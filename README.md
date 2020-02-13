@@ -1,3 +1,3 @@
 # isabelle2cpp
 
-transformation from isabelle to cpp
+Transformation from Isabelle/HOL to C++
