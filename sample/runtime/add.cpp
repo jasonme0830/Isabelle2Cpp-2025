@@ -5,65 +5,65 @@
 using namespace std;
 
 /* source Isabelle/HOL
-datatype natt = zero | succ zero
+datatype nat = zero | suc zero
 
-fun add :: "natt ⇒ natt ⇒ natt" where
+fun add :: "nat ⇒ nat ⇒ nat" where
   "add zero n = n" |
-  "add (succ m) n = succ(add m n)"
+  "add (suc m) n = suc(add m n)"
 */
 
 template <typename T>
 using Ptr = shared_ptr<T>;
 
 // declare the names in datatype definition
-struct natt_t;
+struct nat_t;
 struct zero_t;
-struct succ_t;
+struct suc_t;
 
 // define the subtype in datatype definetion
 // generate zero
 struct zero_t {};
 
-// generate from succ natt
-struct succ_t
+// generate from suc nat
+struct suc_t
 {
-    Ptr<natt_t> natt;
+    Ptr<nat_t> nat;
 
-    succ_t(Ptr<natt_t> natt)
-      : natt(natt) {}
+    suc_t(Ptr<nat_t> nat)
+      : nat(nat) {}
 };
 
-// generate from zero | succ natt
-struct natt_t
+// generate from zero | suc nat
+struct nat_t
 {
     Ptr<zero_t> zero;
-    Ptr<succ_t> succ;
+    Ptr<suc_t> suc;
 
-    natt_t(Ptr<zero_t> zero)
+    nat_t(Ptr<zero_t> zero)
       : zero(zero) {}
-    natt_t(Ptr<succ_t> succ)
-      : succ(succ) {}
+    nat_t(Ptr<suc_t> suc)
+      : suc(suc) {}
 };
 
 // define the function
-Ptr<natt_t> add(Ptr<natt_t> m, Ptr<natt_t> n)
+Ptr<nat_t> add(Ptr<nat_t> m, Ptr<nat_t> n)
 {
     if (m->zero) // add zero n
     {
         return n; // = n
     }
-    else if (m->succ) // add (succ m) n
+    else if (m->suc) // add (suc m) n
     {
         // unpack
-        m = m->succ->natt;
-        // generate result from "= succ(add m n)"
-        return make_shared<natt_t>(
-            make_shared<succ_t>(add(m, n)));
+        m = m->suc->nat;
+        // generate result from "= suc(add m n)"
+        return make_shared<nat_t>(
+            make_shared<suc_t>(add(m, n)));
     }
     return nullptr;
 }
 
-int count(Ptr<natt_t> var)
+int count(Ptr<nat_t> var)
 {
     if (var->zero)
     {
@@ -71,14 +71,14 @@ int count(Ptr<natt_t> var)
     }
     else
     {
-        return 1 + count(var->succ->natt);
+        return 1 + count(var->suc->nat);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    auto zero = make_shared<natt_t>(make_shared<zero_t>());
-    auto one = make_shared<natt_t>(make_shared<succ_t>(zero));
+    auto zero = make_shared<nat_t>(make_shared<zero_t>());
+    auto one = make_shared<nat_t>(make_shared<suc_t>(zero));
 
     auto two = add(one, one);
     auto four = add(two, two);

@@ -4,70 +4,70 @@
 using namespace std;
 
 /* source Isabelle/HOL
-datatype nat = 0 | Suc nat
+datatype nat = zero | suc nat
 
 fun add :: "nat ⇒ nat ⇒ nat" where
-  "add 0 n = n" |
-  "add (Suc m) n = Suc(add m n)"
+  "add zero n = n" |
+  "add (suc m) n = suc(add m n)"
 */
 
-struct Zero_t {};
+struct zero_t {};
 
 template <typename T>
-struct Suc;
+struct suc_t;
 
 template <>
-struct Suc<Zero_t>
+struct suc_t<zero_t>
 {
-    Suc() = default;
-    Suc(Zero_t) {}
+    suc_t() = default;
+    suc_t(zero_t) {}
 };
 
 template <typename T>
-struct Suc<Suc<T>>
+struct suc_t<suc_t<T>>
 {
-    Suc() = default;
-    Suc(Suc<T>) {}
+    suc_t() = default;
+    suc_t(suc_t<T>) {}
 };
 
-template <typename T> Suc(T) -> Suc<Zero_t>;
-template <typename T> Suc(Suc<T>) -> Suc<Suc<T>>;
+template <typename T> suc_t(T) -> suc_t<zero_t>;
+template <typename T> suc_t(suc_t<T>) -> suc_t<suc_t<T>>;
 
 template <typename T1, typename T2>
 auto add(T1 m, T2 n) {}
 
 template <typename T>
-auto add(Zero_t, T n)
+auto add(zero_t, T n)
 {
     return n;
 }
 
 template <typename T1, typename T2>
-auto add(Suc<T1> m, T2 n)
+auto add(suc_t<T1> m, T2 n)
 {
-    return Suc(add(T1(), n));
+    return suc_t(add(T1(), n));
 }
 
 template <typename T>
 int count(T v) {}
 
 template <>
-int count(Zero_t)
+int count(zero_t)
 {
     return 0;
 }
 
 template <typename T>
-int count(Suc<T>)
+int count(suc_t<T>)
 {
     return 1 + count(T());
 }
 
 int main(int argc, char *argv[])
 {
-    Zero_t zero;
+    zero_t zero;
 
-    auto one = Suc(zero);
+    auto one = suc_t(zero);
     auto two = add(one, one);
     auto three = add(two, one);
 
