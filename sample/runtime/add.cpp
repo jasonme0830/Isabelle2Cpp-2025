@@ -5,7 +5,7 @@
 using namespace std;
 
 /* source Isabelle/HOL
-datatype nat = zero | suc zero
+datatype nat = zero | suc nat
 
 fun add :: "nat ⇒ nat ⇒ nat" where
   "add zero n = n" |
