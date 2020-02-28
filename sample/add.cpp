@@ -20,19 +20,6 @@ struct nat_t;
 struct zero_t;
 struct suc_t;
 
-// define the subtype in datatype definetion
-// generate zero
-struct zero_t {};
-
-// generate from suc nat
-struct suc_t
-{
-    Ptr<nat_t> nat;
-
-    suc_t(Ptr<nat_t> nat)
-      : nat(nat) {}
-};
-
 // generate from zero | suc nat
 struct nat_t
 {
@@ -45,40 +32,52 @@ struct nat_t
       : suc(suc) {}
 };
 
-// define the function
-Ptr<nat_t> add(Ptr<nat_t> m, Ptr<nat_t> n)
+// define the subtype in datatype definetion
+// generate zero
+struct zero_t {};
+
+// generate from suc nat
+struct suc_t
 {
-    if (m->zero) // add zero n
+    nat_t nat;
+
+    suc_t(nat_t nat)
+      : nat(nat) {}
+};
+
+// define the function
+nat_t add(nat_t m, nat_t n)
+{
+    if (m.zero) // add zero n
     {
         return n; // = n
     }
-    else if (m->suc) // add (suc m) n
+    else if (m.suc) // add (suc m) n
     {
         // unpack
-        m = m->suc->nat;
+        m = m.suc->nat;
         // generate result from "= suc(add m n)"
-        return make_shared<nat_t>(
-            make_shared<suc_t>(add(m, n)));
+        return nat_t(make_shared<suc_t>(suc_t(add(m, n))));
     }
-    return nullptr;
+    abort();
 }
 
-int count(Ptr<nat_t> var)
+int count(nat_t var)
 {
-    if (var->zero)
+    if (var.zero)
     {
         return 0;
     }
     else
     {
-        return 1 + count(var->suc->nat);
+        return 1 + count(var.suc->nat);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    auto zero = make_shared<nat_t>(make_shared<zero_t>());
-    auto one = make_shared<nat_t>(make_shared<suc_t>(zero));
+    auto zero = nat_t(make_shared<zero_t>());
+    auto one = nat_t(make_shared<suc_t>(zero));
 
     auto two = add(one, one);
     auto four = add(two, two);
