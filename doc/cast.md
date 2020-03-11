@@ -1,6 +1,6 @@
 # Cast by Default
 
-> Support the main types, functions and syntax provided by theory *Main*
+> Support the main types, functions and syntax provided by theory *Main*, at the version on June 9, 2019
 
 ## Types Cast
 
