@@ -1,8 +1,8 @@
 # Cast by Default
 
-## Type Cast
+> Support the main types, functions and syntax provided by theory *Main*
 
-> Support the main types provided by theory *Main*
+## Types Cast
 
 Isabelle/HOL | C++
 - | -
@@ -11,3 +11,5 @@ int | std::int64_t
 'a set | std::set\<T\>
 'a option | std::optional
 'a list | std::list\<T\>
+
+## Functions Cast
