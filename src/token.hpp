@@ -15,7 +15,8 @@ struct Token
         TTidentifier
     };
 
-    Token(Type type, std::string value = "")
+    Token(Type type) : type(type) {}
+    Token(Type type, std::string value)
       : type(type), value(std::move(value)) {}
 
     const Type type;

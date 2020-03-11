@@ -19,7 +19,10 @@ Token Token::gen_token_by_value(const string &value)
     {
     case "if"_hash:
         return Token(Type::TTif);
-
+    case "then"_hash:
+        return Token(Type::TTthen);
+    case "else"_hash:
+        return Token(Type::TTelse);
     default:
         return Token(Type::TTidentifier, value);
     }
