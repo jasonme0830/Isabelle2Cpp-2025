@@ -1,11 +1,9 @@
 # isabelle2cpp
 
-Transformation from Isabelle/HOL to C++
+Transformation from Isabelle/HOL to C++, supports HOL at the version on June 9, 2019
 
-## Supported Syntax in Isabelle/HOL
+## Limitations
 
-### Only receive ASCII representation of the mathematical symbols
-
-### Only support the definitions of recursive functions
+Only support cast the recursive definitions of functions from Isabelle/HOL to C++
 
 ## Quick Usage
