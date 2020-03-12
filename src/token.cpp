@@ -7,7 +7,7 @@ namespace
 static constexpr size_t
 operator""_hash(const char *str, size_t len)
 {
-    return *str ? (*str * 137 + operator""_hash(str + 1, len - 1)) % 57731 : 0;
+    return *str ? (*str * 137 + operator""_hash(str + 1, len - 1)) % 57731751ULL : 0;
 }
 }
 
