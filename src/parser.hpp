@@ -2,5 +2,8 @@
 
 namespace hol2cpp
 {
-
+class Parser
+{
+  public:
+};
 }
