@@ -15,7 +15,9 @@ class Parser
     pas_fun_decl();
 
   private:
-    parsec::Parsec<std::unique_ptr<FunDecl>>
-    FunDeclParsec;
+    Parsec<char> digit_, alpha_, blank_;
+    Parsec<std::string> blanks_;
+    Parsec<std::string> identifier_;
+    parsec::Parsec<std::unique_ptr<FunDecl>> fun_decl_;
 };
 }
