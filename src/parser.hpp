@@ -19,6 +19,7 @@ class Parser
     Parsec<char> digit_, alpha_, blank_;
     Parsec<std::string> blanks_;
     Parsec<std::string> identifier_;
+    Parsec<std::string> fun_decl_pre_;
     parsec::Parsec<std::unique_ptr<FunDecl>> fun_decl_;
 };
 }
