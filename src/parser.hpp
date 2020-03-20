@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <parsec.hpp>
 #include "ast.hpp"
 
@@ -12,7 +13,7 @@ class Parser
     Parser();
 
     std::unique_ptr<FunDecl>
-    pas_fun_decl();
+    pas_fun_decl(const std::string &str);
 
   private:
     Parsec<char> digit_, alpha_, blank_;

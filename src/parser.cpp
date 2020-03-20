@@ -26,8 +26,8 @@ Parser::Parser()
 }
 
 unique_ptr<FunDecl>
-Parser::pas_fun_decl()
+Parser::pas_fun_decl(const string &str)
 {
-
+    return fun_decl_(str);
 }
 }
