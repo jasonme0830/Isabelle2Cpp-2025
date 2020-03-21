@@ -13,6 +13,10 @@ struct AST
 struct FunDecl : AST
 {
     virtual ~FunDecl() = default;
+};
 
+struct Type : AST
+{
+    virtual ~Type() = default;
 };
 }
