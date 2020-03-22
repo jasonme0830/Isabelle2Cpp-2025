@@ -56,16 +56,20 @@ fun_decl_type_(
 
 // fun_decl
 // : fun_decl_name fun_decl_type fun_decl_patterns
-fun_decl_(),
+fun_decl_(
+  fun_decl_name_ + fun_decl_type_ + fun_decl_patterns_ >>
+    [](string name, unique_ptr<Type> type, vector<unique<Pattern>> patterns) {
+      return make_unique<FunDecl>(); }
+),
 
 // fun_decls
 // : fun_decl fun_decls
 // | <epsilon>
 fun_decls_(
   fun_decl_ + fun_decls_ >>
-    [](unique_ptr<FunDecl> fun_decl, vector<unique_ptr<FunDecl>> fun_decls) {
-      fun_decls.emplace(fun_decls.begin(), move(fun_decl));
-      return fun_decls; } |
+    [](unique_ptr<FunDecl> decl, vector<unique_ptr<FunDecl>> decls) {
+      decls.emplace(decls.begin(), move(decl));
+      return decls; } |
   Token::epsilon<vector<unique_ptr<FunDecl>>>()
 )
 
