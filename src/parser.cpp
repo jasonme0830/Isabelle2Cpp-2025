@@ -13,7 +13,9 @@ digit_(Token::by(::isdigit)),
 alpha_(Token::by(::isalpha)),
 blank_(Token::by(::isblank)),
 
-// blanks := blank blanks | blank
+// blanks
+// : blank blanks
+// | blank
 blanks_(
   blank_ + blanks_ >>
     [](Placeholder, Placeholder) {
@@ -23,7 +25,9 @@ blanks_(
       return std::string(); }
 ),
 
-// identifier := alpha identifier | alpha
+// identifier
+// : alpha identifier
+// | alpha
 identifier_(
   alpha_ + identifier_ >>
     [](char head, std::string tail) {
@@ -33,24 +37,34 @@ identifier_(
       return std::string(0, alpha); }
 ),
 
-// fun_decl_name := "fun" blanks identifier blanks "::" blanks
+// fun_decl_name
+// : "fun" blanks identifier blanks "::" blanks
 fun_decl_name_(
   "fun"_T + blanks_ + identifier_ + blanks_ + "::"_T + blanks_ >>
     [](string, string, string ident, string, string, string) {
       return ident; }
 ),
 
-// fun_decl_type := '"' type '"' blanks "where" blanks
+// fun_decl_type
+// : '"' type '"' blanks "where" blanks
 fun_decl_type_(
   '"'_T + type_ + '"'_T + blanks_ + "where"_T + blanks_ >>
     [](char, unique_ptr<Type> type, char, string, string, string) {
       return type; }
 ),
 
-// fun_decl := fun_decl_name fun_decl_type fun_decl_patterns
+// fun_decl_patterns
+// : fun_decl_pattern '|' fun_decl_patterns
+// | fun_decl_pattern
+
+
+// fun_decl
+// : fun_decl_name fun_decl_type fun_decl_patterns
 fun_decl_(),
 
-// fun_decls := fun_decl fun_decls | fun_decl
+// fun_decls
+// : fun_decl fun_decls
+// | fun_decl
 fun_decls_(
   fun_decl_ + fun_decls_ >>
     [](unique_ptr<FunDecl> fun_decl, vector<unique_ptr<FunDecl>> fun_decls) {

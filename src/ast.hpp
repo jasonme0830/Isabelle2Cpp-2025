@@ -20,8 +20,8 @@ struct Type : AST
     virtual ~Type() = default;
 };
 
-struct Patterns : AST
+struct Pattern : AST
 {
-    virtual ~Patterns() = default;
+    virtual ~Pattern() = default;
 };
 }

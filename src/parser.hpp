@@ -26,7 +26,8 @@ class Parser
     parsec::Parsec<std::unique_ptr<Type>> type_;
     parsec::Parsec<std::string> fun_decl_name_;
     parsec::Parsec<std::unique_ptr<Type>> fun_decl_type_;
-    parsec::Parsec<std::unique_ptr<Patterns>> fun_decl_patterns_;
+    parsec::Parsec<std::unique_ptr<Pattern>> fun_decl_pattern_;
+    parsec::Parsec<std::vector<std::unique_ptr<Pattern>>> fun_decl_patterns_;
     parsec::Parsec<std::unique_ptr<FunDecl>> fun_decl_;
     parsec::Parsec<std::vector<std::unique_ptr<FunDecl>>> fun_decls_;
 };
