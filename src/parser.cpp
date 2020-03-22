@@ -15,26 +15,22 @@ blank_(Token::by(::isblank)),
 
 // blanks
 // : blank blanks
-// | blank
+// | <epsilon>
 blanks_(
   blank_ + blanks_ >>
     [](Placeholder, Placeholder) {
-      return std::string(); } |
-  blank_ >>
-    [](Placeholder) {
-      return std::string(); }
+      return string(); } |
+  Token::epsilon<string>()
 ),
 
 // identifier
 // : alpha identifier
-// | alpha
+// | <epsilon>
 identifier_(
   alpha_ + identifier_ >>
-    [](char head, std::string tail) {
+    [](char head, string tail) {
       return head + tail; } |
-  alpha_ >>
-    [](char alpha) {
-      return std::string(0, alpha); }
+  Token::epsilon<string>()
 ),
 
 // fun_decl_name
@@ -64,17 +60,13 @@ fun_decl_(),
 
 // fun_decls
 // : fun_decl fun_decls
-// | fun_decl
+// | <epsilon>
 fun_decls_(
   fun_decl_ + fun_decls_ >>
     [](unique_ptr<FunDecl> fun_decl, vector<unique_ptr<FunDecl>> fun_decls) {
       fun_decls.emplace(fun_decls.begin(), move(fun_decl));
       return fun_decls; } |
-  fun_decl_ >>
-    [](unique_ptr<FunDecl> fun_decl) {
-      vector<unique_ptr<FunDecl>> decls;
-      decls.emplace_back(move(fun_decl));
-      return decls; }
+  Token::epsilon<vector<unique_ptr<FunDecl>>>()
 )
 
 {}
