@@ -58,7 +58,7 @@ fun_decl_type_(
 // : fun_decl_name fun_decl_type fun_decl_patterns
 fun_decl_(
   fun_decl_name_ + fun_decl_type_ + fun_decl_patterns_ >>
-    [](string name, unique_ptr<Type> type, vector<unique<Pattern>> patterns) {
+    [](string name, unique_ptr<Type> type, vector<unique_ptr<Pattern>> patterns) {
       return make_unique<FunDecl>(); }
 ),
 
