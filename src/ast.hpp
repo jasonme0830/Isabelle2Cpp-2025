@@ -19,4 +19,9 @@ struct Type : AST
 {
     virtual ~Type() = default;
 };
+
+struct Patterns : AST
+{
+    virtual ~Patterns() = default;
+};
 }

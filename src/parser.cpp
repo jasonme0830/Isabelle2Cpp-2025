@@ -45,9 +45,31 @@ fun_decl_type_(
   '"'_T + type_ + '"'_T + blanks_ + "where"_T + blanks_ >>
     [](char, unique_ptr<Type> type, char, string, string, string) {
       return type; }
+),
+
+// fun_decl := fun_decl_name fun_decl_type fun_decl_patterns
+fun_decl_(),
+
+// fun_decls := fun_decl fun_decls | fun_decl
+fun_decls_(
+  (fun_decl_ + fun_decls_ >>
+    [](unique_ptr<FunDecl> fun_decl, vector<unique_ptr<FunDecl>> fun_decls) {
+      fun_decls.emplace(fun_decls.begin(), move(fun_decl));
+      return fun_decls; }) |
+  (fun_decl_ >>
+    [](unique_ptr<FunDecl> fun_decl) {
+      vector<unique_ptr<FunDecl>> decls;
+      decls.emplace_back(move(fun_decl));
+      return decls; })
 )
 
 {}
+
+vector<unique_ptr<FunDecl>>
+Parser::pas_fun_decls(const string &str)
+{
+  return fun_decls_(str);
+}
 
 unique_ptr<FunDecl>
 Parser::pas_fun_decl(const string &str)
