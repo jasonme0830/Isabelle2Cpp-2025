@@ -52,7 +52,17 @@ fun_decl_type_(
 // fun_decl_patterns
 // : fun_decl_pattern '|' fun_decl_patterns
 // | fun_decl_pattern
-
+fun_decl_patterns_(
+  fun_decl_pattern_ + '|'_T + fun_decl_patterns_ >>
+    [](unique_ptr<Pattern> pattern, char, vector<unique_ptr<Pattern>> patterns) {
+      patterns.emplace(patterns.begin(), move(pattern));
+      return patterns; } |
+  fun_decl_pattern_ >>
+    [](unique_ptr<Pattern> pattern) {
+      vector<unique_ptr<Pattern>> patterns;
+      patterns.emplace_back(move(pattern));
+      return patterns; }
+),
 
 // fun_decl
 // : fun_decl_name fun_decl_type fun_decl_patterns
