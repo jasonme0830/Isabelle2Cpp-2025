@@ -52,17 +52,13 @@ fun_decl_type_(
     }
 ),
 
-// term
+// miniterm
 // : identifier
 // : '(' blanks expr blanks ')'
-term_(
-  identifier_ + blanks_ + pattern_tail_ >>
-    [](string name, char, vector<unique_ptr<Expr>> args) -> unique_ptr<Expr> {
-      if (args.empty()) {
-        return make_unique<VarExpr>(move(name));
-      } else {
-        return make_unique<ConsExpr>(move(name), move(args));
-      }
+miniterm_(
+  identifier_ >>
+    [](string ident) -> unique_ptr<Expr> {
+      return make_unique<VarExpr>(move(ident));
     } |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, unique_ptr<Expr> expr, char, char) {
@@ -70,43 +66,57 @@ term_(
     }
 ),
 
-// pattern_tail
-// : term blanks pattern_tail
+// miniterms
+// : miniterm blanks miniterms
 // | <epsilon>
-pattern_tail_(
-  term_ + blanks_ + pattern_tail_ >>
-    [](unique_ptr<Expr> term, char, vector<unique_ptr<Expr>> tails) {
-      tails.emplace(tails.begin(), move(term));
-      return tails;
+miniterms_(
+  miniterm_ + blanks_ + miniterms_ >>
+    [](unique_ptr<Expr> miniterm, char, vector<unique_ptr<Expr>> miniterms) {
+      miniterms.emplace(miniterms.begin(), move(miniterm));
+      return miniterms;
     } |
   Token::epsilon<vector<unique_ptr<Expr>>>()
 ),
 
-// pattern
-// : term blanks pattern_tail
-pattern_(
-  term_ + blanks_ + pattern_tail_ >>
-    [](unique_ptr<Expr> term, char, vector<unique_ptr<Expr>> tails) {
-      tails.emplace(tails.begin(), move(term));
-      return make_unique<Pattern>(move(tails));
+// cons_term
+// : identifier blanks miniterm blanks miniterms
+cons_term_(
+  identifier_ + blanks_ + miniterm_ + blanks_ + miniterms_ >>
+    [](string name, char, unique_ptr<Expr> miniterm, char, vector<unique_ptr<Expr>> miniterms) {
+      miniterms.emplace(miniterms.begin(), move(miniterm));
+      return make_unique<ConsExpr>(move(name), move(miniterms));
     }
 ),
 
-// expr
-// : term
-expr_(
-  term_ >>
-    [](unique_ptr<Expr> term) {
-      return term;
+// var_term
+// : identifier
+var_term_(
+  identifier_ >>
+    [](string name) {
+      return make_unique<VarExpr>(move(name));
+    }
+),
+
+// term
+// : cons_term
+// | var_term
+term_(
+  cons_term_ >>
+    [](unique_ptr<Expr> expr) {
+      return expr;
+    } |
+  var_term_ >>
+    [](unique_ptr<Expr> expr) {
+      return expr;
     }
 ),
 
 // fun_decl_equation
-// : '"' blanks identifier blanks pattern blanks '=' blanks expr blanks '"'
+// : '"' blanks cons_term blanks '=' blanks expr blanks '"'
 fun_decl_equation_(
-  '"'_T + blanks_ + identifier_ + blanks_ + pattern_ + blanks_ + '='_T + blanks_ + expr_ + blanks_ + '"'_T >>
-    [](char, char, string ident, char, unique_ptr<Pattern> pattern, char, char, string, unique_ptr<Expr> expr, char, char) {
-      return make_unique<Equation>(ident, move(pattern), move(expr));
+  '"'_T + blanks_ + cons_term_ + blanks_ + '='_T + blanks_ + expr_ + blanks_ + '"'_T >>
+    [](char, char, unique_ptr<ConsExpr> cons, char, char, string, unique_ptr<Expr> expr, char, char) {
+      return make_unique<Equation>(move(cons), move(expr));
     }
 ),
 

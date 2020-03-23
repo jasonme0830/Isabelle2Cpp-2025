@@ -19,16 +19,23 @@ class Parser {
 
   private:
     parsec::Parsec<char> digit_, alpha_, blank_, blanks_;
+
     parsec::Parsec<std::string> identifier_;
-    parsec::Parsec<std::unique_ptr<Type>> type_;
     parsec::Parsec<std::string> fun_decl_name_;
+
+    parsec::Parsec<std::unique_ptr<Type>> type_;
     parsec::Parsec<std::unique_ptr<Type>> fun_decl_type_;
+
+    parsec::Parsec<std::unique_ptr<Expr>> miniterm_;
+    parsec::Parsec<std::vector<std::unique_ptr<Expr>>> miniterms_;
+    parsec::Parsec<std::unique_ptr<ConsExpr>> cons_term_;
+    parsec::Parsec<std::unique_ptr<VarExpr>> var_term_;
     parsec::Parsec<std::unique_ptr<Expr>> term_;
-    parsec::Parsec<std::vector<std::unique_ptr<Expr>>> pattern_tail_;
-    parsec::Parsec<std::unique_ptr<Pattern>> pattern_;
     parsec::Parsec<std::unique_ptr<Expr>> expr_;
+
     parsec::Parsec<std::unique_ptr<Equation>> fun_decl_equation_;
     parsec::Parsec<std::vector<std::unique_ptr<Equation>>> fun_decl_equations_;
+
     parsec::Parsec<std::unique_ptr<FunDecl>> fun_decl_;
     parsec::Parsec<std::vector<std::unique_ptr<FunDecl>>> fun_decls_;
 };

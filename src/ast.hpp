@@ -34,17 +34,8 @@ struct ConsExpr : Expr {
     virtual ~ConsExpr() = default;
 };
 
-struct Pattern : AST {
-    std::vector<std::unique_ptr<Expr>> terms;
-
-    Pattern() = default;
-    Pattern(decltype(terms) terms);
-    virtual ~Pattern() = default;
-};
-
 struct Equation : AST {
-    Equation(std::string ident,
-      std::unique_ptr<Pattern> pattern,
+    Equation(std::unique_ptr<ConsExpr> pattern,
       std::unique_ptr<Expr> expr);
     virtual ~Equation() = default;
 };
