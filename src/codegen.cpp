@@ -1,6 +1,5 @@
 #include "ast.hpp"
 
-namespace hol2cpp
-{
+namespace hol2cpp {
 AST::~AST() {}
 }

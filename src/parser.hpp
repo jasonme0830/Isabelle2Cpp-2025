@@ -6,10 +6,8 @@
 #include <parsec.hpp>
 #include "ast.hpp"
 
-namespace hol2cpp
-{
-class Parser
-{
+namespace hol2cpp {
+class Parser {
   public:
     Parser();
 
@@ -20,12 +18,13 @@ class Parser
     pas_fun_decl(const std::string &str);
 
   private:
-    parsec::Parsec<char> digit_, alpha_, blank_;
-    parsec::Parsec<std::string> blanks_;
+    parsec::Parsec<char> digit_, alpha_, blank_, blanks_;
     parsec::Parsec<std::string> identifier_;
     parsec::Parsec<std::unique_ptr<Type>> type_;
     parsec::Parsec<std::string> fun_decl_name_;
     parsec::Parsec<std::unique_ptr<Type>> fun_decl_type_;
+    parsec::Parsec<std::unique_ptr<Expr>> term_;
+    parsec::Parsec<std::vector<std::unique_ptr<Expr>>> pattern_tail_;
     parsec::Parsec<std::unique_ptr<Pattern>> pattern_;
     parsec::Parsec<std::unique_ptr<Expr>> expr_;
     parsec::Parsec<std::unique_ptr<Equation>> fun_decl_equation_;

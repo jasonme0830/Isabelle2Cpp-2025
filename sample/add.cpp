@@ -21,8 +21,7 @@ struct zero_t;
 struct suc_t;
 
 // generate from zero | suc nat
-struct nat_t
-{
+struct nat_t {
   Ptr<zero_t> zero;
   Ptr<suc_t> suc;
 
@@ -37,8 +36,7 @@ struct nat_t
 struct zero_t {};
 
 // generate from suc nat
-struct suc_t
-{
+struct suc_t {
   nat_t nat;
 
   suc_t(nat_t nat)
@@ -46,14 +44,10 @@ struct suc_t
 };
 
 // define the function
-nat_t add(nat_t m, nat_t n)
-{
-  if (m.zero) // add zero n
-  {
+nat_t add(nat_t m, nat_t n) {
+  if (m.zero) { // add zero n
     return n; // = n
-  }
-  else if (m.suc) // add (suc m) n
-  {
+  } else if (m.suc) { // add (suc m) n
     // unpack
     m = m.suc->nat;
     // generate result from "= suc(add m n)"
@@ -62,20 +56,15 @@ nat_t add(nat_t m, nat_t n)
   abort();
 }
 
-int count(nat_t var)
-{
-  if (var.zero)
-  {
+int count(nat_t var) {
+  if (var.zero) {
     return 0;
-  }
-  else
-  {
+  } else {
     return 1 + count(var.suc->nat);
   }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   auto zero = nat_t(make_shared<zero_t>());
   auto one = nat_t(make_shared<suc_t>(zero));
 

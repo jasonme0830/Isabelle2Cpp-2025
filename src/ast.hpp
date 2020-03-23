@@ -2,39 +2,50 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
-namespace hol2cpp
-{
-struct AST
-{
-    virtual ~AST() = 0;
+namespace hol2cpp {
+struct AST {
+  virtual ~AST() = 0;
 };
 
-struct FunDecl : AST
-{
+struct FunDecl : AST {
     virtual ~FunDecl() = default;
 };
 
-struct Type : AST
-{
+struct Type : AST {
     virtual ~Type() = default;
 };
 
-struct Expr : AST
-{
+struct Expr : AST {
     virtual ~Expr() = default;
 };
 
-struct Pattern : AST
-{
+struct VarExpr : Expr {
+    std::string name;
+
+    VarExpr(std::string name) : name(std::move(name)) {}
+    virtual ~VarExpr() = default;
+};
+
+struct ConsExpr : Expr {
+    ConsExpr(std::string constructor,
+      std::vector<std::unique_ptr<Expr>> patterns);
+    virtual ~ConsExpr() = default;
+};
+
+struct Pattern : AST {
+    std::vector<std::unique_ptr<Expr>> terms;
+
+    Pattern() = default;
+    Pattern(decltype(terms) terms);
     virtual ~Pattern() = default;
 };
 
-struct Equation : AST
-{
+struct Equation : AST {
     Equation(std::string ident,
-        std::unique_ptr<Pattern> pattern,
-        std::unique_ptr<Expr> expr);
+      std::unique_ptr<Pattern> pattern,
+      std::unique_ptr<Expr> expr);
     virtual ~Equation() = default;
 };
 }

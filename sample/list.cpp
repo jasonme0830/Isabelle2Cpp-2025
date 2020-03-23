@@ -26,8 +26,7 @@ template <typename T>
 struct Cons_t;
 
 template <typename T>
-struct List
-{
+struct List {
   List(Ptr<Nil_t> nil= make_shared<Nil_t>())
     : nil(nil), cons(nullptr) {}
 
@@ -41,8 +40,7 @@ struct List
 struct Nil_t {};
 
 template <typename T>
-struct Cons_t
-{
+struct Cons_t {
   Cons_t(T pos1, List<T> pos2)
     : pos1(pos1), pos2(pos2) {}
 
@@ -51,15 +49,11 @@ struct Cons_t
 };
 
 template <typename T>
-List<T> app(List<T> pos1, List<T> pos2)
-{
-  if (pos1.nil)
-  {
+List<T> app(List<T> pos1, List<T> pos2) {
+  if (pos1.nil) {
     auto ys = pos2;
     return pos2;
-  }
-  else if (pos1.cons)
-  {
+  } else if (pos1.cons) {
     auto x = pos1.cons->pos1;
     auto xs = pos1.cons->pos2;
     auto ys = pos2;
@@ -69,14 +63,10 @@ List<T> app(List<T> pos1, List<T> pos2)
 }
 
 template <typename T>
-List<T> rev(List<T> pos1)
-{
-  if (pos1.nil)
-  {
+List<T> rev(List<T> pos1) {
+  if (pos1.nil) {
     return pos1;
-  }
-  else if (pos1.cons)
-  {
+  } else if (pos1.cons) {
     auto x = pos1.cons->pos1;
     auto xs = pos1.cons->pos2;
     return app(
@@ -87,8 +77,7 @@ List<T> rev(List<T> pos1)
   abort();
 }
 
-int main()
-{
+int main() {
   List<int> list1,
         list2(make_shared<Cons_t<int>>(1, make_shared<Nil_t>()));
   auto list3 = app(list1, list2);
