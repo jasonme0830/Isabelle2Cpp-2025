@@ -54,7 +54,7 @@ fun_decl_type_(
 fun_decl_equation_(
   '"'_T + blanks_ + identifier_ + blanks_ + pattern_ + blanks_ + '='_T + blanks_ + expr_ + blanks_ + '"'_T >>
     [](char, string, string ident, string, unique_ptr<Pattern> pattern, string, char, string, unique_ptr<Expr> expr, string, char) {
-      return make_unique<Equation>(); }
+      return make_unique<Equation>(ident, move(pattern), move(expr)); }
 ),
 
 // fun_decl_equations

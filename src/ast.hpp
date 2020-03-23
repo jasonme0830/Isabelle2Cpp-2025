@@ -32,6 +32,9 @@ struct Pattern : AST
 
 struct Equation : AST
 {
+    Equation(std::string ident,
+        std::unique_ptr<Pattern> pattern,
+        std::unique_ptr<Expr> expr);
     virtual ~Equation() = default;
 };
 }
