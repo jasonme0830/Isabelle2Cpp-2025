@@ -20,8 +20,18 @@ struct Type : AST
     virtual ~Type() = default;
 };
 
+struct Expr : AST
+{
+    virtual ~Expr() = default;
+};
+
 struct Pattern : AST
 {
     virtual ~Pattern() = default;
+};
+
+struct Equation : AST
+{
+    virtual ~Equation() = default;
 };
 }

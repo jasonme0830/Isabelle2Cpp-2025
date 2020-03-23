@@ -49,26 +49,34 @@ fun_decl_type_(
       return type; }
 ),
 
-// fun_decl_patterns
-// : fun_decl_pattern '|' fun_decl_patterns
-// | fun_decl_pattern
-fun_decl_patterns_(
-  fun_decl_pattern_ + '|'_T + fun_decl_patterns_ >>
-    [](unique_ptr<Pattern> pattern, char, vector<unique_ptr<Pattern>> patterns) {
-      patterns.emplace(patterns.begin(), move(pattern));
-      return patterns; } |
-  fun_decl_pattern_ >>
-    [](unique_ptr<Pattern> pattern) {
-      vector<unique_ptr<Pattern>> patterns;
-      patterns.emplace_back(move(pattern));
-      return patterns; }
+// fun_decl_equation
+// : '"' blanks identifier blanks pattern blanks '=' blanks expr blanks '"'
+fun_decl_equation_(
+  '"'_T + blanks_ + identifier_ + blanks_ + pattern_ + blanks_ + '='_T + blanks_ + expr_ + blanks_ + '"'_T >>
+    [](char, string, string ident, string, unique_ptr<Pattern> pattern, string, char, string, unique_ptr<Expr> expr, string, char) {
+      return make_unique<Equation>(); }
+),
+
+// fun_decl_equations
+// : fun_decl_equation '|' fun_decl_equations
+// | fun_decl_equation
+fun_decl_equations_(
+  fun_decl_equation_ + '|'_T + fun_decl_equations_ >>
+    [](unique_ptr<Equation> equation, char, vector<unique_ptr<Equation>> equations) {
+      equations.emplace(equations.begin(), move(equation));
+      return equations; } |
+  fun_decl_equation_ >>
+    [](unique_ptr<Equation> equation) {
+      vector<unique_ptr<Equation>> equations;
+      equations.emplace_back(move(equation));
+      return equations; }
 ),
 
 // fun_decl
-// : fun_decl_name fun_decl_type fun_decl_patterns
+// : fun_decl_name fun_decl_type fun_decl_equations
 fun_decl_(
-  fun_decl_name_ + fun_decl_type_ + fun_decl_patterns_ >>
-    [](string name, unique_ptr<Type> type, vector<unique_ptr<Pattern>> patterns) {
+  fun_decl_name_ + fun_decl_type_ + fun_decl_equations_ >>
+    [](string name, unique_ptr<Type> type, vector<unique_ptr<Equation>> equations) {
       return make_unique<FunDecl>(); }
 ),
 
