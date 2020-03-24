@@ -6,15 +6,41 @@
 
 namespace hol2cpp {
 struct AST {
-  virtual ~AST() = 0;
+    virtual ~AST() = 0;
 };
 
-struct FunDecl : AST {
-    virtual ~FunDecl() = default;
+struct FunctionDecl : AST {
+    virtual ~FunctionDecl() = default;
 };
 
 struct Type : AST {
     virtual ~Type() = default;
+};
+
+struct NormalType : Type {
+    std::string name;
+    NormalType(std::string);
+    virtual ~NormalType() = default;
+};
+
+struct ArgumentType : Type {
+    std::string name;
+    ArgumentType(std::string name);
+    virtual ~ArgumentType() = default;
+};
+
+struct TemplateType : Type {
+    std::string name;
+    std::unique_ptr<Type> arg;
+    TemplateType(std::string name,
+      std::unique_ptr<Type> arg);
+    virtual ~TemplateType() = default;
+};
+
+struct FunctionType : Type {
+    std::vector<std::unique_ptr<Type>> types;
+    FunctionType(std::vector<std::unique_ptr<Type>> types);
+    virtual ~FunctionType() = default;
 };
 
 struct Expr : AST {
