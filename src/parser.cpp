@@ -111,6 +111,12 @@ term_(
     }
 ),
 
+// expr
+// : term
+expr_(
+  term_
+),
+
 // fun_decl_equation
 // : '"' blanks cons_term blanks '=' blanks expr blanks '"'
 fun_decl_equation_(
