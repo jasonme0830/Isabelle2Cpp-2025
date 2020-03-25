@@ -16,7 +16,7 @@ struct Type : AST {
 struct NormalType final : Type {
     std::string name;
 
-    NormalType(std::string)
+    NormalType(std::string name)
       : name(std::move(name)) {}
 };
 
