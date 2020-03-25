@@ -9,60 +9,79 @@ struct AST {
     virtual ~AST() = 0;
 };
 
-struct FunctionDecl : AST {
-    virtual ~FunctionDecl() = default;
-};
-
 struct Type : AST {
-    virtual ~Type() = default;
+    virtual ~Type() = 0;
 };
 
-struct NormalType : Type {
+struct NormalType final : Type {
     std::string name;
-    NormalType(std::string);
-    virtual ~NormalType() = default;
+
+    NormalType(std::string)
+      : name(std::move(name)) {}
 };
 
-struct ArgumentType : Type {
+struct ArgumentType final : Type {
     std::string name;
-    ArgumentType(std::string name);
-    virtual ~ArgumentType() = default;
+
+    ArgumentType(std::string name)
+      : name(std::move(name)) {}
 };
 
-struct TemplateType : Type {
+struct TemplateType final : Type {
     std::string name;
     std::unique_ptr<Type> arg;
+
     TemplateType(std::string name,
-      std::unique_ptr<Type> arg);
-    virtual ~TemplateType() = default;
+      std::unique_ptr<Type> arg)
+      : name(std::move(name)),
+        arg(std::move(arg)) {}
 };
 
-struct FunctionType : Type {
+struct FuncType final : Type {
     std::vector<std::unique_ptr<Type>> types;
-    FunctionType(std::vector<std::unique_ptr<Type>> types);
-    virtual ~FunctionType() = default;
+
+    FuncType(std::vector<std::unique_ptr<Type>> types)
+      : types(std::move(types)) {}
 };
 
 struct Expr : AST {
-    virtual ~Expr() = default;
+    virtual ~Expr() = 0;
 };
 
-struct VarExpr : Expr {
+struct VarExpr final : Expr {
     std::string name;
 
-    VarExpr(std::string name) : name(std::move(name)) {}
-    virtual ~VarExpr() = default;
+    VarExpr(std::string name)
+      : name(std::move(name)) {}
 };
 
-struct ConsExpr : Expr {
+struct ConsExpr final : Expr {
+    std::string constructor;
+    std::vector<std::unique_ptr<Expr>> args;
+
     ConsExpr(std::string constructor,
-      std::vector<std::unique_ptr<Expr>> patterns);
-    virtual ~ConsExpr() = default;
+      std::vector<std::unique_ptr<Expr>> args)
+      : constructor(std::move(constructor)),
+        args(std::move(args)) {}
 };
 
-struct Equation : AST {
+struct Equation final : AST {
+    std::unique_ptr<ConsExpr> pattern;
+    std::unique_ptr<Expr> expr;
+
     Equation(std::unique_ptr<ConsExpr> pattern,
-      std::unique_ptr<Expr> expr);
-    virtual ~Equation() = default;
+      std::unique_ptr<Expr> expr)
+      : pattern(std::move(pattern)),
+        expr(std::move(expr)) {}
+};
+
+struct FuncDecl final : AST {
+    std::unique_ptr<FuncType> type;
+    std::vector<std::unique_ptr<Equation>> equations;
+
+    FuncDecl(std::unique_ptr<FuncType> type,
+      std::vector<std::unique_ptr<Equation>> equations)
+      : type(std::move(type)),
+        equations(std::move(equations)) {}
 };
 }
