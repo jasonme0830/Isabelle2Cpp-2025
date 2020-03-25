@@ -39,3 +39,5 @@
 /target
 **/*.rs.bk
 .vscode/
+bin/
+*.out
