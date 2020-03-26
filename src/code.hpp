@@ -1,8 +1,8 @@
 #pragma once
 
 namespace hol2cpp {
-class Context {
+class Code {
   public:
-    Context() = default;
+    Code() = default;
 };
 }

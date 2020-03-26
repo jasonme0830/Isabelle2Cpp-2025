@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cassert>
 
 namespace hol2cpp {
 struct AST {
@@ -42,6 +43,16 @@ struct FuncType final : Type {
 
     FuncType(std::vector<std::unique_ptr<Type>> types)
       : types(std::move(types)) {}
+
+    Type *result_type() {
+      assert(!types.empty());
+      return types.back().get();
+    }
+
+    Type *arg_type_at(std::size_t index) {
+      assert(types.size() > 1 && index < types.size() - 1);
+      return types[index].get();
+    }
 };
 
 struct Expr : AST {
