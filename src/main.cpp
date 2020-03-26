@@ -11,5 +11,6 @@ fun add :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
   "add Nil n = n" |
   "add (Suc m) n = Suc (Add m n)"
 )src");
+  cout << decls.size() << endl;
   return 0;
 }
