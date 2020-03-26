@@ -17,7 +17,9 @@ class Parser {
     std::unique_ptr<FuncDecl>
     pas_func_decl(const std::string &str);
 
+#ifndef _DEBUG
   private:
+#endif
     parsec::Parsec<char> digit_, alpha_, blank_, blanks_;
 
     parsec::Parsec<std::string> identifier_;
