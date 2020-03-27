@@ -15,6 +15,7 @@ struct AST {
 
 struct Type : AST {
     virtual ~Type() = 0;
+    virtual void gen_typeinfos(Context &context) const = 0;
 };
 
 struct NormalType final : Type {
@@ -22,6 +23,8 @@ struct NormalType final : Type {
 
     NormalType(std::string name)
       : name(std::move(name)) {}
+
+    void gen_typeinfos(Context &context) const override;
 };
 
 struct ArgumentType final : Type {
@@ -29,6 +32,8 @@ struct ArgumentType final : Type {
 
     ArgumentType(std::string name)
       : name(std::move(name)) {}
+
+    void gen_typeinfos(Context &context) const override;
 };
 
 struct TemplateType final : Type {
@@ -39,6 +44,8 @@ struct TemplateType final : Type {
       std::unique_ptr<Type> arg)
       : name(std::move(name)),
         arg(std::move(arg)) {}
+
+    void gen_typeinfos(Context &context) const override;
 };
 
 struct FuncType final : Type {
@@ -47,15 +54,12 @@ struct FuncType final : Type {
     FuncType(std::vector<std::unique_ptr<Type>> types)
       : types(std::move(types)) {}
 
-    Type *result_type() {
+    Type *result_type() const {
       assert(!types.empty());
       return types.back().get();
     }
 
-    Type *arg_type_at(std::size_t index) {
-      assert(types.size() > 1 && index < types.size() - 1);
-      return types[index].get();
-    }
+    void gen_typeinfos(Context &context) const;
 };
 
 struct Expr : AST {
