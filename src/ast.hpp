@@ -11,12 +11,10 @@ class Context;
 
 struct AST {
     virtual ~AST() = 0;
-    virtual void codegen(Context &context, Code &code) = 0;
 };
 
 struct Type : AST {
     virtual ~Type() = 0;
-    virtual void codegen(Context &context, Code &code) = 0;
 };
 
 struct NormalType final : Type {
@@ -24,8 +22,6 @@ struct NormalType final : Type {
 
     NormalType(std::string name)
       : name(std::move(name)) {}
-
-    void codegen(Context &context, Code &code) override;
 };
 
 struct ArgumentType final : Type {
@@ -33,8 +29,6 @@ struct ArgumentType final : Type {
 
     ArgumentType(std::string name)
       : name(std::move(name)) {}
-
-    void codegen(Context &context, Code &code) override;
 };
 
 struct TemplateType final : Type {
@@ -45,8 +39,6 @@ struct TemplateType final : Type {
       std::unique_ptr<Type> arg)
       : name(std::move(name)),
         arg(std::move(arg)) {}
-
-    void codegen(Context &context, Code &code) override;
 };
 
 struct FuncType final : Type {
@@ -64,13 +56,11 @@ struct FuncType final : Type {
       assert(types.size() > 1 && index < types.size() - 1);
       return types[index].get();
     }
-
-    void codegen(Context &context, Code &code) override;
 };
 
 struct Expr : AST {
     virtual ~Expr() = 0;
-    virtual void codegen(Context &context, Code &code) = 0;
+    virtual void codegen(Context &context, Code &code) const = 0;
 };
 
 struct VarExpr final : Expr {
@@ -79,7 +69,7 @@ struct VarExpr final : Expr {
     VarExpr(std::string name)
       : name(std::move(name)) {}
 
-    void codegen(Context &context, Code &code) override;
+    void codegen(Context &context, Code &code) const override;
 };
 
 struct ConsExpr final : Expr {
@@ -91,7 +81,7 @@ struct ConsExpr final : Expr {
       : constructor(std::move(constructor)),
         args(std::move(args)) {}
 
-    void codegen(Context &context, Code &code) override;
+    void codegen(Context &context, Code &code) const override;
 };
 
 struct Equation final : AST {
@@ -103,7 +93,7 @@ struct Equation final : AST {
       : pattern(std::move(pattern)),
         expr(std::move(expr)) {}
 
-    void codegen(Context &context, Code &code) override;
+    void codegen(Context &context, Code &code) const;
 };
 
 struct FuncDecl final : AST {
@@ -115,6 +105,6 @@ struct FuncDecl final : AST {
       : type(std::move(type)),
         equations(std::move(equations)) {}
 
-    void codegen(Context &context, Code &code) override;
+    void codegen(Context &context, Code &code) const;
 };
 }
