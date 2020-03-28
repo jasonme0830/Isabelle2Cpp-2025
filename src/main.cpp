@@ -1,4 +1,5 @@
 #include <iostream>
+#include "code.hpp"
 #include "parser.hpp"
 
 using namespace std;
@@ -10,8 +11,14 @@ int main(int argc, char *argv[]) {
 fun add :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
   "add Nil n = n" |
   "add (Suc m) n = Suc (Add m n)"
+
+fun test :: "'a list \<Rightarrow> 'a list" where
+  "test l = l"
 )src");
-  cout << decls.size() << endl;
-  cout << decls.front()->equations.size() << endl;
+  Code code;
+  for (auto &decl : decls) {
+    decl->codegen(code);
+  }
+  code.generate();
   return 0;
 }
