@@ -32,7 +32,7 @@ identifier_ =
     } |
   alpha_ >>
     [](char ch) {
-      return string(0, ch);
+      return string(1, ch);
     };
 
 // func_decl_name
@@ -202,7 +202,7 @@ func_decl_equations_ =
 func_decl_ =
   func_decl_name_ + blanks_ + func_decl_type_ + blanks_ + func_decl_equations_ >>
     [](string name, char, unique_ptr<FuncType> type, char, vector<unique_ptr<Equation>> equations) {
-      return make_unique<FuncDecl>(move(type), move(equations));
+      return make_unique<FuncDecl>(move(name), move(type), move(equations));
     };
 
 // func_decls
