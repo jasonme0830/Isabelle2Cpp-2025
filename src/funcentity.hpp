@@ -54,16 +54,34 @@ class FuncEntity {
       return template_args_;
     }
 
+    void entry_equation() {
+      entry_equation_ = patterns_.size();
+      is_pattern_ = true;
+      patterns_.emplace_back();
+      exprs_.emplace_back();
+    }
+
+    bool is_pattern() const {
+      return is_pattern_;
+    }
+
+    void entry_expr() {
+      is_pattern_ = false;
+    }
+
   private:
     std::string name_;
 
     std::size_t entry_type_;
-
     // the first type is the result type
     std::vector<std::string> types_;
     std::size_t anchor_;
-
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
+
+    std::size_t entry_equation_;
+    bool is_pattern_;
+    std::vector<std::string> patterns_;
+    std::vector<std::string> exprs_;
 };
 }
