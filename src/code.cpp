@@ -23,9 +23,9 @@ void Code::generate_normal(ostream &out, FuncEntity &entity) {
   out << types.front() << " " << entity.name() << "(";
   for (size_t i = 1; i < types.size(); ++i) {
     if (i == 1) {
-      out << types[i];
+      out << types[i] << " arg" << to_string(i);
     } else {
-      out << ", " << types[i];
+      out << ", " << types[i] << " arg" << to_string(i);
     }
   }
   out << ") {}" << endl;
