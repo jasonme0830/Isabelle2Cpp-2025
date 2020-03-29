@@ -7,7 +7,8 @@
 namespace hol2cpp {
 class Code {
   public:
-    Code() : indent_(0), entry_func_(-1) {}
+    Code(std::ostream &out = std::cout)
+      : out_(out), indent_(0), entry_func_(-1) {}
 
     void entry_func() {
       entry_func_ = func_entities_.size();
@@ -18,14 +19,28 @@ class Code {
       return func_entities_[entry_func_];
     }
 
-    void generate(std::ostream &out = std::cout);
+    void generate();
 
   private:
-    void generate_single(std::ostream &out, FuncEntity &entity);
-    void generate_normal(std::ostream &out, FuncEntity &entity);
-    void generate_template(std::ostream &out, FuncEntity &entity);
+    void generate_single(FuncEntity &entity);
+    void generate_normal(FuncEntity &entity);
+    void generate_template(FuncEntity &entity);
 
+    std::ostream &new_line() {
+      out_ << std::string(indent_, ' ');
+      return out_;
+    }
+
+    void add_indent() {
+      indent_ += 4;
+    }
+    void sub_indent() {
+      indent_ -= 4;
+    }
+
+    std::ostream &out_;
     int indent_;
+
     std::size_t entry_func_;
     std::vector<FuncEntity> func_entities_;
 };

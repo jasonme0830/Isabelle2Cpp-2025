@@ -3,45 +3,50 @@
 using namespace std;
 
 namespace hol2cpp {
-void Code::generate(ostream &out) {
+void Code::generate() {
   for (auto &entity : func_entities_) {
-    generate_single(out, entity);
-    out << endl;
+    generate_single(entity);
+    out_ << endl;
   }
 }
 
-void Code::generate_single(ostream &out, FuncEntity &entity) {
+void Code::generate_single(FuncEntity &entity) {
+  indent_ = 0;
   if (entity.template_args().empty()) {
-    generate_normal(out, entity);
+    generate_normal(entity);
   } else {
-    generate_template(out, entity);
+    generate_template(entity);
   }
 }
 
-void Code::generate_normal(ostream &out, FuncEntity &entity) {
+void Code::generate_normal(FuncEntity &entity) {
   auto &types = entity.types();
-  out << types.front() << " " << entity.name() << "(";
+  new_line() << types.front() << " " << entity.name() << "(";
   for (size_t i = 1; i < types.size(); ++i) {
     if (i == 1) {
-      out << types[i] << " arg" << to_string(i);
+      out_ << types[i] << " arg" << to_string(i);
     } else {
-      out << ", " << types[i] << " arg" << to_string(i);
+      out_ << ", " << types[i] << " arg" << to_string(i);
     }
   }
-  out << ") {}" << endl;
+  out_ << ") {" << endl;
+  add_indent();
+  // ...
+  sub_indent();
+  new_line() << "}" << endl;
 }
 
-void Code::generate_template(ostream &out, FuncEntity &entity) {
+void Code::generate_template(FuncEntity &entity) {
   auto &template_args = entity.template_args();
-  out << "template<";
+  new_line() << "template<";
   for (size_t i = 0; i < template_args.size(); ++i) {
     if (i == 0) {
-      out << "typename " << template_args[i];
+      out_ << "typename " << template_args[i];
     } else {
-      out << ", typename " << template_args[i];
+      out_ << ", typename " << template_args[i];
     }
   }
-  out << ">" << endl;
-  generate_normal(out, entity);
+  out_ << ">" << endl;
+  generate_normal(entity);
 }
 }
