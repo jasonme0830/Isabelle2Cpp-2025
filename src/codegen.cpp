@@ -8,7 +8,7 @@ AST::~AST() = default;
 Type::~Type() = default;
 Expr::~Expr() = default;
 
-void NormalType::gen_typeinfo(FuncEntity &entity) const {
+void NormalType::build_entity(FuncEntity &entity) const {
   static map<string, string> mapping {
     { "nat", "std::uint64_t" },
     { "int", "std::int64_t" }
@@ -21,11 +21,11 @@ void NormalType::gen_typeinfo(FuncEntity &entity) const {
   }
 }
 
-void ArgumentType::gen_typeinfo(FuncEntity &entity) const {
+void ArgumentType::build_entity(FuncEntity &entity) const {
   entity.add_argument_type(name);
 }
 
-void TemplateType::gen_typeinfo(FuncEntity &entity) const {
+void TemplateType::build_entity(FuncEntity &entity) const {
   static map<string, string> mapping {
     { "set", "std::set" },
     { "option", "std::optional" },
@@ -37,29 +37,42 @@ void TemplateType::gen_typeinfo(FuncEntity &entity) const {
   } else {
     entity.add_template_type(name);
   }
-  arg->gen_typeinfo(entity);
+  arg->build_entity(entity);
 }
 
-void FuncType::gen_typeinfo(FuncEntity &entity) const {
+void FuncType::build_entity(FuncEntity &entity) const {
   entity.entry_type();
-  result_type()->gen_typeinfo(entity);
+  result_type()->build_entity(entity);
   for (size_t i = 0; i < types.size() - 1; ++i) {
     entity.entry_type();
-    types[i]->gen_typeinfo(entity);
+    types[i]->build_entity(entity);
   }
 }
 
-void VarExpr::codegen(Code &code) const {
-
+void VarExpr::build_entity(FuncEntity &entity) const {
+  static map<string, string> mapping {
+    { "0", "0" }
+  };
 }
 
-void ConsExpr::codegen(Code &code) const {
-
+void ConsExpr::build_entity(FuncEntity &entity) const {
+  static map<string, string> mapping {
+    { "Suc", " + 1" }
+  };
 }
 
-void FuncDecl::codegen(Code &code) const {
-  code.entry_func();
-  code.current_entity().set_name(name);
-  type->gen_typeinfo(code.current_entity());
+void Equation::build_entity(FuncEntity &entity) const {
+  pattern->build_entity(entity);
+  entity.entry_expr();
+  expr->build_entity(entity);
+}
+
+void FuncDecl::build_entity(FuncEntity &entity) const {
+  entity.set_name(name);
+  type->build_entity(entity);
+  for (auto &equation : equations) {
+    entity.entry_equation();
+    equation->build_entity(entity);
+  }
 }
 }
