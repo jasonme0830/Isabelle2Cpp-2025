@@ -12,11 +12,12 @@ class FuncEntity;
 
 struct AST {
     virtual ~AST() = 0;
+    virtual void build_entity(FuncEntity &entity) const = 0;
 };
 
 struct Type : AST {
     virtual ~Type() = 0;
-    virtual void gen_typeinfo(FuncEntity &entity) const = 0;
+    virtual void build_entity(FuncEntity &entity) const = 0;
 };
 
 struct NormalType final : Type {
@@ -25,7 +26,7 @@ struct NormalType final : Type {
     NormalType(std::string name)
       : name(std::move(name)) {}
 
-    void gen_typeinfo(FuncEntity &entity) const override;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct ArgumentType final : Type {
@@ -34,7 +35,7 @@ struct ArgumentType final : Type {
     ArgumentType(std::string name)
       : name(std::move(name)) {}
 
-    void gen_typeinfo(FuncEntity &entity) const override;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct TemplateType final : Type {
@@ -46,7 +47,7 @@ struct TemplateType final : Type {
       : name(std::move(name)),
         arg(std::move(arg)) {}
 
-    void gen_typeinfo(FuncEntity &entity) const override;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct FuncType final : Type {
@@ -60,12 +61,12 @@ struct FuncType final : Type {
       return types.back().get();
     }
 
-    void gen_typeinfo(FuncEntity &entity) const;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct Expr : AST {
     virtual ~Expr() = 0;
-    virtual void codegen(Code &code) const = 0;
+    virtual void build_entity(FuncEntity &entity) const = 0;
 };
 
 struct VarExpr final : Expr {
@@ -74,7 +75,7 @@ struct VarExpr final : Expr {
     VarExpr(std::string name)
       : name(std::move(name)) {}
 
-    void codegen(Code &code) const override;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct ConsExpr final : Expr {
@@ -86,7 +87,7 @@ struct ConsExpr final : Expr {
       : constructor(std::move(constructor)),
         args(std::move(args)) {}
 
-    void codegen(Code &code) const override;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct Equation final : AST {
@@ -98,7 +99,7 @@ struct Equation final : AST {
       : pattern(std::move(pattern)),
         expr(std::move(expr)) {}
 
-    void codegen(Code &code) const;
+    void build_entity(FuncEntity &entity) const override;
 };
 
 struct FuncDecl final : AST {
@@ -113,6 +114,6 @@ struct FuncDecl final : AST {
         type(std::move(type)),
         equations(std::move(equations)) {}
 
-    void codegen(Code &code) const;
+    void build_entity(FuncEntity &entity) const override;
 };
 }
