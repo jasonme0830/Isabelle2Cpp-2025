@@ -18,7 +18,8 @@ fun test :: "'a list \<Rightarrow> 'a list" where
 
   Code code;
   for (auto &decl : decls) {
-    decl->codegen(code);
+    code.entry_func();
+    decl->build_entity(code.current_entity());
   }
   code.generate();
 
