@@ -12,7 +12,16 @@ int | std::int64_t
 'a option | std::optional
 'a list | std::list\<T\>
 
-## Functions or Constructors Cast
+## Patterns Cast
+
+> The *prev* means the last intermediate result
+
+Isabelle/HOL | C++
+- | -
+Nil | 0
+Suc remain | remain =/== (prev) - 1
+
+## Expressions Cast
 
 Isabelle/HOL | C++
 - | -
