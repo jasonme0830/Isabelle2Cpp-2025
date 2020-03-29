@@ -15,10 +15,12 @@ fun add :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
 fun test :: "'a list \<Rightarrow> 'a list" where
   "test l = l"
 )src");
+
   Code code;
   for (auto &decl : decls) {
     decl->codegen(code);
   }
   code.generate();
+
   return 0;
 }
