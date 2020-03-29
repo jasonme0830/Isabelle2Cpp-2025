@@ -12,4 +12,8 @@ int | std::int64_t
 'a option | std::optional
 'a list | std::list\<T\>
 
-## Functions Cast
+## Functions or Constructors Cast
+
+Isabelle/HOL | C++
+- | -
+Suc expr | (expr) + 1
