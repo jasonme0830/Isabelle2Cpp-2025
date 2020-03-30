@@ -9,11 +9,16 @@ int main(int argc, char *argv[]) {
   Parser parser;
   auto decls = parser.pas_func_decls(R"src(
 fun add :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
-  "add Nil n = n" |
-  "add (Suc m) n = Suc (Add m n)"
+  "add 0 n = n" |
+  "add (Suc m) n = Suc (add m n)"
 
-fun test :: "'a list \<Rightarrow> 'a list" where
-  "test l = l"
+fun app :: "'a list \<Rightarrow> 'a list \<Rightarrow> 'a list" where
+  "app Nil ys = ys" |
+  "app (Cons x xs) ys = Cons x (app xs ys)"
+
+fun rev :: "'a list \<Rightarrow> 'a list" where
+  "rev Nil = Nil" |
+  "rev (Cons x xs) = app (rev xs) (Cons x Nil)"
 )src");
 
   Code code;
