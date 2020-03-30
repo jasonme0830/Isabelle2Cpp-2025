@@ -1,8 +1,21 @@
+#include <cctype>
 #include <exception>
+#include <algorithm>
 #include "ast.hpp"
 #include "code.hpp"
 
 using namespace std;
+
+namespace {
+static bool is_number(const string &str) {
+  for (auto ch : str) {
+    if (!isdigit(ch)) {
+      return false;
+    }
+  }
+  return true;
+}
+}
 
 namespace hol2cpp {
 AST::~AST() = default;
@@ -44,7 +57,7 @@ string FuncType::gen_typeinfo(FuncEntity &entity) const {
       type += ", " + types[i]->gen_typeinfo(entity);
     }
   }
-  type += ')>';
+  type += ")>";
   return type;
 }
 
@@ -55,29 +68,107 @@ void FuncType::build_entity(FuncEntity &entity) const {
   }
 }
 
-void VarExpr::build_entity(FuncEntity &entity) const {
-  static map<string, string> mapping {
-    { "0", "0" }
-  };
+void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
+  if (is_number(name)) {
+    entity.add_pattern("if (" + prev + " != " + name + ") {");
+    entity.add_pattern(Code::raw_indent() + "break;");
+    entity.add_pattern("}");
+  } else if (name == "Nil") {
+    entity.add_pattern("if (!" + prev + ".empty()) {");
+    entity.add_pattern(Code::raw_indent() + "break;");
+    entity.add_pattern("}");
+  } else {
+    entity.add_pattern("auto " + name + " = " + prev + ";");
+  }
 }
 
-void ConsExpr::build_entity(FuncEntity &entity) const {
-  static map<string, string> mapping {
-    { "Suc", " + 1" }
-  };
+string VarExpr::gen_expr(FuncEntity &entity) const {
+  if (is_number(name)) {
+    return name;
+  } else if (name == "Nil") {
+    // this may cause errors
+    return entity.types().front() + "{}";
+  } else {
+    return name;
+  }
+}
+
+void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
+  if (constructor == entity.name()) {
+
+    assert(args.size() == entity.types().size() - 1);
+    for (size_t i = 0; i < args.size(); ++i) {
+      args[i]->gen_pattern(entity, "arg" + to_string(i + 1));
+    }
+
+  } else if (constructor == "Suc") {
+
+    auto temp = entity.gen_temp();
+    entity.add_pattern("auto " + temp + " = (" + prev + ") - 1;");
+    args[0]->gen_pattern(entity, temp);
+
+  } else if (constructor == "Cons") {
+
+    auto temp = entity.gen_temp();
+    entity.add_pattern("auto " + temp + " = " + prev + ".front();");
+    args[0]->gen_pattern(entity, temp);
+
+    temp = entity.gen_temp();
+    entity.add_pattern(prev + ".pop_front();");
+    entity.add_pattern("auto " + temp + " = " + prev + ";");
+    args[1]->gen_pattern(entity, temp);
+
+  } else {
+    throw std::runtime_error("no such name: " + constructor);
+  }
+}
+
+string ConsExpr::gen_expr(FuncEntity &entity) const {
+  if (constructor == "Suc") {
+
+    assert(args.size() == 1);
+    auto expr = args[0]->gen_expr(entity);
+    auto temp = entity.gen_temp();
+    entity.add_expr("auto " + temp + " = (" + expr + ") + 1");
+    return temp;
+
+  } else if (constructor == "Cons") {
+
+    assert(args.size() == 2);
+    auto x = args[0]->gen_expr(entity);
+    auto xs = args[1]->gen_expr(entity);
+    auto temp = entity.gen_temp();
+    entity.add_expr("auto " + temp + " = " + xs + ";");
+    entity.add_expr(temp + ".push_front(" + x + ");");
+    return temp;
+
+  } else {
+
+    string expr = constructor + '(';
+    for (size_t i = 0; i < args.size(); ++i) {
+      if (i == 0) {
+        expr += args[i]->gen_expr(entity);
+      } else {
+        expr += ", " + args[i]->gen_expr(entity);
+      }
+    }
+    auto temp = entity.gen_temp();
+    entity.add_expr("auto " + temp + " = " + expr + ");");
+    return temp;
+
+  }
 }
 
 void Equation::build_entity(FuncEntity &entity) const {
-  pattern->build_entity(entity);
-  entity.entry_expr();
-  expr->build_entity(entity);
+  entity.entry_euation();
+  pattern->gen_pattern(entity, "");
+  entity.add_expr("return " + expr->gen_expr(entity) + ";");
 }
 
 void FuncDecl::build_entity(FuncEntity &entity) const {
   entity.name() = name;
   type->build_entity(entity);
   for (auto &equation : equations) {
-    entity.entry_equation();
     equation->build_entity(entity);
   }
 }
