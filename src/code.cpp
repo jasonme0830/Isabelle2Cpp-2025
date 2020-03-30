@@ -4,6 +4,8 @@ using namespace std;
 
 namespace hol2cpp {
 void Code::generate() {
+  out_ << "#include <list>\n"
+       << "#include <cctypes>\n" << endl;
   for (auto &entity : func_entities_) {
     generate_single(entity);
     out_ << endl;
@@ -31,7 +33,24 @@ void Code::generate_normal(FuncEntity &entity) {
   }
   out_ << ") {" << endl;
   add_indent();
-  // ...
+
+  auto &patterns = entity.patterns();
+  auto &exprs = entity.exprs();
+  for (size_t i = 0; i < patterns.size(); ++i) {
+    new_line() << "for (;;) {" << endl;
+    add_indent();
+
+    for (auto &pattern : patterns[i]) {
+      new_line() << pattern << endl;
+    }
+    for (auto &expr : exprs[i]) {
+      new_line() << expr << endl;
+    }
+
+    sub_indent();
+    new_line() << "}" << endl;
+  }
+
   sub_indent();
   new_line() << "}" << endl;
 }

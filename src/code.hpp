@@ -21,6 +21,15 @@ class Code {
 
     void generate();
 
+    static std::size_t &indent_size() {
+      static std::size_t value = 4;
+      return value;
+    }
+
+    static std::string raw_indent() {
+      return std::string(indent_size(), ' ');
+    }
+
   private:
     void generate_single(FuncEntity &entity);
     void generate_normal(FuncEntity &entity);
@@ -32,10 +41,10 @@ class Code {
     }
 
     void add_indent() {
-      indent_ += 4;
+      indent_ += indent_size();
     }
     void sub_indent() {
-      indent_ -= 4;
+      indent_ -= indent_size();
     }
 
     std::ostream &out_;
