@@ -8,7 +8,7 @@ Only support cast the recursive definitions of functions from Isabelle/HOL to C+
 
 ## Example
 
-before:
+Before:
 
 ```isabelle
 fun app :: "'a list \<Rightarrow> 'a list \<Rightarrow> 'a list" where
@@ -20,7 +20,7 @@ fun rev :: "'a list \<Rightarrow> 'a list" where
   "rev (Cons x xs) = app (rev xs) (Cons x Nil)"
 ```
 
-after:
+After:
 
 ```cpp
 #include <list>
