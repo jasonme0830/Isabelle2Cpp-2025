@@ -39,19 +39,32 @@ class FuncEntity {
       return template_args_;
     }
 
-    void entry_equation() {
-      entry_equation_ = patterns_.size();
-      is_pattern_ = true;
+    std::string gen_temp() {
+      return "temp" + std::to_string(temp_count_++);
+    }
+
+    void entry_euation() {
+      temp_count_ = 0;
       patterns_.emplace_back();
       exprs_.emplace_back();
     }
 
-    bool is_pattern() const {
-      return is_pattern_;
+    void add_pattern(std::string pattern) {
+      patterns_.back().push_back(pattern);
     }
 
-    void entry_expr() {
-      is_pattern_ = false;
+    void add_expr(std::string expr) {
+      exprs_.back().push_back(expr);
+    }
+
+    const std::vector<std::vector<std::string>> &
+    patterns() const {
+      return patterns_;
+    }
+
+    const std::vector<std::vector<std::string>> &
+    exprs() const {
+      return exprs_;
     }
 
   private:
@@ -62,9 +75,8 @@ class FuncEntity {
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
 
-    std::size_t entry_equation_;
-    bool is_pattern_;
-    std::vector<std::string> patterns_;
-    std::vector<std::string> exprs_;
+    std::size_t temp_count_;
+    std::vector<std::vector<std::string>> patterns_;
+    std::vector<std::vector<std::string>> exprs_;
 };
 }
