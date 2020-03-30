@@ -12,12 +12,11 @@ class FuncEntity;
 
 struct AST {
     virtual ~AST() = 0;
-    virtual void build_entity(FuncEntity &entity) const = 0;
 };
 
 struct Type : AST {
     virtual ~Type() = 0;
-    virtual void build_entity(FuncEntity &entity) const = 0;
+    virtual std::string gen_typeinfo(FuncEntity &entity) const;
 };
 
 struct NormalType final : Type {
@@ -26,7 +25,7 @@ struct NormalType final : Type {
     NormalType(std::string name)
       : name(std::move(name)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    std::string gen_typeinfo(FuncEntity &entity) const override;
 };
 
 struct ArgumentType final : Type {
@@ -35,7 +34,7 @@ struct ArgumentType final : Type {
     ArgumentType(std::string name)
       : name(std::move(name)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    std::string gen_typeinfo(FuncEntity &entity) const override;
 };
 
 struct TemplateType final : Type {
@@ -47,7 +46,7 @@ struct TemplateType final : Type {
       : name(std::move(name)),
         arg(std::move(arg)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    std::string gen_typeinfo(FuncEntity &entity) const override;
 };
 
 struct FuncType final : Type {
@@ -61,7 +60,7 @@ struct FuncType final : Type {
       return types.back().get();
     }
 
-    void build_entity(FuncEntity &entity) const override;
+    void build_entity(FuncEntity &entity) const;
 };
 
 struct Expr : AST {
@@ -99,7 +98,7 @@ struct Equation final : AST {
       : pattern(std::move(pattern)),
         expr(std::move(expr)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    void build_entity(FuncEntity &entity) const;
 };
 
 struct FuncDecl final : AST {
@@ -114,6 +113,6 @@ struct FuncDecl final : AST {
         type(std::move(type)),
         equations(std::move(equations)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    void build_entity(FuncEntity &entity) const;
 };
 }

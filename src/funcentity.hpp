@@ -9,39 +9,24 @@ class FuncEntity {
   public:
     FuncEntity() = default;
 
+    std::string &name() {
+      return name_;
+    }
+
     const std::string &name() const {
       return name_;
     }
 
-    void set_name(std::string name) {
-      name_ = name;
+    void add_type(std::string type) {
+      types_.push_back(type);
     }
 
-    void entry_type() {
-      entry_type_ = types_.size();
-      types_.emplace_back();
-      anchor_ = 0;
-    }
-
-    void add_normal_type(std::string name) {
-      auto &type = types_[entry_type_];
-      type.insert(anchor_, name);
-    }
-
-    void add_argument_type(std::string name) {
+    std::string add_argument_type(std::string name) {
       if (!template_mapping_.count(name)) {
         template_mapping_[name] = template_args_.size();
         template_args_.push_back("T" + std::to_string(template_args_.size()));
       }
-      const auto &template_name = template_args_[template_mapping_[name]];
-      auto &type = types_[entry_type_];
-      type.insert(anchor_, template_name);
-    }
-
-    void add_template_type(std::string name) {
-      auto &arg_type = types_[entry_type_];
-      arg_type.insert(anchor_, name + "<>");
-      anchor_ += name.size() + 1;
+      return template_args_[template_mapping_[name]];
     }
 
     const std::vector<std::string> &

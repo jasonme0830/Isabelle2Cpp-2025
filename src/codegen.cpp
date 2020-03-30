@@ -1,3 +1,4 @@
+#include <exception>
 #include "ast.hpp"
 #include "code.hpp"
 
@@ -8,44 +9,39 @@ AST::~AST() = default;
 Type::~Type() = default;
 Expr::~Expr() = default;
 
-void NormalType::build_entity(FuncEntity &entity) const {
+string Type::gen_typeinfo(FuncEntity &entity) const {
+  throw std::logic_error("no gen_typeinfo implementation");
+}
+
+string NormalType::gen_typeinfo(FuncEntity &entity) const {
   static map<string, string> mapping {
     { "nat", "std::uint64_t" },
     { "int", "std::int64_t" }
   };
 
-  if (mapping.count(name)) {
-    entity.add_normal_type(mapping[name]);
-  } else {
-    entity.add_normal_type(name);
-  }
+  return mapping.count(name) ? mapping[name] : name;
 }
 
-void ArgumentType::build_entity(FuncEntity &entity) const {
-  entity.add_argument_type(name);
+string ArgumentType::gen_typeinfo(FuncEntity &entity) const {
+  return entity.add_argument_type(name);
 }
 
-void TemplateType::build_entity(FuncEntity &entity) const {
+string TemplateType::gen_typeinfo(FuncEntity &entity) const {
   static map<string, string> mapping {
     { "set", "std::set" },
     { "option", "std::optional" },
     { "list", "std::list" }
   };
 
-  if (mapping.count(name)) {
-    entity.add_template_type(mapping[name]);
-  } else {
-    entity.add_template_type(name);
-  }
-  arg->build_entity(entity);
+  return mapping.count(name)
+    ? mapping[name] + '<' + arg->gen_typeinfo(entity) + '>'
+    : name + '<' + arg->gen_typeinfo(entity) + '>';
 }
 
 void FuncType::build_entity(FuncEntity &entity) const {
-  entity.entry_type();
-  result_type()->build_entity(entity);
+  entity.add_type(result_type()->gen_typeinfo(entity));
   for (size_t i = 0; i < types.size() - 1; ++i) {
-    entity.entry_type();
-    types[i]->build_entity(entity);
+    entity.add_type(types[i]->gen_typeinfo(entity));
   }
 }
 
@@ -68,7 +64,7 @@ void Equation::build_entity(FuncEntity &entity) const {
 }
 
 void FuncDecl::build_entity(FuncEntity &entity) const {
-  entity.set_name(name);
+  entity.name() = name;
   type->build_entity(entity);
   for (auto &equation : equations) {
     entity.entry_equation();
