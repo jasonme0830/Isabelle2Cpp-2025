@@ -57,10 +57,8 @@ class FuncEntity {
   private:
     std::string name_;
 
-    std::size_t entry_type_;
     // the first type is the result type
     std::vector<std::string> types_;
-    std::size_t anchor_;
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
 

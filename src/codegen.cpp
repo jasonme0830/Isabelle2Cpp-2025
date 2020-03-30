@@ -9,10 +9,6 @@ AST::~AST() = default;
 Type::~Type() = default;
 Expr::~Expr() = default;
 
-string Type::gen_typeinfo(FuncEntity &entity) const {
-  throw std::logic_error("no gen_typeinfo implementation");
-}
-
 string NormalType::gen_typeinfo(FuncEntity &entity) const {
   static map<string, string> mapping {
     { "nat", "std::uint64_t" },
@@ -36,6 +32,20 @@ string TemplateType::gen_typeinfo(FuncEntity &entity) const {
   return mapping.count(name)
     ? mapping[name] + '<' + arg->gen_typeinfo(entity) + '>'
     : name + '<' + arg->gen_typeinfo(entity) + '>';
+}
+
+string FuncType::gen_typeinfo(FuncEntity &entity) const {
+  string type = "std::function<";
+  type += result_type()->gen_typeinfo(entity) + '(';
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i == 0) {
+      type += types[i]->gen_typeinfo(entity);
+    } else {
+      type += ", " + types[i]->gen_typeinfo(entity);
+    }
+  }
+  type += ')>';
+  return type;
 }
 
 void FuncType::build_entity(FuncEntity &entity) const {

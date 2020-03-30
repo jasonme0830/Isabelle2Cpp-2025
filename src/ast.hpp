@@ -16,7 +16,7 @@ struct AST {
 
 struct Type : AST {
     virtual ~Type() = 0;
-    virtual std::string gen_typeinfo(FuncEntity &entity) const;
+    virtual std::string gen_typeinfo(FuncEntity &entity) const = 0;
 };
 
 struct NormalType final : Type {
@@ -61,6 +61,7 @@ struct FuncType final : Type {
     }
 
     void build_entity(FuncEntity &entity) const;
+    std::string gen_typeinfo(FuncEntity &entity) const override;
 };
 
 struct Expr : AST {
