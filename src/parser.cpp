@@ -23,14 +23,14 @@ blanks_ =
   Token::epsilon<char>();
 
 // identifier
-// : alpha identifier
-// | alpha
+// : (alpha | digit) identifier
+// | (alpha | digit)
 identifier_ =
-  alpha_ + identifier_ >>
+  (alpha_ | digit_) + identifier_ >>
     [](char head, string tail) {
       return head + tail;
     } |
-  alpha_ >>
+  (alpha_ | digit_) >>
     [](char ch) {
       return string(1, ch);
     };
