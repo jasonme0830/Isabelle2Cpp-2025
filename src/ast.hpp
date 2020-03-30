@@ -66,7 +66,8 @@ struct FuncType final : Type {
 
 struct Expr : AST {
     virtual ~Expr() = 0;
-    virtual void build_entity(FuncEntity &entity) const = 0;
+    virtual void gen_pattern(FuncEntity &entity, const std::string &prev) const = 0;
+    virtual std::string gen_expr(FuncEntity &entity) const = 0;
 };
 
 struct VarExpr final : Expr {
@@ -75,7 +76,8 @@ struct VarExpr final : Expr {
     VarExpr(std::string name)
       : name(std::move(name)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
+    std::string gen_expr(FuncEntity &entity) const override;
 };
 
 struct ConsExpr final : Expr {
@@ -87,7 +89,8 @@ struct ConsExpr final : Expr {
       : constructor(std::move(constructor)),
         args(std::move(args)) {}
 
-    void build_entity(FuncEntity &entity) const override;
+    void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
+    std::string gen_expr(FuncEntity &entity) const override;
 };
 
 struct Equation final : AST {
