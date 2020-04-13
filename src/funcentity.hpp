@@ -1,71 +1,70 @@
 #pragma once
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace hol2cpp {
-class FuncEntity {
+namespace hol2cpp
+{
+class FuncEntity
+{
   public:
     FuncEntity() = default;
 
-    std::string &name() {
-      return name_;
+    std::string
+    &name() { return name_; }
+
+    const std::string
+    &name() const { return name_; }
+
+    void add_type(std::string type)
+    {
+        types_.push_back(type);
     }
 
-    const std::string &name() const {
-      return name_;
+    std::string add_argument_type(std::string name)
+    {
+        if (!template_mapping_.count(name))
+        {
+            template_mapping_[name] = template_args_.size();
+            template_args_.push_back("T" + std::to_string(template_args_.size()));
+        }
+        return template_args_[template_mapping_[name]];
     }
 
-    void add_type(std::string type) {
-      types_.push_back(type);
+    const std::vector<std::string>
+    &types() const { return types_; }
+
+    const std::vector<std::string>
+    &template_args() const { return template_args_; }
+
+    std::string gen_temp()
+    {
+        return "temp" + std::to_string(temp_count_++);
     }
 
-    std::string add_argument_type(std::string name) {
-      if (!template_mapping_.count(name)) {
-        template_mapping_[name] = template_args_.size();
-        template_args_.push_back("T" + std::to_string(template_args_.size()));
-      }
-      return template_args_[template_mapping_[name]];
+    void entry_euation()
+    {
+        temp_count_ = 0;
+        patterns_.emplace_back();
+        exprs_.emplace_back();
     }
 
-    const std::vector<std::string> &
-    types() const {
-      return types_;
+    void add_pattern(std::string pattern)
+    {
+        patterns_.back().push_back(pattern);
     }
 
-    const std::vector<std::string> &
-    template_args() const {
-      return template_args_;
+    void add_expr(std::string expr)
+    {
+        exprs_.back().push_back(expr);
     }
 
-    std::string gen_temp() {
-      return "temp" + std::to_string(temp_count_++);
-    }
+    const std::vector<std::vector<std::string>>
+    &patterns() const { return patterns_; }
 
-    void entry_euation() {
-      temp_count_ = 0;
-      patterns_.emplace_back();
-      exprs_.emplace_back();
-    }
-
-    void add_pattern(std::string pattern) {
-      patterns_.back().push_back(pattern);
-    }
-
-    void add_expr(std::string expr) {
-      exprs_.back().push_back(expr);
-    }
-
-    const std::vector<std::vector<std::string>> &
-    patterns() const {
-      return patterns_;
-    }
-
-    const std::vector<std::vector<std::string>> &
-    exprs() const {
-      return exprs_;
-    }
+    const std::vector<std::vector<std::string>>
+    &exprs() const { return exprs_; }
 
   private:
     std::string name_;

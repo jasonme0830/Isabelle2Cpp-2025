@@ -1,13 +1,16 @@
 #pragma once
 
 #include <memory>
-#include <vector>
-#include <string>
 #include <parsec.hpp>
+#include <string>
+#include <vector>
+
 #include "ast.hpp"
 
-namespace hol2cpp {
-class Parser {
+namespace hol2cpp
+{
+class Parser
+{
   public:
     Parser();
 
@@ -25,23 +28,23 @@ class Parser {
     parsec::Parsec<std::string> identifier_;
     parsec::Parsec<std::string> func_decl_name_;
 
-    parsec::Parsec<std::unique_ptr<Type>> type_term_;
-    parsec::Parsec<std::vector<std::unique_ptr<Type>>> func_type_tail_;
-    parsec::Parsec<std::unique_ptr<FuncType>> func_type_;
-    parsec::Parsec<std::unique_ptr<Type>> type_;
-    parsec::Parsec<std::unique_ptr<FuncType>> func_decl_type_;
+    parsec::Parsec<std::unique_ptr<Type>>               type_term_;
+    parsec::Parsec<std::vector<std::unique_ptr<Type>>>  func_type_tail_;
+    parsec::Parsec<std::unique_ptr<FuncType>>           func_type_;
+    parsec::Parsec<std::unique_ptr<Type>>               type_;
+    parsec::Parsec<std::unique_ptr<FuncType>>           func_decl_type_;
 
     parsec::Parsec<std::unique_ptr<Expr>> miniterm_;
-    parsec::Parsec<std::vector<std::unique_ptr<Expr>>> miniterms_;
-    parsec::Parsec<std::unique_ptr<ConsExpr>> cons_term_;
-    parsec::Parsec<std::unique_ptr<VarExpr>> var_term_;
-    parsec::Parsec<std::unique_ptr<Expr>> term_;
-    parsec::Parsec<std::unique_ptr<Expr>> expr_;
+    parsec::Parsec<std::vector<std::unique_ptr<Expr>>>  miniterms_;
+    parsec::Parsec<std::unique_ptr<ConsExpr>>           cons_term_;
+    parsec::Parsec<std::unique_ptr<VarExpr>>            var_term_;
+    parsec::Parsec<std::unique_ptr<Expr>>               term_;
+    parsec::Parsec<std::unique_ptr<Expr>>               expr_;
 
-    parsec::Parsec<std::unique_ptr<Equation>> func_decl_equation_;
-    parsec::Parsec<std::vector<std::unique_ptr<Equation>>> func_decl_equations_;
+    parsec::Parsec<std::unique_ptr<Equation>>               func_decl_equation_;
+    parsec::Parsec<std::vector<std::unique_ptr<Equation>>>  func_decl_equations_;
 
-    parsec::Parsec<std::unique_ptr<FuncDecl>> func_decl_;
-    parsec::Parsec<std::vector<std::unique_ptr<FuncDecl>>> func_decls_;
+    parsec::Parsec<std::unique_ptr<FuncDecl>>               func_decl_;
+    parsec::Parsec<std::vector<std::unique_ptr<FuncDecl>>>  func_decls_;
 };
-}
+} // namespace hol2cpp

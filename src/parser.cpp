@@ -4,10 +4,11 @@
 using namespace std;
 using namespace parsec;
 
-namespace hol2cpp {
+namespace hol2cpp
+{
 // the grammer is tentative now
-Parser::Parser() {
-
+Parser::Parser()
+{
 digit_ = Token::by(::isdigit);
 alpha_ = Token::by(::isalpha);
 blank_ = Token::by(::isspace);
@@ -17,8 +18,9 @@ blank_ = Token::by(::isspace);
 // | <epsilon>
 blanks_ =
   blank_ + blanks_ >>
-    [](char, char) -> char {
-      return 0;
+    [](char, char) -> char
+    {
+        return 0;
     } |
   Token::epsilon<char>();
 
@@ -27,20 +29,23 @@ blanks_ =
 // | (alpha | digit)
 identifier_ =
   (alpha_ | digit_) + identifier_ >>
-    [](char head, string tail) {
-      return head + tail;
+    [](char head, string tail)
+    {
+        return head + tail;
     } |
   (alpha_ | digit_) >>
-    [](char ch) {
-      return string(1, ch);
+    [](char ch)
+    {
+        return string(1, ch);
     };
 
 // func_decl_name
 // : "fun" blanks identifier blanks "::"
 func_decl_name_ =
   "fun"_T + blanks_ + identifier_ + blanks_ + "::"_T >>
-    [](string, char, string ident, char, string) {
-      return ident;
+    [](string, char, string ident, char, string)
+    {
+        return ident;
     };
 
 // type_term
@@ -52,28 +57,34 @@ func_decl_name_ =
 // | '(' blanks type blanks ')'
 type_term_ =
   identifier_ + blanks_ + identifier_ >>
-    [](string type1, char, string type2) -> unique_ptr<Type> {
-      return make_unique<TemplateType>(type2, make_unique<NormalType>(type1));
+    [](string type1, char, string type2) -> unique_ptr<Type>
+    {
+        return make_unique<TemplateType>(type2, make_unique<NormalType>(type1));
     } |
   identifier_ >>
-    [](string type) -> unique_ptr<Type> {
-      return make_unique<NormalType>(type);
+    [](string type) -> unique_ptr<Type>
+    {
+        return make_unique<NormalType>(type);
     } |
   '\''_T + identifier_ + blanks_ + identifier_ >>
-    [](char, string type1, char, string type2) -> unique_ptr<Type> {
-      return make_unique<TemplateType>(type2, make_unique<ArgumentType>(type1));
+    [](char, string type1, char, string type2) -> unique_ptr<Type>
+    {
+        return make_unique<TemplateType>(type2, make_unique<ArgumentType>(type1));
     } |
   '\''_T + identifier_ >>
-    [](char, string type) -> unique_ptr<Type> {
-      return make_unique<ArgumentType>(type);
+    [](char, string type) -> unique_ptr<Type>
+    {
+        return make_unique<ArgumentType>(type);
     } |
   '('_T + blanks_ + type_ + blanks_ + ')'_T + identifier_ >>
-    [](char, char, unique_ptr<Type> type1, char, char, string type2) -> unique_ptr<Type> {
-      return make_unique<TemplateType>(type2, move(type1));
+    [](char, char, unique_ptr<Type> type1, char, char, string type2) -> unique_ptr<Type>
+    {
+        return make_unique<TemplateType>(type2, move(type1));
     } |
   '('_T + blanks_ + type_ + blanks_ + ')'_T >>
-    [](char, char, unique_ptr<Type> type, char, char) {
-      return type;
+    [](char, char, unique_ptr<Type> type, char, char)
+    {
+        return type;
     };
 
 // func_type_tail
@@ -81,9 +92,10 @@ type_term_ =
 // | <eplison>
 func_type_tail_ =
   R"(\<Rightarrow>)"_T + blanks_ + type_term_ + blanks_ + func_type_tail_ >>
-    [](string, char, unique_ptr<Type> type, char, vector<unique_ptr<Type>> types) {
-      types.insert(types.begin(), move(type));
-      return types;
+    [](string, char, unique_ptr<Type> type, char, vector<unique_ptr<Type>> types)
+    {
+        types.insert(types.begin(), move(type));
+        return types;
     } |
   Token::epsilon<vector<unique_ptr<Type>>>();
 
@@ -91,10 +103,11 @@ func_type_tail_ =
 // : type_term blanks "\<Rightarrow>" blanks type_term blanks func_type_tail
 func_type_ =
   type_term_ + blanks_ + R"(\<Rightarrow>)"_T + blanks_ + type_term_ + blanks_ + func_type_tail_ >>
-    [](unique_ptr<Type> type1, char, string, char, unique_ptr<Type> type2, char, vector<unique_ptr<Type>> types) {
-      types.insert(types.begin(), move(type2));
-      types.insert(types.begin(), move(type1));
-      return make_unique<FuncType>(move(types));
+    [](unique_ptr<Type> type1, char, string, char, unique_ptr<Type> type2, char, vector<unique_ptr<Type>> types)
+    {
+        types.insert(types.begin(), move(type2));
+        types.insert(types.begin(), move(type1));
+        return make_unique<FuncType>(move(types));
     };
 
 // type
@@ -102,8 +115,9 @@ func_type_ =
 // | type_term
 type_ =
   func_type_ >>
-    [](unique_ptr<FuncType> type) -> unique_ptr<Type> {
-      return type;
+    [](unique_ptr<FuncType> type) -> unique_ptr<Type>
+    {
+        return type;
     } |
   type_term_;
 
@@ -111,8 +125,9 @@ type_ =
 // : '"' blanks func_type blanks '"' blanks "where"
 func_decl_type_ =
   '"'_T + blanks_ + func_type_ + blanks_ + '"'_T + blanks_ + "where"_T >>
-    [](char, char, unique_ptr<FuncType> type, char, char, char, string) {
-      return type;
+    [](char, char, unique_ptr<FuncType> type, char, char, char, string)
+    {
+        return type;
     };
 
 // miniterm
@@ -120,12 +135,14 @@ func_decl_type_ =
 // : '(' blanks expr blanks ')'
 miniterm_ =
   identifier_ >>
-    [](string ident) -> unique_ptr<Expr> {
-      return make_unique<VarExpr>(move(ident));
+    [](string ident) -> unique_ptr<Expr>
+    {
+        return make_unique<VarExpr>(move(ident));
     } |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
-    [](char, char, unique_ptr<Expr> expr, char, char) {
-      return expr;
+    [](char, char, unique_ptr<Expr> expr, char, char)
+    {
+        return expr;
     };
 
 // miniterms
@@ -133,9 +150,10 @@ miniterm_ =
 // | <epsilon>
 miniterms_ =
   miniterm_ + blanks_ + miniterms_ >>
-    [](unique_ptr<Expr> miniterm, char, vector<unique_ptr<Expr>> miniterms) {
-      miniterms.insert(miniterms.begin(), move(miniterm));
-      return miniterms;
+    [](unique_ptr<Expr> miniterm, char, vector<unique_ptr<Expr>> miniterms)
+    {
+        miniterms.insert(miniterms.begin(), move(miniterm));
+        return miniterms;
     } |
   Token::epsilon<vector<unique_ptr<Expr>>>();
 
@@ -143,17 +161,19 @@ miniterms_ =
 // : identifier blanks miniterm blanks miniterms
 cons_term_ =
   identifier_ + blanks_ + miniterm_ + blanks_ + miniterms_ >>
-    [](string name, char, unique_ptr<Expr> miniterm, char, vector<unique_ptr<Expr>> miniterms) {
-      miniterms.insert(miniterms.begin(), move(miniterm));
-      return make_unique<ConsExpr>(move(name), move(miniterms));
+    [](string name, char, unique_ptr<Expr> miniterm, char, vector<unique_ptr<Expr>> miniterms)
+    {
+        miniterms.insert(miniterms.begin(), move(miniterm));
+        return make_unique<ConsExpr>(move(name), move(miniterms));
     };
 
 // var_term
 // : identifier
 var_term_ =
   identifier_ >>
-    [](string name) {
-      return make_unique<VarExpr>(move(name));
+    [](string name)
+    {
+        return make_unique<VarExpr>(move(name));
     };
 
 // term
@@ -161,12 +181,14 @@ var_term_ =
 // | var_term
 term_ =
   cons_term_ >>
-    [](unique_ptr<Expr> expr) {
-      return expr;
+    [](unique_ptr<Expr> expr)
+    {
+        return expr;
     } |
   var_term_ >>
-    [](unique_ptr<Expr> expr) {
-      return expr;
+    [](unique_ptr<Expr> expr)
+    {
+        return expr;
     };
 
 // expr
@@ -177,8 +199,9 @@ expr_ = term_;
 // : '"' blanks cons_term blanks '=' blanks expr blanks '"'
 func_decl_equation_ =
   '"'_T + blanks_ + cons_term_ + blanks_ + '='_T + blanks_ + expr_ + blanks_ + '"'_T >>
-    [](char, char, unique_ptr<ConsExpr> cons, char, char, char, unique_ptr<Expr> expr, char, char) {
-      return make_unique<Equation>(move(cons), move(expr));
+    [](char, char, unique_ptr<ConsExpr> cons, char, char, char, unique_ptr<Expr> expr, char, char)
+    {
+        return make_unique<Equation>(move(cons), move(expr));
     };
 
 // func_decl_equations
@@ -186,23 +209,26 @@ func_decl_equation_ =
 // | func_decl_equation
 func_decl_equations_ =
   func_decl_equation_ + blanks_ + '|'_T + blanks_ + func_decl_equations_ >>
-    [](unique_ptr<Equation> equation, char, char, char, vector<unique_ptr<Equation>> equations) {
-      equations.insert(equations.begin(), move(equation));
-      return equations;
+    [](unique_ptr<Equation> equation, char, char, char, vector<unique_ptr<Equation>> equations)
+    {
+        equations.insert(equations.begin(), move(equation));
+        return equations;
     } |
   func_decl_equation_ >>
-    [](unique_ptr<Equation> equation) {
-      vector<unique_ptr<Equation>> equations;
-      equations.push_back(move(equation));
-      return equations;
+    [](unique_ptr<Equation> equation)
+    {
+        vector<unique_ptr<Equation>> equations;
+        equations.push_back(move(equation));
+        return equations;
     };
 
 // func_decl
 // : func_decl_name blanks func_decl_type blanks func_decl_equations
 func_decl_ =
   func_decl_name_ + blanks_ + func_decl_type_ + blanks_ + func_decl_equations_ >>
-    [](string name, char, unique_ptr<FuncType> type, char, vector<unique_ptr<Equation>> equations) {
-      return make_unique<FuncDecl>(move(name), move(type), move(equations));
+    [](string name, char, unique_ptr<FuncType> type, char, vector<unique_ptr<Equation>> equations)
+    {
+        return make_unique<FuncDecl>(move(name), move(type), move(equations));
     };
 
 // func_decls
@@ -210,21 +236,24 @@ func_decl_ =
 // | <epsilon>
 func_decls_ =
   blanks_ + func_decl_ + blanks_ + func_decls_ >>
-    [](char, unique_ptr<FuncDecl> decl, char, vector<unique_ptr<FuncDecl>> decls) {
-      decls.insert(decls.begin(), move(decl));
-      return decls;
+    [](char, unique_ptr<FuncDecl> decl, char, vector<unique_ptr<FuncDecl>> decls)
+    {
+        decls.insert(decls.begin(), move(decl));
+        return decls;
     } |
   Token::epsilon<vector<unique_ptr<FuncDecl>>>();
 
 }
 
 vector<unique_ptr<FuncDecl>>
-Parser::pas_func_decls(const string &str) {
-  return func_decls_(str);
+Parser::pas_func_decls(const string &str)
+{
+    return func_decls_(str);
 }
 
 unique_ptr<FuncDecl>
-Parser::pas_func_decl(const string &str) {
-  return func_decl_(str);
+Parser::pas_func_decl(const string &str)
+{
+    return func_decl_(str);
 }
 }
