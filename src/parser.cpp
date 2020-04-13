@@ -225,7 +225,9 @@ term_ =
 // | <epsilon>
 
 // expr5
-// : expr6 blanks expr5_tail
+// : expr6 blanks '#' blanks expr5
+// | expr6 blanks '@' blanks expr5
+// | expr6 blanks expr5_tail
 
 // expr4
 // : expr5 blanks "\<subseteq>" blanks expr4
