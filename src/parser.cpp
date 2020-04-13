@@ -193,7 +193,7 @@ term_ =
 
 // expr9
 // : term blanks '^' blanks expr9
-// | <epsilon>
+// | term
 
 // expr8_tail
 // : '*' blanks expr9 blanks expr8_tail
