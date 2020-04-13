@@ -191,8 +191,71 @@ term_ =
         return expr;
     };
 
+// expr9
+// : term blanks '^' blanks expr9
+// | <epsilon>
+
+// expr8_tail
+// : '*' blanks expr9 blanks expr8_tail
+// | '/' blanks expr9 blanks expr8_tail
+// | "div" blanks expr9 blanks expr8_tail
+// | "mod" blanks expr9 blanks expr8_tail
+// | <epsilon>
+
+// expr8
+// : expr9 blanks expr8_tail
+
+// expr7_tail
+// : '+' blanks expr8 blanks expr7_tail
+// | '-' blanks expr8 blanks expr7_tail
+// | <epsilon>
+
+// expr7
+// : expr8 blanks expr7_tail
+
+// expr6_tail
+// : "\<inter>" blanks expr7 blanks expr6_tail
+// | <epsilon>
+
+// expr6
+// : expr7 blanks expr6_tail
+
+// expr5_tail
+// : "\<union>" blanks expr6 blanks expr5_tail
+// | <epsilon>
+
+// expr5
+// : expr6 blanks expr5_tail
+
+// expr4
+// : expr5 blanks "\<subseteq>" blanks expr4
+// | expr5 blanks "\<subset>" blanks expr4
+// | expr5 blanks "\<supseteq>" blanks expr4
+// | expr5 blanks "\<supset>" blanks expr4
+// | expr5 blanks "\<in>" blanks expr4
+// | expr5 blanks "\<notin>" blanks expr4
+
+// expr3
+// : expr4 blanks "\<le>" blanks expr3
+// | expr4 blanks '<' blanks expr3
+// | expr4 blanks "\<ge>" blanks expr3
+// | expr4 blanks '>' blanks expr3
+
+// expr2_tail
+// : '=' blanks expr3 blanks expr2_tail
+// | "\<noteq>" blanks expr3 blanks expr2_tail
+// | <epsilon>
+
+// expr2
+// : expr3 blanks expr2_tail
+
+// expr1
+// : expr2 blanks "\<and>" blanks expr1
+// | expr2
+
 // expr
-// : term
+// : expr1 blanks "\<or>" blanks expr
+// | expr1
 expr_ = term_;
 
 // func_decl_equation
