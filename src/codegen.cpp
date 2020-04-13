@@ -120,6 +120,14 @@ string VarExpr::gen_expr(FuncEntity &entity) const
     {
         return name;
     }
+    else if (name == "True")
+    {
+        return "true";
+    }
+    else if (name == "False")
+    {
+        return "false";
+    }
     else if (name == "Nil")
     {
         // this may cause errors
