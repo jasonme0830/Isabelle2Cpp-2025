@@ -46,6 +46,8 @@ class Parser
     Parsec<Ptr<Expr>>                   expr9_;
     Parsec<Ptr<BinaryOpTailExpr>>       expr8_tail_;
     Parsec<Ptr<Expr>>                   expr8_;
+    Parsec<Ptr<BinaryOpTailExpr>>       expr7_tail_;
+    Parsec<Ptr<Expr>>                   expr7_;
     Parsec<Ptr<Expr>>                   expr_;
 
     Parsec<Ptr<Equation>>               func_decl_equation_;

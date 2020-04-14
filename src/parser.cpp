@@ -249,9 +249,36 @@ expr8_ =
 // : '+' blanks expr8 blanks expr7_tail
 // | '-' blanks expr8 blanks expr7_tail
 // | <epsilon>
+expr7_tail_ =
+  '+'_T + blanks_ + expr8_ + blanks_ + expr7_tail_ >>
+    [](char, char, Ptr<Expr> &&expr, char, Ptr<BinaryOpTailExpr> &&tail)
+    {
+        return make_unique<BinaryOpTailExpr>(BOp::NumAdd,
+            move(expr), move(tail));
+    } |
+  '-'_T + blanks_ + expr8_ + blanks_ + expr7_tail_ >>
+    [](Placeholder, char, Ptr<Expr> &&expr, char, Ptr<BinaryOpTailExpr> &&tail)
+    {
+        return make_unique<BinaryOpTailExpr>(BOp::NumSub,
+            move(expr), move(tail));
+    } |
+  Token::epsilon([]() -> Ptr<BinaryOpTailExpr> { return nullptr; });
 
 // expr7
 // : expr8 blanks expr7_tail
+expr7_ =
+  expr8_ + blanks_ + expr7_tail_ >>
+  [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)
+    -> Ptr<Expr>
+  {
+      while (tail)
+      {
+          expr = make_unique<BinaryOpExpr>(tail->op,
+              move(expr), move(tail->expr));
+          tail = move(tail->tail);
+      }
+      return expr;
+  };
 
 // expr6_tail
 // : "\<inter>" blanks expr7 blanks expr6_tail
