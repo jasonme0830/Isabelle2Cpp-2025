@@ -1,8 +1,8 @@
-#include "ast.hpp"
-#include "code.hpp"
-#include <algorithm>
 #include <cctype>
 #include <exception>
+#include <algorithm>
+#include "ast.hpp"
+#include "code.hpp"
 
 using namespace std;
 

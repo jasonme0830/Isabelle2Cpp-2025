@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <parsec.hpp>
-
 #include "ast.hpp"
 
 namespace hol2cpp
@@ -44,6 +43,9 @@ class Parser
     Parsec<Ptr<ConsExpr>>               cons_term_;
     Parsec<Ptr<VarExpr>>                var_term_;
     Parsec<Ptr<Expr>>                   term_;
+    Parsec<Ptr<Expr>>                   expr9_;
+    Parsec<Ptr<BinaryOpTailExpr>>       expr8_tail_;
+    Parsec<Ptr<Expr>>                   expr8_;
     Parsec<Ptr<Expr>>                   expr_;
 
     Parsec<Ptr<Equation>>               func_decl_equation_;

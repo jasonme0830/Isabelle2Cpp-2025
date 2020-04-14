@@ -50,7 +50,7 @@ struct TemplateType final : Type
     std::string name;
     Ptr<Type> arg;
 
-    TemplateType(std::string name, Ptr<Type> arg)
+    TemplateType(std::string name, Ptr<Type> &&arg)
       : name(std::move(name)), arg(std::move(arg)) {}
 
     std::string gen_typeinfo(FuncEntity &entity) const override;
@@ -60,7 +60,7 @@ struct FuncType final : Type
 {
     std::vector<Ptr<Type>> types;
 
-    FuncType(std::vector<Ptr<Type>> types)
+    FuncType(std::vector<Ptr<Type>> &&types)
       : types(std::move(types)) {}
 
     Type* result_type() const
@@ -96,11 +96,45 @@ struct ConsExpr final : Expr
     std::string constructor;
     std::vector<Ptr<Expr>> args;
 
-    ConsExpr(std::string constructor, std::vector<Ptr<Expr>> args)
+    ConsExpr(std::string constructor, std::vector<Ptr<Expr>> &&args)
       : constructor(std::move(constructor)), args(std::move(args)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity) const override;
+};
+
+enum class BOp
+{
+    NumAdd, // +
+    NumSub, // -
+    NumMul, // *
+    NumDiv, // / div
+    NumMod, // mod
+    NumPow, // ^
+
+};
+
+struct BinaryOpExpr final : Expr
+{
+    BOp op;
+    Ptr<Expr> lhs, rhs;
+
+    BinaryOpExpr(BOp op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs)
+      : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+
+    void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
+    std::string gen_expr(FuncEntity &entity) const override;
+};
+
+struct BinaryOpTailExpr final
+{
+    BOp op;
+    Ptr<Expr> expr;
+    Ptr<BinaryOpTailExpr> tail;
+
+    BinaryOpTailExpr(BOp op, Ptr<Expr> &&expr,
+        Ptr<BinaryOpTailExpr> &&tail)
+      : op(op), expr(std::move(expr)), tail(std::move(tail)) {}
 };
 
 struct Equation final : AST
@@ -108,7 +142,7 @@ struct Equation final : AST
     Ptr<ConsExpr> pattern;
     Ptr<Expr> expr;
 
-    Equation(Ptr<ConsExpr> pattern, Ptr<Expr> expr)
+    Equation(Ptr<ConsExpr> &&pattern, Ptr<Expr> &&expr)
       : pattern(std::move(pattern)), expr(std::move(expr)) {}
 
     void build_entity(FuncEntity &entity) const;
@@ -121,8 +155,8 @@ struct FuncDecl final : AST
     std::vector<Ptr<Equation>> equations;
 
     FuncDecl(std::string name,
-        Ptr<FuncType> type,
-        std::vector<Ptr<Equation>> equations)
+        Ptr<FuncType> &&type,
+        std::vector<Ptr<Equation>> &&equations)
       : name(std::move(name)), type(std::move(type))
       , equations(std::move(equations)) {}
 
