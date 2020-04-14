@@ -11,6 +11,9 @@ namespace hol2cpp
 class Code;
 class FuncEntity;
 
+template<typename T>
+using Ptr = std::unique_ptr<T>;
+
 struct AST
 {
     virtual ~AST() = 0;
@@ -45,9 +48,9 @@ struct ArgumentType final : Type
 struct TemplateType final : Type
 {
     std::string name;
-    std::unique_ptr<Type> arg;
+    Ptr<Type> arg;
 
-    TemplateType(std::string name, std::unique_ptr<Type> arg)
+    TemplateType(std::string name, Ptr<Type> arg)
       : name(std::move(name)), arg(std::move(arg)) {}
 
     std::string gen_typeinfo(FuncEntity &entity) const override;
@@ -55,9 +58,9 @@ struct TemplateType final : Type
 
 struct FuncType final : Type
 {
-    std::vector<std::unique_ptr<Type>> types;
+    std::vector<Ptr<Type>> types;
 
-    FuncType(std::vector<std::unique_ptr<Type>> types)
+    FuncType(std::vector<Ptr<Type>> types)
       : types(std::move(types)) {}
 
     Type* result_type() const
@@ -91,9 +94,9 @@ struct VarExpr final : Expr
 struct ConsExpr final : Expr
 {
     std::string constructor;
-    std::vector<std::unique_ptr<Expr>> args;
+    std::vector<Ptr<Expr>> args;
 
-    ConsExpr(std::string constructor, std::vector<std::unique_ptr<Expr>> args)
+    ConsExpr(std::string constructor, std::vector<Ptr<Expr>> args)
       : constructor(std::move(constructor)), args(std::move(args)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
@@ -102,10 +105,10 @@ struct ConsExpr final : Expr
 
 struct Equation final : AST
 {
-    std::unique_ptr<ConsExpr> pattern;
-    std::unique_ptr<Expr> expr;
+    Ptr<ConsExpr> pattern;
+    Ptr<Expr> expr;
 
-    Equation(std::unique_ptr<ConsExpr> pattern, std::unique_ptr<Expr> expr)
+    Equation(Ptr<ConsExpr> pattern, Ptr<Expr> expr)
       : pattern(std::move(pattern)), expr(std::move(expr)) {}
 
     void build_entity(FuncEntity &entity) const;
@@ -114,12 +117,12 @@ struct Equation final : AST
 struct FuncDecl final : AST
 {
     std::string name;
-    std::unique_ptr<FuncType> type;
-    std::vector<std::unique_ptr<Equation>> equations;
+    Ptr<FuncType> type;
+    std::vector<Ptr<Equation>> equations;
 
     FuncDecl(std::string name,
-        std::unique_ptr<FuncType> type,
-        std::vector<std::unique_ptr<Equation>> equations)
+        Ptr<FuncType> type,
+        std::vector<Ptr<Equation>> equations)
       : name(std::move(name)), type(std::move(type))
       , equations(std::move(equations)) {}
 
