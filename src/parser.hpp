@@ -25,10 +25,13 @@ class Parser
 #ifndef _DEBUG
   private:
 #endif
-    Parsec<char> digit_, alpha_, blank_, blanks_;
+    Parsec<char>                        digit_,
+                                        alpha_,
+                                        blank_,
+                                        blanks_;
 
-    Parsec<std::string> identifier_;
-    Parsec<std::string> func_decl_name_;
+    Parsec<std::string>                 identifier_;
+    Parsec<std::string>                 func_decl_name_;
 
     Parsec<Ptr<Type>>                   type_term_;
     Parsec<std::vector<Ptr<Type>>>      func_type_tail_;
