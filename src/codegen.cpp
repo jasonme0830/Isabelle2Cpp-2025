@@ -278,12 +278,11 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity) const
 {
     auto l = lhs->gen_expr(entity);
     auto r = rhs->gen_expr(entity);
-    string temp;
 
     switch (op)
     {
     case BOp::LogicAnd:
-        break;
+        return '(' + l + ") and (" + r + ')';
     case BOp::LogicOr:
         break;
     case BOp::LogicEq:
@@ -318,21 +317,21 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity) const
         break;
 
     case BOp::NumAdd:
-        break;
+        return '(' + l + ") + (" + r + ')';
     case BOp::NumSub:
-        break;
+        return '(' + l + ") - (" + r + ')';
     case BOp::NumMul:
-        break;
+        return '(' + l + ") * (" + r + ')';
     case BOp::NumDiv:
-        break;
+        return '(' + l + ") / (" + r + ')';
     case BOp::NumMod:
-        break;
+        return '(' + l + ") % (" + r + ')';
     case BOp::NumPow:
-        break;
+        return "pow(" + l + ", " + r + ')';
 
     case BOp::ListCons:
     {
-        temp = entity.gen_temp();
+        auto temp = entity.gen_temp();
         if (r == "{}")
         {
             entity.add_expr("auto " + temp + " = std::list<decltype(" + l + ")>{" + l + "};");
@@ -342,10 +341,9 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity) const
             entity.add_expr("auto " + temp + " = " + r + ";");
             entity.add_expr(temp + ".push_front(" + l + ");");
         }
+        return temp;
     }
-        break;
     case BOp::ListApp:
-    {
         if (l == "{}" and r == "{}")
         {
             return "{}";
@@ -360,17 +358,14 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity) const
         }
         else
         {
-            temp = entity.gen_temp();
+            auto temp = entity.gen_temp();
             entity.add_expr("auto " + temp + " = " + l + ";");
             entity.add_expr(
                 temp + ".insert(" + temp + ".end(), "
               + r + ".begin(), " + r + ".end());");
+            return temp;
         }
     }
-        break;
-    }
-
-    return temp;
 }
 
 void Equation::build_entity(FuncEntity &entity) const
