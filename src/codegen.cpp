@@ -152,20 +152,13 @@ void ConsExpr::gen_pattern(FuncEntity &entity,
     }
     else if (constructor == "Suc")
     {
-        auto temp = entity.gen_temp();
-        entity.add_pattern("auto " + temp + " = (" + prev + ") - 1;");
-        args[0]->gen_pattern(entity, temp);
+        args[0]->gen_pattern(entity, "(" + prev + ") - 1");
     }
     else if (constructor == "Cons")
     {
-        auto temp = entity.gen_temp();
-        entity.add_pattern("auto " + temp + " = " + prev + ".front();");
-        args[0]->gen_pattern(entity, temp);
-
-        temp = entity.gen_temp();
+        args[0]->gen_pattern(entity, prev + ".front()");
         entity.add_pattern(prev + ".pop_front();");
-        entity.add_pattern("auto " + temp + " = " + prev + ";");
-        args[1]->gen_pattern(entity, temp);
+        args[1]->gen_pattern(entity, prev);
     }
     else
     {
@@ -179,9 +172,7 @@ string ConsExpr::gen_expr(FuncEntity &entity) const
     {
         assert(args.size() == 1);
         auto expr = args[0]->gen_expr(entity);
-        auto temp = entity.gen_temp();
-        entity.add_expr("auto " + temp + " = (" + expr + ") + 1");
-        return temp;
+        return "(" + expr + ") + 1";
     }
     else if (constructor == "Cons")
     {
@@ -214,9 +205,7 @@ string ConsExpr::gen_expr(FuncEntity &entity) const
                 expr += ", " + args[i]->gen_expr(entity);
             }
         }
-        auto temp = entity.gen_temp();
-        entity.add_expr("auto " + temp + " = " + expr + ");");
-        return temp;
+        return expr + ')';
     }
 }
 
@@ -275,14 +264,9 @@ void BinaryOpExpr::gen_pattern(FuncEntity &entity,
 
     case BOp::ListCons:
     {
-        auto temp = entity.gen_temp();
-        entity.add_pattern("auto " + temp + " = " + prev + ".front();");
-        lhs->gen_pattern(entity, temp);
-
-        temp = entity.gen_temp();
-        entity.add_pattern(prev + ".pop_front()");
-        entity.add_pattern("auto " + temp + " = " + prev + ";");
-        rhs->gen_pattern(entity, temp);
+        lhs->gen_pattern(entity, prev + ".front()");
+        entity.add_pattern(prev + ".pop_front();");
+        rhs->gen_pattern(entity, prev);
     }
         break;
     case BOp::ListApp:
