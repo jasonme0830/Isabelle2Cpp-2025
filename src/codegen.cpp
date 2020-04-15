@@ -191,10 +191,13 @@ string ConsExpr::gen_expr(FuncEntity &entity) const
         auto temp = entity.gen_temp();
         if (xs == "{}")
         {
-            xs = "std::list<decltype(" + x + ")>{}";
+            entity.add_expr("auto " + temp + " = std::list<decltype(" + x + ")>{" + x + "};");
         }
-        entity.add_expr("auto " + temp + " = " + xs + ";");
-        entity.add_expr(temp + ".push_front(" + x + ");");
+        else
+        {
+            entity.add_expr("auto " + temp + " = " + xs + ";");
+            entity.add_expr(temp + ".push_front(" + x + ");");
+        }
         return temp;
     }
     else
