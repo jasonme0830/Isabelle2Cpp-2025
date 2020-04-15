@@ -82,7 +82,8 @@ void FuncType::build_entity(FuncEntity &entity) const
     }
 }
 
-void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const
+void VarExpr::gen_pattern(FuncEntity &entity,
+    const string &prev) const
 {
     bool postfix = true;
     if (is_number(name))
@@ -130,8 +131,7 @@ string VarExpr::gen_expr(FuncEntity &entity) const
     }
     else if (name == "Nil")
     {
-        // this may cause errors
-        return entity.types().front() + "{}";
+        return "{}";
     }
     else
     {
@@ -139,7 +139,8 @@ string VarExpr::gen_expr(FuncEntity &entity) const
     }
 }
 
-void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const
+void ConsExpr::gen_pattern(FuncEntity &entity,
+    const string &prev) const
 {
     if (constructor == entity.name())
     {
@@ -188,6 +189,10 @@ string ConsExpr::gen_expr(FuncEntity &entity) const
         auto x = args[0]->gen_expr(entity);
         auto xs = args[1]->gen_expr(entity);
         auto temp = entity.gen_temp();
+        if (xs == "{}")
+        {
+            xs = "std::list<decltype(" + x + ")>{}";
+        }
         entity.add_expr("auto " + temp + " = " + xs + ";");
         entity.add_expr(temp + ".push_front(" + x + ");");
         return temp;
@@ -210,6 +215,175 @@ string ConsExpr::gen_expr(FuncEntity &entity) const
         entity.add_expr("auto " + temp + " = " + expr + ");");
         return temp;
     }
+}
+
+void BinaryOpExpr::gen_pattern(FuncEntity &entity,
+    const string &prev) const
+{
+    switch (op)
+    {
+    case BOp::LogicAnd:
+        break;
+    case BOp::LogicOr:
+        break;
+    case BOp::LogicEq:
+        break;
+    case BOp::LogicNoteq:
+        break;
+
+    case BOp::OrderLe:
+        break;
+    case BOp::OrderLt:
+        break;
+    case BOp::OrderGe:
+        break;
+    case BOp::OrderGt:
+        break;
+
+    case BOp::SetInter:
+        break;
+    case BOp::SetUnion:
+        break;
+    case BOp::SetSubseteq:
+        break;
+    case BOp::SetSubset:
+        break;
+    case BOp::SetSupseteq:
+        break;
+    case BOp::SetSupset:
+        break;
+    case BOp::SetIn:
+        break;
+    case BOp::SetNotin:
+        break;
+
+    case BOp::NumAdd:
+        break;
+    case BOp::NumSub:
+        break;
+    case BOp::NumMul:
+        break;
+    case BOp::NumDiv:
+        break;
+    case BOp::NumMod:
+        break;
+    case BOp::NumPow:
+        break;
+
+    case BOp::ListCons:
+    {
+        auto temp = entity.gen_temp();
+        entity.add_pattern("auto " + temp + " = " + prev + ".front();");
+        lhs->gen_pattern(entity, temp);
+
+        temp = entity.gen_temp();
+        entity.add_pattern(prev + ".pop_front()");
+        entity.add_pattern("auto " + temp + " = " + prev + ";");
+        rhs->gen_pattern(entity, temp);
+    }
+        break;
+    case BOp::ListApp:
+        break;
+    }
+}
+
+string BinaryOpExpr::gen_expr(FuncEntity &entity) const
+{
+    auto l = lhs->gen_expr(entity);
+    auto r = rhs->gen_expr(entity);
+    string temp;
+
+    switch (op)
+    {
+    case BOp::LogicAnd:
+        break;
+    case BOp::LogicOr:
+        break;
+    case BOp::LogicEq:
+        break;
+    case BOp::LogicNoteq:
+        break;
+
+    case BOp::OrderLe:
+        break;
+    case BOp::OrderLt:
+        break;
+    case BOp::OrderGe:
+        break;
+    case BOp::OrderGt:
+        break;
+
+    case BOp::SetInter:
+        break;
+    case BOp::SetUnion:
+        break;
+    case BOp::SetSubseteq:
+        break;
+    case BOp::SetSubset:
+        break;
+    case BOp::SetSupseteq:
+        break;
+    case BOp::SetSupset:
+        break;
+    case BOp::SetIn:
+        break;
+    case BOp::SetNotin:
+        break;
+
+    case BOp::NumAdd:
+        break;
+    case BOp::NumSub:
+        break;
+    case BOp::NumMul:
+        break;
+    case BOp::NumDiv:
+        break;
+    case BOp::NumMod:
+        break;
+    case BOp::NumPow:
+        break;
+
+    case BOp::ListCons:
+    {
+        temp = entity.gen_temp();
+        if (r == "{}")
+        {
+            entity.add_expr("auto " + temp + " = std::list<decltype(" + l + ")>{" + l + "};");
+        }
+        else
+        {
+            entity.add_expr("auto " + temp + " = " + r + ";");
+            entity.add_expr(temp + ".push_front(" + l + ");");
+        }
+    }
+        break;
+    case BOp::ListApp:
+    {
+        if (l == "{}" and r == "{}")
+        {
+            return "{}";
+        }
+        else if (l == "{}")
+        {
+            return r;
+        }
+        else if (r == "{}")
+        {
+            return l;
+        }
+        else
+        {
+            temp = entity.gen_temp();
+            entity.add_expr("auto " + temp + " = " + l + ";");
+            entity.add_expr(
+                temp + ".insert(" + temp + ".end(), "
+              + r + ".begin(), " + r + ".end());");
+        }
+    }
+        break;
+    }
+
+    return temp;
 }
 
 void Equation::build_entity(FuncEntity &entity) const

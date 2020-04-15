@@ -1,4 +1,6 @@
+#include <map>
 #include <cctype>
+#include <iostream>
 #include "parser.hpp"
 
 using namespace std;
@@ -179,6 +181,7 @@ var_term_ =
 // term
 // : cons_term
 // | var_term
+// | '(' blanks expr blanks ')'
 term_ =
   cons_term_ >>
     [](Ptr<Expr> expr)
@@ -189,6 +192,11 @@ term_ =
     [](Ptr<Expr> expr)
     {
         return expr;
+    } |
+  '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
+    [](char, char, Ptr<Expr> expr, char, char)
+    {
+        return expr;
     };
 
 // expr9
@@ -196,9 +204,11 @@ term_ =
 // | term
 expr9_ =
   term_ + blanks_ + '^'_T + blanks_ + expr9_ >>
-    [](Ptr<Expr> &&term, char, char, char, Ptr<Expr> &&expr)
+    [](Ptr<Expr> &&lhs, char, char, char, Ptr<Expr> &&rhs)
+      -> Ptr<Expr>
     {
-        return make_unique<BinaryOpExpr>(BOp::NumPow, move(term), move(expr));
+        return make_unique<BinaryOpExpr>(BOp::NumPow,
+            move(lhs), move(rhs));
     } |
   term_;
 
@@ -268,33 +278,81 @@ expr7_tail_ =
 // : expr8 blanks expr7_tail
 expr7_ =
   expr8_ + blanks_ + expr7_tail_ >>
-  [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)
-    -> Ptr<Expr>
-  {
-      while (tail)
-      {
-          expr = make_unique<BinaryOpExpr>(tail->op,
-              move(expr), move(tail->expr));
-          tail = move(tail->tail);
-      }
-      return expr;
-  };
+    [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)
+      -> Ptr<Expr>
+    {
+        while (tail)
+        {
+            expr = make_unique<BinaryOpExpr>(tail->op,
+                move(expr), move(tail->expr));
+            tail = move(tail->tail);
+        }
+        return expr;
+    };
 
 // expr6_tail
 // : "\<inter>" blanks expr7 blanks expr6_tail
 // | <epsilon>
+expr6_tail_ =
+  R"(\<inter>)"_T + blanks_ + expr7_ + blanks_ + expr6_tail_ >>
+    [](string, char, Ptr<Expr> &&expr, char, Ptr<BinaryOpTailExpr> &&tail)
+    {
+        return make_unique<BinaryOpTailExpr>(BOp::SetInter,
+            move(expr), move(tail));
+    } |
+  Token::epsilon([]() -> Ptr<BinaryOpTailExpr> { return nullptr; });
 
 // expr6
 // : expr7 blanks expr6_tail
+expr6_ =
+  expr7_ + blanks_ + expr6_tail_ >>
+    [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)
+      -> Ptr<Expr>
+    {
+        while (tail)
+        {
+            expr = make_unique<BinaryOpExpr>(tail->op,
+                move(expr), move(tail->expr));
+            tail = move(tail->tail);
+        }
+        return expr;
+    };
 
 // expr5_tail
 // : "\<union>" blanks expr6 blanks expr5_tail
 // | <epsilon>
+expr5_tail_ =
+  R"(\<union>)"_T + blanks_ + expr6_ + blanks_ + expr5_tail_ >>
+    [](string, char, Ptr<Expr> &&expr, char, Ptr<BinaryOpTailExpr> &&tail)
+    {
+        return make_unique<BinaryOpTailExpr>(BOp::SetUnion,
+            move(expr), move(tail));
+    } |
+  Token::epsilon([]() -> Ptr<BinaryOpTailExpr> { return nullptr; });
 
 // expr5
 // : expr6 blanks '#' blanks expr5
 // | expr6 blanks '@' blanks expr5
 // | expr6 blanks expr5_tail
+expr5_ =
+  expr6_ + blanks_ + ('#'_T | '@'_T) + blanks_ + expr5_ >>
+    [](Ptr<Expr> &&lhs, char, char op, char, Ptr<Expr> &&rhs)
+      -> Ptr<Expr>
+    {
+        return make_unique<BinaryOpExpr>(op == '#' ? BOp::ListCons : BOp::ListApp,
+            move(lhs), move(rhs));
+    } |
+  expr6_ + blanks_ + expr5_tail_ >>
+    [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)
+    {
+        while (tail)
+        {
+            expr = make_unique<BinaryOpExpr>(tail->op,
+                move(expr), move(tail->expr));
+            tail = move(tail->tail);
+        }
+        return expr;
+    };
 
 // expr4
 // : expr5 blanks "\<subseteq>" blanks expr4
@@ -303,29 +361,113 @@ expr7_ =
 // | expr5 blanks "\<supset>" blanks expr4
 // | expr5 blanks "\<in>" blanks expr4
 // | expr5 blanks "\<notin>" blanks expr4
+// | expr5
+expr4_ =
+  expr5_ + blanks_
+    + (R"(\<subseteq>)"_T | R"(\<subset>)"_T | R"(\<supseteq>)"_T | R"(\<supset>)"_T | R"(\<in>)"_T | R"(\<notin>)"_T)
+    + blanks_ + expr4_ >>
+    [](Ptr<Expr> &&lhs, char, string op, char, Ptr<Expr> &&rhs)
+      -> Ptr<Expr>
+    {
+        static const map<string, BOp> mapping
+        {
+            { R"(\<subseteq>)", BOp::SetSubseteq },
+            { R"(\<subset>)",   BOp::SetSubset   },
+            { R"(\<supseteq>)", BOp::SetSupseteq },
+            { R"(\<supset>)",   BOp::SetSupset   },
+            { R"(\<in>)",       BOp::SetIn       },
+            { R"(\<notin>)",    BOp::SetNotin    },
+        };
+        return make_unique<BinaryOpExpr>(mapping.at(op),
+            move(lhs), move(rhs));
+    } |
+  expr5_;
 
 // expr3
 // : expr4 blanks "\<le>" blanks expr3
 // | expr4 blanks '<' blanks expr3
 // | expr4 blanks "\<ge>" blanks expr3
 // | expr4 blanks '>' blanks expr3
+// | expr4
+expr3_ =
+  expr4_ + blanks_
+    + (R"(\<le>)"_T | "<"_T | R"(\<ge>)"_T | ">"_T)
+    + blanks_ + expr3_ >>
+    [](Ptr<Expr> &&lhs, char, string op, char, Ptr<Expr> &&rhs)
+      -> Ptr<Expr>
+    {
+        static const map<string, BOp> mapping
+        {
+            { R"(\<le>)", BOp::OrderLe },
+            { "<",        BOp::OrderLt },
+            { R"(\<ge>)", BOp::OrderGe },
+            { ">",        BOp::OrderGt },
+        };
+        return make_unique<BinaryOpExpr>(mapping.at(op),
+            move(lhs), move(rhs));
+    } |
+  expr4_;
 
 // expr2_tail
 // : '=' blanks expr3 blanks expr2_tail
 // | "\<noteq>" blanks expr3 blanks expr2_tail
 // | <epsilon>
+expr2_tail_ =
+  '='_T + blanks_ + expr3_ + blanks_ + expr2_tail_ >>
+    [](char, char, Ptr<Expr> &&expr, char, Ptr<BinaryOpTailExpr> &&tail)
+    {
+        return make_unique<BinaryOpTailExpr>(BOp::LogicEq,
+            move(expr), move(tail));
+    } |
+  R"(\<noteq>)"_T + blanks_ + expr3_ + blanks_ + expr2_tail_ >>
+    [](string, char, Ptr<Expr> &&expr, char, Ptr<BinaryOpTailExpr> &&tail)
+    {
+        return make_unique<BinaryOpTailExpr>(BOp::LogicNoteq,
+            move(expr), move(tail));
+    } |
+  Token::epsilon([]() -> Ptr<BinaryOpTailExpr> { return nullptr; });
 
 // expr2
 // : expr3 blanks expr2_tail
+expr2_ =
+  expr3_ + blanks_ + expr2_tail_ >>
+    [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)
+      -> Ptr<Expr>
+    {
+        while (tail)
+        {
+            expr = make_unique<BinaryOpExpr>(tail->op,
+                move(expr), move(tail->expr));
+            tail = move(tail->tail);
+        }
+        return expr;
+    };
 
 // expr1
 // : expr2 blanks "\<and>" blanks expr1
 // | expr2
+expr1_ =
+  expr2_ + blanks_ + R"(\<and>)"_T + blanks_ + expr1_ >>
+    [](Ptr<Expr> &&lhs, char, string, char, Ptr<Expr> &&rhs)
+      -> Ptr<Expr>
+    {
+        return make_unique<BinaryOpExpr>(BOp::LogicAnd,
+            move(lhs), move(rhs));
+    } |
+  expr2_;
 
 // expr
 // : expr1 blanks "\<or>" blanks expr
 // | expr1
-expr_ = term_;
+expr_ =
+  expr1_ + blanks_ + R"(\<or>)"_T + blanks_ + expr_ >>
+    [](Ptr<Expr> &&lhs, char, string, char, Ptr<Expr> &&rhs)
+      -> Ptr<Expr>
+    {
+        return make_unique<BinaryOpExpr>(BOp::LogicOr,
+            move(lhs), move(rhs));
+    } |
+  expr1_;
 
 // func_decl_equation
 // : '"' blanks cons_term blanks '=' blanks expr blanks '"'
@@ -341,7 +483,7 @@ func_decl_equation_ =
 // | func_decl_equation
 func_decl_equations_ =
   func_decl_equation_ + blanks_ + '|'_T + blanks_ + func_decl_equations_ >>
-    [](Ptr<Equation> &&equation, char, char, char, vector<Ptr<Equation>> &&equations)
+    [](Ptr<Equation> &&equation, char, char, char, vector<Ptr<Equation>> equations)
     {
         equations.insert(equations.begin(), move(equation));
         return equations;
@@ -368,7 +510,7 @@ func_decl_ =
 // | <epsilon>
 func_decls_ =
   blanks_ + func_decl_ + blanks_ + func_decls_ >>
-    [](char, Ptr<FuncDecl> &&decl, char, vector<Ptr<FuncDecl>> &&decls)
+    [](char, Ptr<FuncDecl> &&decl, char, vector<Ptr<FuncDecl>> decls)
     {
         decls.insert(decls.begin(), move(decl));
         return decls;

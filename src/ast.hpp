@@ -105,6 +105,25 @@ struct ConsExpr final : Expr
 
 enum class BOp
 {
+    LogicAnd,   // \<and>
+    LogicOr,    // \<or>
+    LogicEq,    // =
+    LogicNoteq, // \<noteq>
+
+    OrderLe, // \<le>
+    OrderLt, // <
+    OrderGe, // \<ge>
+    OrderGt, // >
+
+    SetInter,    // \<inter>
+    SetUnion,    // \<union>
+    SetSubseteq, // \<subseteq>
+    SetSubset,   // \<subset>
+    SetSupseteq, // \<supseteq>
+    SetSupset,   // \<supset>
+    SetIn,       // \<in>
+    SetNotin,    // \<notin>
+
     NumAdd, // +
     NumSub, // -
     NumMul, // *
@@ -112,6 +131,8 @@ enum class BOp
     NumMod, // mod
     NumPow, // ^
 
+    ListCons, // #
+    ListApp,  // @
 };
 
 struct BinaryOpExpr final : Expr

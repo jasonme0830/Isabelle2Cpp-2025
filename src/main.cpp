@@ -21,8 +21,9 @@ fun rev :: "'a list \<Rightarrow> 'a list" where
   "rev Nil = Nil" |
   "rev (Cons x xs) = app (rev xs) (Cons x Nil)"
 
-fun test :: "'a list \<Rightarrow> ('a list \<Rightarrow> 'a list)" where
-  "test Nil = fun"
+fun rev2 :: "'a list \<Rightarrow> 'a list" where
+  "rev2 Nil = Nil" |
+  "rev2 (x # xs) = (rev xs) @ (x # Nil)"
 )src");
 
     Code code;
