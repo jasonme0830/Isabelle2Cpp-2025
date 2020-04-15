@@ -284,20 +284,20 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity) const
     case BOp::LogicAnd:
         return '(' + l + ") and (" + r + ')';
     case BOp::LogicOr:
-        break;
+        return '(' + l + ") or (" + r + ')';
     case BOp::LogicEq:
-        break;
+        return '(' + l + ") = (" + r + ')';
     case BOp::LogicNoteq:
-        break;
+        return '(' + l + ") != (" + r + ')';
 
     case BOp::OrderLe:
-        break;
+        return '(' + l + ") <= (" + r + ')';
     case BOp::OrderLt:
-        break;
+        return '(' + l + ") < (" + r + ')';
     case BOp::OrderGe:
-        break;
+        return '(' + l + ") >= (" + r + ')';
     case BOp::OrderGt:
-        break;
+        return '(' + l + ") > (" + r + ')';
 
     case BOp::SetInter:
         break;
