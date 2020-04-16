@@ -214,54 +214,6 @@ void BinaryOpExpr::gen_pattern(FuncEntity &entity,
 {
     switch (op)
     {
-    case BOp::LogicAnd:
-        break;
-    case BOp::LogicOr:
-        break;
-    case BOp::LogicEq:
-        break;
-    case BOp::LogicNoteq:
-        break;
-
-    case BOp::OrderLe:
-        break;
-    case BOp::OrderLt:
-        break;
-    case BOp::OrderGe:
-        break;
-    case BOp::OrderGt:
-        break;
-
-    case BOp::SetInter:
-        break;
-    case BOp::SetUnion:
-        break;
-    case BOp::SetSubseteq:
-        break;
-    case BOp::SetSubset:
-        break;
-    case BOp::SetSupseteq:
-        break;
-    case BOp::SetSupset:
-        break;
-    case BOp::SetIn:
-        break;
-    case BOp::SetNotin:
-        break;
-
-    case BOp::NumAdd:
-        break;
-    case BOp::NumSub:
-        break;
-    case BOp::NumMul:
-        break;
-    case BOp::NumDiv:
-        break;
-    case BOp::NumMod:
-        break;
-    case BOp::NumPow:
-        break;
-
     case BOp::ListCons:
     {
         lhs->gen_pattern(entity, prev + ".front()");
@@ -269,8 +221,9 @@ void BinaryOpExpr::gen_pattern(FuncEntity &entity,
         rhs->gen_pattern(entity, prev);
     }
         break;
-    case BOp::ListApp:
-        break;
+
+    default:
+        throw runtime_error("pattern should be consturctor");
     }
 }
 
