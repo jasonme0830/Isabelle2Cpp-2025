@@ -319,6 +319,7 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity) const
             return temp;
         }
     }
+    throw runtime_error("shit! shit! shit!");
 }
 
 void Equation::build_entity(FuncEntity &entity) const
