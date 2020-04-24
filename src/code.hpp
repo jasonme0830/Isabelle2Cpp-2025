@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <vector>
 #include <iostream>
 #include "funcentity.hpp"
@@ -15,7 +16,7 @@ class Code
     void entry_func()
     {
         entry_func_ = func_entities_.size();
-        func_entities_.emplace_back();
+        func_entities_.emplace_back(*this);
     }
 
     FuncEntity &current_entity()
@@ -34,6 +35,11 @@ class Code
     static std::string raw_indent()
     {
         return std::string(indent_size(), ' ');
+    }
+
+    void add_header(const std::string &header)
+    {
+        headers_.insert(header);
     }
 
   private:
@@ -55,5 +61,7 @@ class Code
 
     std::size_t entry_func_;
     std::vector<FuncEntity> func_entities_;
+
+    std::set<std::string> headers_;
 };
 }

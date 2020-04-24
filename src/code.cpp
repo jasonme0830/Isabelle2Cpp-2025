@@ -6,9 +6,11 @@ namespace hol2cpp
 {
 void Code::generate()
 {
-    out_ << "#include <list>\n"
-         << "#include <cctypes>\n"
-         << endl;
+    for (const auto &header : headers_)
+    {
+        cout << "#include <" + header << ">" << endl;
+    }
+    cout << endl;
 
     for (auto &entity : func_entities_)
     {
