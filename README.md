@@ -23,11 +23,12 @@ fun rev :: "'a list \<Rightarrow> 'a list" where
 After:
 
 ```cpp
+#include <cstdint>
 #include <list>
-#include <cctypes>
 
 template<typename T0>
-std::list<T0> app(std::list<T0> arg1, std::list<T0> arg2) {
+std::list<T0>
+app(std::list<T0> arg1, std::list<T0> arg2) {
     for (;;) {
         if (!arg1.empty()) {
             break;
@@ -36,38 +37,31 @@ std::list<T0> app(std::list<T0> arg1, std::list<T0> arg2) {
         return ys;
     }
     for (;;) {
-        auto temp0 = arg1.front();
-        auto x = temp0;
+        auto x = arg1.front();
         arg1.pop_front();
-        auto temp1 = arg1;
-        auto xs = temp1;
+        auto xs = arg1;
         auto ys = arg2;
-        auto temp2 = app(xs, ys);
-        auto temp3 = temp2;
-        temp3.push_front(x);
-        return temp3;
+        auto temp0 = app(xs, ys);
+        temp0.push_front(x);
+        return temp0;
     }
 }
 
 template<typename T0>
-std::list<T0> rev(std::list<T0> arg1) {
+std::list<T0>
+rev(std::list<T0> arg1) {
     for (;;) {
         if (!arg1.empty()) {
             break;
         }
-        return std::list<T0>{};
+        return std::list<T0>();
     }
     for (;;) {
-        auto temp0 = arg1.front();
-        auto x = temp0;
+        auto x = arg1.front();
         arg1.pop_front();
-        auto temp1 = arg1;
-        auto xs = temp1;
-        auto temp2 = rev(xs);
-        auto temp3 = std::list<T0>{};
-        temp3.push_front(x);
-        auto temp4 = app(temp2, temp3);
-        return temp4;
+        auto xs = arg1;
+        auto temp0 = std::list<decltype(x)>{x};
+        return app(rev(xs), temp0);
     }
 }
 ```
