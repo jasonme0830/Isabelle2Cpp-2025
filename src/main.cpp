@@ -1,38 +1,50 @@
+#include <fstream>
 #include <iostream>
+#include <exception>
 #include "code.hpp"
 #include "parser.hpp"
+#include "argparse.hpp"
 
 using namespace std;
 using namespace hol2cpp;
 
 int main(int argc, char* argv[])
 {
-    Parser parser;
-    auto decls = parser.pas_func_decls(R"src(
-fun add :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
-  "add 0 n = n" |
-  "add (Suc m) n = Suc (add m n)"
+    ArgumentParser arg_parser("hol2cpp");
+    arg_parser.add_argument("file")
+              .help("source hol file");
 
-fun app :: "'a list \<Rightarrow> 'a list \<Rightarrow> 'a list" where
-  "app Nil ys = ys" |
-  "app (Cons x xs) ys = Cons x (app xs ys)"
-
-fun rev :: "'a list \<Rightarrow> 'a list" where
-  "rev Nil = Nil" |
-  "rev (Cons x xs) = app (rev xs) (Cons x Nil)"
-
-fun rev2 :: "'a list \<Rightarrow> 'a list" where
-  "rev2 Nil = Nil" |
-  "rev2 (x # xs) = (rev xs) @ (x # Nil)"
-)src");
-
-    Code code;
-    for (auto &decl : decls)
+    try
     {
-        code.entry_func();
-        decl->build_entity(code.current_entity());
+        arg_parser.parse(argc, argv);
+
+        auto path = arg_parser.get<string>("file");
+        auto fin = ifstream(path);
+        if (!fin.good())
+        {
+            cout << "can't open file " << path << endl;
+            return 0;
+        }
+
+        string source;
+        while (!fin.eof())
+        {
+            source += fin.get();
+        }
+
+        auto decls = Parser().pas_func_decls(source);
+        Code code;
+        for (auto &decl : decls)
+        {
+            code.entry_func();
+            decl->build_entity(code.current_entity());
+        }
+        code.generate();
     }
-    code.generate();
+    catch(const exception& e)
+    {
+      cerr << e.what() << endl;
+    }
 
     return 0;
 }
