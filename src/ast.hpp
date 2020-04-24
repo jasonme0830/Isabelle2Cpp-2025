@@ -76,8 +76,14 @@ struct FuncType final : Type
 struct Expr : AST
 {
     virtual ~Expr() = 0;
-    virtual void gen_pattern(FuncEntity &entity, const std::string &prev) const = 0;
-    virtual std::string gen_expr(FuncEntity &entity) const = 0;
+
+    virtual void
+    gen_pattern(FuncEntity &entity, const std::string &prev)
+    const = 0;
+
+    virtual std::string
+    gen_expr(FuncEntity &entity, const std::string &type)
+    const = 0;
 };
 
 struct VarExpr final : Expr
@@ -87,8 +93,13 @@ struct VarExpr final : Expr
     VarExpr(std::string name)
       : name(std::move(name)) {}
 
-    void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity) const override;
+    void
+    gen_pattern(FuncEntity &entity, const std::string &prev)
+    const override;
+
+    std::string
+    gen_expr(FuncEntity &entity, const std::string &type)
+    const override;
 };
 
 struct ConsExpr final : Expr
@@ -96,11 +107,18 @@ struct ConsExpr final : Expr
     std::string constructor;
     std::vector<Ptr<Expr>> args;
 
-    ConsExpr(std::string constructor, std::vector<Ptr<Expr>> &&args)
-      : constructor(std::move(constructor)), args(std::move(args)) {}
+    ConsExpr(std::string constructor,
+        std::vector<Ptr<Expr>> &&args)
+      : constructor(std::move(constructor))
+      , args(std::move(args)) {}
 
-    void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity) const override;
+    void
+    gen_pattern(FuncEntity &entity, const std::string &prev)
+    const override;
+
+    std::string
+    gen_expr(FuncEntity &entity, const std::string &type)
+    const override;
 };
 
 enum class BOp
@@ -143,8 +161,13 @@ struct BinaryOpExpr final : Expr
     BinaryOpExpr(BOp op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs)
       : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 
-    void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity) const override;
+    void
+    gen_pattern(FuncEntity &entity, const std::string &prev)
+    const override;
+
+    std::string
+    gen_expr(FuncEntity &entity, const std::string &type)
+    const override;
 };
 
 struct BinaryOpTailExpr final
@@ -155,7 +178,8 @@ struct BinaryOpTailExpr final
 
     BinaryOpTailExpr(BOp op, Ptr<Expr> &&expr,
         Ptr<BinaryOpTailExpr> &&tail)
-      : op(op), expr(std::move(expr)), tail(std::move(tail)) {}
+      : op(op), expr(std::move(expr))
+      , tail(std::move(tail)) {}
 };
 
 struct Equation final : AST
