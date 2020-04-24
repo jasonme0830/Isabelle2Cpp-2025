@@ -6,10 +6,15 @@
 
 namespace hol2cpp
 {
+class Code;
+
 class FuncEntity
 {
   public:
-    FuncEntity() = default;
+    FuncEntity(Code &code)
+      : code_(code) {}
+
+    Code &code() { return code_; }
 
     std::string
     &name() { return name_; }
@@ -30,6 +35,11 @@ class FuncEntity
             template_args_.push_back("T" + std::to_string(template_args_.size()));
         }
         return template_args_[template_mapping_[name]];
+    }
+
+    const std::string &result_type()
+    {
+        return types_.front();
     }
 
     const std::vector<std::string>
@@ -67,6 +77,8 @@ class FuncEntity
     &exprs() const { return exprs_; }
 
   private:
+    Code &code_;
+
     std::string name_;
 
     // the first type is the result type
