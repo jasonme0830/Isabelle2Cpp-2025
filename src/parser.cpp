@@ -134,13 +134,15 @@ func_decl_type_ =
 
 // miniterm
 // : identifier
-// : '(' blanks expr blanks ')'
+// | list_term
+// | '(' blanks expr blanks ')'
 miniterm_ =
   identifier_ >>
     [](string ident) -> Ptr<Expr>
     {
         return make_unique<VarExpr>(move(ident));
     } |
+  list_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, Ptr<Expr> expr, char, char)
     {
@@ -178,9 +180,45 @@ var_term_ =
         return make_unique<VarExpr>(move(name));
     };
 
+// list_terms
+// : expr blanks ',' blanks list_terms
+// | expr
+list_terms_ =
+  expr_ + blanks_ + ','_T + blanks_ + list_terms_ >>
+    [](Ptr<Expr> expr, char, char, char, vector<Ptr<Expr>> exprs)
+    {
+        exprs.push_back(move(expr));
+        return exprs;
+    } |
+  expr_ >>
+    [](Ptr<Expr> expr)
+    {
+        vector<Ptr<Expr>> exprs;
+        exprs.push_back(move(expr));
+        return exprs;
+    };
+
+// list_term
+// : '[' blanks ']'
+// | '[' blanks list_terms blanks ']'
+list_term_ =
+  '['_T + blanks_ + ']'_T >>
+    [](char, char, char)
+      -> Ptr<Expr>
+    {
+        return make_unique<ListExpr>();
+    } |
+  '['_T + blanks_ + list_terms_ + blanks_ + ']'_T >>
+    [](char, char, std::vector<Ptr<Expr>> &&exprs, char, char)
+      -> Ptr<Expr>
+    {
+        return make_unique<ListExpr>(move(exprs));
+    };
+
 // term
 // : cons_term
 // | var_term
+// | list_term
 // | '(' blanks expr blanks ')'
 term_ =
   cons_term_ >>
@@ -193,6 +231,7 @@ term_ =
     {
         return expr;
     } |
+  list_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, Ptr<Expr> expr, char, char)
     {
