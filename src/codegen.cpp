@@ -153,7 +153,7 @@ const
     }
 }
 
-// --- generate pattern
+// --- generate pattern ---
 
 void
 VarExpr::gen_pattern(FuncEntity &entity, const string &prev)
@@ -226,6 +226,28 @@ const
 }
 
 void
+ListExpr::gen_pattern(FuncEntity &entity, const string &prev)
+const
+{
+    if (exprs.empty())
+    {
+        VarExpr("Nil").gen_expr(entity, prev);
+    }
+    else
+    {
+        entity.add_pattern("if (" + prev + ".size() != " + to_string(exprs.size()) + ") {");
+        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_pattern("}");
+
+        for (const auto &expr : exprs)
+        {
+            expr->gen_pattern(entity, prev + ".front()");
+            entity.add_pattern(prev + ".pop_front();");
+        }
+    }
+}
+
+void
 BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev)
 const
 {
@@ -236,7 +258,7 @@ const
     }
 }
 
-// --- generate expression
+// --- generate expression ---
 
 string
 VarExpr::gen_expr(FuncEntity &entity, const string &type)
@@ -313,6 +335,42 @@ const
             }
         }
         return expr + ')';
+    }
+}
+
+string
+ListExpr::gen_expr(FuncEntity &entity, const string &type)
+const
+{
+    if (exprs.empty())
+    {
+        return type.empty() ? "{}"s : (type + "()");
+    }
+    else
+    {
+        string res;
+        if (type.empty())
+        {
+            res = "std::list<decltype(" +
+                exprs.front()->gen_expr(entity, type) + ")>{";
+        }
+        else
+        {
+            res = type + "{";
+        }
+
+        for (size_t i = 0; i < exprs.size(); ++i)
+        {
+            if (i == 0)
+            {
+                res += exprs[i]->gen_expr(entity, type);
+            }
+            else
+            {
+                res += ", " + exprs[i]->gen_expr(entity, type);
+            }
+        }
+        return res + "}";
     }
 }
 
