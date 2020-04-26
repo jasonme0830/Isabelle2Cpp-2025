@@ -38,7 +38,7 @@ class Parser
     Parsec<Ptr<Type>>                   type_;
     Parsec<Ptr<FuncType>>               func_decl_type_;
 
-    Parsec<Ptr<Expr>> miniterm_;
+    Parsec<Ptr<Expr>>                   miniterm_;
     Parsec<std::vector<Ptr<Expr>>>      miniterms_;
     Parsec<Ptr<ConsExpr>>               cons_term_;
     Parsec<Ptr<VarExpr>>                var_term_;
