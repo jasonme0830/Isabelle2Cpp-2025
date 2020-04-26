@@ -125,6 +125,7 @@ struct ListExpr final : Expr
 {
     std::vector<Ptr<Expr>> exprs;
 
+    ListExpr() = default;
     ListExpr(std::vector<Ptr<Expr>> &&exprs)
       : exprs(std::move(exprs)) {}
 
