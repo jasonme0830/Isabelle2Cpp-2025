@@ -339,8 +339,19 @@ expr5_ =
     [](Ptr<Expr> &&lhs, char, char op, char, Ptr<Expr> &&rhs)
       -> Ptr<Expr>
     {
-        return make_unique<BinaryOpExpr>(op == '#' ? BOp::ListCons : BOp::ListApp,
-            move(lhs), move(rhs));
+        if (op == '#')
+        {
+            vector<Ptr<Expr>> args;
+            args.push_back(move(lhs));
+            args.push_back(move(rhs));
+            return make_unique<ConsExpr>(
+                "Cons"s, move(args));
+        }
+        else
+        {
+            return make_unique<BinaryOpExpr>(BOp::ListApp,
+                move(lhs), move(rhs));
+        }
     } |
   expr6_ + blanks_ + expr5_tail_ >>
     [](Ptr<Expr> expr, char, Ptr<BinaryOpTailExpr> tail)

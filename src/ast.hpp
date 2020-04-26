@@ -149,7 +149,6 @@ enum class BOp
     NumMod, // mod
     NumPow, // ^
 
-    ListCons, // #
     ListApp,  // @
 };
 

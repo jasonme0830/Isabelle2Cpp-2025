@@ -210,6 +210,10 @@ const
     }
     else if (constructor == "Cons")
     {
+        entity.add_pattern("if (" + prev + ".empty()) {");
+        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_pattern("}");
+
         args[0]->gen_pattern(entity, prev + ".front()");
         entity.add_pattern(prev + ".pop_front();");
         args[1]->gen_pattern(entity, prev);
@@ -238,7 +242,14 @@ const
         auto temp = entity.gen_temp();
         if (xs == "{}")
         {
-            entity.add_expr("auto " + temp + " = std::list<decltype(" + x + ")>{" + x + "};");
+            if (type.empty())
+            {
+                entity.add_expr("auto " + temp + " = std::list<decltype(" + x + ")>{" + x + "};");
+            }
+            else
+            {
+                entity.add_expr(type + " " + temp + " = {" + x + "};");
+            }
         }
         else
         {
@@ -271,14 +282,6 @@ const
 {
     switch (op)
     {
-    case BOp::ListCons:
-    {
-        lhs->gen_pattern(entity, prev + ".front()");
-        entity.add_pattern(prev + ".pop_front();");
-        rhs->gen_pattern(entity, prev);
-    }
-        break;
-
     default:
         throw runtime_error("pattern should be consturctor");
     }
@@ -341,27 +344,6 @@ const
     case BOp::NumPow:
         return "pow(" + l + ", " + r + ')';
 
-    case BOp::ListCons:
-    {
-        auto temp = entity.gen_temp();
-        if (r == "{}")
-        {
-            if (type.empty())
-            {
-                entity.add_expr("auto " + temp + " = std::list<decltype(" + l + ")>{" + l + "};");
-            }
-            else
-            {
-                entity.add_expr(type + " " + temp + " = {" + l + "}");
-            }
-        }
-        else
-        {
-            entity.add_expr("auto " + temp + " = " + r + ";");
-            entity.add_expr(temp + ".push_front(" + l + ");");
-        }
-        return temp;
-    }
     case BOp::ListApp:
         if (l == "{}" and r == "{}")
         {
