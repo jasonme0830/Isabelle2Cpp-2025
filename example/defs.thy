@@ -13,3 +13,7 @@ fun rev :: "'a list \<Rightarrow> 'a list" where
 fun rev2 :: "'a list \<Rightarrow> 'a list" where
   "rev2 Nil = Nil" |
   "rev2 (x # xs) = (rev xs) @ (x # Nil)"
+
+fun rev3 :: "'a list \<Rightarrow> 'a list" where
+  "rev3 [] = []" |
+  "rev3 (x # xs) = (rev xs) @ [x]"
