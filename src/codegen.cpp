@@ -41,6 +41,8 @@ AST::~AST() = default;
 Type::~Type() = default;
 Expr::~Expr() = default;
 
+// --- generate typeinfo ---
+
 string
 NormalType::gen_typeinfo(FuncEntity &entity)
 const
@@ -117,6 +119,8 @@ const
     return type;
 }
 
+// --- build entity ---
+
 void
 FuncType::build_entity(FuncEntity &entity)
 const
@@ -127,6 +131,29 @@ const
         entity.add_type(types[i]->gen_typeinfo(entity));
     }
 }
+
+void
+Equation::build_entity(FuncEntity &entity)
+const
+{
+    entity.entry_euation();
+    pattern->gen_pattern(entity, "");
+    entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + ";");
+}
+
+void
+FuncDecl::build_entity(FuncEntity &entity)
+const
+{
+    entity.name() = name;
+    type->build_entity(entity);
+    for (auto &equation : equations)
+    {
+        equation->build_entity(entity);
+    }
+}
+
+// --- generate pattern
 
 void
 VarExpr::gen_pattern(FuncEntity &entity, const string &prev)
@@ -166,32 +193,6 @@ const
     }
 }
 
-string
-VarExpr::gen_expr(FuncEntity &entity, const string &type)
-const
-{
-    if (is_number(name))
-    {
-        return name;
-    }
-    else if (name == "True")
-    {
-        return "true";
-    }
-    else if (name == "False")
-    {
-        return "false";
-    }
-    else if (name == "Nil")
-    {
-        return type.empty() ? "{}"s : (type + "()");
-    }
-    else
-    {
-        return name;
-    }
-}
-
 void
 ConsExpr::gen_pattern(FuncEntity &entity, const string &prev)
 const
@@ -221,6 +222,45 @@ const
     else
     {
         throw std::runtime_error("no such name: " + constructor);
+    }
+}
+
+void
+BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev)
+const
+{
+    switch (op)
+    {
+    default:
+        throw runtime_error("pattern should be consturctor");
+    }
+}
+
+// --- generate expression
+
+string
+VarExpr::gen_expr(FuncEntity &entity, const string &type)
+const
+{
+    if (is_number(name))
+    {
+        return name;
+    }
+    else if (name == "True")
+    {
+        return "true";
+    }
+    else if (name == "False")
+    {
+        return "false";
+    }
+    else if (name == "Nil")
+    {
+        return type.empty() ? "{}"s : (type + "()");
+    }
+    else
+    {
+        return name;
     }
 }
 
@@ -273,17 +313,6 @@ const
             }
         }
         return expr + ')';
-    }
-}
-
-void
-BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev)
-const
-{
-    switch (op)
-    {
-    default:
-        throw runtime_error("pattern should be consturctor");
     }
 }
 
@@ -368,26 +397,5 @@ const
         }
     }
     throw runtime_error("shit! shit! shit!");
-}
-
-void
-Equation::build_entity(FuncEntity &entity)
-const
-{
-    entity.entry_euation();
-    pattern->gen_pattern(entity, "");
-    entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + ";");
-}
-
-void
-FuncDecl::build_entity(FuncEntity &entity)
-const
-{
-    entity.name() = name;
-    type->build_entity(entity);
-    for (auto &equation : equations)
-    {
-        equation->build_entity(entity);
-    }
 }
 }
