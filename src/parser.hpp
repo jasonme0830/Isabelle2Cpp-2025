@@ -42,8 +42,8 @@ class Parser
     Parsec<std::vector<Ptr<Expr>>>      miniterms_;
     Parsec<Ptr<ConsExpr>>               cons_term_;
     Parsec<Ptr<VarExpr>>                var_term_;
-    Parsec<std::vector<Ptr<Expr>>>      list_terms_;
     Parsec<Ptr<Expr>>                   list_term_;
+    Parsec<Ptr<Expr>>                   set_term_;
 
     Parsec<Ptr<Expr>>                   term_;
     Parsec<Ptr<Expr>>                   expr9_;
@@ -61,6 +61,7 @@ class Parser
     Parsec<Ptr<Expr>>                   expr2_;
     Parsec<Ptr<Expr>>                   expr1_;
     Parsec<Ptr<Expr>>                   expr_;
+    Parsec<std::vector<Ptr<Expr>>>      exprs_;
 
     Parsec<Ptr<Equation>>               func_decl_equation_;
     Parsec<std::vector<Ptr<Equation>>>  func_decl_equations_;

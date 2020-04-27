@@ -135,6 +135,7 @@ func_decl_type_ =
 // miniterm
 // : identifier
 // | list_term
+// | set_term
 // | '(' blanks expr blanks ')'
 miniterm_ =
   identifier_ >>
@@ -143,6 +144,7 @@ miniterm_ =
         return make_unique<VarExpr>(move(ident));
     } |
   list_term_ |
+  set_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, Ptr<Expr> expr, char, char)
     {
@@ -180,27 +182,9 @@ var_term_ =
         return make_unique<VarExpr>(move(name));
     };
 
-// list_terms
-// : expr blanks ',' blanks list_terms
-// | expr
-list_terms_ =
-  expr_ + blanks_ + ','_T + blanks_ + list_terms_ >>
-    [](Ptr<Expr> expr, char, char, char, vector<Ptr<Expr>> exprs)
-    {
-        exprs.push_back(move(expr));
-        return exprs;
-    } |
-  expr_ >>
-    [](Ptr<Expr> expr)
-    {
-        vector<Ptr<Expr>> exprs;
-        exprs.push_back(move(expr));
-        return exprs;
-    };
-
 // list_term
 // : '[' blanks ']'
-// | '[' blanks list_terms blanks ']'
+// | '[' blanks exprs blanks ']'
 list_term_ =
   '['_T + blanks_ + ']'_T >>
     [](char, char, char)
@@ -208,17 +192,35 @@ list_term_ =
     {
         return make_unique<ListExpr>();
     } |
-  '['_T + blanks_ + list_terms_ + blanks_ + ']'_T >>
+  '['_T + blanks_ + exprs_ + blanks_ + ']'_T >>
     [](char, char, std::vector<Ptr<Expr>> &&exprs, char, char)
       -> Ptr<Expr>
     {
         return make_unique<ListExpr>(move(exprs));
     };
 
+// set_term
+// : '{' blanks '}'
+// | '{' blanks exprs blanks '}'
+set_term_ =
+  '{'_T + blanks_ + '}'_T >>
+    [](char, char, char)
+      -> Ptr<Expr>
+    {
+        return make_unique<SetExpr>();
+    } |
+  '{'_T + blanks_ + exprs_ + blanks_ + '}'_T >>
+    [](char, char, std::vector<Ptr<Expr>> &&exprs, char, char)
+      -> Ptr<Expr>
+    {
+        return make_unique<SetExpr>(move(exprs));
+    };
+
 // term
 // : cons_term
 // | var_term
 // | list_term
+// | set_term
 // | '(' blanks expr blanks ')'
 term_ =
   cons_term_ >>
@@ -232,6 +234,7 @@ term_ =
         return expr;
     } |
   list_term_ |
+  set_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, Ptr<Expr> expr, char, char)
     {
@@ -518,6 +521,24 @@ expr_ =
             move(lhs), move(rhs));
     } |
   expr1_;
+
+// exprs
+// : expr blanks ',' blanks exprs
+// | expr
+exprs_ =
+  expr_ + blanks_ + ','_T + blanks_ + exprs_ >>
+    [](Ptr<Expr> expr, char, char, char, vector<Ptr<Expr>> exprs)
+    {
+        exprs.push_back(move(expr));
+        return exprs;
+    } |
+  expr_ >>
+    [](Ptr<Expr> expr)
+    {
+        vector<Ptr<Expr>> exprs;
+        exprs.push_back(move(expr));
+        return exprs;
+    };
 
 // func_decl_equation
 // : '"' blanks cons_term blanks '=' blanks expr blanks '"'
