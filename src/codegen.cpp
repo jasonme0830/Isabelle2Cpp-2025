@@ -178,7 +178,7 @@ const
     }
     else if (name == "None")
     {
-        entity.add_pattern("if (!" + prev + ".has_value()) {");
+        entity.add_pattern("if (" + prev + ".has_value()) {");
     }
     else
     {
@@ -218,6 +218,14 @@ const
         args[0]->gen_pattern(entity, prev + ".front()");
         entity.add_pattern(prev + ".pop_front();");
         args[1]->gen_pattern(entity, prev);
+    }
+    else if (constructor == "Some")
+    {
+        entity.add_pattern("if (!" + prev + ".has_value()) {");
+        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_pattern("}");
+
+        args[0]->gen_pattern(entity, prev + ".value()");
     }
     else
     {
@@ -280,6 +288,10 @@ const
     {
         return type.empty() ? "{}"s : (type + "()");
     }
+    else if (name == "None")
+    {
+        return type.empty() ? "{}"s : (type + "()");
+    }
     else
     {
         return name;
@@ -319,6 +331,31 @@ const
             entity.add_expr(temp + ".push_front(" + x + ");");
         }
         return temp;
+    }
+    else if (constructor == "Some")
+    {
+        assert(args.size() == 1);
+        if (type.empty())
+        {
+            auto expr = args.front()->gen_expr(entity, type);
+            if (expr == "{}")
+            {
+                // if receive Some Nil,
+                // it will return wrong result
+                // becasue it has not enough typeinfo
+                return expr;
+            }
+            else
+            {
+                return "std::make_optional<decltype(" + expr + ")>(" + expr + ")";
+            }
+        }
+        else
+        {
+            auto arg_type = get_argument_type(type);
+            auto expr = args.front()->gen_expr(entity, arg_type);
+            return "std::make_optional<" + arg_type + ">(" + expr + ")";
+        }
     }
     else
     {
