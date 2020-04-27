@@ -454,30 +454,67 @@ string
 BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type)
 const
 {
-    auto l = lhs->gen_expr(entity, type);
-    auto r = rhs->gen_expr(entity, type);
+    string l, r;
 
     switch (op)
     {
     case BOp::LogicAnd:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") and (" + r + ')';
     case BOp::LogicOr:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") or (" + r + ')';
     case BOp::LogicEq:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") = (" + r + ')';
     case BOp::LogicNoteq:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") != (" + r + ')';
 
     case BOp::OrderLe:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") <= (" + r + ')';
     case BOp::OrderLt:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") < (" + r + ')';
     case BOp::OrderGe:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") >= (" + r + ')';
     case BOp::OrderGt:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") > (" + r + ')';
 
     case BOp::SetInter:
+    {
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
+
+        auto lv = entity.gen_temp();
+        auto rv = entity.gen_temp();
+        entity.add_expr("auto " + lv + " = " + l + ";");
+        entity.add_expr("auto " + rv + " = " + r + ";");
+
+        auto res = entity.gen_temp();
+        entity.add_expr("decltype(" + lv + ") " + res + ";");
+
+        auto term = entity.gen_temp();
+        entity.add_expr("for (auto " + term + " : " + rv + ") {");
+        entity.add_expr(Code::raw_indent() +
+            "if (lv.count(" + term + ")) {");
+        entity.add_expr(Code::raw_indent() + Code::raw_indent() +
+            res + ".insert(" + term + ");");
+        entity.add_expr(Code::raw_indent() + "}");
+        entity.add_expr("}");
+        return res;
+    }
         break;
     case BOp::SetUnion:
         break;
@@ -490,24 +527,43 @@ const
     case BOp::SetSupset:
         break;
     case BOp::SetIn:
-        break;
+        l = lhs->gen_expr(entity, get_argument_type(type));
+        r = rhs->gen_expr(entity, type);
+        return r + ".count(" + l + ")";
     case BOp::SetNotin:
-        break;
+        l = lhs->gen_expr(entity, get_argument_type(type));
+        r = rhs->gen_expr(entity, type);
+        return "!" + r + ".count(" + l + ")";
 
     case BOp::NumAdd:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") + (" + r + ')';
     case BOp::NumSub:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") - (" + r + ')';
     case BOp::NumMul:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") * (" + r + ')';
     case BOp::NumDiv:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") / (" + r + ')';
     case BOp::NumMod:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         return '(' + l + ") % (" + r + ')';
     case BOp::NumPow:
-        return "pow(" + l + ", " + r + ')';
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
+        entity.code().add_header("cmath");
+        return "std::pow(" + l + ", " + r + ')';
 
     case BOp::ListApp:
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
         if (l == "{}" and r == "{}")
         {
             return type.empty() ? "{}"s : (type + "()");
