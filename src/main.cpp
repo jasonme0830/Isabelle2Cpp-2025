@@ -8,7 +8,8 @@
 using namespace std;
 using namespace hol2cpp;
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
     ArgumentParser arg_parser("hol2cpp");
     arg_parser.add_argument("file")

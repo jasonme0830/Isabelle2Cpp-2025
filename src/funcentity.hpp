@@ -14,20 +14,24 @@ class FuncEntity
     FuncEntity(Code &code)
       : code_(code) {}
 
-    Code &code() { return code_; }
+    Code
+    &code() { return code_; }
 
     std::string
     &name() { return name_; }
 
     const std::string
-    &name() const { return name_; }
+    &name()
+    const { return name_; }
 
-    void add_type(std::string type)
+    void
+    add_type(std::string type)
     {
         types_.push_back(type);
     }
 
-    std::string add_argument_type(std::string name)
+    std::string
+    add_argument_type(std::string name)
     {
         if (!template_mapping_.count(name))
         {
@@ -37,44 +41,53 @@ class FuncEntity
         return template_args_[template_mapping_[name]];
     }
 
-    const std::string &result_type()
+    const std::string
+    &result_type()
     {
         return types_.front();
     }
 
     const std::vector<std::string>
-    &types() const { return types_; }
+    &types()
+    const { return types_; }
 
     const std::vector<std::string>
-    &template_args() const { return template_args_; }
+    &template_args()
+    const { return template_args_; }
 
-    std::string gen_temp()
+    std::string
+    gen_temp()
     {
         return "temp" + std::to_string(temp_count_++);
     }
 
-    void entry_euation()
+    void
+    entry_euation()
     {
         temp_count_ = 0;
         patterns_.emplace_back();
         exprs_.emplace_back();
     }
 
-    void add_pattern(std::string pattern)
+    void
+    add_pattern(std::string pattern)
     {
         patterns_.back().push_back(pattern);
     }
 
-    void add_expr(std::string expr)
+    void
+    add_expr(std::string expr)
     {
         exprs_.back().push_back(expr);
     }
 
     const std::vector<std::vector<std::string>>
-    &patterns() const { return patterns_; }
+    &patterns()
+    const { return patterns_; }
 
     const std::vector<std::vector<std::string>>
-    &exprs() const { return exprs_; }
+    &exprs()
+    const { return exprs_; }
 
   private:
     Code &code_;

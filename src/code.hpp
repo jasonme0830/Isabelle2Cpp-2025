@@ -11,50 +11,66 @@ class Code
 {
   public:
     Code(std::ostream &out = std::cout)
-      : out_(out), indent_(0), entry_func_(-1) {}
+      : out_(out)
+      , indent_(0)
+      , entry_func_(-1) {}
 
-    void entry_func()
+    void
+    entry_func()
     {
         entry_func_ = func_entities_.size();
         func_entities_.emplace_back(*this);
     }
 
-    FuncEntity &current_entity()
+    FuncEntity
+    &current_entity()
     {
         return func_entities_[entry_func_];
     }
 
-    void generate();
+    void
+    generate();
 
-    static std::size_t &indent_size()
+    static
+    std::size_t
+    &indent_size()
     {
         static std::size_t value = 4;
         return value;
     }
 
-    static std::string raw_indent()
+    static
+    std::string
+    raw_indent()
     {
         return std::string(indent_size(), ' ');
     }
 
-    void add_header(const std::string &header)
+    void
+    add_header(const std::string &header)
     {
         headers_.insert(header);
     }
 
   private:
-    void generate_single(FuncEntity &entity);
-    void generate_normal(FuncEntity &entity);
-    void generate_template(FuncEntity &entity);
+    void
+    generate_single(FuncEntity &entity);
+    void
+    generate_normal(FuncEntity &entity);
+    void
+    generate_template(FuncEntity &entity);
 
-    std::ostream &new_line()
+    std::ostream
+    &new_line()
     {
         out_ << std::string(indent_, ' ');
         return out_;
     }
 
-    void add_indent() { indent_ += indent_size(); }
-    void sub_indent() { indent_ -= indent_size(); }
+    void
+    add_indent() { indent_ += indent_size(); }
+    void
+    sub_indent() { indent_ -= indent_size(); }
 
     std::ostream &out_;
     int indent_;

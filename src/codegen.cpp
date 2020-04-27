@@ -8,7 +8,8 @@ using namespace std;
 
 namespace
 {
-static bool
+static
+bool
 is_number(const string &str)
 {
     for (auto ch : str)
@@ -21,7 +22,8 @@ is_number(const string &str)
     return true;
 }
 
-static string
+static
+string
 get_argument_type(const string &type)
 {
     if (type.empty())

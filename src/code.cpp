@@ -4,7 +4,8 @@ using namespace std;
 
 namespace hol2cpp
 {
-void Code::generate()
+void
+Code::generate()
 {
     for (const auto &header : headers_)
     {
@@ -19,7 +20,8 @@ void Code::generate()
     }
 }
 
-void Code::generate_single(FuncEntity &entity)
+void
+Code::generate_single(FuncEntity &entity)
 {
     indent_ = 0;
     if (entity.template_args().empty())
@@ -32,7 +34,8 @@ void Code::generate_single(FuncEntity &entity)
     }
 }
 
-void Code::generate_normal(FuncEntity &entity)
+void
+Code::generate_normal(FuncEntity &entity)
 {
     auto &types = entity.types();
     new_line() << types.front() << endl;
@@ -75,7 +78,8 @@ void Code::generate_normal(FuncEntity &entity)
     new_line() << "}" << endl;
 }
 
-void Code::generate_template(FuncEntity &entity)
+void
+Code::generate_template(FuncEntity &entity)
 {
     auto &template_args = entity.template_args();
     new_line() << "template<";

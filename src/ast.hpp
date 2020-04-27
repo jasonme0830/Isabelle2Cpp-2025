@@ -16,13 +16,22 @@ using Ptr = std::unique_ptr<T>;
 
 struct AST
 {
-    virtual ~AST() = 0;
+    virtual
+    ~AST()
+    = 0;
 };
 
 struct Type : AST
 {
-    virtual ~Type() = 0;
-    virtual std::string gen_typeinfo(FuncEntity &entity) const = 0;
+    virtual
+    ~Type()
+    = 0;
+
+    virtual
+    std::string
+    gen_typeinfo(FuncEntity &entity)
+    const
+    = 0;
 };
 
 struct NormalType final : Type
@@ -32,7 +41,10 @@ struct NormalType final : Type
     NormalType(std::string name)
       : name(std::move(name)) {}
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    std::string
+    gen_typeinfo(FuncEntity &entity)
+    const
+    override;
 };
 
 struct ArgumentType final : Type
@@ -42,7 +54,10 @@ struct ArgumentType final : Type
     ArgumentType(std::string name)
       : name(std::move(name)) {}
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    std::string
+    gen_typeinfo(FuncEntity &entity)
+    const
+    override;
 };
 
 struct TemplateType final : Type
@@ -51,9 +66,13 @@ struct TemplateType final : Type
     Ptr<Type> arg;
 
     TemplateType(std::string name, Ptr<Type> &&arg)
-      : name(std::move(name)), arg(std::move(arg)) {}
+      : name(std::move(name))
+      , arg(std::move(arg)) {}
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    std::string
+    gen_typeinfo(FuncEntity &entity)
+    const
+    override;
 };
 
 struct FuncType final : Type
@@ -63,27 +82,40 @@ struct FuncType final : Type
     FuncType(std::vector<Ptr<Type>> &&types)
       : types(std::move(types)) {}
 
-    Type* result_type() const
+    Type
+    *result_type()
+    const
     {
         assert(!types.empty());
         return types.back().get();
     }
 
-    void build_entity(FuncEntity &entity) const;
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    void
+    build_entity(FuncEntity &entity)
+    const;
+
+    std::string
+    gen_typeinfo(FuncEntity &entity)
+    const
+    override;
 };
 
 struct Expr : AST
 {
-    virtual ~Expr() = 0;
+    virtual
+    ~Expr()
+    = 0;
 
-    virtual void
+    virtual
+    void
     gen_pattern(FuncEntity &entity, const std::string &prev)
     const;
 
-    virtual std::string
+    virtual
+    std::string
     gen_expr(FuncEntity &entity, const std::string &type)
-    const = 0;
+    const
+    = 0;
 };
 
 struct VarExpr final : Expr
@@ -95,11 +127,13 @@ struct VarExpr final : Expr
 
     void
     gen_pattern(FuncEntity &entity, const std::string &prev)
-    const override;
+    const
+    override;
 
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
-    const override;
+    const
+    override;
 };
 
 struct ConsExpr final : Expr
@@ -114,11 +148,13 @@ struct ConsExpr final : Expr
 
     void
     gen_pattern(FuncEntity &entity, const std::string &prev)
-    const override;
+    const
+    override;
 
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
-    const override;
+    const
+    override;
 };
 
 struct ListExpr final : Expr
@@ -131,11 +167,13 @@ struct ListExpr final : Expr
 
     void
     gen_pattern(FuncEntity &entity, const std::string &prev)
-    const override;
+    const
+    override;
 
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
-    const override;
+    const
+    override;
 };
 
 struct SetExpr final : Expr
@@ -148,7 +186,8 @@ struct SetExpr final : Expr
 
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
-    const override;
+    const
+    override;
 };
 
 enum class BOp
@@ -188,15 +227,19 @@ struct BinaryOpExpr final : Expr
     Ptr<Expr> lhs, rhs;
 
     BinaryOpExpr(BOp op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs)
-      : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+      : op(op)
+      , lhs(std::move(lhs))
+      , rhs(std::move(rhs)) {}
 
     void
     gen_pattern(FuncEntity &entity, const std::string &prev)
-    const override;
+    const
+    override;
 
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
-    const override;
+    const
+    override;
 };
 
 struct BinaryOpTailExpr final
@@ -207,7 +250,8 @@ struct BinaryOpTailExpr final
 
     BinaryOpTailExpr(BOp op, Ptr<Expr> &&expr,
         Ptr<BinaryOpTailExpr> &&tail)
-      : op(op), expr(std::move(expr))
+      : op(op)
+      , expr(std::move(expr))
       , tail(std::move(tail)) {}
 };
 
@@ -217,9 +261,12 @@ struct Equation final : AST
     Ptr<Expr> expr;
 
     Equation(Ptr<ConsExpr> &&pattern, Ptr<Expr> &&expr)
-      : pattern(std::move(pattern)), expr(std::move(expr)) {}
+      : pattern(std::move(pattern))
+      , expr(std::move(expr)) {}
 
-    void build_entity(FuncEntity &entity) const;
+    void
+    build_entity(FuncEntity &entity)
+    const;
 };
 
 struct FuncDecl final : AST
@@ -231,9 +278,12 @@ struct FuncDecl final : AST
     FuncDecl(std::string name,
         Ptr<FuncType> &&type,
         std::vector<Ptr<Equation>> &&equations)
-      : name(std::move(name)), type(std::move(type))
+      : name(std::move(name))
+      , type(std::move(type))
       , equations(std::move(equations)) {}
 
-    void build_entity(FuncEntity &entity) const;
+    void
+    build_entity(FuncEntity &entity)
+    const;
 };
 } // namespace hol2cpp
