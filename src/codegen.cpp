@@ -515,9 +515,23 @@ const
         entity.add_expr("}");
         return res;
     }
-        break;
     case BOp::SetUnion:
-        break;
+    {
+        l = lhs->gen_expr(entity, type);
+        r = rhs->gen_expr(entity, type);
+
+        auto lv = entity.gen_temp();
+        auto rv = entity.gen_temp();
+        entity.add_expr("auto " + lv + " = " + l + ";");
+        entity.add_expr("auto " + rv + " = " + r + ";");
+
+        auto term = entity.gen_temp();
+        entity.add_expr("for (auto " + term + " : " + rv + ") {");
+        entity.add_expr(Code::raw_indent() +
+            lv + ".insert(" + term + ");");
+        entity.add_expr("}");
+        return lv;
+    }
     case BOp::SetSubseteq:
         break;
     case BOp::SetSubset:
