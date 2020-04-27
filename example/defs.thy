@@ -17,3 +17,7 @@ fun rev2 :: "'a list \<Rightarrow> 'a list" where
 fun rev3 :: "'a list \<Rightarrow> 'a list" where
   "rev3 [] = []" |
   "rev3 (x # xs) = (rev xs) @ [x]"
+
+fun testoption :: "'a option \<Rightarrow> ('a list) option" where
+  "testoption None = Some Nil" |
+  "testoption (Some x) = Some [x]"
