@@ -156,6 +156,13 @@ const
 // --- generate pattern ---
 
 void
+Expr::gen_pattern(FuncEntity &entity, const string &prev)
+const
+{
+    throw runtime_error("cannot be pattern");
+}
+
+void
 VarExpr::gen_pattern(FuncEntity &entity, const string &prev)
 const
 {
@@ -383,32 +390,64 @@ const
     {
         return type.empty() ? "{}"s : (type + "()");
     }
+
+    string res;
+    if (type.empty())
+    {
+        res = "std::list<decltype(" +
+            exprs.front()->gen_expr(entity, type) + ")>{";
+    }
     else
     {
-        string res;
-        if (type.empty())
+        res = type + "{";
+    }
+
+    for (size_t i = 0; i < exprs.size(); ++i)
+    {
+        if (i == 0)
         {
-            res = "std::list<decltype(" +
-                exprs.front()->gen_expr(entity, type) + ")>{";
+            res += exprs[i]->gen_expr(entity, type);
         }
         else
         {
-            res = type + "{";
+            res += ", " + exprs[i]->gen_expr(entity, type);
         }
-
-        for (size_t i = 0; i < exprs.size(); ++i)
-        {
-            if (i == 0)
-            {
-                res += exprs[i]->gen_expr(entity, type);
-            }
-            else
-            {
-                res += ", " + exprs[i]->gen_expr(entity, type);
-            }
-        }
-        return res + "}";
     }
+    return res + "}";
+}
+
+string
+SetExpr::gen_expr(FuncEntity &entity, const string &type)
+const
+{
+    if (exprs.empty())
+    {
+        return type.empty() ? "{}"s : (type + "()");
+    }
+
+    string res;
+    if (type.empty())
+    {
+        res = "std::set<decltype(" +
+            exprs.front()->gen_expr(entity, type) + ")>{";
+    }
+    else
+    {
+        res = type + "{";
+    }
+
+    for (size_t i = 0; i < exprs.size(); ++i)
+    {
+        if (i == 0)
+        {
+            res += exprs[i]->gen_expr(entity, type);
+        }
+        else
+        {
+            res += ", " + exprs[i]->gen_expr(entity, type);
+        }
+    }
+    return res + "}";
 }
 
 string
