@@ -21,3 +21,7 @@ fun rev3 :: "'a list \<Rightarrow> 'a list" where
 fun testoption :: "'a option \<Rightarrow> ('a list) option" where
   "testoption None = Some Nil" |
   "testoption (Some x) = Some [x]"
+
+fun testset :: "'a list \<Rightarrow> 'a set" where
+  "testset Nil = {}" |
+  "testset (x # xs) = {x} \<inter> testset(xs)"
