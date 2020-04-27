@@ -24,4 +24,5 @@ fun testoption :: "'a option \<Rightarrow> ('a list) option" where
 
 fun testset :: "'a list \<Rightarrow> 'a set" where
   "testset Nil = {}" |
-  "testset (x # xs) = {x} \<inter> testset(xs)"
+  "testset (x # xs) = {x} \<inter> testset(xs)" |
+  "testset (x # xs) = {x} \<union> testset(xs)"
