@@ -78,8 +78,8 @@ type_term_ =
     {
         return make_unique<ArgumentType>(type);
     } |
-  '('_T + blanks_ + type_ + blanks_ + ')'_T + identifier_ >>
-    [](char, char, Ptr<Type> &&type1, char, char, string type2) -> Ptr<Type>
+  '('_T + blanks_ + type_ + blanks_ + ')'_T + blanks_ + identifier_ >>
+    [](char, char, Ptr<Type> &&type1, char, char, char, string type2) -> Ptr<Type>
     {
         return make_unique<TemplateType>(type2, move(type1));
     } |
