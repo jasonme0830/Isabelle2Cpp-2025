@@ -79,7 +79,7 @@ struct Expr : AST
 
     virtual void
     gen_pattern(FuncEntity &entity, const std::string &prev)
-    const = 0;
+    const;
 
     virtual std::string
     gen_expr(FuncEntity &entity, const std::string &type)
@@ -132,6 +132,19 @@ struct ListExpr final : Expr
     void
     gen_pattern(FuncEntity &entity, const std::string &prev)
     const override;
+
+    std::string
+    gen_expr(FuncEntity &entity, const std::string &type)
+    const override;
+};
+
+struct SetExpr final : Expr
+{
+    std::vector<Ptr<Expr>> exprs;
+
+    SetExpr() = default;
+    SetExpr(std::vector<Ptr<Expr>> &&exprs)
+      : exprs(std::move(exprs)) {}
 
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
