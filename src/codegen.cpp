@@ -481,9 +481,7 @@ const
         entity.add_indent();
             entity.add_expr(res + " = " + true_expr->gen_expr(entity, type) + ";");
         entity.sub_indent();
-        entity.add_expr("}");
-
-        entity.add_expr("else {");
+        entity.add_expr("} else {");
         entity.add_indent();
             entity.add_expr(res + " = " + false_expr->gen_expr(entity, type) + ";");
         entity.sub_indent();
