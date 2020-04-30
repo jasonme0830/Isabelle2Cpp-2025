@@ -133,16 +133,14 @@ func_decl_type_ =
     };
 
 // miniterm
-// : identifier
+// : ifelse_term
+// | var_term
 // | list_term
 // | set_term
 // | '(' blanks expr blanks ')'
 miniterm_ =
-  identifier_ >>
-    [](string ident) -> Ptr<Expr>
-    {
-        return make_unique<VarExpr>(move(ident));
-    } |
+  ifelse_term_ |
+  var_term_ |
   list_term_ |
   set_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
@@ -162,6 +160,16 @@ miniterms_ =
         return miniterms;
     } |
   Token::epsilon<vector<Ptr<Expr>>>();
+
+// ifelse_term
+// : "if" blanks expr blanks "then" blanks expr blanks "else" blanks expr
+ifelse_term_ =
+  "if"_T + blanks_ + expr_ + blanks_ + "then"_T + blanks_ + expr_ + blanks_ + "else"_T + blanks_ + expr_ >>
+    [](Placeholder, char, Ptr<Expr> &&cond, char, Placeholder, char, Ptr<Expr> &&true_expr, char, Placeholder, char, Ptr<Expr> &&false_expr)
+      -> Ptr<Expr>
+    {
+        return make_unique<IfelseExpr>(move(cond), move(true_expr), move(false_expr));
+    };
 
 // cons_term
 // : identifier blanks miniterm blanks miniterms
@@ -217,12 +225,14 @@ set_term_ =
     };
 
 // term
-// : cons_term
+// : ifelse_term
+// | cons_term
 // | var_term
 // | list_term
 // | set_term
 // | '(' blanks expr blanks ')'
 term_ =
+  ifelse_term_ |
   cons_term_ >>
     [](Ptr<Expr> expr)
     {
