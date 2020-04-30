@@ -42,7 +42,7 @@ class Parser
     Parsec<std::vector<Ptr<Expr>>>      miniterms_;
     Parsec<Ptr<Expr>>                   ifelse_term_;
     Parsec<Ptr<ConsExpr>>               cons_term_;
-    Parsec<Ptr<VarExpr>>                var_term_;
+    Parsec<Ptr<Expr>>                   var_term_;
     Parsec<Ptr<Expr>>                   list_term_;
     Parsec<Ptr<Expr>>                   set_term_;
 

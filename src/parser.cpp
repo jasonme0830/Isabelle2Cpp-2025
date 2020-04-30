@@ -186,6 +186,7 @@ cons_term_ =
 var_term_ =
   identifier_ >>
     [](string name)
+      -> Ptr<Expr>
     {
         return make_unique<VarExpr>(move(name));
     };
@@ -238,11 +239,7 @@ term_ =
     {
         return expr;
     } |
-  var_term_ >>
-    [](Ptr<Expr> expr)
-    {
-        return expr;
-    } |
+  var_term_ |
   list_term_ |
   set_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
