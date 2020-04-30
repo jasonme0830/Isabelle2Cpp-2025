@@ -10,47 +10,23 @@ namespace hol2cpp
 class Code
 {
   public:
-    Code(std::ostream &out = std::cout)
-      : out_(out)
-      , indent_(0)
-      , entry_func_(-1) {}
+    Code(std::ostream &out = std::cout);
 
     void
-    entry_func()
-    {
-        entry_func_ = func_entities_.size();
-        func_entities_.emplace_back(*this);
-    }
+    entry_func();
 
     FuncEntity
-    &current_entity()
-    {
-        return func_entities_[entry_func_];
-    }
+    &current_entity();
 
     void
     generate();
 
     static
     std::size_t
-    &indent_size()
-    {
-        static std::size_t value = 4;
-        return value;
-    }
-
-    static
-    std::string
-    raw_indent()
-    {
-        return std::string(indent_size(), ' ');
-    }
+    &indent_size();
 
     void
-    add_header(const std::string &header)
-    {
-        headers_.insert(header);
-    }
+    add_header(const std::string &header);
 
   private:
     void
@@ -61,16 +37,12 @@ class Code
     generate_template(FuncEntity &entity);
 
     std::ostream
-    &new_line()
-    {
-        out_ << std::string(indent_, ' ');
-        return out_;
-    }
+    &new_line();
 
     void
-    add_indent() { indent_ += indent_size(); }
+    add_indent();
     void
-    sub_indent() { indent_ -= indent_size(); }
+    sub_indent();
 
     std::ostream &out_;
     int indent_;

@@ -1,9 +1,28 @@
 #include "code.hpp"
+#include "funcentity.hpp"
 
 using namespace std;
 
 namespace hol2cpp
 {
+Code::Code(ostream &out)
+  : out_(out)
+  , indent_(0)
+  , entry_func_(-1) {}
+
+void
+Code::entry_func()
+{
+    entry_func_ = func_entities_.size();
+    func_entities_.emplace_back(*this);
+}
+
+FuncEntity
+&Code::current_entity()
+{
+    return func_entities_[entry_func_];
+}
+
 void
 Code::generate()
 {
@@ -18,6 +37,19 @@ Code::generate()
         generate_single(entity);
         out_ << endl;
     }
+}
+
+size_t
+&Code::indent_size()
+{
+    static size_t value = 4;
+    return value;
+}
+
+void
+Code::add_header(const string &header)
+{
+    headers_.insert(header);
 }
 
 void
@@ -96,5 +128,24 @@ Code::generate_template(FuncEntity &entity)
     }
     out_ << ">" << endl;
     generate_normal(entity);
+}
+
+ostream
+&Code::new_line()
+{
+    out_ << string(indent_, ' ');
+    return out_;
+}
+
+void
+Code::add_indent()
+{
+    indent_ += indent_size();
+}
+
+void
+Code::sub_indent()
+{
+    indent_ -= indent_size();
 }
 } // namespace hol2cpp
