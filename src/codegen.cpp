@@ -60,6 +60,7 @@ const
         entity.code().add_header("cstdint");
         return mapping.at(name);
     }
+    // as bool
     return name;
 }
 
@@ -198,7 +199,7 @@ const
     if (postfix)
     {
         entity.add_indent();
-        entity.add_pattern("break;");
+            entity.add_pattern("break;");
         entity.sub_indent();
         entity.add_pattern("}");
     }
@@ -224,7 +225,7 @@ const
     {
         entity.add_pattern("if (" + prev + ".empty()) {");
         entity.add_indent();
-        entity.add_pattern("break;");
+            entity.add_pattern("break;");
         entity.sub_indent();
         entity.add_pattern("}");
 
@@ -236,7 +237,7 @@ const
     {
         entity.add_pattern("if (!" + prev + ".has_value()) {");
         entity.add_indent();
-        entity.add_pattern("break;");
+            entity.add_pattern("break;");
         entity.sub_indent();
         entity.add_pattern("}");
 
@@ -260,7 +261,7 @@ const
     {
         entity.add_pattern("if (" + prev + ".size() != " + to_string(exprs.size()) + ") {");
         entity.add_indent();
-        entity.add_pattern("break;");
+            entity.add_pattern("break;");
         entity.sub_indent();
         entity.add_pattern("}");
 
@@ -461,6 +462,37 @@ const
 }
 
 string
+IfelseExpr::gen_expr(FuncEntity &entity, const string &type)
+const
+{
+    if (type.empty())
+    {
+        auto texpr = true_expr->gen_expr(entity, type);
+        auto fexpr = false_expr->gen_expr(entity, type);
+        auto ce = cond->gen_expr(entity, "bool");
+        return ce + "? " + texpr + " : " + fexpr;
+    }
+    else
+    {
+        auto ce = cond->gen_expr(entity, "bool");
+        auto res = entity.gen_temp();
+        entity.add_expr(type + " " + res + ";");
+        entity.add_expr("if (" + ce + ") {");
+        entity.add_indent();
+            entity.add_expr(res + " = " + true_expr->gen_expr(entity, type) + ";");
+        entity.sub_indent();
+        entity.add_expr("}");
+
+        entity.add_expr("else {");
+        entity.add_indent();
+            entity.add_expr(res + " = " + false_expr->gen_expr(entity, type) + ";");
+        entity.sub_indent();
+        entity.add_expr("}");
+        return res;
+    }
+}
+
+string
 BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type)
 const
 {
@@ -518,11 +550,11 @@ const
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
         entity.add_indent();
-        entity.add_expr("if (lv.count(" + term + ")) {");
-        entity.add_indent();
-        entity.add_expr(res + ".insert(" + term + ");");
-        entity.sub_indent();
-        entity.add_expr("}");
+            entity.add_expr("if (lv.count(" + term + ")) {");
+            entity.add_indent();
+                entity.add_expr(res + ".insert(" + term + ");");
+            entity.sub_indent();
+            entity.add_expr("}");
         entity.sub_indent();
         entity.add_expr("}");
         return res;
@@ -540,7 +572,7 @@ const
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
         entity.add_indent();
-        entity.add_expr(lv + ".insert(" + term + ");");
+            entity.add_expr(lv + ".insert(" + term + ");");
         entity.sub_indent();
         entity.add_expr("}");
         return lv;
