@@ -26,3 +26,7 @@ fun testset :: "'a list \<Rightarrow> 'a set" where
   "testset Nil = {}" |
   "testset (x # xs) = {x} \<inter> testset(xs)" |
   "testset (x # xs) = {x} \<union> testset(xs)"
+
+fun testifelse :: "'a list \<Rightarrow> 'a \<Rightarrow> 'a list" where
+  "testifelse [] n = []" |
+  "testifelse (x # xs) n = if (x < n) then (x # (testifelse xs n)) else []"
