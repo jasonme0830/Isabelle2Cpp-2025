@@ -197,7 +197,9 @@ const
 
     if (postfix)
     {
-        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_indent();
+        entity.add_pattern("break;");
+        entity.sub_indent();
         entity.add_pattern("}");
     }
 }
@@ -221,7 +223,9 @@ const
     else if (constructor == "Cons")
     {
         entity.add_pattern("if (" + prev + ".empty()) {");
-        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_indent();
+        entity.add_pattern("break;");
+        entity.sub_indent();
         entity.add_pattern("}");
 
         args[0]->gen_pattern(entity, prev + ".front()");
@@ -231,7 +235,9 @@ const
     else if (constructor == "Some")
     {
         entity.add_pattern("if (!" + prev + ".has_value()) {");
-        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_indent();
+        entity.add_pattern("break;");
+        entity.sub_indent();
         entity.add_pattern("}");
 
         args[0]->gen_pattern(entity, prev + ".value()");
@@ -253,7 +259,9 @@ const
     else
     {
         entity.add_pattern("if (" + prev + ".size() != " + to_string(exprs.size()) + ") {");
-        entity.add_pattern(Code::raw_indent() + "break;");
+        entity.add_indent();
+        entity.add_pattern("break;");
+        entity.sub_indent();
         entity.add_pattern("}");
 
         for (const auto &expr : exprs)
@@ -509,11 +517,13 @@ const
 
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
-        entity.add_expr(Code::raw_indent() +
-            "if (lv.count(" + term + ")) {");
-        entity.add_expr(Code::raw_indent() + Code::raw_indent() +
-            res + ".insert(" + term + ");");
-        entity.add_expr(Code::raw_indent() + "}");
+        entity.add_indent();
+        entity.add_expr("if (lv.count(" + term + ")) {");
+        entity.add_indent();
+        entity.add_expr(res + ".insert(" + term + ");");
+        entity.sub_indent();
+        entity.add_expr("}");
+        entity.sub_indent();
         entity.add_expr("}");
         return res;
     }
@@ -529,8 +539,9 @@ const
 
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
-        entity.add_expr(Code::raw_indent() +
-            lv + ".insert(" + term + ");");
+        entity.add_indent();
+        entity.add_expr(lv + ".insert(" + term + ");");
+        entity.sub_indent();
         entity.add_expr("}");
         return lv;
     }
