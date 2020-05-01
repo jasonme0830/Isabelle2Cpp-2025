@@ -190,22 +190,6 @@ struct SetExpr final : Expr
     override;
 };
 
-struct IfelseExpr final : Expr
-{
-    Ptr<Expr> cond, true_expr, false_expr;
-
-    IfelseExpr(Ptr<Expr> &&cond,
-        Ptr<Expr> &&texpr, Ptr<Expr> fexpr)
-      : cond(std::move(cond))
-      , true_expr(std::move(texpr))
-      , false_expr(std::move(fexpr)) {}
-
-    std::string
-    gen_expr(FuncEntity &entity, const std::string &type)
-    const
-    override;
-};
-
 enum class BOp
 {
     LogicAnd,   // \<and>

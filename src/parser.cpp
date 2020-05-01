@@ -168,7 +168,11 @@ ifelse_term_ =
     [](Placeholder, char, Ptr<Expr> &&cond, char, Placeholder, char, Ptr<Expr> &&true_expr, char, Placeholder, char, Ptr<Expr> &&false_expr)
       -> Ptr<Expr>
     {
-        return make_unique<IfelseExpr>(move(cond), move(true_expr), move(false_expr));
+        vector<Ptr<Expr>> exprs;
+        exprs.push_back(move(cond));
+        exprs.push_back(move(true_expr));
+        exprs.push_back(move(false_expr));
+        return make_unique<ConsExpr>("If"s, move(exprs));
     };
 
 // cons_term
