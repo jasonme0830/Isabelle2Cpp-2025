@@ -375,6 +375,33 @@ const
             return "std::make_optional<" + arg_type + ">(" + expr + ")";
         }
     }
+    else if (constructor == "If")
+    {
+        assert(args.size() == 3);
+        if (type.empty())
+        {
+            auto texpr = args[1]->gen_expr(entity, type);
+            auto fexpr = args[2]->gen_expr(entity, type);
+            auto ce = args[0]->gen_expr(entity, "bool");
+            return ce + "? " + texpr + " : " + fexpr;
+        }
+        else
+        {
+            auto ce = args[0]->gen_expr(entity, "bool");
+            auto res = entity.gen_temp();
+            entity.add_expr(type + " " + res + ";");
+            entity.add_expr("if (" + ce + ") {");
+            entity.add_indent();
+                entity.add_expr(res + " = " + args[1]->gen_expr(entity, type) + ";");
+            entity.sub_indent();
+            entity.add_expr("} else {");
+            entity.add_indent();
+                entity.add_expr(res + " = " + args[2]->gen_expr(entity, type) + ";");
+            entity.sub_indent();
+            entity.add_expr("}");
+            return res;
+        }
+    }
     else
     {
         string expr = constructor + '(';
@@ -459,35 +486,6 @@ const
         }
     }
     return res + "}";
-}
-
-string
-IfelseExpr::gen_expr(FuncEntity &entity, const string &type)
-const
-{
-    if (type.empty())
-    {
-        auto texpr = true_expr->gen_expr(entity, type);
-        auto fexpr = false_expr->gen_expr(entity, type);
-        auto ce = cond->gen_expr(entity, "bool");
-        return ce + "? " + texpr + " : " + fexpr;
-    }
-    else
-    {
-        auto ce = cond->gen_expr(entity, "bool");
-        auto res = entity.gen_temp();
-        entity.add_expr(type + " " + res + ";");
-        entity.add_expr("if (" + ce + ") {");
-        entity.add_indent();
-            entity.add_expr(res + " = " + true_expr->gen_expr(entity, type) + ";");
-        entity.sub_indent();
-        entity.add_expr("} else {");
-        entity.add_indent();
-            entity.add_expr(res + " = " + false_expr->gen_expr(entity, type) + ";");
-        entity.sub_indent();
-        entity.add_expr("}");
-        return res;
-    }
 }
 
 string
