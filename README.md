@@ -8,7 +8,6 @@ Only support cast the recursive definitions of functions from Isabelle/HOL to C+
 
 ## To Do
 
-- [ ] Support If-Else
 - [ ] Support pair
 
 ## Example
