@@ -30,3 +30,12 @@ fun testset :: "'a list \<Rightarrow> 'a set" where
 fun testifelse :: "'a list \<Rightarrow> 'a \<Rightarrow> 'a list" where
   "testifelse [] n = []" |
   "testifelse (x # xs) n = if (x < n) then (x # (testifelse xs n)) else []"
+
+fun pair :: "'a \<Rightarrow> 'b \<Rightarrow> ('a * 'b)" where
+  "pair f s = (f, s)"
+
+fun fst :: "('a * 'b) \<Rightarrow> 'a" where
+  "fst (first, second) = first"
+
+fun snd :: "('a * 'b) \<Rightarrow> 'b" where
+  "snd (first, second) = second"
