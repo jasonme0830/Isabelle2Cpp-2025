@@ -114,12 +114,22 @@ func_type_ =
 
 // type
 // : func_type
+// | type_term blanks '*' blanks type_term
 // | type_term
 type_ =
   func_type_ >>
     [](Ptr<FuncType> type) -> Ptr<Type>
     {
         return type;
+    } |
+  type_term_ + blanks_ + '*'_T + blanks_ + type_term_ >>
+    [](Ptr<Type> &&t1, char, char, char, Ptr<Type> &&t2)
+      -> Ptr<Type>
+    {
+        vector<Ptr<Type>> types;
+        types.push_back(move(t1));
+        types.push_back(move(t2));
+        return make_unique<TemplateType>("pair"s, move(types));
     } |
   type_term_;
 
@@ -137,12 +147,14 @@ func_decl_type_ =
 // | var_term
 // | list_term
 // | set_term
+// | pair_term
 // | '(' blanks expr blanks ')'
 miniterm_ =
   ifelse_term_ |
   var_term_ |
   list_term_ |
   set_term_ |
+  pair_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, Ptr<Expr> expr, char, char)
     {
@@ -229,12 +241,25 @@ set_term_ =
         return make_unique<SetExpr>(move(exprs));
     };
 
+// pair_term
+// : '(' blanks expr blanks ',' blanks expr blanks ')'
+pair_term_ =
+  '('_T + blanks_ + expr_ + blanks_ + ','_T + blanks_ + expr_ + blanks_ + ')'_T >>
+    [](char, char, Ptr<Expr> &&first, char, char, char, Ptr<Expr> &&second, char, char)
+    {
+        vector<Ptr<Expr>> exprs;
+        exprs.push_back(move(first));
+        exprs.push_back(move(second));
+        return make_unique<ConsExpr>("Pair"s, move(exprs));
+    };
+
 // term
 // : ifelse_term
 // | cons_term
 // | var_term
 // | list_term
 // | set_term
+// | pair_term
 // | '(' blanks expr blanks ')'
 term_ =
   ifelse_term_ |
@@ -246,6 +271,7 @@ term_ =
   var_term_ |
   list_term_ |
   set_term_ |
+  pair_term_ |
   '('_T + blanks_ + expr_ + blanks_ + ')'_T >>
     [](char, char, Ptr<Expr> expr, char, char)
     {

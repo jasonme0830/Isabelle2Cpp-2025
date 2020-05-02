@@ -45,6 +45,7 @@ class Parser
     Parsec<Ptr<Expr>>                   var_term_;
     Parsec<Ptr<Expr>>                   list_term_;
     Parsec<Ptr<Expr>>                   set_term_;
+    Parsec<Ptr<Expr>>                   pair_term_;
 
     Parsec<Ptr<Expr>>                   term_;
     Parsec<Ptr<Expr>>                   expr9_;
