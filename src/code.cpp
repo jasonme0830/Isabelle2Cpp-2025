@@ -70,11 +70,11 @@ void
 Code::generate_normal(FuncEntity &entity)
 {
     auto &types = entity.types();
-    new_line() << types.front() << endl;
+    new_line() << types.back() << endl;
     new_line() << entity.name() << "(";
-    for (size_t i = 1; i < types.size(); ++i)
+    for (size_t i = 0; i < types.size() - 1; ++i)
     {
-        if (i == 1)
+        if (i == 0)
         {
             out_ << types[i] << " arg" << to_string(i);
         }
