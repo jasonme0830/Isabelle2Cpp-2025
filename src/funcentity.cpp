@@ -59,7 +59,7 @@ FuncEntity::add_argument_type(string name)
 const string
 &FuncEntity::result_type()
 {
-    return types_.front();
+    return types_.back();
 }
 
 const vector<string>
