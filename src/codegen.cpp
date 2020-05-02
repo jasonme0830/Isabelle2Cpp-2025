@@ -24,7 +24,7 @@ is_number(const string &str)
 
 static
 string
-get_argument_type(const string &type)
+get_argument_type(const string &type, size_t ind = 0)
 {
     if (type.empty())
     {
@@ -32,8 +32,40 @@ get_argument_type(const string &type)
     }
 
     auto l = type.find('<');
-    auto r = type.rfind('>');
-    return type.substr(l + 1, r - l - 1);
+    for (size_t i = 0; i < ind; ++i)
+    {
+        for (size_t cnt = 0;
+            cnt == 0 and type[l] == ',';
+            ++l)
+        {
+            if (type[l] == '<')
+            {
+                ++cnt;
+            }
+            else if (type[l] == '>')
+            {
+                --cnt;
+            }
+        }
+        l += 2;
+    }
+
+    auto r = l;
+    for (size_t cnt = 0;
+        cnt == 0 and (type[r] == ',' or type[r] == '>');
+        ++r)
+    {
+        if (type[r] == '<')
+        {
+            ++cnt;
+        }
+        else if (type[r] == '>')
+        {
+            --cnt;
+        }
+    }
+
+    return type.substr(l, r - l);
 }
 }
 
@@ -79,14 +111,16 @@ const
     {
         { "set",    "std::set" },
         { "option", "std::optional" },
-        { "list",   "std::list" }
+        { "list",   "std::list" },
+        { "pair",   "std::pair" }
     };
 
     static const map<string, string> mapping_header
     {
         { "set",    "set" },
         { "option", "optional" },
-        { "list",   "list" }
+        { "list",   "list" },
+        { "pair",   "utility" }
     };
 
     if (mapping_header.count(name))
@@ -94,9 +128,23 @@ const
         entity.code().add_header(mapping_header.at(name));
     }
 
-    return mapping.count(name)
-           ? mapping.at(name) + '<' + arg->gen_typeinfo(entity) + '>'
-           : name + '<' + arg->gen_typeinfo(entity) + '>';
+    auto res = mapping.count(name) ? mapping.at(name) : name;
+
+    res += '<';
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        if (i == 0)
+        {
+            res += args[i]->gen_typeinfo(entity);
+        }
+        else
+        {
+            res += ", " + args[i]->gen_typeinfo(entity);
+        }
+    }
+    res += '>';
+
+    return res;
 }
 
 string
@@ -128,11 +176,11 @@ void
 FuncType::build_entity(FuncEntity &entity)
 const
 {
-    entity.add_type(result_type()->gen_typeinfo(entity));
     for (size_t i = 0; i < types.size() - 1; ++i)
     {
         entity.add_type(types[i]->gen_typeinfo(entity));
     }
+    entity.add_type(result_type()->gen_typeinfo(entity));
 }
 
 void
@@ -243,6 +291,12 @@ const
 
         args[0]->gen_pattern(entity, prev + ".value()");
     }
+    else if (constructor == "Pair")
+    {
+        assert(args.size() == 2);
+        args[0]->gen_pattern(entity, prev + ".first");
+        args[1]->gen_pattern(entity, prev + ".second");
+    }
     else
     {
         throw std::runtime_error("no such name: " + constructor);
@@ -255,7 +309,7 @@ const
 {
     if (exprs.empty())
     {
-        VarExpr("Nil").gen_expr(entity, prev);
+        VarExpr("Nil").gen_pattern(entity, prev);
     }
     else
     {
@@ -401,6 +455,12 @@ const
             entity.add_expr("}");
             return res;
         }
+    }
+    else if (constructor == "Pair")
+    {
+        assert(args.size() == 2);
+        return "std::make_pair(" + args[0]->gen_expr(entity, get_argument_type(type, 0))
+            + ", " + args[1]->gen_expr(entity, get_argument_type(type, 1)) + ")";
     }
     else
     {
