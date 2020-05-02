@@ -63,11 +63,20 @@ struct ArgumentType final : Type
 struct TemplateType final : Type
 {
     std::string name;
-    Ptr<Type> arg;
+    std::vector<Ptr<Type>> args;
 
-    TemplateType(std::string name, Ptr<Type> &&arg)
+    TemplateType(std::string name)
+      : name(std::move(name)) {}
+    TemplateType(std::string name,
+        Ptr<Type> &&arg)
       : name(std::move(name))
-      , arg(std::move(arg)) {}
+    {
+        args.push_back(std::move(arg));
+    }
+    TemplateType(std::string name,
+        std::vector<Ptr<Type>> &&args)
+      : name(std::move(name))
+      , args(std::move(args)) {}
 
     std::string
     gen_typeinfo(FuncEntity &entity)
