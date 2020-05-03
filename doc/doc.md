@@ -8,9 +8,10 @@ Isabelle/HOL | C++
 - | -
 nat | std::uint64_t
 int | std::int64_t
-'a set | std::set\<T\>
-'a option | std::optional
-'a list | std::list\<T\>
+'a set | std::set\<T0\>
+'a list | std::list\<T0\>
+'a option | std::optional\<T0\>
+'a * 'b | std::pair\<T0, T1\>
 
 ## Patterns Mapping
 
