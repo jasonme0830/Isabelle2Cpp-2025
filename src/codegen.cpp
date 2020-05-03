@@ -374,7 +374,23 @@ string
 ConsExpr::gen_expr(FuncEntity &entity, const string &type)
 const
 {
-    if (constructor == "Suc")
+    if (constructor == entity.name())
+    {
+        string expr = constructor + '(';
+        for (size_t i = 0; i < args.size(); ++i)
+        {
+            if (i == 0)
+            {
+                expr += args[i]->gen_expr(entity, entity.types[i]);
+            }
+            else
+            {
+                expr += ", " + args[i]->gen_expr(entity, entity.types[i]);
+            }
+        }
+        return expr + ')';
+    }
+    else if (constructor == "Suc")
     {
         assert(args.size() == 1);
         auto expr = args[0]->gen_expr(entity, type);
