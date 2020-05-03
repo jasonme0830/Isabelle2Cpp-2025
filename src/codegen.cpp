@@ -381,11 +381,11 @@ const
         {
             if (i == 0)
             {
-                expr += args[i]->gen_expr(entity, entity.types[i]);
+                expr += args[i]->gen_expr(entity, entity.types()[i]);
             }
             else
             {
-                expr += ", " + args[i]->gen_expr(entity, entity.types[i]);
+                expr += ", " + args[i]->gen_expr(entity, entity.types()[i]);
             }
         }
         return expr + ')';
