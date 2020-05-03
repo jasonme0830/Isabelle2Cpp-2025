@@ -6,10 +6,6 @@ Transformation from Isabelle/HOL to C++, supports HOL at the version on June 9, 
 
 Only support cast the recursive definitions of functions from Isabelle/HOL to C++
 
-## To Do
-
-- [ ] Support pair
-
 ## Example
 
 Before:
