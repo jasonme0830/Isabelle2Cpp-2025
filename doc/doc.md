@@ -19,20 +19,78 @@ And type variables also can be replaced by concrete types, for example, `('t0 * 
 
 > `prev` means the previous variable for patterns, for example, `prev` is `arg1`, the first parameter in the generated declaration, when generating code for `Cons x xs` in `name-of-function (Cons x xs)`
 
-### *Numeral*
+### Variable
 
-as a condiation like `prev != numeral`
-
-### Nil
-
-as a condiation like `!prev.empty()`
-
-### Cons x xs
+A single name stands for a variable if it is not supported like Nil, None and so on. It will generate a declaration statement for the variable like:
 
 ```cpp
-auto x = prev.front();
+auto var-name = prev;
+```
+
+### *Numeral*
+
+As a condition like:
+
+```cpp
+if (prev != NUMERAL) {
+    break;
+}
+```
+
+### Boolean
+
+As a condition like:
+
+```cpp
+if (prev != true) {
+    break;
+}
+```
+
+or
+
+```cpp
+if (prev != false) {
+    break;
+}
+```
+
+### List
+
+#### Nil
+
+As a condition like:
+
+```cpp
+if (!prev.empty()) {
+    break;
+}
+```
+
+#### Cons ($1) ($2)
+
+($1) and ($2) are the arguments of constructor `Cons`
+
+```cpp
+if (prev.size() < 1) {
+    break;
+}
+
+// prev.front() as the prev of ($1)
 prev.pop_front();
-auto xs = prev;
+// prev as the prev of ($2)
+```
+
+### Option
+
+#### None
+
+As a condition like:
+
+```cpp
+if (prev.has_value()) {
+    break;
+}
 ```
 
 ## Expressions Mapping
