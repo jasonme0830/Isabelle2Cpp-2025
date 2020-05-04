@@ -8,10 +8,12 @@ Isabelle/HOL | C++
 - | -
 nat | std::uint64_t
 int | std::int64_t
-'a set | std::set\<T0\>
-'a list | std::list\<T0\>
-'a option | std::optional\<T0\>
-'a * 'b | std::pair\<T0, T1\>
+'t set | std::set\<T0\>
+'t list | std::list\<T0\>
+'t option | std::optional\<T0\>
+'t0 * 't1 | std::pair\<T0, T1\>
+
+And type variables also can be replaced by concrete types, for example, `('t0 * 't1) list` will be translated to `std::list<std::pair<T0, T1>>` in C++
 
 ## Patterns Mapping
 
