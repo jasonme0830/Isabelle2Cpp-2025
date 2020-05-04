@@ -17,7 +17,7 @@ And type variables also can be replaced by concrete types, for example, `('t0 * 
 
 ## Patterns Mapping
 
-> for example, *prev* is `arg1` in `rev (Cons x xs)`
+> `prev` means the previous variable for patterns, for example, `prev` is `arg1`, the first parameter in the generated declaration, when generating code for `Cons x xs` in `name-of-function (Cons x xs)`
 
 ### *Numeral*
 
