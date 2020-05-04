@@ -14,6 +14,9 @@ class FuncEntity;
 template<typename T>
 using Ptr = std::unique_ptr<T>;
 
+/**
+ * base class for all ast nodes
+*/
 struct AST
 {
     virtual
@@ -21,12 +24,23 @@ struct AST
     = 0;
 };
 
+/**
+ * base class for all types
+ * types generate concrete type as 'std::uint64_t'
+*/
 struct Type : AST
 {
     virtual
     ~Type()
     = 0;
 
+    /**
+     * receive the related function entity
+     *  and return the type infomation
+     * @entity: generate type infomation
+     *  related with the given entity
+     *
+    */
     virtual
     std::string
     gen_typeinfo(FuncEntity &entity)
@@ -34,10 +48,18 @@ struct Type : AST
     = 0;
 };
 
+/**
+ * class for normal type
+ * normal type is neither 't nor list in 't list
+ * it is a concrete type like nat
+*/
 struct NormalType final : Type
 {
     std::string name;
 
+    /**
+     * @name: name of concrete type
+    */
     NormalType(std::string name)
       : name(std::move(name)) {}
 
@@ -47,10 +69,18 @@ struct NormalType final : Type
     override;
 };
 
+/**
+ * argument type is the type variable in isabelle
+ * such as 't in 't list
+*/
 struct ArgumentType final : Type
 {
     std::string name;
 
+    /**
+     * @name: name of the argument type but without '
+     *  for example, t is the name of 't
+    */
     ArgumentType(std::string name)
       : name(std::move(name)) {}
 
