@@ -19,6 +19,8 @@ And type variables also can be replaced by concrete types, for example, `('t0 * 
 
 > `prev` means the previous variable for patterns, for example, `prev` is `arg1`, the first parameter in the generated declaration, when generating code for `Cons x xs` in `name-of-function (Cons x xs)`
 
+> You will see `($n)` later, `($n)` means it is the nth argument of the given constructor
+
 ### Variable
 
 A single name stands for a variable if it is not supported like Nil, None and so on. It will generate a declaration statement for the variable like:
@@ -29,13 +31,20 @@ auto var-name = prev;
 
 ### *Numeral*
 
+#### Numeral Literal
+
 As a condition like:
 
 ```cpp
-if (prev != NUMERAL) {
+// 0 or other numeral literals
+if (prev != 0) {
     break;
 }
 ```
+
+#### Suc ($1)
+
+`(prev) - 1` as the `prev` of `($1)`
 
 ### Boolean
 
@@ -55,6 +64,10 @@ if (prev != false) {
 }
 ```
 
+### Set
+
+
+
 ### List
 
 #### Nil
@@ -69,16 +82,16 @@ if (!prev.empty()) {
 
 #### Cons ($1) ($2)
 
-($1) and ($2) are the arguments of constructor `Cons`
-
 ```cpp
 if (prev.size() < 1) {
     break;
 }
 
 // prev.front() as the prev of ($1)
+// then generate code for ($1)
 prev.pop_front();
 // prev as the prev of ($2)
+// then generate code for ($2)
 ```
 
 ### Option
@@ -92,6 +105,23 @@ if (prev.has_value()) {
     break;
 }
 ```
+
+#### Some ($1)
+
+```cpp
+if (!prev.has_value()) {
+    break;
+}
+// prev.value() as prev of ($1)
+```
+
+### Pair
+
+#### Pair ($1) ($2)
+
+`prev.first` as the `prev` of `($1)`
+
+`prev.second` as the `prev` of `($2)`
 
 ## Expressions Mapping
 
