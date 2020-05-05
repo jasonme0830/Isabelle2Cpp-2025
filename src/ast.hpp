@@ -363,12 +363,26 @@ struct BinaryOpExpr final : Expr
     override;
 };
 
+/**
+ * helpful class for parsing left-associative binary operation
+ *  contains its binded binary operator,
+ *   current expression and the tail expression,
+ *    such * b * c in a * b * c,
+ *     * is the binded operator
+ *      b is the current expression
+ *       and * c is the tail expression
+*/
 struct BinaryOpTailExpr final
 {
     BOp op;
     Ptr<Expr> expr;
     Ptr<BinaryOpTailExpr> tail;
 
+    /**
+     * @op: binded binary operator
+     * @expr: current expression
+     * @tail: tail expression, maybe nullptr
+    */
     BinaryOpTailExpr(BOp op, Ptr<Expr> &&expr,
         Ptr<BinaryOpTailExpr> &&tail)
       : op(op)
@@ -376,26 +390,46 @@ struct BinaryOpTailExpr final
       , tail(std::move(tail)) {}
 };
 
+/**
+ * equation means each line in function declaration
+ * for example, "fun x y = (x, y)" is an equation
+*/
 struct Equation final : AST
 {
     Ptr<ConsExpr> pattern;
     Ptr<Expr> expr;
 
+    /**
+     * @pattern: expression before '='
+     * @expr: expression after '='
+    */
     Equation(Ptr<ConsExpr> &&pattern, Ptr<Expr> &&expr)
       : pattern(std::move(pattern))
       , expr(std::move(expr)) {}
 
+    /**
+     * build the binded entity
+    */
     void
     build_entity(FuncEntity &entity)
     const;
 };
 
+/**
+ * function declaration contains its name,
+ *  the function type and its equations
+*/
 struct FuncDecl final : AST
 {
     std::string name;
     Ptr<FuncType> type;
     std::vector<Ptr<Equation>> equations;
 
+    /**
+     * @name: name of the declared function
+     * @type: type of the function
+     * @equations: equations of the function
+    */
     FuncDecl(std::string name,
         Ptr<FuncType> &&type,
         std::vector<Ptr<Equation>> &&equations)
@@ -403,6 +437,9 @@ struct FuncDecl final : AST
       , type(std::move(type))
       , equations(std::move(equations)) {}
 
+    /**
+     * build the binded entity
+    */
     void
     build_entity(FuncEntity &entity)
     const;
