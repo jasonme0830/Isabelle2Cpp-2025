@@ -90,11 +90,20 @@ struct ArgumentType final : Type
     override;
 };
 
+/**
+ * template type is the type which has type variable
+ * such as list in 't list
+*/
 struct TemplateType final : Type
 {
     std::string name;
     std::vector<Ptr<Type>> args;
 
+    /**
+     * @name: name of template type
+     * @args: type arguments for this template type
+     *  such 'a and 'b in ('a * 'b)
+    */
     TemplateType(std::string name)
       : name(std::move(name)) {}
     TemplateType(std::string name,
@@ -114,13 +123,25 @@ struct TemplateType final : Type
     override;
 };
 
+/**
+ * function type is defined with symbol =>
+ *  such as 'a => 'b => ('a * 'b) will be translated to
+ *  std::pair<T0, T1>(T0, T1)
+*/
 struct FuncType final : Type
 {
     std::vector<Ptr<Type>> types;
 
+    /**
+     * @types: the last type is the result type
+     *  and others are argument types
+    */
     FuncType(std::vector<Ptr<Type>> &&types)
       : types(std::move(types)) {}
 
+    /**
+     * return the raw pointer of result type
+    */
     Type
     *result_type()
     const
@@ -129,6 +150,9 @@ struct FuncType final : Type
         return types.back().get();
     }
 
+    /**
+     * build the binded entity
+    */
     void
     build_entity(FuncEntity &entity)
     const;
@@ -139,17 +163,32 @@ struct FuncType final : Type
     override;
 };
 
+/**
+ * base class for all exprs
+ * exprs can be captured as pattern or expr
+ *  exprs as pattern will generate code by calling gen_pattern
+ *  exprs as the return expression, such (x, y) in "func x y = (x, y)",
+ *   will generate code by calling gen_expr
+*/
 struct Expr : AST
 {
     virtual
     ~Expr()
     = 0;
 
+    /**
+     * method to generate code when expr occurs as pattern
+     * not return value, just generate statements in entity
+    */
     virtual
     void
     gen_pattern(FuncEntity &entity, const std::string &prev)
     const;
 
+    /**
+     * method to generate code when expr occurs as the expression to return
+     * return the expression and generate statements when needed
+    */
     virtual
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
@@ -157,10 +196,18 @@ struct Expr : AST
     = 0;
 };
 
+/**
+ * single identifier or numeral literal
+ *  without arguments
+*/
 struct VarExpr final : Expr
 {
     std::string name;
 
+    /**
+     * @name: value of VarExpr
+     *  single identifier or numeral literal
+    */
     VarExpr(std::string name)
       : name(std::move(name)) {}
 
@@ -175,11 +222,20 @@ struct VarExpr final : Expr
     override;
 };
 
+/**
+ * constructor with arguments
+ *  for example, Cons is the constructor
+ *   and x and xs are arguments in Cons x xs
+*/
 struct ConsExpr final : Expr
 {
     std::string constructor;
     std::vector<Ptr<Expr>> args;
 
+    /**
+     * @constructor: name of constructor
+     * @args: arguments for the constructor
+    */
     ConsExpr(std::string constructor,
         std::vector<Ptr<Expr>> &&args)
       : constructor(std::move(constructor))
@@ -196,10 +252,17 @@ struct ConsExpr final : Expr
     override;
 };
 
+/**
+ * ListExpr describes expression like [...]
+ *  exprs are splited by comma in []
+*/
 struct ListExpr final : Expr
 {
     std::vector<Ptr<Expr>> exprs;
 
+    /**
+     * @exprs: exprs in []
+    */
     ListExpr() = default;
     ListExpr(std::vector<Ptr<Expr>> &&exprs)
       : exprs(std::move(exprs)) {}
@@ -215,10 +278,17 @@ struct ListExpr final : Expr
     override;
 };
 
+/**
+ * SetExpr describes expression like {...}
+ *  exprs are splited by comma in {}
+*/
 struct SetExpr final : Expr
 {
     std::vector<Ptr<Expr>> exprs;
 
+    /**
+     * @exprs: exprs in {}
+    */
     SetExpr() = default;
     SetExpr(std::vector<Ptr<Expr>> &&exprs)
       : exprs(std::move(exprs)) {}
@@ -229,6 +299,9 @@ struct SetExpr final : Expr
     override;
 };
 
+/**
+ * enum class to indicate different binary operators
+*/
 enum class BOp
 {
     LogicAnd,   // \<and>
@@ -260,11 +333,20 @@ enum class BOp
     ListApp,  // @
 };
 
+/**
+ * contains binary operator,
+ *  lhs expression and rhs expression
+*/
 struct BinaryOpExpr final : Expr
 {
     BOp op;
     Ptr<Expr> lhs, rhs;
 
+    /**
+     * @op: enum which indicates the binary operator
+     * @lhs: the lhs expression
+     * @rhs: the rhs expression
+    */
     BinaryOpExpr(BOp op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs)
       : op(op)
       , lhs(std::move(lhs))
