@@ -17,7 +17,7 @@ And type variables also can be replaced by concrete types, for example, `('t0 * 
 
 ## Patterns Mapping
 
-> `prev` means the previous variable for patterns, for example, `prev` is `arg1`, the first parameter in the generated declaration, when generating code for `Cons x xs` in `name-of-function (Cons x xs)`
+> `prev` means the previous variable for patterns, for example, `prev` is `arg0`, the first parameter in the generated declaration, when generating code for `Cons x xs` in `name-of-function (Cons x xs)`
 
 > You will see `($n)` later, `($n)` means it is the nth argument of the given constructor
 
