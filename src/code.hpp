@@ -7,11 +7,22 @@
 
 namespace hol2cpp
 {
+/**
+ * Code contains all function entities
+ * provides methods to generate C++ code
+*/
 class Code
 {
   public:
+    /**
+     * @out: generated C++ code will be outputed by out
+     *  use std::cout by default
+    */
     Code(std::ostream &out = std::cout);
 
+    /**
+     * entry new function entity
+    */
     void
     entry_func();
 
