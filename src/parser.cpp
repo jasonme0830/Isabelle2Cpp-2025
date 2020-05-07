@@ -8,6 +8,18 @@ using namespace parsec;
 
 namespace hol2cpp
 {
+vector<Ptr<FuncDecl>>
+Parser::pas_func_decls(const string &str)
+{
+    return func_decls_(str);
+}
+
+Ptr<FuncDecl>
+Parser::pas_func_decl(const string &str)
+{
+    return func_decl_(str);
+}
+
 // the grammer is tentative now
 Parser::Parser()
 {
@@ -625,17 +637,5 @@ func_decls_ =
     } |
   Token::epsilon<vector<Ptr<FuncDecl>>>();
 
-}
-
-vector<Ptr<FuncDecl>>
-Parser::pas_func_decls(const string &str)
-{
-    return func_decls_(str);
-}
-
-Ptr<FuncDecl>
-Parser::pas_func_decl(const string &str)
-{
-    return func_decl_(str);
 }
 }
