@@ -10,14 +10,26 @@ namespace hol2cpp
 {
 using parsec::Parsec;
 
+/**
+ * parser receive source code
+ *  then return the ast node(s)
+*/
 class Parser
 {
   public:
     Parser();
 
+    /**
+     * @str: source code contains multi declarations
+     * return FuncDecl nodes
+    */
     std::vector<Ptr<FuncDecl>>
     pas_func_decls(const std::string &str);
 
+    /**
+     * @str: source code contains only one declaration
+     * return FuncDecl node
+    */
     Ptr<FuncDecl>
     pas_func_decl(const std::string &str);
 
