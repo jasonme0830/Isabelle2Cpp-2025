@@ -133,7 +133,7 @@ just as the numeral's value like `auto temp = numeral`
 
 ### Nil
 
-{} of the result type like `auto temp = std::list<T>{}`
+{} of the type like `auto temp = std::list<T>{}`
 
 ### Cons x xs
 
