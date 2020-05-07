@@ -17,6 +17,9 @@ using parsec::Parsec;
 class Parser
 {
   public:
+    /**
+     * default ctor
+    */
     Parser();
 
     /**
