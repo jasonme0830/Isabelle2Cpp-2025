@@ -187,7 +187,7 @@ void
 Equation::build_entity(FuncEntity &entity)
 const
 {
-    entity.entry_euation();
+    entity.entry_euqation();
     pattern->gen_pattern(entity, "");
     entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + ";");
 }

@@ -83,7 +83,7 @@ FuncEntity::gen_temp()
 }
 
 void
-FuncEntity::entry_euation()
+FuncEntity::entry_euqation()
 {
     temp_count_ = 0;
     patterns_.emplace_back();
