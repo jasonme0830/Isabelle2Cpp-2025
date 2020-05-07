@@ -7,20 +7,18 @@ namespace hol2cpp
 {
 Code::Code(ostream &out)
   : out_(out)
-  , indent_(0)
-  , entry_func_(-1) {}
+  , indent_(0) {}
 
 void
 Code::entry_func()
 {
-    entry_func_ = func_entities_.size();
     func_entities_.emplace_back(*this);
 }
 
 FuncEntity
 &Code::current_entity()
 {
-    return func_entities_[entry_func_];
+    return func_entities_.back();
 }
 
 void

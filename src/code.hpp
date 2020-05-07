@@ -92,9 +92,7 @@ class Code
     std::ostream &out_;
     int indent_;
 
-    std::size_t entry_func_;
     std::vector<FuncEntity> func_entities_;
-
     std::set<std::string> headers_;
 };
 }
