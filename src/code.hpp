@@ -27,7 +27,7 @@ class Code
     entry_func();
 
     /**
-     * return the current entity to build
+     * return the current entity, always the last one, to build
     */
     FuncEntity
     &current_entity();
