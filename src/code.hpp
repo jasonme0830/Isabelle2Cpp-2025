@@ -40,7 +40,7 @@ class Code
 
     /**
      * define or get the indent size
-     *  4 by default
+     * 4 by default
     */
     static
     std::size_t
