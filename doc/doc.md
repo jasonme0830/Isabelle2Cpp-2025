@@ -83,7 +83,7 @@ if (!prev.empty()) {
 #### Cons ($1) ($2)
 
 ```cpp
-if (prev.size() < 1) {
+if (prev.empty()) {
     break;
 }
 
