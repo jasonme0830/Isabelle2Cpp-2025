@@ -328,6 +328,18 @@ const
 }
 
 void
+SetExpr::gen_pattern(FuncEntity &entity, const string &prev)
+const
+{
+    assert(exprs.empty());
+    entity.add_pattern("if (!" + prev + ".empty()) {");
+    entity.add_indent();
+        entity.add_pattern("break;");
+    entity.sub_indent();
+    entity.add_pattern("}");
+}
+
+void
 BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev)
 const
 {

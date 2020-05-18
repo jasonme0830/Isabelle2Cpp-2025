@@ -293,6 +293,11 @@ struct SetExpr final : Expr
     SetExpr(std::vector<Ptr<Expr>> &&exprs)
       : exprs(std::move(exprs)) {}
 
+    void
+    gen_pattern(FuncEntity &entity, const std::string &prev)
+    const
+    override;
+
     std::string
     gen_expr(FuncEntity &entity, const std::string &type)
     const
