@@ -721,12 +721,14 @@ const
         }
         else
         {
-            auto temp = entity.gen_temp();
-            entity.add_expr("auto " + temp + " = " + l + ";");
+            auto temp0 = entity.gen_temp();
+            auto temp1 = entity.gen_temp();
+            entity.add_expr("auto " + temp0 + " = " + l + ";");
+            entity.add_expr("auto " + temp1 + " = " + r + ";");
             entity.add_expr(
-                temp + ".insert(" + temp + ".end(), "
-              + r + ".begin(), " + r + ".end());");
-            return temp;
+                temp0 + ".insert(" + temp0 + ".end(), "
+              + temp1 + ".begin(), " + temp1 + ".end());");
+            return temp0;
         }
     }
     throw runtime_error("shit! shit! shit!");
