@@ -60,8 +60,7 @@ rev(std::list<T0> arg0) {
         auto x = arg1.front();
         arg1.pop_front();
         auto xs = arg1;
-        auto temp0 = std::list<decltype(x)>{x};
-        return app(rev(xs), temp0);
+        return app(rev(xs), std::list<decltype(x)>{x});
     }
 }
 

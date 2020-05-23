@@ -413,24 +413,24 @@ const
         assert(args.size() == 2);
         auto x = args[0]->gen_expr(entity, get_argument_type(type));
         auto xs = args[1]->gen_expr(entity, type);
-        auto temp = entity.gen_temp();
         if (xs == "{}")
         {
             if (type.empty())
             {
-                entity.add_expr("auto " + temp + " = std::list<decltype(" + x + ")>{" + x + "};");
+                return "std::list<decltype(" + x + ")>{" + x + "}";
             }
             else
             {
-                entity.add_expr(type + " " + temp + " = {" + x + "};");
+                return type + "{" + x + "}";
             }
         }
         else
         {
+            auto temp = entity.gen_temp();
             entity.add_expr("auto " + temp + " = " + xs + ";");
             entity.add_expr(temp + ".push_front(" + x + ");");
+            return temp;
         }
-        return temp;
     }
     else if (constructor == "Some")
     {
