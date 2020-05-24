@@ -440,7 +440,7 @@ const
             auto expr = args.front()->gen_expr(entity, type);
             if (expr == "{}")
             {
-                // if receive Some Nil,
+                // if receive Some Nil or Some None,
                 // it will return wrong result
                 // becasue it has not enough typeinfo
                 return expr;
