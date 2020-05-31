@@ -82,7 +82,7 @@ rev2(std::list<T0> arg0) {
         auto xs = arg0;
         auto temp0 = std::list<T0>();
         temp0.push_front(x);
-        auto temp1 = rev(xs);
+        auto temp1 = rev2(xs);
         auto temp2 = temp0;
         temp1.insert(temp1.end(), temp2.begin(), temp2.end());
         return temp1;
@@ -105,7 +105,7 @@ rev3(std::list<T0> arg0) {
         auto x = arg0.front();
         arg0.pop_front();
         auto xs = arg0;
-        auto temp0 = rev(xs);
+        auto temp0 = rev3(xs);
         auto temp1 = std::list<T0>{x};
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
         return temp0;
