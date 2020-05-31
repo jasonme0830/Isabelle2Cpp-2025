@@ -262,7 +262,7 @@ const
         assert(args.size() == entity.types().size() - 1);
         for (size_t i = 0; i < args.size(); ++i)
         {
-            args[i]->gen_pattern(entity, "arg" + to_string(i + 1));
+            args[i]->gen_pattern(entity, "arg" + to_string(i));
         }
     }
     else if (constructor == "Suc")
