@@ -7,7 +7,8 @@ namespace hol2cpp
 {
 Code::Code(ostream &out)
   : out_(out)
-  , indent_(0) {}
+  , indent_(0) 
+  , headers_{"cstdlib"} {}
 
 void
 Code::entry_func()
@@ -100,11 +101,11 @@ Code::generate_normal(FuncEntity &entity)
             new_line() << expr << endl;
         }
         sub_indent();
-        
+
         new_line() << "}" << endl;
     }
+    new_line() << "std::abort();" << endl;
     sub_indent();
-    
     new_line() << "}" << endl;
 }
 

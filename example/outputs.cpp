@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstdlib>
 #include <list>
 #include <optional>
 #include <set>
@@ -18,6 +19,7 @@ add(std::uint64_t arg0, std::uint64_t arg1) {
         auto n = arg1;
         return (add(m, n)) + 1;
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -42,6 +44,7 @@ app(std::list<T0> arg0, std::list<T0> arg1) {
         temp0.push_front(x);
         return temp0;
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -62,6 +65,7 @@ rev(std::list<T0> arg0) {
         auto xs = arg0;
         return app(rev(xs), std::list<decltype(x)>{x});
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -87,6 +91,7 @@ rev2(std::list<T0> arg0) {
         temp1.insert(temp1.end(), temp2.begin(), temp2.end());
         return temp1;
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -110,6 +115,7 @@ rev3(std::list<T0> arg0) {
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
         return temp0;
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -128,6 +134,7 @@ testoption(std::optional<T0> arg0) {
         auto x = arg0.value();
         return std::make_optional<>(std::list<decltype(x)>{x});
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -170,6 +177,7 @@ testset(std::list<T0> arg0) {
         }
         return temp0;
     }
+    std::abort();
 }
 
 template<typename T0>
@@ -200,6 +208,7 @@ testifelse(std::list<T0> arg0, T0 arg1) {
         }
         return temp0;
     }
+    std::abort();
 }
 
 template<typename T0, typename T1>
@@ -210,6 +219,7 @@ pair(T0 arg0, T1 arg1) {
         auto s = arg1;
         return std::make_pair(f, s);
     }
+    std::abort();
 }
 
 template<typename T0, typename T1>
@@ -220,6 +230,7 @@ fst(std::pair<T0, T1> arg0) {
         auto second = arg0.second;
         return first;
     }
+    std::abort();
 }
 
 template<typename T0, typename T1>
@@ -230,5 +241,6 @@ snd(std::pair<T0, T1> arg0) {
         auto second = arg0.second;
         return second;
     }
+    std::abort();
 }
 
