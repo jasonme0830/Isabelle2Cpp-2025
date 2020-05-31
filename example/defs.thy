@@ -39,3 +39,8 @@ fun fst :: "('a * 'b) \<Rightarrow> 'a" where
 
 fun snd :: "('a * 'b) \<Rightarrow> 'b" where
   "snd (first, second) = second"
+
+fun evn :: "nat \<Rightarrow> bool" where
+  "evn 0 = True" |
+  "evn (Suc 0) = False" |
+  "evn (Suc (Suc n)) = evn n"

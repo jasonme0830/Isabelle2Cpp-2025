@@ -244,3 +244,24 @@ snd(std::pair<T0, T1> arg0) {
     std::abort();
 }
 
+bool
+evn(std::uint64_t arg0) {
+    for (;;) {
+        if (arg0 != 0) {
+            break;
+        }
+        return true;
+    }
+    for (;;) {
+        if ((arg0) - 1 != 0) {
+            break;
+        }
+        return false;
+    }
+    for (;;) {
+        auto n = ((arg0) - 1) - 1;
+        return evn(n);
+    }
+    std::abort();
+}
+
