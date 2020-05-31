@@ -82,15 +82,15 @@ Code::generate_normal(FuncEntity &entity)
         }
     }
     out_ << ") {" << endl;
-    add_indent();
 
     auto &patterns = entity.patterns();
     auto &exprs = entity.exprs();
+    add_indent();
     for (size_t i = 0; i < patterns.size(); ++i)
     {
         new_line() << "for (;;) {" << endl;
-        add_indent();
 
+        add_indent();
         for (auto &pattern : patterns[i])
         {
             new_line() << pattern << endl;
@@ -99,12 +99,12 @@ Code::generate_normal(FuncEntity &entity)
         {
             new_line() << expr << endl;
         }
-
         sub_indent();
+        
         new_line() << "}" << endl;
     }
-
     sub_indent();
+    
     new_line() << "}" << endl;
 }
 
