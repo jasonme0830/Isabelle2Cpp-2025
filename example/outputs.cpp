@@ -200,13 +200,14 @@ testifelse(std::list<T0> arg0, T0 arg1) {
         auto n = arg1;
         std::list<T0> temp0;
         if ((x) < (n)) {
-            auto temp1 = testifelse(xs, n);
-            temp1.push_front(x);
-            temp0 = temp1;
+            temp0 = std::list<T0>{x};
         } else {
             temp0 = std::list<T0>();
         }
-        return temp0;
+        auto temp1 = temp0;
+        auto temp2 = testifelse(xs, n);
+        temp1.insert(temp1.end(), temp2.begin(), temp2.end());
+        return temp1;
     }
     std::abort();
 }

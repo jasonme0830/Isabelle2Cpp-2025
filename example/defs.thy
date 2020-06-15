@@ -29,7 +29,7 @@ fun testset :: "'a list \<Rightarrow> 'a set" where
 
 fun testifelse :: "'a list \<Rightarrow> 'a \<Rightarrow> 'a list" where
   "testifelse [] n = []" |
-  "testifelse (x # xs) n = if (x < n) then (x # (testifelse xs n)) else []"
+  "testifelse (x # xs) n = (if (x < n) then [x] else []) @ (testifelse xs n)"
 
 fun pair :: "'a \<Rightarrow> 'b \<Rightarrow> ('a * 'b)" where
   "pair f s = (f, s)"
