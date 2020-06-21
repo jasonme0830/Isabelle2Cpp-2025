@@ -65,3 +65,7 @@ rev(std::list<T0> arg1) {
     }
 }
 ```
+
+## To Do
+
+- [ ] Record all defined functions' types to reduce expressions' types in call expression
