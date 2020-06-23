@@ -13,3 +13,4 @@ You can see some examples in [example/](example/)
 ## To Do
 
 - [ ] Record all defined functions' types to reduce expressions' types in call expression
+- [ ] Support translation from declaration of `datatype` to C++ (template) class
