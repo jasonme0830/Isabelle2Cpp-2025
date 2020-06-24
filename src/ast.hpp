@@ -33,6 +33,7 @@ struct Type;
 struct TypeComponent
 {
     std::string constructor;
+    std::vector<Ptr<Type>> arguments;
 };
 
 /**
@@ -40,7 +41,9 @@ struct TypeComponent
  * datatype 'a list = Nil | Cons 'a "'a list"
  *
  * use union to contain the type components
- *  for example, Nil -> union { struct Nil * }
+ *  constructor without arguments won't be declared
+ *  constructor with argument(s) will be declared by its position
+ * use enum type to determine which Constructor
 */
 struct DataType : AST
 {
