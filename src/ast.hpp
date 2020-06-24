@@ -44,6 +44,8 @@ struct TypeComponent
  *  constructor without arguments won't be declared
  *  constructor with argument(s) will be declared by its position
  * use enum type to determine which Constructor
+ *
+ * literal identity of the decl_type will be stored after codegen
 */
 struct DataType : AST
 {
