@@ -24,18 +24,7 @@ struct AST
     = 0;
 };
 
-
 struct Type;
-/**
- * TypeComponent like ConsExpr
- *  but arguments are types but not expressions
-*/
-struct TypeComponent
-{
-    std::string constructor;
-    std::vector<Ptr<Type>> arguments;
-};
-
 /**
  * datatype 'a option = None | Some 'a
  * datatype 'a list = Nil | Cons 'a "'a list"
@@ -49,8 +38,22 @@ struct TypeComponent
 */
 struct DataType : AST
 {
+    /**
+     * Component likes ConsExpr
+     *  but arguments are types but not expressions
+    */
+    struct Component
+    {
+        std::string constructor;
+        std::vector<Ptr<Type>> arguments;
+    };
+
     Ptr<Type> decl_type;
-    std::vector<TypeComponent> components;
+    std::vector<Component> components;
+
+    void
+    build_entity(FuncEntity &entity)
+    const;
 };
 
 /**
