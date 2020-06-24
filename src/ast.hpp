@@ -24,6 +24,11 @@ struct AST
     = 0;
 };
 
+struct DataType : AST
+{
+
+};
+
 /**
  * base class for all types
  * types generate concrete type as 'std::uint64_t'
