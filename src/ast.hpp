@@ -24,9 +24,28 @@ struct AST
     = 0;
 };
 
+
+struct Type;
+/**
+ * TypeComponent like ConsExpr
+ *  but arguments are types but not expressions
+*/
+struct TypeComponent
+{
+    std::string constructor;
+};
+
+/**
+ * datatype 'a option = None | Some 'a
+ * datatype 'a list = Nil | Cons 'a "'a list"
+ *
+ * use union to contain the type components
+ *  for example, Nil -> union { struct Nil * }
+*/
 struct DataType : AST
 {
-
+    Ptr<Type> decl_type;
+    std::vector<TypeComponent> components;
 };
 
 /**
