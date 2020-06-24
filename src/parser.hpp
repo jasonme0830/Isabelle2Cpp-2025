@@ -85,5 +85,7 @@ class Parser
 
     Parsec<Ptr<FuncDecl>>               func_decl_;
     Parsec<std::vector<Ptr<FuncDecl>>>  func_decls_;
+
+    Parsec<Ptr<DataTypeDecl>>           datatype_decl_;
 };
 } // namespace hol2cpp

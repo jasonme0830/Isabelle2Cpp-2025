@@ -26,6 +26,7 @@ struct AST
 
 struct Type;
 /**
+ * struct for the declaration of new datatype
  * datatype 'a option = None | Some 'a
  * datatype 'a list = Nil | Cons 'a "'a list"
  *
@@ -36,7 +37,7 @@ struct Type;
  *
  * literal identity of the decl_type will be stored after codegen
 */
-struct DataType : AST
+struct DataTypeDecl : AST
 {
     /**
      * Component likes ConsExpr
