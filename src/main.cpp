@@ -33,12 +33,11 @@ main(int argc, char* argv[])
             source += fin.get();
         }
 
-        auto decls = Parser().pas_func_decls(source);
+        auto decls = Parser().pas_decls(source);
         Code code;
         for (auto &decl : decls)
         {
-            code.entry_func();
-            decl->build_entity(code.current_entity());
+            decl->codegen(code);
         }
         code.generate();
     }

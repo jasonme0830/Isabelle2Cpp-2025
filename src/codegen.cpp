@@ -8,7 +8,6 @@ using namespace std;
 
 namespace
 {
-static
 bool
 is_number(const string &str)
 {
@@ -22,7 +21,6 @@ is_number(const string &str)
     return true;
 }
 
-static
 string
 get_argument_type(const string &type, size_t ind = 0)
 {
@@ -31,12 +29,10 @@ get_argument_type(const string &type, size_t ind = 0)
         return type;
     }
 
-    auto l = type.find('<');
+    auto l = type.find('<') + 1;
     for (size_t i = 0; i < ind; ++i)
     {
-        for (size_t cnt = 0;
-            cnt == 0 and type[l] == ',';
-            ++l)
+        for (size_t cnt = 1; cnt != 0; ++l)
         {
             if (type[l] == '<')
             {
@@ -47,13 +43,11 @@ get_argument_type(const string &type, size_t ind = 0)
                 --cnt;
             }
         }
-        l += 2;
+        l = type.find('<', l) + 1;
     }
 
     auto r = l;
-    for (size_t cnt = 0;
-        cnt == 0 and (type[r] == ',' or type[r] == '>');
-        ++r)
+    for (size_t cnt = 1; cnt != 0 ; ++r)
     {
         if (type[r] == '<')
         {
@@ -65,15 +59,70 @@ get_argument_type(const string &type, size_t ind = 0)
         }
     }
 
-    return type.substr(l, r - l);
+    return type.substr(l, r - l - 1);
+}
+
+string
+get_main_of_type(const string &type)
+{
+    return type.substr(0, type.find('<'));
 }
 }
 
 namespace hol2cpp
 {
-AST::~AST() = default;
 Type::~Type() = default;
 Expr::~Expr() = default;
+Declaration::~Declaration() = default;
+
+// --- code generation ---
+
+void
+DataTypeDecl::codegen(Code &code)
+const
+{
+    code.add_header("variant");
+
+    auto name = decl_type->main_name();
+    auto &data_type = code.entry_data_type(name);
+    data_type.name() = name;
+    auto self = decl_type->build_data_type(data_type);
+
+    vector<vector<Ptr<Type>>> abstracts;
+    for (size_t i = 0; i < components.size(); ++i)
+    {
+        abstracts.push_back({});
+        data_type.entry_component();
+        data_type.add_constructor(components[i].constructor);
+        code.bind_cons(components[i].constructor, data_type);
+        for (auto &type : components[i].arguments)
+        {
+            auto field_type = type->build_data_type(data_type);
+            data_type.add_field_type(field_type);
+            if (field_type == self)
+            {
+                data_type.is_recuisive() = true;
+                code.add_header("memory");
+            }
+            abstracts.back().push_back(move(type));
+        }
+    }
+    data_type.abstracts() = move(abstracts);
+}
+
+void
+FuncDecl::codegen(Code &code)
+const
+{
+    auto &entity = code.entry_func_entity(name);
+
+    entity.name() = name;
+    type->build_func_entity(entity);
+    for (auto &equation : equations)
+    {
+        equation->build_func_entity(entity);
+    }
+}
 
 // --- generate typeinfo ---
 
@@ -170,10 +219,166 @@ const
     return type;
 }
 
-// --- build entity ---
+// --- build data type ---
+
+string
+NormalType::build_data_type(DataType &type)
+const
+{
+    return name;
+}
+
+string
+ArgumentType::build_data_type(DataType &type)
+const
+{
+    return type.add_argument_type(name);
+}
+
+string
+TemplateType::build_data_type(DataType &type)
+const
+{
+    auto res = name + '<';
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        if (i == 0)
+        {
+            res += args[i]->build_data_type(type);
+        }
+        else
+        {
+            res += ", " + args[i]->build_data_type(type);
+        }
+    }
+    res += '>';
+    return res;
+}
+
+string
+FuncType::build_data_type(DataType &type)
+const
+{
+    string res = "std::function<";
+    res += result_type()->build_data_type(type) + '(';
+    for (size_t i = 0; i < types.size() - 1; ++i)
+    {
+        if (i == 0)
+        {
+            res += types[i]->build_data_type(type);
+        }
+        else
+        {
+            res += ", " + types[i]->build_data_type(type);
+        }
+    }
+    res += ")>";
+    return res;
+}
+
+// --- get main name of type ---
+
+string
+Type::main_name()
+const
+{
+    throw runtime_error("fff");
+}
+
+string
+NormalType::main_name()
+const
+{
+    return name;
+}
+
+string
+TemplateType::main_name()
+const
+{
+    return name;
+}
+
+// --- apply type arguments ---
+
+string
+NormalType::apply(std::function<std::string(std::string)> &trans)
+const
+{
+    return name;
+}
+
+string
+ArgumentType::apply(std::function<std::string(std::string)> &trans)
+const
+{
+    return trans(name);
+}
+
+string
+TemplateType::apply(std::function<std::string(std::string)> &trans)
+const
+{
+    static const map<string, string> mapping
+    {
+        { "set",    "std::set" },
+        { "option", "std::optional" },
+        { "list",   "std::list" },
+        { "pair",   "std::pair" }
+    };
+
+    static const map<string, string> mapping_header
+    {
+        { "set",    "set" },
+        { "option", "optional" },
+        { "list",   "list" },
+        { "pair",   "utility" }
+    };
+
+    auto res = mapping.count(name) ? mapping.at(name) : name;
+
+    res += '<';
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        if (i == 0)
+        {
+            res += args[i]->apply(trans);
+        }
+        else
+        {
+            res += ", " + args[i]->apply(trans);
+        }
+    }
+    res += '>';
+
+    return res;
+}
+
+string
+FuncType::apply(std::function<std::string(std::string)> &trans)
+const
+{
+    string type = "std::function<";
+    type += result_type()->apply(trans) + '(';
+    for (size_t i = 0; i < types.size() - 1; ++i)
+    {
+        if (i == 0)
+        {
+            type += types[i]->apply(trans);
+        }
+        else
+        {
+            type += ", " + types[i]->apply(trans);
+        }
+    }
+    type += ")>";
+    return type;
+}
+
+// --- build func entity ---
 
 void
-FuncType::build_entity(FuncEntity &entity)
+FuncType::build_func_entity(FuncEntity &entity)
 const
 {
     for (size_t i = 0; i < types.size() - 1; ++i)
@@ -184,24 +389,12 @@ const
 }
 
 void
-Equation::build_entity(FuncEntity &entity)
+Equation::build_func_entity(FuncEntity &entity)
 const
 {
     entity.entry_euqation();
     pattern->gen_pattern(entity, "");
-    entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + ";");
-}
-
-void
-FuncDecl::build_entity(FuncEntity &entity)
-const
-{
-    entity.name() = name;
-    type->build_entity(entity);
-    for (auto &equation : equations)
-    {
-        equation->build_entity(entity);
-    }
+    entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + "");
 }
 
 // --- generate pattern ---
@@ -217,39 +410,34 @@ void
 VarExpr::gen_pattern(FuncEntity &entity, const string &prev)
 const
 {
-    bool postfix = true;
     if (is_number(name))
     {
-        entity.add_pattern("if (" + prev + " != " + name + ") {");
+        entity.add_pattern_cond(prev + " != " + name);
     }
     else if (name == "True")
     {
-        entity.add_pattern("if (" + prev + "!= true) {");
+        entity.add_pattern_cond(prev + "!= true");
     }
     else if (name == "False")
     {
-        entity.add_pattern("if (" + prev + "!= false) {");
+        entity.add_pattern_cond(prev + "!= false");
     }
     else if (name == "Nil")
     {
-        entity.add_pattern("if (!" + prev + ".empty()) {");
+        entity.add_pattern_cond("!" + prev + ".empty()");
     }
     else if (name == "None")
     {
-        entity.add_pattern("if (" + prev + ".has_value()) {");
+        entity.add_pattern_cond("!" + prev + ".has_value()");
+    }
+    else if (auto data_type = entity.code().find_data_type_by_cons(name))
+    {
+        string dot = data_type->is_recuisive() ? "->"s : "."s;
+        entity.add_pattern_cond(prev + dot + "cons != " + name);
     }
     else
     {
-        postfix = false;
-        entity.add_pattern("auto " + name + " = " + prev + ";");
-    }
-
-    if (postfix)
-    {
-        entity.add_indent();
-            entity.add_pattern("break;");
-        entity.sub_indent();
-        entity.add_pattern("}");
+        entity.add_pattern("auto " + name + " = " + prev + "");
     }
 }
 
@@ -271,24 +459,14 @@ const
     }
     else if (constructor == "Cons")
     {
-        entity.add_pattern("if (" + prev + ".empty()) {");
-        entity.add_indent();
-            entity.add_pattern("break;");
-        entity.sub_indent();
-        entity.add_pattern("}");
-
+        entity.add_pattern_cond("!" + prev + ".empty()");
         args[0]->gen_pattern(entity, prev + ".front()");
-        entity.add_pattern(prev + ".pop_front();");
+        entity.add_pattern(prev + ".pop_front()");
         args[1]->gen_pattern(entity, prev);
     }
     else if (constructor == "Some")
     {
-        entity.add_pattern("if (!" + prev + ".has_value()) {");
-        entity.add_indent();
-            entity.add_pattern("break;");
-        entity.sub_indent();
-        entity.add_pattern("}");
-
+        entity.add_pattern_cond("!" + prev + ".has_value()");
         args[0]->gen_pattern(entity, prev + ".value()");
     }
     else if (constructor == "Pair")
@@ -296,6 +474,16 @@ const
         assert(args.size() == 2);
         args[0]->gen_pattern(entity, prev + ".first");
         args[1]->gen_pattern(entity, prev + ".second");
+    }
+    else if (auto data_type = entity.code().find_data_type_by_cons(constructor))
+    {
+        string dot = data_type->is_recuisive() ? "->"s : "."s;
+        entity.add_pattern_cond(prev + dot + "cons != " + constructor);
+        auto pos = data_type->pos_of_cons(constructor);
+        for (size_t i = 0; i < args.size(); ++i)
+        {
+            args[i]->gen_pattern(entity, prev + dot + "get_c" + to_string(pos) + "().p" + to_string(i));
+        }
     }
     else
     {
@@ -313,16 +501,12 @@ const
     }
     else
     {
-        entity.add_pattern("if (" + prev + ".size() != " + to_string(exprs.size()) + ") {");
-        entity.add_indent();
-            entity.add_pattern("break;");
-        entity.sub_indent();
-        entity.add_pattern("}");
+        entity.add_pattern_cond(prev + ".size() != " + to_string(exprs.size()));
 
         for (const auto &expr : exprs)
         {
             expr->gen_pattern(entity, prev + ".front()");
-            entity.add_pattern(prev + ".pop_front();");
+            entity.add_pattern(prev + ".pop_front()");
         }
     }
 }
@@ -332,11 +516,7 @@ SetExpr::gen_pattern(FuncEntity &entity, const string &prev)
 const
 {
     assert(exprs.empty());
-    entity.add_pattern("if (!" + prev + ".empty()) {");
-    entity.add_indent();
-        entity.add_pattern("break;");
-    entity.sub_indent();
-    entity.add_pattern("}");
+    entity.add_pattern_cond("!" + prev + ".empty()");
 }
 
 void
@@ -376,6 +556,17 @@ const
     {
         return type.empty() ? "{}"s : (type + "()");
     }
+    else if (auto data_type = entity.code().find_data_type_by_cons(name))
+    {
+        if (data_type->is_recuisive())
+        {
+            return "std::make_shared<" + type + "::element_type>(" + name + ")";
+        }
+        else
+        {
+            return type + "(" + name + ")";
+        }
+    }
     else
     {
         return name;
@@ -398,6 +589,22 @@ const
             else
             {
                 expr += ", " + args[i]->gen_expr(entity, entity.types()[i]);
+            }
+        }
+        return expr + ')';
+    }
+    else if (auto func = entity.code().find_func_entity(constructor))
+    {
+        string expr = constructor + '(';
+        for (size_t i = 0; i < args.size(); ++i)
+        {
+            if (i == 0)
+            {
+                expr += args[i]->gen_expr(entity, func->types()[i]);
+            }
+            else
+            {
+                expr += ", " + args[i]->gen_expr(entity, func->types()[i]);
             }
         }
         return expr + ')';
@@ -427,8 +634,8 @@ const
         else
         {
             auto temp = entity.gen_temp();
-            entity.add_expr("auto " + temp + " = " + xs + ";");
-            entity.add_expr(temp + ".push_front(" + x + ");");
+            entity.add_expr("auto " + temp + " = " + xs + "");
+            entity.add_expr(temp + ".push_front(" + x + ")");
             return temp;
         }
     }
@@ -471,14 +678,14 @@ const
         {
             auto ce = args[0]->gen_expr(entity, "bool");
             auto res = entity.gen_temp();
-            entity.add_expr(type + " " + res + ";");
+            entity.add_expr(type + " " + res + "");
             entity.add_expr("if (" + ce + ") {");
             entity.add_indent();
-                entity.add_expr(res + " = " + args[1]->gen_expr(entity, type) + ";");
+                entity.add_expr(res + " = " + args[1]->gen_expr(entity, type) + "");
             entity.sub_indent();
             entity.add_expr("} else {");
             entity.add_indent();
-                entity.add_expr(res + " = " + args[2]->gen_expr(entity, type) + ";");
+                entity.add_expr(res + " = " + args[2]->gen_expr(entity, type) + "");
             entity.sub_indent();
             entity.add_expr("}");
             return res;
@@ -490,6 +697,43 @@ const
         return "std::make_pair(" + args[0]->gen_expr(entity, get_argument_type(type, 0))
             + ", " + args[1]->gen_expr(entity, get_argument_type(type, 1)) + ")";
     }
+    else if (auto data_type = entity.code().find_data_type(get_main_of_type(type)))
+    {
+        auto dot = data_type->is_recuisive() ? "->"s : "."s;
+
+        auto temp = entity.gen_temp();
+        if (data_type->is_recuisive())
+        {
+            entity.add_expr(type + " " + temp + " = std::make_shared<" + type + "::element_type>" + "(" + constructor + ")");
+        }
+        else
+        {
+            entity.add_expr(type + " " + temp + "{" + constructor +"}");
+        }
+        
+        string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor)) + "(";
+        
+        function trans = [&](string arg_type)
+        {
+            return get_argument_type(type, data_type->find_argument_type(arg_type));
+        };
+        
+        auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
+        for (size_t i = 0; i < abstracts.size(); ++i)
+        {
+            if (i == 0)
+            {
+                stmt += args[i]->gen_expr(entity, abstracts[i]->apply(trans));
+            }
+            else
+            {
+                stmt += ", " + args[i]->gen_expr(entity, abstracts[i]->apply(trans));
+            }
+        }
+        entity.add_expr(stmt + ')');
+        return temp;
+    }
+    // else as the common call without determined function
     else
     {
         string expr = constructor + '(';
@@ -625,18 +869,18 @@ const
 
         auto lv = entity.gen_temp();
         auto rv = entity.gen_temp();
-        entity.add_expr("auto " + lv + " = " + l + ";");
-        entity.add_expr("auto " + rv + " = " + r + ";");
+        entity.add_expr("auto " + lv + " = " + l + "");
+        entity.add_expr("auto " + rv + " = " + r + "");
 
         auto res = entity.gen_temp();
-        entity.add_expr("decltype(" + lv + ") " + res + ";");
+        entity.add_expr("decltype(" + lv + ") " + res + "");
 
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
         entity.add_indent();
             entity.add_expr("if (lv.count(" + term + ")) {");
             entity.add_indent();
-                entity.add_expr(res + ".insert(" + term + ");");
+                entity.add_expr(res + ".insert(" + term + ")");
             entity.sub_indent();
             entity.add_expr("}");
         entity.sub_indent();
@@ -650,13 +894,13 @@ const
 
         auto lv = entity.gen_temp();
         auto rv = entity.gen_temp();
-        entity.add_expr("auto " + lv + " = " + l + ";");
-        entity.add_expr("auto " + rv + " = " + r + ";");
+        entity.add_expr("auto " + lv + " = " + l + "");
+        entity.add_expr("auto " + rv + " = " + r + "");
 
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
         entity.add_indent();
-            entity.add_expr(lv + ".insert(" + term + ");");
+            entity.add_expr(lv + ".insert(" + term + ")");
         entity.sub_indent();
         entity.add_expr("}");
         return lv;
@@ -723,11 +967,11 @@ const
         {
             auto temp0 = entity.gen_temp();
             auto temp1 = entity.gen_temp();
-            entity.add_expr("auto " + temp0 + " = " + l + ";");
-            entity.add_expr("auto " + temp1 + " = " + r + ";");
+            entity.add_expr("auto " + temp0 + " = " + l + "");
+            entity.add_expr("auto " + temp1 + " = " + r + "");
             entity.add_expr(
                 temp0 + ".insert(" + temp0 + ".end(), "
-              + temp1 + ".begin(), " + temp1 + ".end());");
+              + temp1 + ".begin(), " + temp1 + ".end())");
             return temp0;
         }
     }

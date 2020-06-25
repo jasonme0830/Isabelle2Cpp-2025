@@ -8,10 +8,16 @@ using namespace parsec;
 
 namespace hol2cpp
 {
-vector<Ptr<FuncDecl>>
-Parser::pas_func_decls(const string &str)
+vector<Ptr<Declaration>>
+Parser::pas_decls(const string &str)
 {
-    return func_decls_(str);
+    return decls_(str);
+}
+
+Ptr<DataTypeDecl>
+Parser::pas_data_type_decl(const string &str)
+{
+    return datatype_decl_(str);
 }
 
 Ptr<FuncDecl>
@@ -625,17 +631,99 @@ func_decl_ =
         return make_unique<FuncDecl>(move(name), move(type), move(equations));
     };
 
-// func_decls
-// : blanks func_decl blanks func_decls
+// types
+// : '"' blanks type blanks '"' blanks types
+// | type blanks types
+// | '"' blanks type blanks '"'
+// | type
+types_ =
+  '"'_T + blanks_ + type_ + blanks_ + '"'_T + blanks_ + types_ >>
+    [](char, char, Ptr<Type> &&type, char, char, char, vector<Ptr<Type>> types)
+    {
+        types.insert(types.begin(), move(type));
+        return types;
+    } |
+  type_ + blanks_ + types_ >>
+    [](Ptr<Type> &&type, char, vector<Ptr<Type>> types)
+    {
+        types.insert(types.begin(), move(type));
+        return types;
+    } |
+  '"'_T + blanks_ + type_ + blanks_ + '"'_T >>
+    [](char, char, Ptr<Type> &&type, char, char)
+    {
+        vector<Ptr<Type>> types;
+        types.push_back(move(type));
+        return types;
+    } |
+  type_ >>
+    [](Ptr<Type> &&type)
+    {
+        vector<Ptr<Type>> types;
+        types.push_back(move(type));
+        return types;
+    };
+
+// dtdecl_component
+// : identifier blanks types
+// | identifier
+dtdecl_component_ =
+  identifier_ + blanks_ + types_ >>
+    [](string cons, char, vector<Ptr<Type>> &&types)
+    {
+        return DataTypeDecl::Component{move(cons), move(types)};
+    } |
+  identifier_ >>
+    [](string cons)
+    {
+        return DataTypeDecl::Component{move(cons), {}};
+    };
+
+// dtdecl_components
+// : dtdecl_component blanks '|' blanks dtdecl_components
+// | dtdecl_component
+dtdecl_components_ =
+  dtdecl_component_ + blanks_ + '|'_T + blanks_ + dtdecl_components_ >>
+    [](DataTypeDecl::Component &&comp, char, char, char, vector<DataTypeDecl::Component> comps)
+    {
+        comps.insert(comps.begin(), move(comp));
+        return comps;
+    } |
+  dtdecl_component_ >>
+    [](DataTypeDecl::Component &&comp)
+    {
+        vector<DataTypeDecl::Component> comps;
+        comps.push_back(move(comp));
+        return comps;
+    };
+
+// datatype_decl
+// : "datatype" blanks type_term blanks '=' blanks dtdecl_components blanks ';'
+datatype_decl_ =
+  "datatype"_T + blanks_ + type_term_ + blanks_ + '='_T + blanks_ + dtdecl_components_ + blanks_ + ';'_T >>
+    [](Placeholder, char, Ptr<Type> &&decl_type, char, char, char, vector<DataTypeDecl::Component> &&components, char, char)
+    {
+        return make_unique<DataTypeDecl>(move(decl_type), move(components));
+    };
+
+// decls
+// : blanks func_decl blanks decls
+// | blanks datatype_decl blanks decls
 // | <epsilon>
-func_decls_ =
-  blanks_ + func_decl_ + blanks_ + func_decls_ >>
-    [](char, Ptr<FuncDecl> &&decl, char, vector<Ptr<FuncDecl>> decls)
+decls_ =
+  blanks_ + func_decl_ + blanks_ + decls_ >>
+    [](char, Ptr<FuncDecl> &&decl, char, vector<Ptr<Declaration>> decls)
     {
         decls.insert(decls.begin(), move(decl));
         return decls;
     } |
-  Token::epsilon<vector<Ptr<FuncDecl>>>();
+  blanks_ + datatype_decl_ + blanks_ + decls_ >>
+    [](char, Ptr<DataTypeDecl> &&decl, char, vector<Ptr<Declaration>> decls)
+    {
+        decls.insert(decls.begin(), move(decl));
+        return decls;
+    } |
+  Token::epsilon<vector<Ptr<Declaration>>>();
 
 }
 }

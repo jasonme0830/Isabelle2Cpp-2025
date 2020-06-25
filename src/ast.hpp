@@ -5,63 +5,22 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <functional>
 
 namespace hol2cpp
 {
 class Code;
+class DataType;
 class FuncEntity;
 
 template<typename T>
 using Ptr = std::unique_ptr<T>;
 
 /**
- * base class for all ast nodes
-*/
-struct AST
-{
-    virtual
-    ~AST()
-    = 0;
-};
-
-struct Type;
-/**
- * struct for the declaration of new datatype
- * datatype 'a option = None | Some 'a
- * datatype 'a list = Nil | Cons 'a "'a list"
- *
- * use union to contain the type components
- *  constructor without arguments won't be declared
- *  constructor with argument(s) will be declared by its position
- * use enum type to determine which Constructor
- *
- * literal identity of the decl_type will be stored after codegen
-*/
-struct DataTypeDecl : AST
-{
-    /**
-     * Component likes ConsExpr
-     *  but arguments are types but not expressions
-    */
-    struct Component
-    {
-        std::string constructor;
-        std::vector<Ptr<Type>> arguments;
-    };
-
-    Ptr<Type> decl_type;
-    std::vector<Component> components;
-
-    void
-    build_entity(FuncEntity &entity)
-    const;
-};
-
-/**
  * base class for all types
  * types generate concrete type as 'std::uint64_t'
 */
-struct Type : AST
+struct Type
 {
     virtual
     ~Type()
@@ -77,6 +36,23 @@ struct Type : AST
     virtual
     std::string
     gen_typeinfo(FuncEntity &entity)
+    const
+    = 0;
+
+    virtual
+    std::string
+    build_data_type(DataType &)
+    const
+    = 0;
+
+    virtual
+    std::string
+    main_name()
+    const;
+
+    virtual
+    std::string
+    apply(std::function<std::string(std::string)> &trans)
     const
     = 0;
 };
@@ -100,6 +76,21 @@ struct NormalType final : Type
     gen_typeinfo(FuncEntity &entity)
     const
     override;
+
+    std::string
+    build_data_type(DataType &)
+    const
+    override;
+
+    std::string
+    main_name()
+    const
+    override;
+
+    std::string
+    apply(std::function<std::string(std::string)> &trans)
+    const
+    override;
 };
 
 /**
@@ -119,6 +110,16 @@ struct ArgumentType final : Type
 
     std::string
     gen_typeinfo(FuncEntity &entity)
+    const
+    override;
+
+    std::string
+    build_data_type(DataType &)
+    const
+    override;
+
+    std::string
+    apply(std::function<std::string(std::string)> &trans)
     const
     override;
 };
@@ -154,7 +155,24 @@ struct TemplateType final : Type
     gen_typeinfo(FuncEntity &entity)
     const
     override;
+
+    std::string
+    build_data_type(DataType &)
+    const
+    override;
+
+    std::string
+    main_name()
+    const
+    override;
+
+    std::string
+    apply(std::function<std::string(std::string)> &trans)
+    const
+    override;
 };
+
+struct ProductType;
 
 /**
  * function type is defined with symbol =>
@@ -187,11 +205,21 @@ struct FuncType final : Type
      * build the binded entity
     */
     void
-    build_entity(FuncEntity &entity)
+    build_func_entity(FuncEntity &entity)
     const;
 
     std::string
     gen_typeinfo(FuncEntity &entity)
+    const
+    override;
+
+    std::string
+    build_data_type(DataType &)
+    const
+    override;
+
+    std::string
+    apply(std::function<std::string(std::string)> &trans)
     const
     override;
 };
@@ -203,7 +231,7 @@ struct FuncType final : Type
  *  exprs as the return expression, such (x, y) in "func x y = (x, y)",
  *   will generate code by calling gen_expr
 */
-struct Expr : AST
+struct Expr
 {
     virtual
     ~Expr()
@@ -432,7 +460,7 @@ struct BinaryOpTailExpr final
  * equation means each line in function declaration
  * for example, "fun x y = (x, y)" is an equation
 */
-struct Equation final : AST
+struct Equation final
 {
     Ptr<ConsExpr> pattern;
     Ptr<Expr> expr;
@@ -449,15 +477,66 @@ struct Equation final : AST
      * build the binded entity
     */
     void
-    build_entity(FuncEntity &entity)
+    build_func_entity(FuncEntity &entity)
     const;
+};
+
+struct Declaration
+{
+    virtual
+    ~Declaration()
+    = 0;
+
+    virtual
+    void
+    codegen(Code &)
+    const
+    = 0;
+};
+
+/**
+ * struct for the declaration of new datatype
+ * datatype 'a option = None | Some 'a
+ * datatype 'a list = Nil | Cons 'a "'a list"
+ *
+ * use union to contain the type components
+ *  constructor without arguments won't be declared
+ *  constructor with argument(s) will be declared by its position
+ * use enum type to determine which Constructor
+ *
+ * literal identity of the decl_type will be stored after codegen
+*/
+struct DataTypeDecl : Declaration
+{
+    /**
+     * Component likes ConsExpr
+     *  but arguments are types but not expressions
+    */
+    struct Component
+    {
+        std::string constructor;
+        std::vector<Ptr<Type>> arguments;
+    };
+
+    Ptr<Type> decl_type;
+    mutable std::vector<Component> components;
+
+    DataTypeDecl(Ptr<Type> &&decl_type,
+        std::vector<Component> &&components)
+      : decl_type(std::move(decl_type))
+      , components(std::move(components)) {}
+
+    void
+    codegen(Code &)
+    const
+    override;
 };
 
 /**
  * function declaration contains its name,
  *  the function type and its equations
 */
-struct FuncDecl final : AST
+struct FuncDecl final : Declaration
 {
     std::string name;
     Ptr<FuncType> type;
@@ -479,7 +558,8 @@ struct FuncDecl final : AST
      * build the binded entity
     */
     void
-    build_entity(FuncEntity &entity)
-    const;
+    codegen(Code &)
+    const
+    override;
 };
 } // namespace hol2cpp

@@ -103,12 +103,15 @@ class FuncEntity
     entry_euqation();
 
     /**
-     * add a pattern statement
+     * add a pattern condition
      * pattern statements will be generated before expressions
      *  to break or generate variable declarations
     */
     void
     add_pattern(const std::string &pattern);
+
+    void
+    add_pattern_cond(const std::string &cond);
 
     /**
      * add a statement for returning expression

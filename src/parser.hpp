@@ -26,8 +26,11 @@ class Parser
      * @str: source code contains multi declarations
      * return FuncDecl nodes
     */
-    std::vector<Ptr<FuncDecl>>
-    pas_func_decls(const std::string &str);
+    std::vector<Ptr<Declaration>>
+    pas_decls(const std::string &str);
+
+    Ptr<DataTypeDecl>
+    pas_data_type_decl(const std::string &str);
 
     /**
      * @str: source code contains only one declaration
@@ -84,8 +87,13 @@ class Parser
     Parsec<std::vector<Ptr<Equation>>>  func_decl_equations_;
 
     Parsec<Ptr<FuncDecl>>               func_decl_;
-    Parsec<std::vector<Ptr<FuncDecl>>>  func_decls_;
+
+    Parsec<std::vector<Ptr<Type>>>      types_;
+    Parsec<DataTypeDecl::Component>     dtdecl_component_;
+    Parsec<std::vector<DataTypeDecl::Component>> dtdecl_components_;
 
     Parsec<Ptr<DataTypeDecl>>           datatype_decl_;
+
+    Parsec<std::vector<Ptr<Declaration>>> decls_;
 };
 } // namespace hol2cpp

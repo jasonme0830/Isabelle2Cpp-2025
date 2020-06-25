@@ -93,13 +93,23 @@ FuncEntity::entry_euqation()
 void
 FuncEntity::add_pattern(const string &pattern)
 {
-    patterns_.back().push_back(string(indent_, ' ') + pattern);
+    patterns_.back().push_back(string(indent_, ' ') + pattern + ";");
+}
+
+void
+FuncEntity::add_pattern_cond(const string &cond)
+{
+    patterns_.back().push_back(string(indent_, ' ') + "if (" + cond + ") {");
+    add_indent();
+        patterns_.back().push_back(string(indent_, ' ') + "break;");
+    sub_indent();
+    patterns_.back().push_back(string(indent_, ' ') + "}");
 }
 
 void
 FuncEntity::add_expr(const string &expr)
 {
-    exprs_.back().push_back(string(indent_, ' ') + expr);
+    exprs_.back().push_back(string(indent_, ' ') + expr + ";");
 }
 
 const vector<vector<string>>

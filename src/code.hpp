@@ -1,8 +1,10 @@
 #pragma once
 
 #include <set>
+#include <map>
 #include <vector>
 #include <iostream>
+#include "datatype.hpp"
 #include "funcentity.hpp"
 
 namespace hol2cpp
@@ -20,17 +22,25 @@ class Code
     */
     Code(std::ostream &out = std::cout);
 
-    /**
-     * entry new function entity
-    */
+    DataType
+    &entry_data_type(const std::string &);
+
+    DataType
+    *find_data_type(const std::string &);
+
     void
-    entry_func();
+    bind_cons(const std::string &, DataType &);
+    DataType
+    *find_data_type_by_cons(const std::string &);
 
     /**
-     * return the current entity, always the last one, to build
+     * entry new function entity ane the return it
     */
     FuncEntity
-    &current_entity();
+    &entry_func_entity(const std::string &);
+
+    FuncEntity
+    *find_func_entity(const std::string &);
 
     /**
      * generate code and output by the out_ member
@@ -53,24 +63,33 @@ class Code
     add_header(const std::string &header);
 
   private:
+    void
+    gen_data_type(DataType &data_type);
+    void
+    gen_type_rest(DataType &data_type);
+    void
+    gen_normal_type_header(DataType &data_type);
+    void
+    gen_template_type_header(DataType &data_type);
+
     /**
      * generate code for each function declaration
     */
     void
-    generate_single(FuncEntity &entity);
+    gen_single_func(FuncEntity &entity);
     /**
      * generate code for type determined function
     */
     void
-    generate_normal(FuncEntity &entity);
+    gen_normal_func(FuncEntity &entity);
     /**
      * generate code for template function
      * add the template declaration before function declaration
      *  such as template<typename T0...>
-     * then call method generate_normal to generate the rest code
+     * then call method gen_normal_func to generate the rest code
     */
     void
-    generate_template(FuncEntity &entity);
+    gen_template_func(FuncEntity &entity);
 
     /**
      * start a new line with the indent
@@ -92,7 +111,12 @@ class Code
     std::ostream &out_;
     int indent_;
 
-    std::vector<FuncEntity> func_entities_;
+    std::vector<std::string> names_of_data_types_;
+    std::map<std::string, DataType> data_types_;
+    std::map<std::string, DataType&> cons_types_;
+
+    std::vector<std::string> names_of_func_entities_;
+    std::map<std::string, FuncEntity> func_entities_;
     std::set<std::string> headers_;
 };
 }
