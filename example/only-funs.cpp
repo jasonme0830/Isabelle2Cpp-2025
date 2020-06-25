@@ -33,7 +33,7 @@ app(std::list<T0> arg0, std::list<T0> arg1) {
         return ys;
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -57,13 +57,15 @@ rev(std::list<T0> arg0) {
         return std::list<T0>();
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
         arg0.pop_front();
         auto xs = arg0;
-        return app(rev(xs), std::list<decltype(x)>{x});
+        auto temp0 = std::list<T0>();
+        temp0.push_front(x);
+        return app(rev(xs), temp0);
     }
     std::abort();
 }
@@ -78,7 +80,7 @@ rev2(std::list<T0> arg0) {
         return std::list<T0>();
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -104,7 +106,7 @@ rev3(std::list<T0> arg0) {
         return std::list<T0>();
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -122,7 +124,7 @@ template<typename T0>
 std::optional<std::list<T0>>
 testoption(std::optional<T0> arg0) {
     for (;;) {
-        if (arg0.has_value()) {
+        if (!arg0.has_value()) {
             break;
         }
         return std::make_optional<>({});
@@ -147,7 +149,7 @@ testset(std::list<T0> arg0) {
         return std::set<T0>();
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -156,15 +158,15 @@ testset(std::list<T0> arg0) {
         auto temp0 = std::set<T0>{x};
         auto temp1 = testset(xs);
         decltype(temp0) temp2;
-        for (auto temp3 : temp1) {
-            if (lv.count(temp3)) {
+        for (auto temp3 : temp1) {;
+            if (lv.count(temp3)) {;
                 temp2.insert(temp3);
-            }
-        }
+            };
+        };
         return temp2;
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -172,9 +174,9 @@ testset(std::list<T0> arg0) {
         auto xs = arg0;
         auto temp0 = std::set<T0>{x};
         auto temp1 = testset(xs);
-        for (auto temp2 : temp1) {
+        for (auto temp2 : temp1) {;
             temp0.insert(temp2);
-        }
+        };
         return temp0;
     }
     std::abort();
@@ -191,7 +193,7 @@ testifelse(std::list<T0> arg0, T0 arg1) {
         return std::list<T0>();
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (!arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -199,11 +201,11 @@ testifelse(std::list<T0> arg0, T0 arg1) {
         auto xs = arg0;
         auto n = arg1;
         std::list<T0> temp0;
-        if ((x) < (n)) {
+        if ((x) < (n)) {;
             temp0 = std::list<T0>{x};
-        } else {
+        } else {;
             temp0 = std::list<T0>();
-        }
+        };
         auto temp1 = temp0;
         auto temp2 = testifelse(xs, n);
         temp1.insert(temp1.end(), temp2.begin(), temp2.end());

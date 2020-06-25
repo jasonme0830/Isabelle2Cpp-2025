@@ -1,0 +1,25 @@
+datatype snat = sZero | sSucc snat;
+datatype 'a slist = sNil | sCons 'a "'a slist";
+
+fun app :: "'a slist \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
+  "app sNil ys = ys" |
+  "app (sCons x xs) ys = sCons x (app xs ys)"
+
+fun rev :: "'a slist \<Rightarrow> 'a slist" where
+  "rev sNil = sNil" |
+  "rev (sCons x xs) = app (rev xs) (sCons x sNil)"
+
+fun snat2slist :: "snat \<Rightarrow> snat slist" where
+  "snat2slist n = sCons n sNil"
+
+fun len :: "'a slist \<Rightarrow> snat" where
+  "len sNil = sZero" |
+  "len (sCons x xs) = sSucc (len xs)"
+
+fun listwithlen :: "nat \<Rightarrow> nat slist" where
+  "listwithlen 0 = sNil" |
+  "listwithlen (Suc n) = sCons 1 (listwithlen n)"
+
+fun leninnat :: "'a slist \<Rightarrow> nat" where
+  "leninnat sNil = 0" |
+  "leninnat (sCons x xs) = (leninnat xs) + 1"
