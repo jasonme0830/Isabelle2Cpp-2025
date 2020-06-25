@@ -10,6 +10,3 @@ Only support cast the recursive definitions of functions from Isabelle/HOL to C+
 
 You can see some examples in [example/](example/)
 
-## To Do
-
-- [ ] Support translation from declaration of `datatype` to C++ (template) class
