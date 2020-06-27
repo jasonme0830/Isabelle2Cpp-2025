@@ -135,7 +135,7 @@ Code::gen_type_rest(DataType &data_type)
         auto &components = data_type.components();
         for (size_t i = 0; i < components.size(); ++i)
         {
-            new_line() << "struct c" << to_string(i) << "{" << endl;
+            new_line() << "struct c" << to_string(i) << " {" << endl;
             add_indent();
             for (size_t j = 0; j < components[i].size(); ++j)
             {
@@ -186,7 +186,7 @@ Code::gen_type_rest(DataType &data_type)
             out_ << ") {" << endl;
 
             add_indent();
-                new_line() << "value = c" << to_string(i) << " {";
+                new_line() << "value = c" << to_string(i) << "{";
             for (size_t j = 0; j < components[i].size(); ++j)
             {
                 if (j == 0)

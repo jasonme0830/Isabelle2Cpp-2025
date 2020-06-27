@@ -12,9 +12,9 @@ struct snatNode;
 using snat = std::shared_ptr<snatNode>;
 
 struct snatNode {
-    struct c0{
+    struct c0 {
     };
-    struct c1{
+    struct c1 {
         snat p0;
     };
 
@@ -27,13 +27,13 @@ struct snatNode {
         return std::get<c0>(value);
     };
     void set_c0() {
-        value = c0 {};
+        value = c0{};
     }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
     void set_c1(snat _p0) {
-        value = c1 {_p0};
+        value = c1{_p0};
     }
 };
 
@@ -50,9 +50,9 @@ using slist = std::shared_ptr<slistNode<T0>>;
 
 template<typename T0>
 struct slistNode {
-    struct c0{
+    struct c0 {
     };
-    struct c1{
+    struct c1 {
         T0 p0;
         slist<T0> p1;
     };
@@ -66,13 +66,13 @@ struct slistNode {
         return std::get<c0>(value);
     };
     void set_c0() {
-        value = c0 {};
+        value = c0{};
     }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
     void set_c1(T0 _p0, slist<T0> _p1) {
-        value = c1 {_p0, _p1};
+        value = c1{_p0, _p1};
     }
 };
 
