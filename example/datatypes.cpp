@@ -193,3 +193,40 @@ leninnat(slist<T0> arg0) {
     std::abort();
 }
 
+template<typename T0>
+slist<T0>
+dblist(slist<T0> arg0) {
+    for (;;) {
+        if (arg0->cons != sNil) {
+            break;
+        }
+        return std::make_shared<slist<T0>::element_type>(sNil);
+    }
+    for (;;) {
+        if (arg0->cons != sCons) {
+            break;
+        }
+        auto x = arg0->get_c1().p0;
+        if (arg0->get_c1().p1->cons != sNil) {
+            break;
+        }
+        slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
+        slist<T0> temp1 = std::make_shared<slist<T0>::element_type>(sCons);
+        temp1->set_c1(x, std::make_shared<slist<T0>::element_type>(sNil));
+        temp0->set_c1(x, temp1);
+        return temp0;
+    }
+    for (;;) {
+        if (!arg0.empty()) {
+            break;
+        }
+        auto x = arg0.front();
+        arg0.pop_front();
+        auto xs = arg0;
+        slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
+        temp0->set_c1(x, std::make_shared<slist<T0>::element_type>(sNil));
+        return app(dblist(temp0), dblist(xs));
+    }
+    std::abort();
+}
+

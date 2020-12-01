@@ -23,3 +23,8 @@ fun listwithlen :: "nat \<Rightarrow> nat slist" where
 fun leninnat :: "'a slist \<Rightarrow> nat" where
   "leninnat sNil = 0" |
   "leninnat (sCons x xs) = (leninnat xs) + 1"
+
+fun dblist :: "'a slist \<Rightarrow> 'a slist" where
+  "dblist sNil = sNil" |
+  "dblist (sCons x sNil) = sCons x (sCons x sNil)" |
+  "dblist (x # xs) = app (dblist (sCons x sNil)) (dblist xs)"
