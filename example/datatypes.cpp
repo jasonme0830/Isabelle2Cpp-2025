@@ -217,12 +217,11 @@ dblist(slist<T0> arg0) {
         return temp0;
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0->cons != sCons) {
             break;
         }
-        auto x = arg0.front();
-        arg0.pop_front();
-        auto xs = arg0;
+        auto x = arg0->get_c1().p0;
+        auto xs = arg0->get_c1().p1;
         slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
         temp0->set_c1(x, std::make_shared<slist<T0>::element_type>(sNil));
         return app(dblist(temp0), dblist(xs));

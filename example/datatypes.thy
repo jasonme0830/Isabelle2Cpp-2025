@@ -27,4 +27,4 @@ fun leninnat :: "'a slist \<Rightarrow> nat" where
 fun dblist :: "'a slist \<Rightarrow> 'a slist" where
   "dblist sNil = sNil" |
   "dblist (sCons x sNil) = sCons x (sCons x sNil)" |
-  "dblist (x # xs) = app (dblist (sCons x sNil)) (dblist xs)"
+  "dblist (sCons x xs) = app (dblist (sCons x sNil)) (dblist xs)"
