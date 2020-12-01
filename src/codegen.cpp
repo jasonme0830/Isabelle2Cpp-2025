@@ -433,7 +433,7 @@ const
     else if (auto data_type = entity.code().find_data_type_by_cons(name))
     {
         string dot = data_type->is_recuisive() ? "->"s : "."s;
-        entity.add_pattern_cond(prev + dot + "cons != " + name);
+        entity.add_pattern_cond(prev + dot + "cons != " + data_type->name() + "Cons::" + name);
     }
     else
     {
@@ -478,7 +478,7 @@ const
     else if (auto data_type = entity.code().find_data_type_by_cons(constructor))
     {
         string dot = data_type->is_recuisive() ? "->"s : "."s;
-        entity.add_pattern_cond(prev + dot + "cons != " + constructor);
+        entity.add_pattern_cond(prev + dot + "cons != " + data_type->name() + "Cons::" + constructor);
         auto pos = data_type->pos_of_cons(constructor);
         for (size_t i = 0; i < args.size(); ++i)
         {
@@ -560,11 +560,11 @@ const
     {
         if (data_type->is_recuisive())
         {
-            return "std::make_shared<" + type + "::element_type>(" + name + ")";
+            return "construct<" + type + ">(" + data_type->name() + "Cons::" + name + ")";
         }
         else
         {
-            return type + "(" + name + ")";
+            return type + "(" + data_type->name() + "Cons::" + name + ")";
         }
     }
     else
@@ -704,11 +704,11 @@ const
         auto temp = entity.gen_temp();
         if (data_type->is_recuisive())
         {
-            entity.add_expr(type + " " + temp + " = std::make_shared<" + type + "::element_type>" + "(" + constructor + ")");
+            entity.add_expr(type + " " + temp + " = construct<" + type + ">" + "(" + data_type->name() + "Cons::" + constructor + ")");
         }
         else
         {
-            entity.add_expr(type + " " + temp + "{" + constructor +"}");
+            entity.add_expr(type + " " + temp + "{" + data_type->name() + "Cons::" + constructor +"}");
         }
         
         string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor)) + "(";
