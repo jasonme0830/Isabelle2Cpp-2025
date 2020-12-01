@@ -79,16 +79,16 @@ Code::generate()
     }
     out_ << endl;
 
+    out_ << "template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }\n" << endl;
+
     for (auto &name : names_of_data_types_)
     {
         gen_data_type(data_types_[name]);
-        out_ << endl;
     }
 
     for (auto &name : names_of_func_entities_)
     {
         gen_single_func(func_entities_.at(name));
-        out_ << endl;
     }
 }
 
@@ -109,6 +109,16 @@ void
 Code::gen_data_type(DataType &data_type)
 {
     indent_ = 0;
+
+    new_line() << "enum " << data_type.name() << "Cons {" << endl;
+    add_indent();
+    for (auto &cons : data_type.constructors())
+    {
+        new_line() << cons << "," << endl;
+    }
+    sub_indent();
+    new_line() << "};\n\n";
+
     if (data_type.template_args().empty())
     {
         gen_normal_type_header(data_type);
@@ -127,7 +137,7 @@ Code::gen_type_rest(DataType &data_type)
     auto name = data_type.name();
     if (data_type.is_recuisive())
     {
-        name += "Node";
+        name += "Elem";
     }
 
     new_line() << "struct " << name << " {" << endl;
@@ -146,22 +156,7 @@ Code::gen_type_rest(DataType &data_type)
         }
         out_ << endl;
 
-        new_line() << origin << "ConsEnum cons;\n";
-        new_line() << "std::variant<";
-        for (size_t i = 0; i < components.size(); ++i)
-        {
-            if (i == 0)
-            {
-                out_ << "c" << to_string(i);
-            }
-            else
-            {
-                out_ << ", c" << to_string(i);
-            }
-        }
-        out_ << "> value;\n\n";
-
-        new_line() << name << "(" << origin << "ConsEnum cons" << ") : cons(cons) {}\n\n";
+        new_line() << name << "(" << origin << "Cons cons" << ") : cons(cons) {}\n\n";
 
         for (size_t i = 0; i < components.size(); ++i)
         {
@@ -200,37 +195,41 @@ Code::gen_type_rest(DataType &data_type)
             }
                 out_  << "};" << endl;
             sub_indent();
-            new_line() << "}" << endl;
+            new_line() << "}\n";
         }
+        out_ << "\n";
+        
+        new_line() << origin << "Cons cons;\n";
+        new_line() << "std::variant<";
+        for (size_t i = 0; i < components.size(); ++i)
+        {
+            if (i == 0)
+            {
+                out_ << "c" << to_string(i);
+            }
+            else
+            {
+                out_ << ", c" << to_string(i);
+            }
+        }
+        out_ << "> value;\n";
     sub_indent();
-    new_line() << "};\n" << endl;
+    new_line() << "};\n\n";
 }
 
 void
 Code::gen_normal_type_header(DataType &data_type)
 {
-    const auto &origin = data_type.name();
-    auto name = data_type.name();
-    if (data_type.is_recuisive())
+    if (!data_type.is_recuisive())
     {
-        name += "Node";
+        return;
     }
 
-    new_line() << "enum " << origin << "ConsEnum {" << endl;
-    add_indent();
-    for (auto &cons : data_type.constructors())
-    {
-        new_line() << cons << "," << endl;
-    }
-    sub_indent();
-    new_line() << "};\n\n";
+    const auto &origin = data_type.name();
+    auto name = data_type.name() + "Elem";
 
     new_line() << "struct " << name << ";" << endl;
-    if (data_type.is_recuisive())
-    {
-        new_line() << "using " << data_type.name() << " = std::shared_ptr<" << name << ">;" << endl;
-    }
-    out_ << endl;
+    new_line() << "using " << origin << " = std::shared_ptr<" << name << ">;\n\n";
 }
 
 void
@@ -238,20 +237,6 @@ Code::gen_template_type_header(DataType &data_type)
 {
     const auto &origin = data_type.name();
     auto name = data_type.name();
-    if (data_type.is_recuisive())
-    {
-        name += "Node";
-    }
-
-    new_line() << "enum " << origin << "ConsEnum {" << endl;
-    add_indent();
-    for (auto &cons : data_type.constructors())
-    {
-        new_line() << cons << "," << endl;
-    }
-    sub_indent();
-    new_line() << "};\n\n";
-
     auto &targs = data_type.template_args();
     new_line() << "template<";
     for (size_t i = 0; i < targs.size(); ++i)
@@ -265,7 +250,17 @@ Code::gen_template_type_header(DataType &data_type)
             out_ << ", typename " << targs[i];
         }
     }
-    out_ << ">" << endl;
+    out_ << ">\n";
+
+    if (!data_type.is_recuisive())
+    {
+        return;
+    }
+    else
+    {
+        name += "Elem";
+    }
+
     new_line() << "struct " << name << ";" << endl;
     if (data_type.is_recuisive())
     {
@@ -367,7 +362,7 @@ Code::gen_normal_func(FuncEntity &entity)
     }
     new_line() << "std::abort();" << endl;
     sub_indent();
-    new_line() << "}" << endl;
+    new_line() << "}\n\n";
 }
 
 void
