@@ -1,5 +1,6 @@
 datatype snat = sZero | sSucc snat;
 datatype 'a slist = sNil | sCons 'a "'a slist";
+datatype sbool = sTrue | sFalse;
 
 fun app :: "'a slist \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
   "app sNil ys = ys" |
@@ -28,3 +29,7 @@ fun dblist :: "'a slist \<Rightarrow> 'a slist" where
   "dblist sNil = sNil" |
   "dblist (sCons x sNil) = sCons x (sCons x sNil)" |
   "dblist (sCons x xs) = app (dblist (sCons x sNil)) (dblist xs)"
+
+fun snot :: "sbool \<Rightarrow> sbool" where
+  "snot sTrue = sFalse" |
+  "snot sFlase = sTrue"

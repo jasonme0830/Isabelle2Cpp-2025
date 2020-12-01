@@ -3,25 +3,24 @@
 #include <memory>
 #include <variant>
 
-enum snatConsEnum {
+template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }
+
+enum snatCons {
     sZero,
     sSucc,
 };
 
-struct snatNode;
-using snat = std::shared_ptr<snatNode>;
+struct snatElem;
+using snat = std::shared_ptr<snatElem>;
 
-struct snatNode {
+struct snatElem {
     struct c0 {
     };
     struct c1 {
         snat p0;
     };
 
-    snatConsEnum cons;
-    std::variant<c0, c1> value;
-
-    snatNode(snatConsEnum cons) : cons(cons) {}
+    snatElem(snatCons cons) : cons(cons) {}
 
     c0 &get_c0() {
         return std::get<c0>(value);
@@ -35,21 +34,23 @@ struct snatNode {
     void set_c1(snat _p0) {
         value = c1{_p0};
     }
+
+    snatCons cons;
+    std::variant<c0, c1> value;
 };
 
-
-enum slistConsEnum {
+enum slistCons {
     sNil,
     sCons,
 };
 
 template<typename T0>
-struct slistNode;
+struct slistElem;
 template<typename T0>
-using slist = std::shared_ptr<slistNode<T0>>;
+using slist = std::shared_ptr<slistElem<T0>>;
 
 template<typename T0>
-struct slistNode {
+struct slistElem {
     struct c0 {
     };
     struct c1 {
@@ -57,10 +58,7 @@ struct slistNode {
         slist<T0> p1;
     };
 
-    slistConsEnum cons;
-    std::variant<c0, c1> value;
-
-    slistNode(slistConsEnum cons) : cons(cons) {}
+    slistElem(slistCons cons) : cons(cons) {}
 
     c0 &get_c0() {
         return std::get<c0>(value);
@@ -74,27 +72,59 @@ struct slistNode {
     void set_c1(T0 _p0, slist<T0> _p1) {
         value = c1{_p0, _p1};
     }
+
+    slistCons cons;
+    std::variant<c0, c1> value;
 };
 
+enum sboolCons {
+    sTrue,
+    sFalse,
+};
+
+struct sbool {
+    struct c0 {
+    };
+    struct c1 {
+    };
+
+    sbool(sboolCons cons) : cons(cons) {}
+
+    c0 &get_c0() {
+        return std::get<c0>(value);
+    };
+    void set_c0() {
+        value = c0{};
+    }
+    c1 &get_c1() {
+        return std::get<c1>(value);
+    };
+    void set_c1() {
+        value = c1{};
+    }
+
+    sboolCons cons;
+    std::variant<c0, c1> value;
+};
 
 template<typename T0>
 slist<T0>
 app(slist<T0> arg0, slist<T0> arg1) {
     for (;;) {
-        if (arg0->cons != sNil) {
+        if (arg0->cons != slistCons::sNil) {
             break;
         }
         auto ys = arg1;
         return ys;
     }
     for (;;) {
-        if (arg0->cons != sCons) {
+        if (arg0->cons != slistCons::sCons) {
             break;
         }
         auto x = arg0->get_c1().p0;
         auto xs = arg0->get_c1().p1;
         auto ys = arg1;
-        slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
+        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
         temp0->set_c1(x, app(xs, ys));
         return temp0;
     }
@@ -105,19 +135,19 @@ template<typename T0>
 slist<T0>
 rev(slist<T0> arg0) {
     for (;;) {
-        if (arg0->cons != sNil) {
+        if (arg0->cons != slistCons::sNil) {
             break;
         }
-        return std::make_shared<slist<T0>::element_type>(sNil);
+        return construct<slist<T0>>(slistCons::sNil);
     }
     for (;;) {
-        if (arg0->cons != sCons) {
+        if (arg0->cons != slistCons::sCons) {
             break;
         }
         auto x = arg0->get_c1().p0;
         auto xs = arg0->get_c1().p1;
-        slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
-        temp0->set_c1(x, std::make_shared<slist<T0>::element_type>(sNil));
+        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
+        temp0->set_c1(x, construct<slist<T0>>(slistCons::sNil));
         return app(rev(xs), temp0);
     }
     std::abort();
@@ -127,8 +157,8 @@ slist<snat>
 snat2slist(snat arg0) {
     for (;;) {
         auto n = arg0;
-        slist<snat> temp0 = std::make_shared<slist<snat>::element_type>(sCons);
-        temp0->set_c1(n, std::make_shared<slist<snat>::element_type>(sNil));
+        slist<snat> temp0 = construct<slist<snat>>(slistCons::sCons);
+        temp0->set_c1(n, construct<slist<snat>>(slistCons::sNil));
         return temp0;
     }
     std::abort();
@@ -138,18 +168,18 @@ template<typename T0>
 snat
 len(slist<T0> arg0) {
     for (;;) {
-        if (arg0->cons != sNil) {
+        if (arg0->cons != slistCons::sNil) {
             break;
         }
-        return std::make_shared<snat::element_type>(sZero);
+        return construct<snat>(snatCons::sZero);
     }
     for (;;) {
-        if (arg0->cons != sCons) {
+        if (arg0->cons != slistCons::sCons) {
             break;
         }
         auto x = arg0->get_c1().p0;
         auto xs = arg0->get_c1().p1;
-        snat temp0 = std::make_shared<snat::element_type>(sSucc);
+        snat temp0 = construct<snat>(snatCons::sSucc);
         temp0->set_c1(len(xs));
         return temp0;
     }
@@ -162,11 +192,11 @@ listwithlen(std::uint64_t arg0) {
         if (arg0 != 0) {
             break;
         }
-        return std::make_shared<slist<std::uint64_t>::element_type>(sNil);
+        return construct<slist<std::uint64_t>>(slistCons::sNil);
     }
     for (;;) {
         auto n = (arg0) - 1;
-        slist<std::uint64_t> temp0 = std::make_shared<slist<std::uint64_t>::element_type>(sCons);
+        slist<std::uint64_t> temp0 = construct<slist<std::uint64_t>>(slistCons::sCons);
         temp0->set_c1(1, listwithlen(n));
         return temp0;
     }
@@ -177,13 +207,13 @@ template<typename T0>
 std::uint64_t
 leninnat(slist<T0> arg0) {
     for (;;) {
-        if (arg0->cons != sNil) {
+        if (arg0->cons != slistCons::sNil) {
             break;
         }
         return 0;
     }
     for (;;) {
-        if (arg0->cons != sCons) {
+        if (arg0->cons != slistCons::sCons) {
             break;
         }
         auto x = arg0->get_c1().p0;
@@ -197,34 +227,49 @@ template<typename T0>
 slist<T0>
 dblist(slist<T0> arg0) {
     for (;;) {
-        if (arg0->cons != sNil) {
+        if (arg0->cons != slistCons::sNil) {
             break;
         }
-        return std::make_shared<slist<T0>::element_type>(sNil);
+        return construct<slist<T0>>(slistCons::sNil);
     }
     for (;;) {
-        if (arg0->cons != sCons) {
+        if (arg0->cons != slistCons::sCons) {
             break;
         }
         auto x = arg0->get_c1().p0;
-        if (arg0->get_c1().p1->cons != sNil) {
+        if (arg0->get_c1().p1->cons != slistCons::sNil) {
             break;
         }
-        slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
-        slist<T0> temp1 = std::make_shared<slist<T0>::element_type>(sCons);
-        temp1->set_c1(x, std::make_shared<slist<T0>::element_type>(sNil));
+        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
+        slist<T0> temp1 = construct<slist<T0>>(slistCons::sCons);
+        temp1->set_c1(x, construct<slist<T0>>(slistCons::sNil));
         temp0->set_c1(x, temp1);
         return temp0;
     }
     for (;;) {
-        if (arg0->cons != sCons) {
+        if (arg0->cons != slistCons::sCons) {
             break;
         }
         auto x = arg0->get_c1().p0;
         auto xs = arg0->get_c1().p1;
-        slist<T0> temp0 = std::make_shared<slist<T0>::element_type>(sCons);
-        temp0->set_c1(x, std::make_shared<slist<T0>::element_type>(sNil));
+        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
+        temp0->set_c1(x, construct<slist<T0>>(slistCons::sNil));
         return app(dblist(temp0), dblist(xs));
+    }
+    std::abort();
+}
+
+sbool
+snot(sbool arg0) {
+    for (;;) {
+        if (arg0.cons != sboolCons::sTrue) {
+            break;
+        }
+        return sbool(sboolCons::sFalse);
+    }
+    for (;;) {
+        auto sFlase = arg0;
+        return sbool(sboolCons::sTrue);
     }
     std::abort();
 }
