@@ -8,7 +8,10 @@ namespace hol2cpp
 Code::Code(ostream &out)
   : out_(out)
   , indent_(0)
-  , headers_{"cstdlib"} {}
+  , headers_{"cstdlib"}
+{
+    // ...
+}
 
 DataType
 &Code::entry_data_type(const string &name)
@@ -198,7 +201,7 @@ Code::gen_type_rest(DataType &data_type)
             new_line() << "}\n";
         }
         out_ << "\n";
-        
+
         new_line() << origin << "Cons cons;\n";
         new_line() << "std::variant<";
         for (size_t i = 0; i < components.size(); ++i)
