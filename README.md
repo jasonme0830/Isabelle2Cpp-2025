@@ -10,3 +10,6 @@ Only support cast the recursive definitions of functions from Isabelle/HOL to C+
 
 You can see some examples in [example/](example/)
 
+## TODO
+
+- [ ] Do some benchmarks comparing to the Isabelle and native cpp codes
