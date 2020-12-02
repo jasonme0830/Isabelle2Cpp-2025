@@ -951,7 +951,7 @@ const
     case BOp::ListApp:
         l = lhs->gen_expr(entity, type);
         r = rhs->gen_expr(entity, type);
-        if (l == "{}" and r == "{}")
+        if (l == "{}" && r == "{}")
         {
             return type.empty() ? "{}"s : (type + "()");
         }
