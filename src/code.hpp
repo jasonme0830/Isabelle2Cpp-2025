@@ -95,7 +95,7 @@ class Code
      * start a new line with the indent
     */
     std::ostream
-    &new_line();
+    &newline();
 
     /**
      * add the indent's length by indent size

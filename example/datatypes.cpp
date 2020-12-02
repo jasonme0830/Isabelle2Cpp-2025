@@ -108,8 +108,7 @@ struct sbool {
 };
 
 template<typename T0>
-slist<T0>
-app(slist<T0> arg0, slist<T0> arg1) {
+slist<T0> app(slist<T0> arg0, slist<T0> arg1) {
     for (;;) {
         if (arg0->cons != slistCons::sNil) {
             break;
@@ -132,8 +131,7 @@ app(slist<T0> arg0, slist<T0> arg1) {
 }
 
 template<typename T0>
-slist<T0>
-rev(slist<T0> arg0) {
+slist<T0> rev(slist<T0> arg0) {
     for (;;) {
         if (arg0->cons != slistCons::sNil) {
             break;
@@ -153,8 +151,7 @@ rev(slist<T0> arg0) {
     std::abort();
 }
 
-slist<snat>
-snat2slist(snat arg0) {
+slist<snat> snat2slist(snat arg0) {
     for (;;) {
         auto n = arg0;
         slist<snat> temp0 = construct<slist<snat>>(slistCons::sCons);
@@ -165,8 +162,7 @@ snat2slist(snat arg0) {
 }
 
 template<typename T0>
-snat
-len(slist<T0> arg0) {
+snat len(slist<T0> arg0) {
     for (;;) {
         if (arg0->cons != slistCons::sNil) {
             break;
@@ -186,8 +182,7 @@ len(slist<T0> arg0) {
     std::abort();
 }
 
-slist<std::uint64_t>
-listwithlen(std::uint64_t arg0) {
+slist<std::uint64_t> listwithlen(std::uint64_t arg0) {
     for (;;) {
         if (arg0 != 0) {
             break;
@@ -204,8 +199,7 @@ listwithlen(std::uint64_t arg0) {
 }
 
 template<typename T0>
-std::uint64_t
-leninnat(slist<T0> arg0) {
+std::uint64_t leninnat(slist<T0> arg0) {
     for (;;) {
         if (arg0->cons != slistCons::sNil) {
             break;
@@ -224,8 +218,7 @@ leninnat(slist<T0> arg0) {
 }
 
 template<typename T0>
-slist<T0>
-dblist(slist<T0> arg0) {
+slist<T0> dblist(slist<T0> arg0) {
     for (;;) {
         if (arg0->cons != slistCons::sNil) {
             break;
@@ -259,8 +252,7 @@ dblist(slist<T0> arg0) {
     std::abort();
 }
 
-sbool
-snot(sbool arg0) {
+sbool snot(sbool arg0) {
     for (;;) {
         if (arg0.cons != sboolCons::sTrue) {
             break;

@@ -1,4 +1,5 @@
 #include "code.hpp"
+#include "format.hpp"
 #include "funcentity.hpp"
 
 using namespace std;
@@ -6,7 +7,10 @@ using namespace std;
 namespace hol2cpp
 {
 FuncEntity::FuncEntity(Code &code)
-  : code_(code), indent_(0) {}
+  : code_(code), indent_(0)
+{
+    // ...
+}
 
 Code
 &FuncEntity::code()
@@ -93,23 +97,23 @@ FuncEntity::entry_euqation()
 void
 FuncEntity::add_pattern(const string &pattern)
 {
-    patterns_.back().push_back(string(indent_, ' ') + pattern + ";");
+    patterns_.back().push_back(pattern + ";");
 }
 
 void
 FuncEntity::add_pattern_cond(const string &cond)
 {
-    patterns_.back().push_back(string(indent_, ' ') + "if (" + cond + ") {");
+    patterns_.back().push_back("if ($) {"_fs.format(cond));
     add_indent();
         patterns_.back().push_back(string(indent_, ' ') + "break;");
     sub_indent();
-    patterns_.back().push_back(string(indent_, ' ') + "}");
+    patterns_.back().push_back("}");
 }
 
 void
 FuncEntity::add_expr(const string &expr)
 {
-    exprs_.back().push_back(string(indent_, ' ') + expr + ";");
+    exprs_.back().push_back(expr + ";");
 }
 
 const vector<vector<string>>

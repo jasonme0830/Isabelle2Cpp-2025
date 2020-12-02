@@ -1,4 +1,5 @@
 #include "code.hpp"
+#include "format.hpp"
 #include "funcentity.hpp"
 
 using namespace std;
@@ -78,11 +79,10 @@ Code::generate()
 {
     for (const auto &header : headers_)
     {
-        out_ << "#include <" + header << ">" << endl;
-    }
-    out_ << endl;
+        "#include <$>\n"_fs.outf(out_, header);
+    }   out_ << endl;
 
-    out_ << "template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }\n" << endl;
+    "template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }\n\n"_fs.outf(out_);
 
     for (auto &name : names_of_data_types_)
     {
@@ -113,14 +113,14 @@ Code::gen_data_type(DataType &data_type)
 {
     indent_ = 0;
 
-    new_line() << "enum " << data_type.name() << "Cons {" << endl;
+    "enum $Cons {\n"_fs.outf(newline(), data_type.name());
     add_indent();
     for (auto &cons : data_type.constructors())
     {
-        new_line() << cons << "," << endl;
+        "$,\n"_fs.outf(newline(), cons);
     }
     sub_indent();
-    new_line() << "};\n\n";
+    "};\n\n"_fs.outf(newline());
 
     if (data_type.template_args().empty())
     {
@@ -143,81 +143,78 @@ Code::gen_type_rest(DataType &data_type)
         name += "Elem";
     }
 
-    new_line() << "struct " << name << " {" << endl;
+    "struct $ {\n"_fs.outf(newline(), name);
     add_indent();
-        auto &components = data_type.components();
-        for (size_t i = 0; i < components.size(); ++i)
+    auto &components = data_type.components();
+    for (size_t i = 0; i < components.size(); ++i)
+    {
+        "struct c$ {\n"_fs.outf(newline(), i);
+        add_indent();
+        for (size_t j = 0; j < components[i].size(); ++j)
         {
-            new_line() << "struct c" << to_string(i) << " {" << endl;
-            add_indent();
-            for (size_t j = 0; j < components[i].size(); ++j)
-            {
-                new_line() << components[i][j] << " p" + to_string(j) << ";" << endl;
-            }
-            sub_indent();
-            new_line() << "};" << endl;
+            "$ p$;\n"_fs.outf(newline(), components[i][j], j);
         }
+        sub_indent();
+        "};\n"_fs.outf(newline());
+    }   out_ << endl;
+
+        "$($Cons cons) : cons(cons) {}\n\n"_fs.outf(newline(), name, origin);
+
+    for (size_t i = 0; i < components.size(); ++i)
+    {
+        "c$ &get_c$() {\n"_fs.outf(newline(), i, i);
+        add_indent();
+            "return std::get<c$>(value);\n"_fs.outf(newline(), i);
+        sub_indent();
+        "};\n"_fs.outf(newline());
+
+        "void set_c$("_fs.outf(newline(), i);
+        for (size_t j = 0; j < components[i].size(); ++j)
+        {
+            if (j == 0)
+            {
+                "$ _p0"_fs.outf(out_, components[i][j]);;
+            }
+            else
+            {
+                ", $ _p$"_fs.outf(out_, components[i][j], j);
+            }
+        }   ") {\n"_fs.outf(out_);
+
+        add_indent();
+            "value = c${"_fs.outf(newline(), i);
+        for (size_t j = 0; j < components[i].size(); ++j)
+        {
+            if (j == 0)
+            {
+                "_p0"_fs.outf(out_);
+            }
+            else
+            {
+                ", _p$"_fs.outf(out_, j);
+            }
+        }   "};\n"_fs.outf(out_);
+        sub_indent();
+        "}\n"_fs.outf(newline());
+    }
         out_ << endl;
 
-        new_line() << name << "(" << origin << "Cons cons" << ") : cons(cons) {}\n\n";
-
-        for (size_t i = 0; i < components.size(); ++i)
-        {
-            new_line() << "c" << to_string(i) << " &get_c" << to_string(i) << "() {\n";
-            add_indent();
-                new_line() << "return std::get<c" << to_string(i) << ">(value);\n";
-            sub_indent();
-            new_line() << "};\n";
-
-            new_line() << "void set_c" << to_string(i) << "(";
-            for (size_t j = 0; j < components[i].size(); ++j)
-            {
-                if (j == 0)
-                {
-                    out_ << components[i][j] << " _p0";
-                }
-                else
-                {
-                    out_ << ", " << components[i][j] << " _p" << to_string(j);
-                }
-            }
-            out_ << ") {" << endl;
-
-            add_indent();
-                new_line() << "value = c" << to_string(i) << "{";
-            for (size_t j = 0; j < components[i].size(); ++j)
-            {
-                if (j == 0)
-                {
-                    out_ << "_p0";
-                }
-                else
-                {
-                    out_ << ", _p" + to_string(j);
-                }
-            }
-                out_  << "};" << endl;
-            sub_indent();
-            new_line() << "}\n";
-        }
-        out_ << "\n";
-
-        new_line() << origin << "Cons cons;\n";
-        new_line() << "std::variant<";
+        "$Cons cons;\n"_fs.outf(newline(), origin);
+        "std::variant<"_fs.outf(newline());
         for (size_t i = 0; i < components.size(); ++i)
         {
             if (i == 0)
             {
-                out_ << "c" << to_string(i);
+                "c$"_fs.outf(out_, i);;
             }
             else
             {
-                out_ << ", c" << to_string(i);
+                ", c$"_fs.outf(out_, i);
             }
         }
-        out_ << "> value;\n";
+        "> value;\n"_fs.outf(out_);
     sub_indent();
-    new_line() << "};\n\n";
+    "};\n\n"_fs.outf(newline());
 }
 
 void
@@ -231,8 +228,8 @@ Code::gen_normal_type_header(DataType &data_type)
     const auto &origin = data_type.name();
     auto name = data_type.name() + "Elem";
 
-    new_line() << "struct " << name << ";" << endl;
-    new_line() << "using " << origin << " = std::shared_ptr<" << name << ">;\n\n";
+    "struct $;\n"_fs                        .outf(newline(), name);
+    "using $ = std::shared_ptr<$>;\n\n"_fs  .outf(newline(), origin, name);
 }
 
 void
@@ -241,19 +238,19 @@ Code::gen_template_type_header(DataType &data_type)
     const auto &origin = data_type.name();
     auto name = data_type.name();
     auto &targs = data_type.template_args();
-    new_line() << "template<";
+    "template<"_fs.outf(newline());
     for (size_t i = 0; i < targs.size(); ++i)
     {
         if (i == 0)
         {
-            out_ << "typename " << targs[i];
+            "typename $"_fs.outf(out_, targs[i]);
         }
         else
         {
-            out_ << ", typename " << targs[i];
+            ", typename $"_fs.outf(out_, targs[i]);
         }
     }
-    out_ << ">\n";
+    ">\n"_fs.outf(out_);
 
     if (!data_type.is_recuisive())
     {
@@ -264,23 +261,22 @@ Code::gen_template_type_header(DataType &data_type)
         name += "Elem";
     }
 
-    new_line() << "struct " << name << ";" << endl;
+    "struct $;\n"_fs.outf(newline(), name);
     if (data_type.is_recuisive())
     {
-        new_line() << "template<";
+        "template<"_fs.outf(newline());
         for (size_t i = 0; i < targs.size(); ++i)
         {
             if (i == 0)
             {
-                out_ << "typename " << targs[i];
+                "typename $"_fs.outf(out_, targs[i]);
             }
             else
             {
-                out_ << ", typename " << targs[i];
+                ", typename $"_fs.outf(out_, targs[i]);
             }
-        }
-        out_ << ">\n";
-        new_line() << "using " << origin << " = std::shared_ptr<" << name << "<";
+        }   ">\n"_fs.outf(out_);
+        "using $ = std::shared_ptr<$<"_fs.outf(newline(), origin, name);
         for (size_t i = 0; i < targs.size(); ++i)
         {
             if (i == 0)
@@ -289,25 +285,23 @@ Code::gen_template_type_header(DataType &data_type)
             }
             else
             {
-                out_ << ", " << targs[i];
+                ", $"_fs.outf(out_, targs[i]);
             }
-        }
-        out_ << ">>;\n\n";
+        }   ">>;\n\n"_fs.outf(out_);
     }
 
-    new_line() << "template<";
+    "template<"_fs.outf(newline());
     for (size_t i = 0; i < targs.size(); ++i)
     {
         if (i == 0)
         {
-            out_ << "typename " << targs[i];
+            "typename $"_fs.outf(out_, targs[i]);
         }
         else
         {
-            out_ << ", typename " << targs[i];
+            ", typename $"_fs.outf(out_, targs[i]);
         }
-    }
-    out_ << ">" << endl;
+    }   ">\n"_fs.outf(out_);
 }
 
 void
@@ -328,68 +322,64 @@ void
 Code::gen_normal_func(FuncEntity &entity)
 {
     auto &types = entity.types();
-    new_line() << types.back() << endl;
-    new_line() << entity.name() << "(";
+    "$ $("_fs.outf(newline(), types.back(), entity.name());
     for (size_t i = 0; i < types.size() - 1; ++i)
     {
         if (i == 0)
         {
-            out_ << types[i] << " arg" << to_string(i);
+            "$ arg$"_fs.outf(out_, types[i], i);
         }
         else
         {
-            out_ << ", " << types[i] << " arg" << to_string(i);
+            ", $ arg$"_fs.outf(out_, types[i], i);
         }
-    }
-    out_ << ") {" << endl;
+    }   ") {\n"_fs.outf(out_);
 
     auto &patterns = entity.patterns();
     auto &exprs = entity.exprs();
     add_indent();
     for (size_t i = 0; i < patterns.size(); ++i)
     {
-        new_line() << "for (;;) {" << endl;
+        "for (;;) {\n"_fs.outf(newline());
 
         add_indent();
         for (auto &pattern : patterns[i])
         {
-            new_line() << pattern << endl;
+            newline() << pattern << endl;
         }
         for (auto &expr : exprs[i])
         {
-            new_line() << expr << endl;
+            newline() << expr << endl;
         }
         sub_indent();
 
-        new_line() << "}" << endl;
-    }
-    new_line() << "std::abort();" << endl;
+        "}\n"_fs.outf(newline());
+    }   "std::abort();\n"_fs.outf(newline());
     sub_indent();
-    new_line() << "}\n\n";
+    "}\n\n"_fs.outf(newline());
 }
 
 void
 Code::gen_template_func(FuncEntity &entity)
 {
     auto &template_args = entity.template_args();
-    new_line() << "template<";
+    "template<"_fs.outf(newline());
     for (size_t i = 0; i < template_args.size(); ++i)
     {
         if (i == 0)
         {
-            out_ << "typename " << template_args[i];
+            "typename $"_fs.outf(out_, template_args[i]);
         }
         else
         {
-            out_ << ", typename " << template_args[i];
+            ", typename $"_fs.outf(out_, template_args[i]);
         }
-    }
-    out_ << ">" << endl;
+    }   ">\n"_fs.outf(out_);
     gen_normal_func(entity);
 }
 
 ostream
-&Code::new_line()
+&Code::newline()
 {
     out_ << string(indent_, ' ');
     return out_;
