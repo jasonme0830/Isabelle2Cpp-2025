@@ -222,7 +222,7 @@ const
 // --- build data type ---
 
 string
-NormalType::build_data_type(DataType &type)
+NormalType::build_data_type(DataType &)
 const
 {
     return name;
@@ -302,7 +302,7 @@ const
 // --- apply type arguments ---
 
 string
-NormalType::apply(std::function<std::string(std::string)> &trans)
+NormalType::apply(std::function<std::string(std::string)> &)
 const
 {
     return name;
@@ -400,7 +400,7 @@ const
 // --- generate pattern ---
 
 void
-Expr::gen_pattern(FuncEntity &entity, const string &prev)
+Expr::gen_pattern(FuncEntity &, const string &)
 const
 {
     throw runtime_error("cannot be pattern");
@@ -520,7 +520,7 @@ const
 }
 
 void
-BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev)
+BinaryOpExpr::gen_pattern(FuncEntity &, const string &)
 const
 {
     switch (op)
@@ -710,14 +710,14 @@ const
         {
             entity.add_expr(type + " " + temp + "{" + data_type->name() + "Cons::" + constructor +"}");
         }
-        
+
         string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor)) + "(";
-        
+
         function trans = [&](string arg_type)
         {
             return get_argument_type(type, data_type->find_argument_type(arg_type));
         };
-        
+
         auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
         for (size_t i = 0; i < abstracts.size(); ++i)
         {
