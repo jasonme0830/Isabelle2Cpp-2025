@@ -107,6 +107,38 @@ struct sbool {
     std::variant<c0, c1> value;
 };
 
+enum optionCons {
+    None,
+    Some,
+};
+
+template<typename T0>
+struct option {
+    struct c0 {
+    };
+    struct c1 {
+        T0 p0;
+    };
+
+    option(optionCons cons) : cons(cons) {}
+
+    c0 &get_c0() {
+        return std::get<c0>(value);
+    };
+    void set_c0() {
+        value = c0{};
+    }
+    c1 &get_c1() {
+        return std::get<c1>(value);
+    };
+    void set_c1(T0 _p0) {
+        value = c1{_p0};
+    }
+
+    optionCons cons;
+    std::variant<c0, c1> value;
+};
+
 template<typename T0>
 slist<T0> app(slist<T0> arg0, slist<T0> arg1) {
     for (;;) {

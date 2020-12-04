@@ -1,6 +1,7 @@
 datatype snat = sZero | sSucc snat;
 datatype 'a slist = sNil | sCons 'a "'a slist";
 datatype sbool = sTrue | sFalse;
+datatype option = None | Some 'a;
 
 fun app :: "'a slist \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
   "app sNil ys = ys" |
