@@ -99,6 +99,12 @@ const
         {
             auto field_type = type->build_data_type(data_type);
             data_type.add_field_type(field_type);
+            /**
+             * FIXME:
+             *  datatype 'a tlist = tNil | tCons 'a "int tlist"
+             *
+             * this should be also recursive
+            */
             if (field_type == self)
             {
                 data_type.is_recuisive() = true;
