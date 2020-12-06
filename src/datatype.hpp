@@ -13,6 +13,12 @@ class DataType
     {
         return is_recuisive_;
     }
+
+    bool is_normal_type()
+    {
+        return template_args_.empty();
+    }
+
     std::string &name()
     {
         return name_;

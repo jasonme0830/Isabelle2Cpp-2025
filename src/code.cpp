@@ -122,7 +122,7 @@ Code::gen_data_type(DataType &data_type)
     sub_indent();
     "};\n\n"_fs.outf(newline());
 
-    if (data_type.template_args().empty())
+    if (data_type.is_normal_type())
     {
         gen_normal_type_header(data_type);
     }
