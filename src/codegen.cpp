@@ -434,7 +434,7 @@ const
     }
     else if (name == "None")
     {
-        entity.add_pattern_cond("!" + prev + ".has_value()");
+        entity.add_pattern_cond(prev + ".has_value()");
     }
     else if (auto data_type = entity.code().find_data_type_by_cons(name))
     {
@@ -465,7 +465,7 @@ const
     }
     else if (constructor == "Cons")
     {
-        entity.add_pattern_cond("!" + prev + ".empty()");
+        entity.add_pattern_cond(prev + ".empty()");
         args[0]->gen_pattern(entity, prev + ".front()");
         entity.add_pattern(prev + ".pop_front()");
         args[1]->gen_pattern(entity, prev);

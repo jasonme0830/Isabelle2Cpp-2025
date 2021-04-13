@@ -5,8 +5,9 @@
 #include <set>
 #include <utility>
 
-std::uint64_t
-add(std::uint64_t arg0, std::uint64_t arg1) {
+template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }
+
+std::uint64_t add(std::uint64_t arg0, std::uint64_t arg1) {
     for (;;) {
         if (arg0 != 0) {
             break;
@@ -23,8 +24,7 @@ add(std::uint64_t arg0, std::uint64_t arg1) {
 }
 
 template<typename T0>
-std::list<T0>
-app(std::list<T0> arg0, std::list<T0> arg1) {
+std::list<T0> app(std::list<T0> arg0, std::list<T0> arg1) {
     for (;;) {
         if (!arg0.empty()) {
             break;
@@ -33,7 +33,7 @@ app(std::list<T0> arg0, std::list<T0> arg1) {
         return ys;
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -48,8 +48,7 @@ app(std::list<T0> arg0, std::list<T0> arg1) {
 }
 
 template<typename T0>
-std::list<T0>
-rev(std::list<T0> arg0) {
+std::list<T0> rev(std::list<T0> arg0) {
     for (;;) {
         if (!arg0.empty()) {
             break;
@@ -57,7 +56,7 @@ rev(std::list<T0> arg0) {
         return std::list<T0>();
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -71,8 +70,7 @@ rev(std::list<T0> arg0) {
 }
 
 template<typename T0>
-std::list<T0>
-rev2(std::list<T0> arg0) {
+std::list<T0> rev2(std::list<T0> arg0) {
     for (;;) {
         if (!arg0.empty()) {
             break;
@@ -80,7 +78,7 @@ rev2(std::list<T0> arg0) {
         return std::list<T0>();
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -97,8 +95,7 @@ rev2(std::list<T0> arg0) {
 }
 
 template<typename T0>
-std::list<T0>
-rev3(std::list<T0> arg0) {
+std::list<T0> rev3(std::list<T0> arg0) {
     for (;;) {
         if (!arg0.empty()) {
             break;
@@ -106,7 +103,7 @@ rev3(std::list<T0> arg0) {
         return std::list<T0>();
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -121,27 +118,25 @@ rev3(std::list<T0> arg0) {
 }
 
 template<typename T0>
-std::optional<std::list<T0>>
-testoption(std::optional<T0> arg0) {
+std::optional<std::list<T0>> testoption(std::optional<T0> arg0) {
     for (;;) {
-        if (!arg0.has_value()) {
+        if (arg0.has_value()) {
             break;
         }
-        return std::make_optional<>({});
+        return std::make_optional<std::list<T0>>(std::list<T0>());
     }
     for (;;) {
         if (!arg0.has_value()) {
             break;
         }
         auto x = arg0.value();
-        return std::make_optional<>(std::list<decltype(x)>{x});
+        return std::make_optional<std::list<T0>>(std::list<T0>{x});
     }
     std::abort();
 }
 
 template<typename T0>
-std::set<T0>
-testset(std::list<T0> arg0) {
+std::set<T0> testset(std::list<T0> arg0) {
     for (;;) {
         if (!arg0.empty()) {
             break;
@@ -149,7 +144,7 @@ testset(std::list<T0> arg0) {
         return std::set<T0>();
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -159,14 +154,14 @@ testset(std::list<T0> arg0) {
         auto temp1 = testset(xs);
         decltype(temp0) temp2;
         for (auto temp3 : temp1) {;
-            if (lv.count(temp3)) {;
-                temp2.insert(temp3);
-            };
+        if (lv.count(temp3)) {;
+        temp2.insert(temp3);
+        };
         };
         return temp2;
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -175,7 +170,7 @@ testset(std::list<T0> arg0) {
         auto temp0 = std::set<T0>{x};
         auto temp1 = testset(xs);
         for (auto temp2 : temp1) {;
-            temp0.insert(temp2);
+        temp0.insert(temp2);
         };
         return temp0;
     }
@@ -183,8 +178,7 @@ testset(std::list<T0> arg0) {
 }
 
 template<typename T0>
-std::list<T0>
-testifelse(std::list<T0> arg0, T0 arg1) {
+std::list<T0> testifelse(std::list<T0> arg0, T0 arg1) {
     for (;;) {
         if (!arg0.empty()) {
             break;
@@ -193,7 +187,7 @@ testifelse(std::list<T0> arg0, T0 arg1) {
         return std::list<T0>();
     }
     for (;;) {
-        if (!arg0.empty()) {
+        if (arg0.empty()) {
             break;
         }
         auto x = arg0.front();
@@ -202,9 +196,9 @@ testifelse(std::list<T0> arg0, T0 arg1) {
         auto n = arg1;
         std::list<T0> temp0;
         if ((x) < (n)) {;
-            temp0 = std::list<T0>{x};
+        temp0 = std::list<T0>{x};
         } else {;
-            temp0 = std::list<T0>();
+        temp0 = std::list<T0>();
         };
         auto temp1 = temp0;
         auto temp2 = testifelse(xs, n);
@@ -215,8 +209,7 @@ testifelse(std::list<T0> arg0, T0 arg1) {
 }
 
 template<typename T0, typename T1>
-std::pair<T0, T1>
-pair(T0 arg0, T1 arg1) {
+std::pair<T0, T1> pair(T0 arg0, T1 arg1) {
     for (;;) {
         auto f = arg0;
         auto s = arg1;
@@ -226,8 +219,7 @@ pair(T0 arg0, T1 arg1) {
 }
 
 template<typename T0, typename T1>
-T0
-fst(std::pair<T0, T1> arg0) {
+T0 fst(std::pair<T0, T1> arg0) {
     for (;;) {
         auto first = arg0.first;
         auto second = arg0.second;
@@ -237,8 +229,7 @@ fst(std::pair<T0, T1> arg0) {
 }
 
 template<typename T0, typename T1>
-T1
-snd(std::pair<T0, T1> arg0) {
+T1 snd(std::pair<T0, T1> arg0) {
     for (;;) {
         auto first = arg0.first;
         auto second = arg0.second;
@@ -247,8 +238,7 @@ snd(std::pair<T0, T1> arg0) {
     std::abort();
 }
 
-bool
-evn(std::uint64_t arg0) {
+bool evn(std::uint64_t arg0) {
     for (;;) {
         if (arg0 != 0) {
             break;
