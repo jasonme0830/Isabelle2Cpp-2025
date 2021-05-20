@@ -837,15 +837,15 @@ const
     case BOp::LogicAnd:
         l = lhs->gen_expr(entity, type);
         r = rhs->gen_expr(entity, type);
-        return '(' + l + ") and (" + r + ')';
+        return '(' + l + ") && (" + r + ')';
     case BOp::LogicOr:
         l = lhs->gen_expr(entity, type);
         r = rhs->gen_expr(entity, type);
-        return '(' + l + ") or (" + r + ')';
+        return '(' + l + ") || (" + r + ')';
     case BOp::LogicEq:
         l = lhs->gen_expr(entity, type);
         r = rhs->gen_expr(entity, type);
-        return '(' + l + ") = (" + r + ')';
+        return '(' + l + ") == (" + r + ')';
     case BOp::LogicNoteq:
         l = lhs->gen_expr(entity, type);
         r = rhs->gen_expr(entity, type);
