@@ -456,7 +456,7 @@ const
         assert(args.size() == entity.types().size() - 1);
         for (size_t i = 0; i < args.size(); ++i)
         {
-            args[i]->gen_pattern(entity, "arg" + to_string(i));
+            args[i]->gen_pattern(entity, "arg" + to_string(i + 1));
         }
     }
     else if (constructor == "Suc")
@@ -488,7 +488,7 @@ const
         auto pos = data_type->pos_of_cons(constructor);
         for (size_t i = 0; i < args.size(); ++i)
         {
-            args[i]->gen_pattern(entity, prev + dot + "get_c" + to_string(pos) + "().p" + to_string(i));
+            args[i]->gen_pattern(entity, prev + dot + "get_c" + to_string(pos + 1) + "().p" + to_string(i + 1));
         }
     }
     else
@@ -717,7 +717,7 @@ const
             entity.add_expr(type + " " + temp + "{" + data_type->name() + "Cons::" + constructor +"}");
         }
 
-        string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor)) + "(";
+        string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor) + 1) + "(";
 
         function trans = [&](string arg_type)
         {

@@ -55,7 +55,7 @@ FuncEntity::add_argument_type(string name)
     if (!template_mapping_.count(name))
     {
         template_mapping_[name] = template_args_.size();
-        template_args_.push_back("T" + to_string(template_args_.size()));
+        template_args_.push_back("T" + to_string(template_args_.size() + 1));
     }
     return template_args_[template_mapping_[name]];
 }

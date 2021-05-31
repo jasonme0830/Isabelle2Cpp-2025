@@ -148,11 +148,11 @@ Code::gen_type_rest(DataType &data_type)
     auto &components = data_type.components();
     for (size_t i = 0; i < components.size(); ++i)
     {
-        "struct c$ {\n"_fs.outf(newline(), i);
+        "struct c$ {\n"_fs.outf(newline(), i + 1);
         add_indent();
         for (size_t j = 0; j < components[i].size(); ++j)
         {
-            "$ p$;\n"_fs.outf(newline(), components[i][j], j);
+            "$ p$;\n"_fs.outf(newline(), components[i][j], j + 1);
         }
         sub_indent();
         "};\n"_fs.outf(newline());
@@ -162,36 +162,36 @@ Code::gen_type_rest(DataType &data_type)
 
     for (size_t i = 0; i < components.size(); ++i)
     {
-        "c$ &get_c$() {\n"_fs.outf(newline(), i, i);
+        "c$ &get_c$() {\n"_fs.outf(newline(), i + 1, i + 1);
         add_indent();
-            "return std::get<c$>(value);\n"_fs.outf(newline(), i);
+            "return std::get<c$>(value);\n"_fs.outf(newline(), i + 1);
         sub_indent();
         "};\n"_fs.outf(newline());
 
-        "void set_c$("_fs.outf(newline(), i);
+        "void set_c$("_fs.outf(newline(), i + 1);
         for (size_t j = 0; j < components[i].size(); ++j)
         {
             if (j == 0)
             {
-                "$ _p0"_fs.outf(out_, components[i][j]);;
+                "$ _p1"_fs.outf(out_, components[i][j]);;
             }
             else
             {
-                ", $ _p$"_fs.outf(out_, components[i][j], j);
+                ", $ _p$"_fs.outf(out_, components[i][j], j + 1);
             }
         }   ") {\n"_fs.outf(out_);
 
         add_indent();
-            "value = c${"_fs.outf(newline(), i);
+            "value = c${"_fs.outf(newline(), i + 1);
         for (size_t j = 0; j < components[i].size(); ++j)
         {
             if (j == 0)
             {
-                "_p0"_fs.outf(out_);
+                "_p1"_fs.outf(out_);
             }
             else
             {
-                ", _p$"_fs.outf(out_, j);
+                ", _p$"_fs.outf(out_, j + 1);
             }
         }   "};\n"_fs.outf(out_);
         sub_indent();
@@ -205,11 +205,11 @@ Code::gen_type_rest(DataType &data_type)
         {
             if (i == 0)
             {
-                "c$"_fs.outf(out_, i);;
+                "c$"_fs.outf(out_, i + 1);;
             }
             else
             {
-                ", c$"_fs.outf(out_, i);
+                ", c$"_fs.outf(out_, i + 1);
             }
         }
         "> value;\n"_fs.outf(out_);
@@ -327,11 +327,11 @@ Code::gen_normal_func(FuncEntity &entity)
     {
         if (i == 0)
         {
-            "$ arg$"_fs.outf(out_, types[i], i);
+            "$ arg$"_fs.outf(out_, types[i], i + 1);
         }
         else
         {
-            ", $ arg$"_fs.outf(out_, types[i], i);
+            ", $ arg$"_fs.outf(out_, types[i], i + 1);
         }
     }   ") {\n"_fs.outf(out_);
 
