@@ -2,7 +2,6 @@
 #include <list>
 #include <memory>
 #include <variant>
-#include <iostream>
 
 template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }
 
@@ -11,90 +10,83 @@ enum slistCons {
     sCons,
 };
 
-template<typename T0>
+template<typename T1>
 struct slistElem;
-template<typename T0>
-using slist = std::shared_ptr<slistElem<T0>>;
+template<typename T1>
+using slist = std::shared_ptr<slistElem<T1>>;
 
-template<typename T0>
+template<typename T1>
 struct slistElem {
-    struct c0 {
-    };
     struct c1 {
-        T0 p0;
-        slist<T0> p1;
+    };
+    struct c2 {
+        T1 p1;
+        slist<T1> p2;
     };
 
     slistElem(slistCons cons) : cons(cons) {}
 
-    c0 &get_c0() {
-        return std::get<c0>(value);
-    };
-    void set_c0() {
-        value = c0{};
-    }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
-    void set_c1(T0 _p0, slist<T0> _p1) {
-        value = c1{_p0, _p1};
+    void set_c1() {
+        value = c1{};
+    }
+    c2 &get_c2() {
+        return std::get<c2>(value);
+    };
+    void set_c2(T1 _p1, slist<T1> _p2) {
+        value = c2{_p1, _p2};
     }
 
     slistCons cons;
-    std::variant<c0, c1> value;
+    std::variant<c1, c2> value;
 };
 
-template<typename T0>
-std::list<T0> app(std::list<T0> arg0, std::list<T0> arg1) {
+template<typename T1>
+std::list<T1> app1(std::list<T1> arg1, std::list<T1> arg2) {
     for (;;) {
-        if (!arg0.empty()) {
+        if (!arg1.empty()) {
             break;
         }
-        auto ys = arg1;
+        auto ys = arg2;
         return ys;
     }
     for (;;) {
-        if (arg0.empty()) {
+        if (arg1.empty()) {
             break;
         }
-        auto x = arg0.front();
-        arg0.pop_front();
-        auto xs = arg0;
-        auto ys = arg1;
-        auto temp0 = app(xs, ys);
+        auto x = arg1.front();
+        arg1.pop_front();
+        auto xs = arg1;
+        auto ys = arg2;
+        auto temp0 = app1(xs, ys);
         temp0.push_front(x);
         return temp0;
     }
     std::abort();
 }
 
-template<typename T0>
-slist<T0> app2(slist<T0> arg0, slist<T0> arg1) {
+template<typename T1>
+slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
     for (;;) {
-        if (arg0->cons != slistCons::sNil) {
+        if (arg1->cons != slistCons::sNil) {
             break;
         }
-        auto ys = arg1;
+        auto ys = arg2;
         return ys;
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        auto xs = arg0->get_c1().p1;
-        auto ys = arg1;
-        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
-        temp0->set_c1(x, app(xs, ys));
+        auto x = arg1->get_c2().p1;
+        auto xs = arg1->get_c2().p2;
+        auto ys = arg2;
+        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
+        temp0->set_c2(x, app(xs, ys));
         return temp0;
     }
     std::abort();
 }
 
-int main() {
-    std::list<int> list0 {0, 1, 2};
-    std::list<int> list1 {3, 4, 5};
-    for (auto elem : app(list0, list1)) {
-        std::cout << elem << " ";
-    }
-}
