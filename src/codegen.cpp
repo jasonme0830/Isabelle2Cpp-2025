@@ -461,6 +461,7 @@ const
     }
     else if (constructor == "Suc")
     {
+        entity.add_pattern_cond(prev + " == 0");
         args[0]->gen_pattern(entity, "(" + prev + ") - 1");
     }
     else if (constructor == "Cons")
