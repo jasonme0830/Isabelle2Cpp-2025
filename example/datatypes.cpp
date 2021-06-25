@@ -14,29 +14,29 @@ struct snatElem;
 using snat = std::shared_ptr<snatElem>;
 
 struct snatElem {
-    struct c0 {
-    };
     struct c1 {
-        snat p0;
+    };
+    struct c2 {
+        snat p1;
     };
 
     snatElem(snatCons cons) : cons(cons) {}
 
-    c0 &get_c0() {
-        return std::get<c0>(value);
-    };
-    void set_c0() {
-        value = c0{};
-    }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
-    void set_c1(snat _p0) {
-        value = c1{_p0};
+    void set_c1() {
+        value = c1{};
+    }
+    c2 &get_c2() {
+        return std::get<c2>(value);
+    };
+    void set_c2(snat _p1) {
+        value = c2{_p1};
     }
 
     snatCons cons;
-    std::variant<c0, c1> value;
+    std::variant<c1, c2> value;
 };
 
 enum slistCons {
@@ -44,37 +44,37 @@ enum slistCons {
     sCons,
 };
 
-template<typename T0>
+template<typename T1>
 struct slistElem;
-template<typename T0>
-using slist = std::shared_ptr<slistElem<T0>>;
+template<typename T1>
+using slist = std::shared_ptr<slistElem<T1>>;
 
-template<typename T0>
+template<typename T1>
 struct slistElem {
-    struct c0 {
-    };
     struct c1 {
-        T0 p0;
-        slist<T0> p1;
+    };
+    struct c2 {
+        T1 p1;
+        slist<T1> p2;
     };
 
     slistElem(slistCons cons) : cons(cons) {}
 
-    c0 &get_c0() {
-        return std::get<c0>(value);
-    };
-    void set_c0() {
-        value = c0{};
-    }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
-    void set_c1(T0 _p0, slist<T0> _p1) {
-        value = c1{_p0, _p1};
+    void set_c1() {
+        value = c1{};
+    }
+    c2 &get_c2() {
+        return std::get<c2>(value);
+    };
+    void set_c2(T1 _p1, slist<T1> _p2) {
+        value = c2{_p1, _p2};
     }
 
     slistCons cons;
-    std::variant<c0, c1> value;
+    std::variant<c1, c2> value;
 };
 
 enum sboolCons {
@@ -83,28 +83,28 @@ enum sboolCons {
 };
 
 struct sbool {
-    struct c0 {
-    };
     struct c1 {
+    };
+    struct c2 {
     };
 
     sbool(sboolCons cons) : cons(cons) {}
 
-    c0 &get_c0() {
-        return std::get<c0>(value);
-    };
-    void set_c0() {
-        value = c0{};
-    }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
     void set_c1() {
         value = c1{};
     }
+    c2 &get_c2() {
+        return std::get<c2>(value);
+    };
+    void set_c2() {
+        value = c2{};
+    }
 
     sboolCons cons;
-    std::variant<c0, c1> value;
+    std::variant<c1, c2> value;
 };
 
 enum optionCons {
@@ -112,187 +112,194 @@ enum optionCons {
     Some,
 };
 
-template<typename T0>
+template<typename T1>
 struct option {
-    struct c0 {
-    };
     struct c1 {
-        T0 p0;
+    };
+    struct c2 {
+        T1 p1;
     };
 
     option(optionCons cons) : cons(cons) {}
 
-    c0 &get_c0() {
-        return std::get<c0>(value);
-    };
-    void set_c0() {
-        value = c0{};
-    }
     c1 &get_c1() {
         return std::get<c1>(value);
     };
-    void set_c1(T0 _p0) {
-        value = c1{_p0};
+    void set_c1() {
+        value = c1{};
+    }
+    c2 &get_c2() {
+        return std::get<c2>(value);
+    };
+    void set_c2(T1 _p1) {
+        value = c2{_p1};
     }
 
     optionCons cons;
-    std::variant<c0, c1> value;
+    std::variant<c1, c2> value;
 };
 
-template<typename T0>
-slist<T0> app(slist<T0> arg0, slist<T0> arg1) {
+/**
+ * app xs ys = app (app1 xs ys) (app2 xs ys)
+*/
+
+template<typename T1>
+slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
     for (;;) {
-        if (arg0->cons != slistCons::sNil) {
+        if (arg1->cons != slistCons::sNil) {
             break;
         }
-        auto ys = arg1;
+        auto ys = arg2;
         return ys;
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        auto xs = arg0->get_c1().p1;
-        auto ys = arg1;
-        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
-        temp0->set_c1(x, app(xs, ys));
+        auto x = arg1->get_c2().p1;
+        auto xs = arg1->get_c2().p2;
+        auto ys = arg2;
+        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
+        temp0->set_c2(x, app(xs, ys));
         return temp0;
     }
     std::abort();
 }
 
-template<typename T0>
-slist<T0> rev(slist<T0> arg0) {
+template<typename T1>
+slist<T1> rev(slist<T1> arg1) {
     for (;;) {
-        if (arg0->cons != slistCons::sNil) {
+        if (arg1->cons != slistCons::sNil) {
             break;
         }
-        return construct<slist<T0>>(slistCons::sNil);
+        return construct<slist<T1>>(slistCons::sNil);
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        auto xs = arg0->get_c1().p1;
-        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
-        temp0->set_c1(x, construct<slist<T0>>(slistCons::sNil));
+        auto x = arg1->get_c2().p1;
+        auto xs = arg1->get_c2().p2;
+        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
+        temp0->set_c2(x, construct<slist<T1>>(slistCons::sNil));
         return app(rev(xs), temp0);
     }
     std::abort();
 }
 
-slist<snat> snat2slist(snat arg0) {
+slist<snat> snat2slist(snat arg1) {
     for (;;) {
-        auto n = arg0;
+        auto n = arg1;
         slist<snat> temp0 = construct<slist<snat>>(slistCons::sCons);
-        temp0->set_c1(n, construct<slist<snat>>(slistCons::sNil));
+        temp0->set_c2(n, construct<slist<snat>>(slistCons::sNil));
         return temp0;
     }
     std::abort();
 }
 
-template<typename T0>
-snat len(slist<T0> arg0) {
+template<typename T1>
+snat len(slist<T1> arg1) {
     for (;;) {
-        if (arg0->cons != slistCons::sNil) {
+        if (arg1->cons != slistCons::sNil) {
             break;
         }
         return construct<snat>(snatCons::sZero);
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        auto xs = arg0->get_c1().p1;
+        auto x = arg1->get_c2().p1;
+        auto xs = arg1->get_c2().p2;
         snat temp0 = construct<snat>(snatCons::sSucc);
-        temp0->set_c1(len(xs));
+        temp0->set_c2(len(xs));
         return temp0;
     }
     std::abort();
 }
 
-slist<std::uint64_t> listwithlen(std::uint64_t arg0) {
+slist<std::uint64_t> listwithlen(std::uint64_t arg1) {
     for (;;) {
-        if (arg0 != 0) {
+        if (arg1 != 0) {
             break;
         }
         return construct<slist<std::uint64_t>>(slistCons::sNil);
     }
     for (;;) {
-        auto n = (arg0) - 1;
+        if (arg1 == 0) {
+            break;
+        }
+        auto n = (arg1) - 1;
         slist<std::uint64_t> temp0 = construct<slist<std::uint64_t>>(slistCons::sCons);
-        temp0->set_c1(1, listwithlen(n));
+        temp0->set_c2(1, listwithlen(n));
         return temp0;
     }
     std::abort();
 }
 
-template<typename T0>
-std::uint64_t leninnat(slist<T0> arg0) {
+template<typename T1>
+std::uint64_t leninnat(slist<T1> arg1) {
     for (;;) {
-        if (arg0->cons != slistCons::sNil) {
+        if (arg1->cons != slistCons::sNil) {
             break;
         }
         return 0;
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        auto xs = arg0->get_c1().p1;
+        auto x = arg1->get_c2().p1;
+        auto xs = arg1->get_c2().p2;
         return (leninnat(xs)) + (1);
     }
     std::abort();
 }
 
-template<typename T0>
-slist<T0> dblist(slist<T0> arg0) {
+template<typename T1>
+slist<T1> dblist(slist<T1> arg1) {
     for (;;) {
-        if (arg0->cons != slistCons::sNil) {
+        if (arg1->cons != slistCons::sNil) {
             break;
         }
-        return construct<slist<T0>>(slistCons::sNil);
+        return construct<slist<T1>>(slistCons::sNil);
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        if (arg0->get_c1().p1->cons != slistCons::sNil) {
+        auto x = arg1->get_c2().p1;
+        if (arg1->get_c2().p2->cons != slistCons::sNil) {
             break;
         }
-        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
-        slist<T0> temp1 = construct<slist<T0>>(slistCons::sCons);
-        temp1->set_c1(x, construct<slist<T0>>(slistCons::sNil));
-        temp0->set_c1(x, temp1);
+        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
+        slist<T1> temp1 = construct<slist<T1>>(slistCons::sCons);
+        temp1->set_c2(x, construct<slist<T1>>(slistCons::sNil));
+        temp0->set_c2(x, temp1);
         return temp0;
     }
     for (;;) {
-        if (arg0->cons != slistCons::sCons) {
+        if (arg1->cons != slistCons::sCons) {
             break;
         }
-        auto x = arg0->get_c1().p0;
-        auto xs = arg0->get_c1().p1;
-        slist<T0> temp0 = construct<slist<T0>>(slistCons::sCons);
-        temp0->set_c1(x, construct<slist<T0>>(slistCons::sNil));
+        auto x = arg1->get_c2().p1;
+        auto xs = arg1->get_c2().p2;
+        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
+        temp0->set_c2(x, construct<slist<T1>>(slistCons::sNil));
         return app(dblist(temp0), dblist(xs));
     }
     std::abort();
 }
 
-sbool snot(sbool arg0) {
+sbool snot(sbool arg1) {
     for (;;) {
-        if (arg0.cons != sboolCons::sTrue) {
+        if (arg1.cons != sboolCons::sTrue) {
             break;
         }
         return sbool(sboolCons::sFalse);
     }
     for (;;) {
-        auto sFlase = arg0;
+        auto sFlase = arg1;
         return sbool(sboolCons::sTrue);
     }
     std::abort();
