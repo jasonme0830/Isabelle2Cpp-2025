@@ -12,5 +12,4 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Do some benchmarks comparing to the Isabelle and native cpp codes
-- [ ] Enabel the general form of the definition of datatypes
+- [ ]Do some benchmarks comparing to the Isabelle and native cpp codes
