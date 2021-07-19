@@ -12,4 +12,9 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ]Do some benchmarks comparing to the Isabelle and native cpp codes
+- [ ] Reimplement the parser
+- [ ] Add optimization of variables removal
+- [ ] Try to reuse values as many as possible
+- [ ] Provide configurable conversion rules
+- [ ] Do some benchmarks between generated cpp codes and native cpp codes
+- [ ] Do some benchmarks between generated cpp codes and generated sml codes
