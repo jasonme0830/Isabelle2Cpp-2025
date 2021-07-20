@@ -1,3 +1,4 @@
+#include <regex>
 #include <cctype>
 #include <exception>
 #include <algorithm>
@@ -400,7 +401,7 @@ const
 {
     entity.entry_euqation();
     pattern->gen_pattern(entity, "");
-    entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + "");
+    entity.add_expr("return " + expr->gen_expr(entity, entity.result_type()) + ";");
 }
 
 // --- generate pattern ---
@@ -443,7 +444,15 @@ const
     }
     else
     {
-        entity.add_pattern("auto " + name + " = " + prev + "");
+        static std::regex arg_regex(R"(arg[1-9][0-9]*)");
+        if (std::regex_match(prev, arg_regex))
+        {
+            entity.varrm_mapping()[name] = prev;
+        }
+        else
+        {
+            entity.add_pattern("auto " + name + " = " + prev);
+        }
     }
 }
 
@@ -468,8 +477,7 @@ const
     {
         entity.add_pattern_cond(prev + ".empty()");
         args[0]->gen_pattern(entity, prev + ".front()");
-        entity.add_pattern(prev + ".pop_front()");
-        args[1]->gen_pattern(entity, prev);
+        args[1]->gen_pattern(entity, "decltype(" + prev + ")(" + prev + ".begin() + 1, " + prev + ".end())");
     }
     else if (constructor == "Some")
     {
@@ -576,7 +584,16 @@ const
     }
     else
     {
-        return name;
+        auto &varrm_mapping = entity.varrm_mapping();
+        auto it = varrm_mapping.find(name);
+        if (it != varrm_mapping.end())
+        {
+            return it->second;
+        }
+        else
+        {
+            return name;
+        }
     }
 }
 
@@ -641,8 +658,8 @@ const
         else
         {
             auto temp = entity.gen_temp();
-            entity.add_expr("auto " + temp + " = " + xs + "");
-            entity.add_expr(temp + ".push_front(" + x + ")");
+            entity.add_expr("auto " + temp + " = " + xs + ";");
+            entity.add_expr(temp + ".push_front(" + x + ");");
             return temp;
         }
     }
@@ -685,14 +702,14 @@ const
         {
             auto ce = args[0]->gen_expr(entity, "bool");
             auto res = entity.gen_temp();
-            entity.add_expr(type + " " + res + "");
+            entity.add_expr(type + " " + res + ";");
             entity.add_expr("if (" + ce + ") {");
             entity.add_indent();
-                entity.add_expr(res + " = " + args[1]->gen_expr(entity, type) + "");
+                entity.add_expr(res + " = " + args[1]->gen_expr(entity, type) + ";");
             entity.sub_indent();
             entity.add_expr("} else {");
             entity.add_indent();
-                entity.add_expr(res + " = " + args[2]->gen_expr(entity, type) + "");
+                entity.add_expr(res + " = " + args[2]->gen_expr(entity, type) + ";");
             entity.sub_indent();
             entity.add_expr("}");
             return res;
@@ -711,11 +728,11 @@ const
         auto temp = entity.gen_temp();
         if (data_type->is_recuisive())
         {
-            entity.add_expr(type + " " + temp + " = construct<" + type + ">" + "(" + data_type->name() + "Cons::" + constructor + ")");
+            entity.add_expr(type + " " + temp + " = construct<" + type + ">" + "(" + data_type->name() + "Cons::" + constructor + ");");
         }
         else
         {
-            entity.add_expr(type + " " + temp + "{" + data_type->name() + "Cons::" + constructor +"}");
+            entity.add_expr(type + " " + temp + "{" + data_type->name() + "Cons::" + constructor +"};");
         }
 
         string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor) + 1) + "(";
@@ -737,7 +754,7 @@ const
                 stmt += ", " + args[i]->gen_expr(entity, abstracts[i]->apply(trans));
             }
         }
-        entity.add_expr(stmt + ')');
+        entity.add_expr(stmt + ");");
         return temp;
     }
     // else as the common call without determined function
@@ -876,18 +893,18 @@ const
 
         auto lv = entity.gen_temp();
         auto rv = entity.gen_temp();
-        entity.add_expr("auto " + lv + " = " + l + "");
-        entity.add_expr("auto " + rv + " = " + r + "");
+        entity.add_expr("auto " + lv + " = " + l + ";");
+        entity.add_expr("auto " + rv + " = " + r + ";");
 
         auto res = entity.gen_temp();
-        entity.add_expr("decltype(" + lv + ") " + res + "");
+        entity.add_expr("decltype(" + lv + ") " + res + ";");
 
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
         entity.add_indent();
-            entity.add_expr("if (lv.count(" + term + ")) {");
+            entity.add_expr("if (" + lv + ".count(" + term + ")) {");
             entity.add_indent();
-                entity.add_expr(res + ".insert(" + term + ")");
+                entity.add_expr(res + ".insert(" + term + ");");
             entity.sub_indent();
             entity.add_expr("}");
         entity.sub_indent();
@@ -901,13 +918,13 @@ const
 
         auto lv = entity.gen_temp();
         auto rv = entity.gen_temp();
-        entity.add_expr("auto " + lv + " = " + l + "");
-        entity.add_expr("auto " + rv + " = " + r + "");
+        entity.add_expr("auto " + lv + " = " + l + ";");
+        entity.add_expr("auto " + rv + " = " + r + ";");
 
         auto term = entity.gen_temp();
         entity.add_expr("for (auto " + term + " : " + rv + ") {");
         entity.add_indent();
-            entity.add_expr(lv + ".insert(" + term + ")");
+            entity.add_expr(lv + ".insert(" + term + ");");
         entity.sub_indent();
         entity.add_expr("}");
         return lv;
@@ -974,11 +991,11 @@ const
         {
             auto temp0 = entity.gen_temp();
             auto temp1 = entity.gen_temp();
-            entity.add_expr("auto " + temp0 + " = " + l + "");
-            entity.add_expr("auto " + temp1 + " = " + r + "");
+            entity.add_expr("auto " + temp0 + " = " + l + ";");
+            entity.add_expr("auto " + temp1 + " = " + r + ";");
             entity.add_expr(
                 temp0 + ".insert(" + temp0 + ".end(), "
-              + temp1 + ".begin(), " + temp1 + ".end())");
+              + temp1 + ".begin(), " + temp1 + ".end());");
             return temp0;
         }
     }
