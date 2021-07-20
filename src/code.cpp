@@ -7,9 +7,7 @@ using namespace std;
 namespace hol2cpp
 {
 Code::Code(ostream &out)
-  : out_(out)
-  , indent_(0)
-  , headers_{"cstdlib"}
+  : out_(out), indent_(0), headers_{"cstdlib"}
 {
     // ...
 }
@@ -82,7 +80,9 @@ Code::generate()
         "#include <$>\n"_fs.outf(out_, header);
     }   out_ << endl;
 
-    "template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }\n\n"_fs.outf(out_);
+    if (headers_.count("memory")) {
+        "template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }\n\n"_fs.outf(out_);
+    }
 
     for (auto &name : names_of_data_types_)
     {
@@ -327,11 +327,11 @@ Code::gen_normal_func(FuncEntity &entity)
     {
         if (i == 0)
         {
-            "$ arg$"_fs.outf(out_, types[i], i + 1);
+            "const $ &arg$"_fs.outf(out_, types[i], i + 1);
         }
         else
         {
-            ", $ arg$"_fs.outf(out_, types[i], i + 1);
+            ", const $ &arg$"_fs.outf(out_, types[i], i + 1);
         }
     }   ") {\n"_fs.outf(out_);
 
