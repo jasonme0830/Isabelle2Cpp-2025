@@ -13,8 +13,11 @@ You can see some examples in [example/](example/)
 ## TODO
 
 - [ ] Reimplement the parser
-- [ ] Add optimization of variables removal
-- [ ] Try to reuse values as many as possible
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
 - [ ] Do some benchmarks between generated cpp codes and generated sml codes
+
+## DONE
+
+- [x] Add optimization of variables removal
+- [x] Try to reuse values as many as possible [Use `const T &` for parameters and update all conversions to make sure that parameters won't be edited]

@@ -24,39 +24,32 @@ class FuncEntity
     /**
      * return the binded code
     */
-    Code
-    &code();
+    Code &code();
 
     /**
      * add indent by the defined indent size
     */
-    void
-    add_indent();
+    void add_indent();
     /**
      * sub indent by the defined indent size
     */
-    void
-    sub_indent();
+    void sub_indent();
 
     /**
      * set or get the name of this function
     */
-    std::string
-    &name();
+    std::string &name();
 
     /**
      * get the name of this function
     */
-    const std::string
-    &name()
-    const;
+    const std::string &name() const;
 
     /**
      * add the determined type
      *  argument type or result type
     */
-    void
-    add_type(std::string type);
+    void add_type(std::string type);
 
     /**
      * mapping the given name to the argument type in C++
@@ -64,74 +57,66 @@ class FuncEntity
      *  for example, a from 'a
      * return the mapped argument type in C++
     */
-    std::string
-    add_argument_type(std::string name);
+    std::string add_argument_type(std::string name);
 
     /**
      * return the result type
     */
-    const std::string
-    &result_type();
+    const std::string &result_type();
 
     /**
      * return the types of this function
      * note: the types contain the result type, which is the last
     */
-    const std::vector<std::string>
-    &types()
-    const;
+    const std::vector<std::string> &types() const;
 
     /**
      * return the template argument types
      *  used for generate code for template functions
     */
-    const std::vector<std::string>
-    &template_args()
-    const;
+    const std::vector<std::string> &template_args() const;
+
+    std::map<std::string, std::string> &varrm_mapping();
 
     /**
      * generate a temporary variable name
      *  format as temp0, temp1, ..., tempN
     */
-    std::string
-    gen_temp();
+    std::string gen_temp();
 
     /**
      * entry a new equation
     */
-    void
-    entry_euqation();
+    void entry_euqation();
 
     /**
      * add a pattern condition
      * pattern statements will be generated before expressions
      *  to break or generate variable declarations
+     *
+     * ';' will be added to the end automatically
     */
-    void
-    add_pattern(const std::string &pattern);
+    void add_pattern(const std::string &pattern);
 
-    void
-    add_pattern_cond(const std::string &cond);
+    void add_pattern_cond(const std::string &cond);
 
     /**
      * add a statement for returning expression
+     *
+     * ';' won't be added to the end automatically,
+     *  so the expr should be with ';' if it needs
     */
-    void
-    add_expr(const std::string &expr);
+    void add_expr(const std::string &expr);
 
     /**
      * get generated statements for pattern
     */
-    const std::vector<std::vector<std::string>>
-    &patterns()
-    const;
+    const std::vector<std::vector<std::string>> &patterns() const;
 
     /**
      * get generated statements for expression
     */
-    const std::vector<std::vector<std::string>>
-    &exprs()
-    const;
+    const std::vector<std::vector<std::string>> &exprs() const;
 
   private:
     Code &code_;
@@ -143,6 +128,7 @@ class FuncEntity
     std::vector<std::string> types_;
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
+    std::map<std::string, std::string> varrm_mapping_;
 
     std::size_t temp_count_;
     std::vector<std::vector<std::string>> patterns_;

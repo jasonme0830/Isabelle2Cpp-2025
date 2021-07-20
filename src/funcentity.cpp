@@ -12,45 +12,37 @@ FuncEntity::FuncEntity(Code &code)
     // ...
 }
 
-Code
-&FuncEntity::code()
+Code &FuncEntity::code()
 {
     return code_;
 }
 
-void
-FuncEntity::add_indent()
+void FuncEntity::add_indent()
 {
     indent_ += Code::indent_size();
 }
 
-void
-FuncEntity::sub_indent()
+void FuncEntity::sub_indent()
 {
     indent_ -= Code::indent_size();
 }
 
-string
-&FuncEntity::name()
+string &FuncEntity::name()
 {
     return name_;
 }
 
-const string
-&FuncEntity::name()
-const
+const string &FuncEntity::name() const
 {
     return name_;
 }
 
-void
-FuncEntity::add_type(string type)
+void FuncEntity::add_type(string type)
 {
     types_.push_back(move(type));
 }
 
-string
-FuncEntity::add_argument_type(string name)
+string FuncEntity::add_argument_type(string name)
 {
     if (!template_mapping_.count(name))
     {
@@ -60,48 +52,45 @@ FuncEntity::add_argument_type(string name)
     return template_args_[template_mapping_[name]];
 }
 
-const string
-&FuncEntity::result_type()
+const string &FuncEntity::result_type()
 {
     return types_.back();
 }
 
-const vector<string>
-&FuncEntity::types()
-const
+const vector<string> &FuncEntity::types() const
 {
     return types_;
 }
 
-const vector<string>
-&FuncEntity::template_args()
-const
+const vector<string> &FuncEntity::template_args() const
 {
     return template_args_;
 }
 
-string
-FuncEntity::gen_temp()
+std::map<std::string, std::string> &FuncEntity::varrm_mapping()
+{
+    return varrm_mapping_;
+}
+
+string FuncEntity::gen_temp()
 {
     return "temp" + to_string(temp_count_++);
 }
 
-void
-FuncEntity::entry_euqation()
+void FuncEntity::entry_euqation()
 {
     temp_count_ = 0;
     patterns_.emplace_back();
     exprs_.emplace_back();
+    varrm_mapping_.clear();
 }
 
-void
-FuncEntity::add_pattern(const string &pattern)
+void FuncEntity::add_pattern(const string &pattern)
 {
     patterns_.back().push_back(pattern + ";");
 }
 
-void
-FuncEntity::add_pattern_cond(const string &cond)
+void FuncEntity::add_pattern_cond(const string &cond)
 {
     patterns_.back().push_back("if ($) {"_fs.format(cond));
     add_indent();
@@ -110,22 +99,17 @@ FuncEntity::add_pattern_cond(const string &cond)
     patterns_.back().push_back("}");
 }
 
-void
-FuncEntity::add_expr(const string &expr)
+void FuncEntity::add_expr(const string &expr)
 {
-    exprs_.back().push_back(expr + ";");
+    exprs_.back().push_back(std::string(indent_, ' ') + expr);
 }
 
-const vector<vector<string>>
-&FuncEntity::patterns()
-const
+const vector<vector<string>> &FuncEntity::patterns() const
 {
     return patterns_;
 }
 
-const vector<vector<string>>
-&FuncEntity::exprs()
-const
+const vector<vector<string>> &FuncEntity::exprs() const
 {
     return exprs_;
 }
