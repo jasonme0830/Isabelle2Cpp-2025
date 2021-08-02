@@ -3,8 +3,6 @@
 #include <memory>
 #include <variant>
 
-template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }
-
 enum snatCons {
     sZero,
     sSucc,
@@ -139,18 +137,13 @@ struct option {
     std::variant<c1, c2> value;
 };
 
-/**
- * app xs ys = app (app1 xs ys) (app2 xs ys)
-*/
-
 template<typename T1>
-slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
+slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
     for (;;) {
         if (arg1->cons != slistCons::sNil) {
             break;
         }
-        auto ys = arg2;
-        return ys;
+        return arg2;
     }
     for (;;) {
         if (arg1->cons != slistCons::sCons) {
@@ -158,21 +151,20 @@ slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
         }
         auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
-        auto ys = arg2;
-        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
-        temp0->set_c2(x, app(xs, ys));
+        slist<T1> temp0 = std::make_shared<slistElem<T1>>(slistCons::sCons);
+        temp0->set_c2(x, app(xs, arg2));
         return temp0;
     }
     std::abort();
 }
 
 template<typename T1>
-slist<T1> rev(slist<T1> arg1) {
+slist<T1> rev(const slist<T1> &arg1) {
     for (;;) {
         if (arg1->cons != slistCons::sNil) {
             break;
         }
-        return construct<slist<T1>>(slistCons::sNil);
+        return std::make_shared<slistElem<T1>>(slistCons::sNil);
     }
     for (;;) {
         if (arg1->cons != slistCons::sCons) {
@@ -180,30 +172,29 @@ slist<T1> rev(slist<T1> arg1) {
         }
         auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
-        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
-        temp0->set_c2(x, construct<slist<T1>>(slistCons::sNil));
+        slist<T1> temp0 = std::make_shared<slistElem<T1>>(slistCons::sCons);
+        temp0->set_c2(x, std::make_shared<slistElem<T1>>(slistCons::sNil));
         return app(rev(xs), temp0);
     }
     std::abort();
 }
 
-slist<snat> snat2slist(snat arg1) {
+slist<snat> snat2slist(const snat &arg1) {
     for (;;) {
-        auto n = arg1;
-        slist<snat> temp0 = construct<slist<snat>>(slistCons::sCons);
-        temp0->set_c2(n, construct<slist<snat>>(slistCons::sNil));
+        slist<snat> temp0 = std::make_shared<slistElem<snat>>(slistCons::sCons);
+        temp0->set_c2(arg1, std::make_shared<slistElem<snat>>(slistCons::sNil));
         return temp0;
     }
     std::abort();
 }
 
 template<typename T1>
-snat len(slist<T1> arg1) {
+snat len(const slist<T1> &arg1) {
     for (;;) {
         if (arg1->cons != slistCons::sNil) {
             break;
         }
-        return construct<snat>(snatCons::sZero);
+        return std::make_shared<snatElem>(snatCons::sZero);
     }
     for (;;) {
         if (arg1->cons != slistCons::sCons) {
@@ -211,26 +202,26 @@ snat len(slist<T1> arg1) {
         }
         auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
-        snat temp0 = construct<snat>(snatCons::sSucc);
+        snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
         temp0->set_c2(len(xs));
         return temp0;
     }
     std::abort();
 }
 
-slist<std::uint64_t> listwithlen(std::uint64_t arg1) {
+slist<std::uint64_t> listwithlen(const std::uint64_t &arg1) {
     for (;;) {
         if (arg1 != 0) {
             break;
         }
-        return construct<slist<std::uint64_t>>(slistCons::sNil);
+        return std::make_shared<slistElem<std::uint64_t>>(slistCons::sNil);
     }
     for (;;) {
         if (arg1 == 0) {
             break;
         }
         auto n = (arg1) - 1;
-        slist<std::uint64_t> temp0 = construct<slist<std::uint64_t>>(slistCons::sCons);
+        slist<std::uint64_t> temp0 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
         temp0->set_c2(1, listwithlen(n));
         return temp0;
     }
@@ -238,7 +229,7 @@ slist<std::uint64_t> listwithlen(std::uint64_t arg1) {
 }
 
 template<typename T1>
-std::uint64_t leninnat(slist<T1> arg1) {
+std::uint64_t leninnat(const slist<T1> &arg1) {
     for (;;) {
         if (arg1->cons != slistCons::sNil) {
             break;
@@ -257,12 +248,12 @@ std::uint64_t leninnat(slist<T1> arg1) {
 }
 
 template<typename T1>
-slist<T1> dblist(slist<T1> arg1) {
+slist<T1> dblist(const slist<T1> &arg1) {
     for (;;) {
         if (arg1->cons != slistCons::sNil) {
             break;
         }
-        return construct<slist<T1>>(slistCons::sNil);
+        return std::make_shared<slistElem<T1>>(slistCons::sNil);
     }
     for (;;) {
         if (arg1->cons != slistCons::sCons) {
@@ -272,9 +263,9 @@ slist<T1> dblist(slist<T1> arg1) {
         if (arg1->get_c2().p2->cons != slistCons::sNil) {
             break;
         }
-        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
-        slist<T1> temp1 = construct<slist<T1>>(slistCons::sCons);
-        temp1->set_c2(x, construct<slist<T1>>(slistCons::sNil));
+        slist<T1> temp0 = std::make_shared<slistElem<T1>>(slistCons::sCons);
+        slist<T1> temp1 = std::make_shared<slistElem<T1>>(slistCons::sCons);
+        temp1->set_c2(x, std::make_shared<slistElem<T1>>(slistCons::sNil));
         temp0->set_c2(x, temp1);
         return temp0;
     }
@@ -284,14 +275,14 @@ slist<T1> dblist(slist<T1> arg1) {
         }
         auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
-        slist<T1> temp0 = construct<slist<T1>>(slistCons::sCons);
-        temp0->set_c2(x, construct<slist<T1>>(slistCons::sNil));
+        slist<T1> temp0 = std::make_shared<slistElem<T1>>(slistCons::sCons);
+        temp0->set_c2(x, std::make_shared<slistElem<T1>>(slistCons::sNil));
         return app(dblist(temp0), dblist(xs));
     }
     std::abort();
 }
 
-sbool snot(sbool arg1) {
+sbool snot(const sbool &arg1) {
     for (;;) {
         if (arg1.cons != sboolCons::sTrue) {
             break;
@@ -299,7 +290,6 @@ sbool snot(sbool arg1) {
         return sbool(sboolCons::sFalse);
     }
     for (;;) {
-        auto sFlase = arg1;
         return sbool(sboolCons::sTrue);
     }
     std::abort();

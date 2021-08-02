@@ -80,10 +80,6 @@ Code::generate()
         "#include <$>\n"_fs.outf(out_, header);
     }   out_ << endl;
 
-    if (headers_.count("memory")) {
-        "template<typename T, typename Cons> T construct(Cons cons) { return std::make_shared<typename T::element_type>(cons); }\n\n"_fs.outf(out_);
-    }
-
     for (auto &name : names_of_data_types_)
     {
         gen_data_type(data_types_[name]);

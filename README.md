@@ -19,5 +19,6 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Remove `construct` and use `std::make_shared` directly now
 - [x] Add optimization of variables removal
 - [x] Try to reuse values as many as possible [Use `const T &` for parameters and update all conversions to make sure that parameters won't be edited]

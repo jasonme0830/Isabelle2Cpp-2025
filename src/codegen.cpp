@@ -9,8 +9,7 @@ using namespace std;
 
 namespace
 {
-bool
-is_number(const string &str)
+bool is_number(const string &str)
 {
     for (auto ch : str)
     {
@@ -22,8 +21,7 @@ is_number(const string &str)
     return true;
 }
 
-string
-get_argument_type(const string &type, size_t ind = 0)
+string argument_type(const string &type, size_t ind = 0)
 {
     if (type.empty())
     {
@@ -63,10 +61,29 @@ get_argument_type(const string &type, size_t ind = 0)
     return type.substr(l, r - l - 1);
 }
 
-string
-get_main_of_type(const string &type)
+pair<string, string> split_type(const string &type)
 {
-    return type.substr(0, type.find('<'));
+    auto pos = type.find('<');
+    if (pos == type.npos)
+    {
+        return { type.substr(0, pos), "" };
+    }
+    return { type.substr(0, pos), type.substr(pos) };
+}
+
+string main_of_type(const string &type)
+{
+    return split_type(type).first;
+}
+
+string rest_of_type(const string &type)
+{
+    return split_type(type).second;
+}
+
+string add_elem_for_type(const string &type)
+{
+    return main_of_type(type) + "Elem" + rest_of_type(type);
 }
 }
 
@@ -575,7 +592,7 @@ const
     {
         if (data_type->is_recuisive())
         {
-            return "construct<" + type + ">(" + data_type->name() + "Cons::" + name + ")";
+            return "std::make_shared<" + add_elem_for_type(type) + ">(" + data_type->name() + "Cons::" + name + ")";
         }
         else
         {
@@ -642,7 +659,7 @@ const
     else if (constructor == "Cons")
     {
         assert(args.size() == 2);
-        auto x = args[0]->gen_expr(entity, get_argument_type(type));
+        auto x = args[0]->gen_expr(entity, argument_type(type));
         auto xs = args[1]->gen_expr(entity, type);
         if (xs == "{}")
         {
@@ -683,7 +700,7 @@ const
         }
         else
         {
-            auto arg_type = get_argument_type(type);
+            auto arg_type = argument_type(type);
             auto expr = args.front()->gen_expr(entity, arg_type);
             return "std::make_optional<" + arg_type + ">(" + expr + ")";
         }
@@ -718,17 +735,18 @@ const
     else if (constructor == "Pair")
     {
         assert(args.size() == 2);
-        return "std::make_pair(" + args[0]->gen_expr(entity, get_argument_type(type, 0))
-            + ", " + args[1]->gen_expr(entity, get_argument_type(type, 1)) + ")";
+        return "std::make_pair(" + args[0]->gen_expr(entity, argument_type(type, 0))
+            + ", " + args[1]->gen_expr(entity, argument_type(type, 1)) + ")"
+        ;
     }
-    else if (auto data_type = entity.code().find_data_type(get_main_of_type(type)))
+    else if (auto data_type = entity.code().find_data_type(main_of_type(type)))
     {
         auto dot = data_type->is_recuisive() ? "->"s : "."s;
 
         auto temp = entity.gen_temp();
         if (data_type->is_recuisive())
         {
-            entity.add_expr(type + " " + temp + " = construct<" + type + ">" + "(" + data_type->name() + "Cons::" + constructor + ");");
+            entity.add_expr(type + " " + temp + " = std::make_shared<" + add_elem_for_type(type) + ">(" + data_type->name() + "Cons::" + constructor + ");");
         }
         else
         {
@@ -739,7 +757,7 @@ const
 
         function trans = [&](string arg_type)
         {
-            return get_argument_type(type, data_type->find_argument_type(arg_type));
+            return argument_type(type, data_type->find_argument_type(arg_type));
         };
 
         auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
@@ -938,11 +956,11 @@ const
     case BOp::SetSupset:
         break;
     case BOp::SetIn:
-        l = lhs->gen_expr(entity, get_argument_type(type));
+        l = lhs->gen_expr(entity, argument_type(type));
         r = rhs->gen_expr(entity, type);
         return r + ".count(" + l + ")";
     case BOp::SetNotin:
-        l = lhs->gen_expr(entity, get_argument_type(type));
+        l = lhs->gen_expr(entity, argument_type(type));
         r = rhs->gen_expr(entity, type);
         return "!" + r + ".count(" + l + ")";
 
