@@ -44,3 +44,8 @@ fun evn :: "nat \<Rightarrow> bool" where
   "evn 0 = True" |
   "evn (Suc 0) = False" |
   "evn (Suc (Suc n)) = evn n"
+
+fun fib :: "nat \<Rightarrow> nat" where
+  "fib 0 = 1" |
+  "fib (Suc 0) = 1" |
+  "fib n = (fib (n - 1)) + (fib (n - 2))"

@@ -17,4 +17,15 @@ fun dblist :: "'a slist \<Rightarrow> 'a slist" where
   "dblist (sCons x sNil) = sCons x (sCons x sNil)" |
   "dblist (sCons x xs) = app (dblist (sCons x sNil)) (dblist xs)"
 
+fun fib :: "nat \<Rightarrow> nat" where
+  "fib 0 = 1" |
+  "fib (Suc 0) = 1" |
+  "fib n = (fib (n - 1)) + (fib (n - 2))"
+
+fun rev3 :: "'a list \<Rightarrow> 'a list" where
+  "rev3 [] = []" |
+  "rev3 (x # xs) = (rev3 xs) @ [x]"
+
+export_code rev3 in SML module_name demo
+
 end

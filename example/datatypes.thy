@@ -3,6 +3,23 @@ datatype 'a slist = sNil | sCons 'a "'a slist";
 datatype sbool = sTrue | sFalse;
 datatype option = None | Some 'a;
 
+fun add :: "snat \<Rightarrow> snat \<Rightarrow> snat" where
+  "add sZero n = n" |
+  "add (sSucc m) n = sSucc (add m n)"
+
+fun fib :: "snat \<Rightarrow> snat" where
+  "fib sZero = sSucc sZero" |
+  "fib (sSucc sZero) = sSucc sZero" |
+  "fib (sSucc (sSucc m)) = add (fib (sSucc m)) (fib m)"
+
+fun natofsnat :: "snat \<Rightarrow> nat" where
+  "natofsnat sZero = 0" |
+  "natofsnat (sSucc n) = (natofsnat n) + 1"
+
+fun snatofnat :: "nat \<Rightarrow> snat" where
+  "snatofnat 0 = sZero" |
+  "snatofnat (Suc n) = sSucc (snatofnat n)"
+
 fun app :: "'a slist \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
   "app sNil ys = ys" |
   "app (sCons x xs) ys = sCons x (app xs ys)"

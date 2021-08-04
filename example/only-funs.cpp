@@ -35,7 +35,7 @@ std::list<T1> app(const std::list<T1> &arg1, const std::list<T1> &arg2) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = app(xs, arg2);
         temp0.push_front(x);
         return temp0;
@@ -56,7 +56,7 @@ std::list<T1> rev(const std::list<T1> &arg1) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::list<T1>();
         temp0.push_front(x);
         return app(rev(xs), temp0);
@@ -77,7 +77,7 @@ std::list<T1> rev2(const std::list<T1> &arg1) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::list<T1>();
         temp0.push_front(x);
         auto temp1 = rev2(xs);
@@ -101,7 +101,7 @@ std::list<T1> rev3(const std::list<T1> &arg1) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = rev3(xs);
         auto temp1 = std::list<T1>{x};
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
@@ -141,7 +141,7 @@ std::set<T1> testset(const std::list<T1> &arg1) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
         decltype(temp0) temp2;
@@ -157,7 +157,7 @@ std::set<T1> testset(const std::list<T1> &arg1) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
         for (auto temp2 : temp1) {
@@ -181,7 +181,7 @@ std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
             break;
         }
         auto x = arg1.front();
-        auto xs = decltype(arg1)(arg1.begin() + 1, arg1.end());
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
         if ((x) < (arg2)) {
             temp0 = std::list<T1>{x};
@@ -249,6 +249,28 @@ bool evn(const std::uint64_t &arg1) {
         }
         auto n = ((arg1) - 1) - 1;
         return evn(n);
+    }
+    std::abort();
+}
+
+std::uint64_t fib(const std::uint64_t &arg1) {
+    for (;;) {
+        if (arg1 != 0) {
+            break;
+        }
+        return 1;
+    }
+    for (;;) {
+        if (arg1 == 0) {
+            break;
+        }
+        if ((arg1) - 1 != 0) {
+            break;
+        }
+        return 1;
+    }
+    for (;;) {
+        return (fib((arg1) - (1))) + (fib((arg1) - (2)));
     }
     std::abort();
 }

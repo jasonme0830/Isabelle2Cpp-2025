@@ -494,7 +494,7 @@ const
     {
         entity.add_pattern_cond(prev + ".empty()");
         args[0]->gen_pattern(entity, prev + ".front()");
-        args[1]->gen_pattern(entity, "decltype(" + prev + ")(" + prev + ".begin() + 1, " + prev + ".end())");
+        args[1]->gen_pattern(entity, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
     }
     else if (constructor == "Some")
     {

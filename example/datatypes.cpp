@@ -137,6 +137,96 @@ struct option {
     std::variant<c1, c2> value;
 };
 
+snat add(const snat &arg1, const snat &arg2) {
+    for (;;) {
+        if (arg1->cons != snatCons::sZero) {
+            break;
+        }
+        return arg2;
+    }
+    for (;;) {
+        if (arg1->cons != snatCons::sSucc) {
+            break;
+        }
+        auto m = arg1->get_c2().p1;
+        snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
+        temp0->set_c2(add(m, arg2));
+        return temp0;
+    }
+    std::abort();
+}
+
+snat fib(const snat &arg1) {
+    for (;;) {
+        if (arg1->cons != snatCons::sZero) {
+            break;
+        }
+        snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
+        temp0->set_c2(std::make_shared<snatElem>(snatCons::sZero));
+        return temp0;
+    }
+    for (;;) {
+        if (arg1->cons != snatCons::sSucc) {
+            break;
+        }
+        if (arg1->get_c2().p1->cons != snatCons::sZero) {
+            break;
+        }
+        snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
+        temp0->set_c2(std::make_shared<snatElem>(snatCons::sZero));
+        return temp0;
+    }
+    for (;;) {
+        if (arg1->cons != snatCons::sSucc) {
+            break;
+        }
+        if (arg1->get_c2().p1->cons != snatCons::sSucc) {
+            break;
+        }
+        auto m = arg1->get_c2().p1->get_c2().p1;
+        snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
+        temp0->set_c2(m);
+        return add(fib(temp0), fib(m));
+    }
+    std::abort();
+}
+
+std::uint64_t natofsnat(const snat &arg1) {
+    for (;;) {
+        if (arg1->cons != snatCons::sZero) {
+            break;
+        }
+        return 0;
+    }
+    for (;;) {
+        if (arg1->cons != snatCons::sSucc) {
+            break;
+        }
+        auto n = arg1->get_c2().p1;
+        return (natofsnat(n)) + (1);
+    }
+    std::abort();
+}
+
+snat snatofnat(const std::uint64_t &arg1) {
+    for (;;) {
+        if (arg1 != 0) {
+            break;
+        }
+        return std::make_shared<snatElem>(snatCons::sZero);
+    }
+    for (;;) {
+        if (arg1 == 0) {
+            break;
+        }
+        auto n = (arg1) - 1;
+        snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
+        temp0->set_c2(snatofnat(n));
+        return temp0;
+    }
+    std::abort();
+}
+
 template<typename T1>
 slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
     for (;;) {
