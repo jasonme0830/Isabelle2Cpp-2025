@@ -2,30 +2,6 @@ theory demo
   imports Main
 begin
 
-datatype 'a slist = sNil | sCons 'a "'a slist"
-
-fun app :: "'a slist \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
-  "app sNil ys = ys" |
-  "app (sCons x xs) ys = sCons x (app xs ys)"
-
-fun rev :: "'a slist \<Rightarrow> 'a slist" where
-  "rev sNil = sNil" |
-  "rev (sCons x xs) = app (rev xs) (sCons x sNil)"
-
-fun dblist :: "'a slist \<Rightarrow> 'a slist" where
-  "dblist sNil = sNil" |
-  "dblist (sCons x sNil) = sCons x (sCons x sNil)" |
-  "dblist (sCons x xs) = app (dblist (sCons x sNil)) (dblist xs)"
-
-fun fib :: "nat \<Rightarrow> nat" where
-  "fib 0 = 1" |
-  "fib (Suc 0) = 1" |
-  "fib n = (fib (n - 1)) + (fib (n - 2))"
-
-fun rev3 :: "'a list \<Rightarrow> 'a list" where
-  "rev3 [] = []" |
-  "rev3 (x # xs) = (rev3 xs) @ [x]"
-
 fun merge :: "nat list \<Rightarrow> nat list \<Rightarrow> nat list" where
   "merge xs [] = xs" |
   "merge [] ys = ys" |
@@ -34,8 +10,39 @@ fun merge :: "nat list \<Rightarrow> nat list \<Rightarrow> nat list" where
 fun merge_sort :: "nat list \<Rightarrow> nat list" where
   "merge_sort [] = []" |
   "merge_sort [x] = [x]" |
-  "merge_sort xs = merge (merge_sort (take ((length xs) div (nat 2)) xs)) (merge_sort (drop ((length xs) div (nat 2)) xs))"
+  "merge_sort xs = merge (merge_sort (take ((length xs) div 2) xs)) (merge_sort (drop ((length xs) div 2) xs))"
 
-export_code rev3 in SML module_name demo
+datatype 'a slist = sNil | sCons 'a "'a slist"
+
+fun slength :: "'a slist \<Rightarrow> nat" where
+  "slength sNil = 0" |
+  "slength (sCons x xs) = Suc (slength xs)"
+
+fun stake :: "nat \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
+  "stake n sNil = sNil" |
+  "stake 0 _ = sNil" |
+  "stake (Suc m) (sCons x xs) = sCons x (stake m xs)"
+
+fun sdrop :: "nat \<Rightarrow> 'a slist \<Rightarrow> 'a slist" where
+  "sdrop n sNil = sNil" |
+  "sdrop 0 xs = xs" |
+  "sdrop (Suc m) (sCons x xs) = sdrop m xs"
+
+fun smerge :: "nat slist \<Rightarrow> nat slist \<Rightarrow> nat slist" where
+  "smerge xs sNil = xs" |
+  "smerge sNil ys = ys" |
+  "smerge (sCons x xs) (sCons y ys) = If (x \<le> y) (sCons x (smerge xs (sCons y ys))) (sCons y (smerge (sCons x xs) ys))"
+
+fun smerge_sort :: "nat slist \<Rightarrow> nat slist" where
+  "smerge_sort sNil = sNil" |
+  "smerge_sort (sCons x sNil) = sCons x sNil" |
+  "smerge_sort xs = smerge (smerge_sort (stake ((slength xs) div 2) xs)) (smerge_sort (sdrop ((slength xs) div 2) xs))"
+
+fun fib :: "nat \<Rightarrow> nat" where
+  "fib 0 = 1" |
+  "fib (Suc 0) = 1" |
+  "fib n = (fib (n - 1)) + (fib (n - 2))"
+
+export_code merge_sort in SML module_name demo
 
 end
