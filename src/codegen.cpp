@@ -490,12 +490,6 @@ const
         entity.add_pattern_cond(prev + " == 0");
         args[0]->gen_pattern(entity, "(" + prev + ") - 1");
     }
-    else if (constructor == "Cons")
-    {
-        entity.add_pattern_cond(prev + ".empty()");
-        args[0]->gen_pattern(entity, prev + ".front()");
-        args[1]->gen_pattern(entity, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
-    }
     else if (constructor == "Some")
     {
         entity.add_pattern_cond("!" + prev + ".has_value()");
@@ -507,6 +501,16 @@ const
         args[0]->gen_pattern(entity, prev + ".first");
         args[1]->gen_pattern(entity, prev + ".second");
     }
+
+    // for List
+    else if (constructor == "Cons")
+    {
+        entity.add_pattern_cond(prev + ".empty()");
+        args[0]->gen_pattern(entity, prev + ".front()");
+        args[1]->gen_pattern(entity, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+    }
+
+    // for Datatype
     else if (auto data_type = entity.code().find_data_type_by_cons(constructor))
     {
         string dot = data_type->is_recuisive() ? "->"s : "."s;
@@ -534,11 +538,9 @@ const
     else
     {
         entity.add_pattern_cond(prev + ".size() != " + to_string(exprs.size()));
-
-        for (const auto &expr : exprs)
+        for (std::size_t i = 0; i < exprs.size(); ++i)
         {
-            expr->gen_pattern(entity, prev + ".front()");
-            entity.add_pattern(prev + ".pop_front()");
+            exprs[i]->gen_pattern(entity, "*std::next(" + prev + ".begin(), " + std::to_string(i) + ")");
         }
     }
 }
@@ -656,30 +658,6 @@ const
         auto expr = args[0]->gen_expr(entity, type);
         return "(" + expr + ") + 1";
     }
-    else if (constructor == "Cons")
-    {
-        assert(args.size() == 2);
-        auto x = args[0]->gen_expr(entity, argument_type(type));
-        auto xs = args[1]->gen_expr(entity, type);
-        if (xs == "{}")
-        {
-            if (type.empty())
-            {
-                return "std::list<decltype(" + x + ")>{" + x + "}";
-            }
-            else
-            {
-                return type + "{" + x + "}";
-            }
-        }
-        else
-        {
-            auto temp = entity.gen_temp();
-            entity.add_expr("auto " + temp + " = " + xs + ";");
-            entity.add_expr(temp + ".push_front(" + x + ");");
-            return temp;
-        }
-    }
     else if (constructor == "Some")
     {
         assert(args.size() == 1);
@@ -705,6 +683,60 @@ const
             return "std::make_optional<" + arg_type + ">(" + expr + ")";
         }
     }
+
+    // for List
+    else if (constructor == "Cons")
+    {
+        assert(args.size() == 2);
+        auto x = args[0]->gen_expr(entity, argument_type(type));
+        auto xs = args[1]->gen_expr(entity, type);
+        if (xs == "{}")
+        {
+            if (type.empty())
+            {
+                return "std::list<decltype(" + x + ")>{" + x + "}";
+            }
+            else
+            {
+                return type + "{" + x + "}";
+            }
+        }
+        else
+        {
+            auto temp = entity.gen_temp();
+            entity.add_expr("auto " + temp + " = " + xs + ";");
+            entity.add_expr(temp + ".push_front(" + x + ");");
+            return temp;
+        }
+    }
+    else if (constructor == "length")
+    {
+        assert(args.size() == 1);
+        auto xs = args[0]->gen_expr(entity, type);
+        if (xs == "{}")
+        {
+            return "0";
+        }
+        else
+        {
+            return xs + ".size()";
+        }
+    }
+    else if (constructor == "take")
+    {
+        assert(args.size() == 2);
+        auto n = args[0]->gen_expr(entity, "nat");
+        auto xs = args[1]->gen_expr(entity, "");
+        return "decltype(" + xs + "){ " + xs + ".begin(), std::next(" + xs + ".begin(), " + n + ") }";
+    }
+    else if (constructor == "drop")
+    {
+        assert(args.size() == 2);
+        auto n = args[0]->gen_expr(entity, "nat");
+        auto xs = args[1]->gen_expr(entity, "");
+        return "decltype(" + xs + "){ std::next(" + xs + ".begin(), " + n + "), " + xs + ".end() }";
+    }
+
     else if (constructor == "If")
     {
         assert(args.size() == 3);
