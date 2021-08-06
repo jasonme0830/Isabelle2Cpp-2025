@@ -30,7 +30,7 @@ Parser::pas_func_decl(const string &str)
 Parser::Parser()
 {
 digit_ = Token::by(::isdigit);
-alpha_ = Token::by(::isalpha);
+alpha_ = Token::by([] (char chr) { return ::isalpha(chr) || (chr == '_'); });
 blank_ = Token::by(::isspace);
 
 // blanks
