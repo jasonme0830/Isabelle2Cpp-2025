@@ -8,42 +8,35 @@
 using namespace std;
 using namespace hol2cpp;
 
-int
-main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     ArgumentParser arg_parser("hol2cpp");
     arg_parser.add_argument("file")
-              .help("source hol file");
+              .help("source hol file")
+    ;
 
-    try
-    {
+    try {
         arg_parser.parse(argc, argv);
 
         auto path = arg_parser.get<string>("file");
         auto fin = ifstream(path);
-        if (!fin.good())
-        {
+        if (!fin.good()) {
             cout << "can't open file " << path << endl;
             return 0;
         }
 
         string source;
-        while (!fin.eof())
-        {
+        while (!fin.eof()) {
             source += fin.get();
         }
 
         auto decls = Parser().pas_decls(source);
         Code code;
-        for (auto &decl : decls)
-        {
+        for (auto &decl : decls) {
             decl->codegen(code);
         }
         code.generate();
-    }
-    catch(const exception& e)
-    {
-      cerr << e.what() << endl;
+    } catch(const exception& e) {
+        cerr << e.what() << endl;
     }
 
     return 0;

@@ -3,17 +3,16 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "format.hpp"
 
-namespace hol2cpp
-{
+namespace hol2cpp {
 class Code;
 
 /**
  * FuncEntity contains types occurs in the parsed function
  *  and generated statements
 */
-class FuncEntity
-{
+class FuncEntity {
   public:
     /**
      * @code: bind the code then could get the code
@@ -29,11 +28,11 @@ class FuncEntity
     /**
      * add indent by the defined indent size
     */
-    void add_indent();
+    FuncEntity &add_indent();
     /**
      * sub indent by the defined indent size
     */
-    void sub_indent();
+    FuncEntity &sub_indent();
 
     /**
      * set or get the name of this function
@@ -97,8 +96,16 @@ class FuncEntity
      * ';' will be added to the end automatically
     */
     void add_pattern(const std::string &pattern);
+    template<typename ...Args>
+    void add_pattern(const FormatString &fs, Args &&...args) {
+        add_pattern(fs.format(std::forward<Args>(args)...));
+    }
 
     void add_pattern_cond(const std::string &cond);
+    template<typename ...Args>
+    void add_pattern_cond(const FormatString &fs, Args &&...args) {
+        add_pattern_cond(fs.format(std::forward<Args>(args)...));
+    }
 
     /**
      * add a statement for returning expression
@@ -106,7 +113,11 @@ class FuncEntity
      * ';' won't be added to the end automatically,
      *  so the expr should be with ';' if it needs
     */
-    void add_expr(const std::string &expr);
+    FuncEntity &add_expr(const std::string &expr);
+    template<typename ...Args>
+    FuncEntity &add_expr(const FormatString &fs, Args &&...args) {
+        return add_expr(fs.format(std::forward<Args>(args)...));
+    }
 
     /**
      * get generated statements for pattern
@@ -134,4 +145,4 @@ class FuncEntity
     std::vector<std::vector<std::string>> patterns_;
     std::vector<std::vector<std::string>> exprs_;
 };
-}
+} // namespace hol2cpp
