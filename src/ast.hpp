@@ -403,4 +403,10 @@ struct FuncDecl final : Declaration {
     */
     void codegen(Code &) const override;
 };
+
+struct Theory final {
+    std::string name;
+    std::vector<std::string> imports;
+    std::vector<Ptr<Declaration>> declarations;
+};
 } // namespace hol2cpp
