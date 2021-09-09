@@ -1,10 +1,11 @@
+#include "ast.hpp"
+#include "code.hpp"
+#include "format.hpp"
+
 #include <regex>
 #include <cctype>
 #include <exception>
 #include <algorithm>
-#include "ast.hpp"
-#include "code.hpp"
-#include "format.hpp"
 
 using namespace std;
 
@@ -736,4 +737,4 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type) const {
     }
     throw runtime_error("Implementation error at line $ in file $!"_fs.format(__LINE__, __FILE__));
 }
-}
+} // namespace hol2cpp

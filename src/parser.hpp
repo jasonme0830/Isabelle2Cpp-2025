@@ -1,10 +1,11 @@
 #pragma once
 
+#include "ast.hpp"
+
 #include <memory>
 #include <string>
 #include <vector>
 #include <parsec.hpp>
-#include "ast.hpp"
 
 namespace hol2cpp
 {

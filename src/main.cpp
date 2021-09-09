@@ -1,9 +1,10 @@
-#include <fstream>
-#include <iostream>
-#include <exception>
 #include "code.hpp"
 #include "parser.hpp"
 #include "argparse.hpp"
+
+#include <fstream>
+#include <iostream>
+#include <exception>
 
 using namespace std;
 using namespace hol2cpp;

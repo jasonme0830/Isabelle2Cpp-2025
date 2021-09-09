@@ -1,9 +1,10 @@
 #pragma once
 
+#include "format.hpp"
+
 #include <map>
 #include <string>
 #include <vector>
-#include "format.hpp"
 
 namespace hol2cpp {
 class Code;

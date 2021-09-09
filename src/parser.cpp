@@ -1,7 +1,8 @@
+#include "parser.hpp"
+
 #include <map>
 #include <cctype>
 #include <iostream>
-#include "parser.hpp"
 
 using namespace std;
 using namespace parsec;

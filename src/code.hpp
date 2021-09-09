@@ -1,11 +1,12 @@
 #pragma once
 
+#include "datatype.hpp"
+#include "funcentity.hpp"
+
 #include <set>
 #include <map>
 #include <vector>
 #include <iostream>
-#include "datatype.hpp"
-#include "funcentity.hpp"
 
 namespace hol2cpp {
 /**

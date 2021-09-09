@@ -1,8 +1,9 @@
 #pragma once
 
+#include "ast.hpp"
+
 #include <vector>
 #include <string>
-#include "ast.hpp"
 
 namespace hol2cpp {
 class DataType {
