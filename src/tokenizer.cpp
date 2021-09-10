@@ -10,7 +10,8 @@ using namespace std;
 
 namespace hol2cpp {
 static set<string> localSymbolSet {
-    ":", "::", ":="
+    ":", "::", ":=", "=", "|", "\"", "(", ")", "*", R"(\<Rightarrow>)",
+    "[", "]", "{", "}", ","
 };
 
 Tokenizer::Tokenizer(ifstream &input) noexcept
@@ -136,7 +137,7 @@ Token Tokenizer::next_token() {
     }
 
     if (!token) {
-        return Token(Token::Type::End);
+        return Token(Token::Type::EndOfFile);
     } else {
         return *token;
     }
