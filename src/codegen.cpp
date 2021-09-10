@@ -110,7 +110,7 @@ void FuncDecl::codegen(Code &code) const {
     entity.name() = name;
     type->build_func_entity(entity);
     for (auto &equation : equations) {
-        equation->build_func_entity(entity);
+        equation.build_func_entity(entity);
     }
 }
 

@@ -64,8 +64,7 @@ struct ArgumentType final : Type {
      * @name: name of the argument type but without '
      *  for example, t is the name of 't
     */
-    ArgumentType(std::string name)
-      : name(std::move(name)) {}
+    ArgumentType(std::string name) : name(std::move(name)) {}
 
     std::string gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
@@ -89,11 +88,6 @@ struct TemplateType final : Type {
     TemplateType(std::string name, Ptr<Type> &&arg) : name(std::move(name)) {
         args.push_back(std::move(arg));
     }
-    TemplateType(std::string name, std::vector<Ptr<Type>> &&args)
-      : name(std::move(name))
-      , args(std::move(args)) {
-        // ...
-    }
 
     std::string gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
@@ -110,12 +104,6 @@ struct ProductType;
 */
 struct FuncType final : Type {
     std::vector<Ptr<Type>> types;
-
-    /**
-     * @types: the last type is the result type
-     *  and others are argument types
-    */
-    FuncType(std::vector<Ptr<Type>> &&types) : types(std::move(types)) {}
 
     /**
      * return the raw pointer of result type
@@ -188,11 +176,7 @@ struct ConsExpr final : Expr {
      * @constructor: name of constructor
      * @args: arguments for the constructor
     */
-    ConsExpr(std::string constructor, std::vector<Ptr<Expr>> &&args)
-      : constructor(std::move(constructor))
-      , args(std::move(args)) {
-        // ...
-    }
+    ConsExpr(std::string constructor) : constructor(std::move(constructor)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
@@ -208,7 +192,6 @@ struct ListExpr final : Expr {
     /**
      * @exprs: exprs in []
     */
-    ListExpr() = default;
     ListExpr(std::vector<Ptr<Expr>> &&exprs) : exprs(std::move(exprs)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
@@ -225,7 +208,6 @@ struct SetExpr final : Expr {
     /**
      * @exprs: exprs in {}
     */
-    SetExpr() = default;
     SetExpr(std::vector<Ptr<Expr>> &&exprs) : exprs(std::move(exprs)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
@@ -317,22 +299,9 @@ struct BinaryOpTailExpr final {
  * for example, "fun x y = (x, y)" is an equation
 */
 struct Equation final {
-    Ptr<ConsExpr> pattern;
+    Ptr<Expr> pattern;
     Ptr<Expr> expr;
 
-    /**
-     * @pattern: expression before '='
-     * @expr: expression after '='
-    */
-    Equation(Ptr<ConsExpr> &&pattern, Ptr<Expr> &&expr)
-      : pattern(std::move(pattern))
-      , expr(std::move(expr)) {
-        // ...
-    }
-
-    /**
-     * build the binded entity
-    */
     void build_func_entity(FuncEntity &entity) const;
 };
 
@@ -367,13 +336,6 @@ struct DataTypeDecl : Declaration {
     Ptr<Type> decl_type;
     mutable std::vector<Component> components; // mutable for codegen
 
-    DataTypeDecl(Ptr<Type> &&decl_type,
-        std::vector<Component> &&components)
-      : decl_type(std::move(decl_type))
-      , components(std::move(components)) {
-        // ...
-    }
-
     void codegen(Code &) const override;
 };
 
@@ -384,23 +346,8 @@ struct DataTypeDecl : Declaration {
 struct FuncDecl final : Declaration {
     std::string name;
     Ptr<FuncType> type;
-    std::vector<Ptr<Equation>> equations;
+    std::vector<Equation> equations;
 
-    /**
-     * @name: name of the declared function
-     * @type: type of the function
-     * @equations: equations of the function
-    */
-    FuncDecl(std::string name, Ptr<FuncType> &&type,
-        std::vector<Ptr<Equation>> &&equations)
-      : name(std::move(name)), type(std::move(type))
-      , equations(std::move(equations)) {
-        // ...
-    }
-
-    /**
-     * build the binded entity
-    */
     void codegen(Code &) const override;
 };
 
