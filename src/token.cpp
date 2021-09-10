@@ -50,9 +50,25 @@ static map<string, Token::Type> localMapping {
     { "primrec", Token::Type::Primrec },
     { "where", Token::Type::Where },
 
+    { "if", Token::Type::If },
+    { "else", Token::Type::Else },
+    { "then", Token::Type::Then },
+
     { ":", Token::Type::Colon },
     { "::", Token::Type::Colonn },
     { ":=", Token::Type::ColonEquiv },
+    { "=", Token::Type::Equiv },
+    { "|", Token::Type::Pipe },
+    { "\"", Token::Type::Quotation },
+    { "(", Token::Type::LParen },
+    { ")", Token::Type::RParen },
+    { "*", Token::Type::Star },
+    { R"(\<Rightarrow>)", Token::Type::Rightarrow },
+    { "[", Token::Type::LBracket },
+    { "]", Token::Type::RBracket },
+    { "{", Token::Type::LBrace },
+    { "}", Token::Type::RBrace },
+    { ",", Token::Type::Comma },
 };
 
 Token::Token(string value) noexcept

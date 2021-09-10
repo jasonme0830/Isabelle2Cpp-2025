@@ -23,11 +23,27 @@ struct Token {
         Identifier,     // [_a-zA-Z]+
         TypeVariable,   // '[_a-zA-Z]+
 
+        If,             // if
+        Else,           // else
+        Then,           // then
+
         Colon,          // :
         Colonn,         // ::
         ColonEquiv,     // :=
+        Equiv,          // =
+        Pipe,           // |
+        Quotation,      // "
+        LParen,         // (
+        RParen,         // )
+        Star,           // *
+        Rightarrow,     // \<Rightarrow>
+        LBracket,       // [
+        RBracket,       // ]
+        LBrace,         // {
+        RBrace,         // }
+        Comma,          // ,
 
-        End             // new symbol will be greater than End
+        EndOfFile       // new symbol will be greater than EndOfFile
     };
 
     Type type;
