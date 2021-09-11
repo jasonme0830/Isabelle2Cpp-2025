@@ -42,6 +42,29 @@ struct Token {
         LBrace,         // {
         RBrace,         // }
         Comma,          // ,
+        Or,             // \<or>
+        And,            // \<and>
+        NotEq,          // \<noteq>
+        Le,             // \<le>
+        Lt,             // <
+        Ge,             // \<ge>
+        Gt,             // >
+        SubsetEq,       // \<subseteq>
+        Subset,         // \<subset>
+        SupsetEq,       // \<supseteq>
+        Supset,         // \<supset>
+        In,             // \<in>
+        NotIn,          // \<notin>
+        Sharp,          // #
+        At,             // @
+        Union,          // \<union>
+        Inter,          // \<inter>
+        Add,            // +
+        Sub,            // -
+        Mul,            // *
+        Div,            // / or div
+        Mod,            // mod
+        Pow,            // ^
 
         EndOfFile       // new symbol will be greater than EndOfFile
     };

@@ -18,7 +18,7 @@ class Parser {
     template<Token::Type type, Token::Type ...types>
     void check(const std::string &err_info = "") {
         if (current_token_.type != type) {
-            if constexpr (sizeof...(types)) {
+            if constexpr (sizeof...(types) > 0) {
                 check<types...>(err_info);
             } else {
                 throw std::runtime_error(err_info);
@@ -38,7 +38,7 @@ class Parser {
             return true;
         }
 
-        if constexpr (sizeof...(types)) {
+        if constexpr (sizeof...(types) > 0) {
             return meet<types...>();
         } else {
             return false;
@@ -71,7 +71,7 @@ class Parser {
     Ptr<NormalType> gen_normal_type();
 
     std::vector<Ptr<Expr>> gen_exprs();
-    Ptr<Expr> gen_expr();
+    Ptr<Expr> gen_expr(std::size_t layer = 0);
     Ptr<Expr> gen_term();
     Ptr<Expr> gen_construction();
     Ptr<Expr> gen_factor();

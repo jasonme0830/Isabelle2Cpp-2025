@@ -1,8 +1,64 @@
 #include "parser.hpp"
 
+#include <set>
+#include <map>
+#include <vector>
+
 using namespace std;
 
 namespace hol2cpp {
+namespace operators {
+// set<Token::Type> uops;
+
+vector<pair<size_t, set<Token::Type>>> bop_precedences {
+    {
+        30, {
+            Token::Type::Or
+        }
+    },
+    {
+        35, {
+            Token::Type::And
+        }
+    },
+    {
+        50, {
+            Token::Type::Equiv, Token::Type::NotEq,
+            Token::Type::Le, Token::Type::Lt, Token::Type::Ge, Token::Type::Gt,
+            Token::Type::Subset, Token::Type::SubsetEq, Token::Type::SupsetEq, Token::Type::Supset,
+            Token::Type::In, Token::Type::NotIn
+        }
+    },
+    {
+        65, {
+            Token::Type::Sharp, Token::Type::At, Token::Type::Union,
+            Token::Type::Add, Token::Type::Sub
+        }
+    },
+    {
+        70, {
+            Token::Type::Inter,
+            Token::Type::Mul, Token::Type::Div, Token::Type::Mod
+        }
+    },
+    {
+        80, {
+            Token::Type::Pow
+        }
+    }
+};
+
+set<Token::Type> bop_right_associativity {
+    Token::Type::Or, Token::Type::And,
+    Token::Type::Pow,
+    Token::Type::Sharp, Token::Type::At
+};
+
+set<Token::Type> &bops_at_layer(size_t layer) {
+    return bop_precedences[layer].second;
+}
+} // namespace operators
+
 Parser::Parser(ifstream &input) noexcept
   : tokenizer_(input), current_token_(tokenizer_.next_token()) {
     // ...
@@ -19,11 +75,12 @@ Token &Parser::next_token() {
 Theory Parser::gen_theory() {
     Theory theory;
 
-    eat<Token::Type::Theory>();
+    eat<Token::Type::Theory>("expected keyword theory");
     check<Token::Type::Identifier>("expected an identifier");
     theory.name = current_token_.value;
+    get_next_token();
 
-    eat<Token::Type::Imports>();
+    eat<Token::Type::Imports>("expected keyword imports");
     while (current_token_.type != Token::Type::Begin) {
         check<Token::Type::Identifier>("expected an identifier");
         theory.imports.push_back(current_token_.value);
@@ -32,7 +89,7 @@ Theory Parser::gen_theory() {
     get_next_token(); // eat begin
 
     std::vector<Ptr<Declaration>> declarations;
-    while (current_token_.type != Token::Type::End) {
+    while (current_token_.type != Token::Type::EndOfFile) {
         if (auto declaration = gen_declaration()) {
             theory.declarations.push_back(move(declaration));
         }
@@ -96,7 +153,7 @@ Ptr<FuncDecl> Parser::gen_function_declaration() {
     decl->name = current_token_.value;
     get_next_token();
 
-    eat<Token::Type::ColonEquiv>();
+    eat<Token::Type::Colonn>("expected ::");
 
     eat<Token::Type::Quotation>();
     decl->type = gen_func_type();
@@ -227,8 +284,23 @@ vector<Ptr<Expr>> Parser::gen_exprs() {
     return exprs;
 }
 
-Ptr<Expr> Parser::gen_expr() {
+Ptr<Expr> Parser::gen_expr(size_t layer) {
+    if (layer == operators::bop_precedences.size()) {
+        return gen_term();
+    }
 
+    auto lhs = gen_expr(layer + 1);
+    auto op = current_token_;
+    while (operators::bops_at_layer(layer).count(op.type)) {
+        get_next_token();
+        if (operators::bop_right_associativity.count(op.type)) {
+            return make_unique<BinaryOpExpr>(op, move(lhs), gen_expr(layer));
+        }
+
+        lhs = make_unique<BinaryOpExpr>(op, move(lhs), gen_expr(layer + 1));
+        op = current_token_;
+    }
+    return lhs;
 }
 
 Ptr<Expr> Parser::gen_term() {
@@ -242,6 +314,7 @@ Ptr<Expr> Parser::gen_term() {
 Ptr<Expr> Parser::gen_construction() {
     check<Token::Type::Identifier>();
     auto name = current_token_.value;
+    get_next_token();
 
     function has_arg = [this] () mutable {
         return meet<Token::Type::Identifier,
@@ -325,7 +398,7 @@ Ptr<Expr> Parser::gen_set() {
 Ptr<Expr> Parser::gen_pair() {
     eat<Token::Type::LParen>();
     auto expr = gen_pair_helper();
-    eat<Token::Type::RBrace>();
+    eat<Token::Type::RParen>();
     return expr;
 }
 
@@ -344,6 +417,8 @@ Ptr<Expr> Parser::gen_pair_helper() {
 }
 
 Ptr<Expr> Parser::gen_integral() {
-
+    auto expr = make_unique<IntegralExpr>(current_token_.value);
+    get_next_token();
+    return expr;
 }
 } // namespace hol2cpp

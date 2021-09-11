@@ -5,13 +5,17 @@
 #include <cassert>
 #include <optional>
 #include <exception>
+#include <algorithm>
 
 using namespace std;
 
 namespace hol2cpp {
 static set<string> localSymbolSet {
     ":", "::", ":=", "=", "|", "\"", "(", ")", "*", R"(\<Rightarrow>)",
-    "[", "]", "{", "}", ","
+    "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
+    R"(\<le>)", R"(<)", R"(\<ge>)", R"(>)", R"(\<subseteq>)", R"(\<subset>)",
+    R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)",
+    R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(/)", R"(div)", R"(mod)", R"(^)",
 };
 
 Tokenizer::Tokenizer(ifstream &input) noexcept
@@ -42,26 +46,38 @@ std::string Tokenizer::next_raw_str() {
 }
 
 optional<Token> Tokenizer::try_get_symbol() {
-    auto longest_len = localSymbolSet.rbegin()->size();
+    auto longest_len = max_element(localSymbolSet.begin(), localSymbolSet.end(), [] (const string &lhs, const string &rhs) { return lhs.size() < rhs.size(); })->size();
+
+    vector<char> backups;
+    backups.push_back(last_input_);
 
     auto alts = localSymbolSet;
-    for (size_t i = 0; i < longest_len; ++i) {
+    size_t i = 0;
+    for (; i < longest_len; ++i) {
         set<string> temp;
         for (const auto &symbol : alts) {
             if (symbol.size() <= i || symbol[i] == last_input_) {
                 temp.insert(symbol);
             }
         }
-        alts = temp;
+        swap(alts, temp);
+        if (alts.empty()) {
+            break;
+        }
+
         get_next_input();
+        backups.push_back(last_input_);
     }
 
+    size_t tell_g = input_.tellg();
     if (alts.empty()) {
-        input_.seekg(input_.tellg() - longest_len);
+        input_.seekg(tell_g - i, ios::beg);
+        last_input_ = backups[0];
         return {};
     } else {
-        auto symbol = *alts.rbegin();
-        input_.seekg(input_.tellg() - longest_len + symbol.size());
+        auto symbol = *max_element(alts.begin(), alts.end(), [] (const string &lhs, const string &rhs) { return lhs.size() < rhs.size(); });
+        input_.seekg(tell_g - i + symbol.size(), ios::beg);
+        last_input_ = backups[symbol.size()];
         return Token(symbol);
     }
 }
@@ -77,6 +93,10 @@ Token Tokenizer::next_token() {
 
     while (std::isspace(last_input_)) {
         get_next_input();
+    }
+
+    if (last_input_ == EOF) {
+        return Token(Token::Type::EndOfFile);
     }
 
     auto state = State::Begin;

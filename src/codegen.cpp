@@ -76,6 +76,12 @@ Expr::~Expr() = default;
 Declaration::~Declaration() = default;
 
 // --- code generation ---
+void Theory::codegen(Code &code) const {
+    for (auto &decl : declarations) {
+        decl->codegen(code);
+    }
+}
+
 void DataTypeDecl::codegen(Code &code) const {
     code.add_header("variant");
 
@@ -296,10 +302,12 @@ void Expr::gen_pattern(FuncEntity &, const string &) const {
     throw runtime_error("cannot be pattern");
 }
 
+void IntegralExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
+    entity.add_pattern_cond("$ != $", prev, value);
+}
+
 void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
-    if (is_number(name)) {
-        entity.add_pattern_cond("$ != $", prev, name);
-    } else if (name == "True") {
+    if (name == "True") {
         entity.add_pattern_cond("$ != true", prev);
     } else if (name == "False") {
         entity.add_pattern_cond("$ != false", prev);
@@ -375,17 +383,16 @@ void SetExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 }
 
 void BinaryOpExpr::gen_pattern(FuncEntity &, const string &) const {
-    switch (op) {
-        default:
-            throw runtime_error("pattern should be consturctor");
-    }
+    throw runtime_error("pattern should be consturctor");
 }
 
 // --- generate expression ---
+string IntegralExpr::gen_expr(FuncEntity &, const string &) const {
+    return value;
+}
+
 string VarExpr::gen_expr(FuncEntity &entity, const string &type) const {
-    if (is_number(name)) {
-        return name;
-    } else if (name == "True") {
+    if (name == "True") {
         return "true";
     } else if (name == "False") {
         return "false";
@@ -622,26 +629,26 @@ string SetExpr::gen_expr(FuncEntity &entity, const string &type) const {
 }
 
 string BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type) const {
-    static const map<BOp, string> bop_mapping {
-        { BOp::LogicAnd, "&&" },
-        { BOp::LogicOr, "||" },
-        { BOp::LogicEq, "==" },
-        { BOp::LogicNoteq, "!=" },
+    static const map<Token::Type, string> bop_mapping {
+        { Token::Type::And, "&&" },
+        { Token::Type::Or, "||" },
+        { Token::Type::Equiv, "==" },
+        { Token::Type::NotEq, "!=" },
 
-        { BOp::OrderLe, "<=" },
-        { BOp::OrderLt, "<" },
-        { BOp::OrderGe, ">=" },
-        { BOp::OrderGt, ">" },
+        { Token::Type::Le, "<=" },
+        { Token::Type::Lt, "<" },
+        { Token::Type::Ge, ">=" },
+        { Token::Type::Gt, ">" },
 
-        { BOp::NumAdd, "+" },
-        { BOp::NumSub, "-" },
-        { BOp::NumMul, "*" },
-        { BOp::NumDiv, "/" },
-        { BOp::NumMod, "%" },
+        { Token::Type::Add, "+" },
+        { Token::Type::Sub, "-" },
+        { Token::Type::Mul, "*" },
+        { Token::Type::Div, "/" },
+        { Token::Type::Mod, "%" },
     };
 
-    switch (op) {
-        case BOp::SetInter: {
+    switch (op.type) {
+        case Token::Type::Inter: {
             auto l = lhs->gen_expr(entity, type);
             auto r = rhs->gen_expr(entity, type);
 
@@ -665,7 +672,7 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type) const {
             ;
             return res;
         }
-        case BOp::SetUnion: {
+        case Token::Type::Union: {
             auto l = lhs->gen_expr(entity, type);
             auto r = rhs->gen_expr(entity, type);
 
@@ -684,30 +691,30 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type) const {
             ;
             return lv;
         }
-        case BOp::SetSubseteq:
+        case Token::Type::SubsetEq:
             break;
-        case BOp::SetSubset:
+        case Token::Type::Subset:
             break;
-        case BOp::SetSupseteq:
+        case Token::Type::SupsetEq:
             break;
-        case BOp::SetSupset:
+        case Token::Type::Supset:
             break;
-        case BOp::SetIn:
+        case Token::Type::In:
             return "$.count($)"_fs.format(
                 rhs->gen_expr(entity, type), lhs->gen_expr(entity, argument_type(type))
             );
-        case BOp::SetNotin:
+        case Token::Type::NotIn:
             return "!$.count($)"_fs.format(
                 rhs->gen_expr(entity, type), lhs->gen_expr(entity, argument_type(type))
             );
 
-        case BOp::NumPow:
+        case Token::Type::Pow:
             entity.code().add_header("cmath");
             return "std::pow($, $)"_fs.format(
                 lhs->gen_expr(entity, type), rhs->gen_expr(entity, type)
             );
 
-        case BOp::ListApp: {
+        case Token::Type::At: {
             auto l = lhs->gen_expr(entity, type);
             auto r = rhs->gen_expr(entity, type);
             if (l == "{}" && r == "{}") {
@@ -729,10 +736,10 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type) const {
         }
 
         default:
-            assert(bop_mapping.count(op));
+            assert(bop_mapping.count(op.type));
 
             return "($) $ ($)"_fs.format(
-                lhs->gen_expr(entity, type), bop_mapping.at(op), rhs->gen_expr(entity, type)
+                lhs->gen_expr(entity, type), bop_mapping.at(op.type), rhs->gen_expr(entity, type)
             );
     }
     throw runtime_error("Implementation error at line $ in file $!"_fs.format(__LINE__, __FILE__));

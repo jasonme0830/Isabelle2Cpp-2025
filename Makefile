@@ -1,5 +1,5 @@
 bin/hol2cpp: src/*.cpp | bin/
-	clang++ -W -std=c++17 src/*.cpp -o bin/hol2cpp
+	clang++ -W -g -std=c++17 src/*.cpp -o bin/hol2cpp
 
 bin/:
 	mkdir bin

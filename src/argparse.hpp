@@ -15,9 +15,7 @@ class Argument {
         = std::function<std::any(const std::string &)>
     ;
 
-    Argument() : action_([](const std::string &value) { return value; }) {
-        // ...
-    }
+    Argument() : action_([](const std::string &value) { return value; }) {}
 
     Argument &help(std::string info) {
         help_info_ = std::move(info);

@@ -6,20 +6,16 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <iostream>
+#include <fstream>
 
 namespace hol2cpp {
 /**
  * Code contains all function entities
- * provides methods to generate C++ code
+ *  provides methods to generate C++ code
 */
 class Code {
   public:
-    /**
-     * @out: generated C++ code will be outputed by out
-     *  use std::cout by default
-    */
-    Code(std::ostream &out = std::cout);
+    Code(std::string filename);
 
     DataType &entry_data_type(const std::string &);
     DataType *find_data_type(const std::string &);
@@ -31,13 +27,11 @@ class Code {
      * entry new function entity ane the return it
     */
     FuncEntity &entry_func_entity(const std::string &);
-
     FuncEntity *find_func_entity(const std::string &);
 
-    /**
-     * generate code and output by the out_ member
-    */
     void generate();
+    void generate_header();
+    void generate_impl();
 
     /**
      * define or get the indent size
@@ -59,18 +53,18 @@ class Code {
     /**
      * generate code for each function declaration
     */
-    void gen_single_func(FuncEntity &entity);
+    void gen_single_func(FuncEntity &entity, bool is_impl = true);
     /**
      * generate code for type determined function
     */
-    void gen_normal_func(FuncEntity &entity);
+    void gen_normal_func(FuncEntity &entity, bool is_impl);
     /**
      * generate code for template function
      * add the template declaration before function declaration
      *  such as template<typename T0...>
      * then call method gen_normal_func to generate the rest code
     */
-    void gen_template_func(FuncEntity &entity);
+    void gen_template_func(FuncEntity &entity, bool is_impl);
 
     /**
      * start a new line with the indent
@@ -86,7 +80,10 @@ class Code {
     */
     void sub_indent();
 
-    std::ostream &out_;
+    std::string filename_;
+    std::ofstream header_out_;
+    std::ofstream impl_out_;
+    std::reference_wrapper<std::ofstream> out_;
     int indent_;
 
     std::vector<std::string> names_of_data_types_;
