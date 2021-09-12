@@ -1,7 +1,11 @@
-datatype snat = sZero | sSucc snat;
-datatype 'a slist = sNil | sCons 'a "'a slist";
-datatype sbool = sTrue | sFalse;
-datatype option = None | Some 'a;
+theory datatypes
+imports Main
+begin
+
+datatype snat = sZero | sSucc snat
+datatype 'a slist = sNil | sCons 'a "'a slist"
+datatype sbool = sTrue | sFalse
+datatype option = None | Some 'a
 
 fun add :: "snat \<Rightarrow> snat \<Rightarrow> snat" where
   "add sZero n = n" |
@@ -51,3 +55,5 @@ fun dblist :: "'a slist \<Rightarrow> 'a slist" where
 fun snot :: "sbool \<Rightarrow> sbool" where
   "snot sTrue = sFalse" |
   "snot sFlase = sTrue"
+
+end

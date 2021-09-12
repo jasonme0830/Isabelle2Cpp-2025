@@ -1,46 +1,4 @@
-#include <cstdint>
-#include <cstdlib>
-#include <list>
-#include <memory>
-#include <variant>
-
-enum slistCons {
-    sNil,
-    sCons,
-};
-
-template<typename T1>
-struct slistElem;
-template<typename T1>
-using slist = std::shared_ptr<slistElem<T1>>;
-
-template<typename T1>
-struct slistElem {
-    struct c1 {
-    };
-    struct c2 {
-        T1 p1;
-        slist<T1> p2;
-    };
-
-    slistElem(slistCons cons) : cons(cons) {}
-
-    c1 &get_c1() {
-        return std::get<c1>(value);
-    };
-    void set_c1() {
-        value = c1{};
-    }
-    c2 &get_c2() {
-        return std::get<c2>(value);
-    };
-    void set_c2(T1 _p1, slist<T1> _p2) {
-        value = c2{_p1, _p2};
-    }
-
-    slistCons cons;
-    std::variant<c1, c2> value;
-};
+#include "merge_sort.hpp"
 
 std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::list<std::uint64_t> &arg2) {
     for (;;) {

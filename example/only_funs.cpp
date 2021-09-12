@@ -1,9 +1,4 @@
-#include <cstdint>
-#include <cstdlib>
-#include <list>
-#include <optional>
-#include <set>
-#include <utility>
+#include "only_funs.hpp"
 
 std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
     for (;;) {

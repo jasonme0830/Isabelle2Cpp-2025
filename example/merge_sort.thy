@@ -1,4 +1,8 @@
-datatype 'a slist = sNil | sCons 'a "'a slist";
+theory merge_sort
+imports Main
+begin
+
+datatype 'a slist = sNil | sCons 'a "'a slist"
 
 fun merge :: "nat list \<Rightarrow> nat list \<Rightarrow> nat list" where
   "merge xs [] = xs" |
@@ -33,3 +37,5 @@ fun smerge_sort :: "nat slist \<Rightarrow> nat slist" where
   "smerge_sort sNil = sNil" |
   "smerge_sort (sCons x sNil) = sCons x sNil" |
   "smerge_sort xs = smerge (smerge_sort (stake ((slength xs) div 2) xs)) (smerge_sort (sdrop ((slength xs) div 2) xs))"
+
+end
