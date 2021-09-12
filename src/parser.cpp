@@ -81,7 +81,7 @@ Theory Parser::gen_theory() {
     get_next_token();
 
     eat<Token::Type::Imports>("expected keyword imports");
-    while (current_token_.type != Token::Type::Begin) {
+    while (!meet<Token::Type::Begin>()) {
         check<Token::Type::Identifier>("expected an identifier");
         theory.imports.push_back(current_token_.value);
         get_next_token();
@@ -89,7 +89,7 @@ Theory Parser::gen_theory() {
     get_next_token(); // eat begin
 
     std::vector<Ptr<Declaration>> declarations;
-    while (!meet<Token::Type::End>()) {
+    while (!meet<Token::Type::End, Token::Type::EndOfFile>()) {
         if (auto declaration = gen_declaration()) {
             theory.declarations.push_back(move(declaration));
         }
@@ -102,7 +102,9 @@ Theory Parser::gen_theory() {
 Ptr<Declaration> Parser::gen_declaration() {
     eat_until<Token::Type::Datatype, Token::Type::Fun, Token::Type::Function, Token::Type::Primrec>();
 
-    if (current_token_.type == Token::Type::Datatype) {
+    if (meet<Token::Type::EndOfFile>()) {
+        return nullptr;
+    } else if (meet<Token::Type::Datatype>()) {
         return gen_datatype_declaration();
     } else {
         return gen_function_declaration();
@@ -113,7 +115,7 @@ Ptr<DataTypeDecl> Parser::gen_datatype_declaration() {
     auto decl = make_unique<DataTypeDecl>();
 
     eat<Token::Type::Datatype>("expected token Datatype");
-    if (current_token_.type == Token::Type::Identifier) {
+    if (meet<Token::Type::Identifier>()) {
         decl->decl_type = gen_normal_type();
     } else {
         decl->decl_type = gen_template_type();
@@ -121,7 +123,7 @@ Ptr<DataTypeDecl> Parser::gen_datatype_declaration() {
 
     eat<Token::Type::Equiv>("expected token Equiv");
     decl->components.push_back(gen_component());
-    while (current_token_.type == Token::Type::Pipe) {
+    while (meet<Token::Type::Pipe>()) {
         get_next_token();
         decl->components.push_back(gen_component());
     }
@@ -161,7 +163,7 @@ Ptr<FuncDecl> Parser::gen_function_declaration() {
 
     eat<Token::Type::Where>("expected token Where");
     decl->equations.push_back(gen_equation());
-    while (current_token_.type == Token::Type::Pipe) {
+    while (meet<Token::Type::Pipe>()) {
         get_next_token();
         decl->equations.push_back(gen_equation());
     }
@@ -197,7 +199,7 @@ Ptr<Type> Parser::gen_type() {
 Ptr<FuncType> Parser::gen_func_type() {
     auto type = make_unique<FuncType>();
     type->types.push_back(gen_pair_type());
-    while (current_token_.type == Token::Type::Rightarrow) {
+    while (meet<Token::Type::Rightarrow>()) {
         get_next_token();
         type->types.push_back(gen_pair_type());
     }
@@ -206,7 +208,7 @@ Ptr<FuncType> Parser::gen_func_type() {
 
 Ptr<Type> Parser::gen_pair_type() {
     auto type = gen_template_type();
-    if (current_token_.type == Token::Type::Star) {
+    if (meet<Token::Type::Star>()) {
         get_next_token();
 
         auto template_type = make_unique<TemplateType>("pair"s);
@@ -226,7 +228,7 @@ Ptr<Type> Parser::gen_pair_type() {
 */
 Ptr<Type> Parser::gen_template_type() {
     auto type = gen_type_term();
-    while (current_token_.type == Token::Type::Identifier) {
+    while (meet<Token::Type::Identifier>()) {
         type = make_unique<TemplateType>(current_token_.value, move(type));
         get_next_token();
     }
@@ -411,7 +413,7 @@ Ptr<Expr> Parser::gen_pair() {
 
 Ptr<Expr> Parser::gen_pair_helper() {
     auto expr = gen_expr();
-    if (current_token_.type == Token::Type::Comma) {
+    if (meet<Token::Type::Comma>()) {
         get_next_token();
 
         auto cons_expr = make_unique<ConsExpr>("Pair"s);

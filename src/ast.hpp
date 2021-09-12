@@ -33,7 +33,7 @@ struct Type {
     virtual TypeInfo gen_typeinfo(FuncEntity &entity) const = 0;
     virtual std::string build_data_type(DataType &) const = 0;
     virtual std::string main_name() const;
-    virtual std::string apply(std::function<std::string(std::string)> &trans) const = 0;
+    virtual TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const = 0;
 };
 
 /**
@@ -52,7 +52,7 @@ struct NormalType final : Type {
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
     std::string main_name() const override;
-    std::string apply(std::function<std::string(std::string)> &trans) const override;
+    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
 /**
@@ -70,7 +70,7 @@ struct ArgumentType final : Type {
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
-    std::string apply(std::function<std::string(std::string)> &trans) const override;
+    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
 /**
@@ -94,7 +94,7 @@ struct TemplateType final : Type {
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
     std::string main_name() const override;
-    std::string apply(std::function<std::string(std::string)> &trans) const override;
+    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
 struct ProductType;
@@ -122,7 +122,7 @@ struct FuncType final : Type {
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
-    std::string apply(std::function<std::string(std::string)> &trans) const override;
+    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
 /**

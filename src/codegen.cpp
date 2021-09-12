@@ -9,71 +9,6 @@
 
 using namespace std;
 
-namespace {
-bool is_number(const string &str) {
-    for (auto ch : str) {
-        if (!isdigit(ch)) {
-            return false;
-        }
-    }
-    return true;
-}
-/**
- * std::pair<T1, T2>
- * std::pair<std::vector<T1, T2>, T3>
-*/
-string argument_type(const string &type, size_t ind = 0) {
-    if (typeinfo.empty()) {
-        return type;
-    }
-
-    auto l = type.find('<');
-    auto r = type.rfind('>');
-
-    assert(l != type.npos && r != type.npos);
-
-    ind = ind + 1;
-
-    size_t pos = l + 1, cnt = 0;
-    for (; pos < r; ++pos) {
-        if (type[pos] == '<') {
-            ++cnt;
-        } else if (type[pos] == '>') {
-            --cnt;
-        } else if (cnt == 0 && type[pos] == ',') {
-            --ind;
-        }
-
-        if (ind == 0) {
-            break;
-        }
-    }
-
-    return type.substr(l + 1, pos - l);
-}
-
-pair<string, string> split_type(const string &type) {
-    auto pos = type.find('<');
-    if (pos == type.npos) {
-        return { type.substr(0, pos), "" };
-    } else {
-        return { type.substr(0, pos), type.substr(pos) };
-    }
-}
-
-string main_of_type(const string &type) {
-    return split_type(type).first;
-}
-
-string rest_of_type(const string &type) {
-    return split_type(type).second;
-}
-
-string add_elem_for_type(const string &type) {
-    return main_of_type(type) + "Elem" + rest_of_type(type);
-}
-} // namespace
-
 namespace hol2cpp {
 Type::~Type() = default;
 Expr::~Expr() = default;
@@ -227,15 +162,15 @@ string TemplateType::main_name() const {
 }
 
 // --- apply type arguments ---
-string NormalType::apply(std::function<std::string(std::string)> &) const {
-    return name;
+TypeInfo NormalType::apply(function<TypeInfo(const string &)> &) const {
+    return TypeInfo(name);
 }
 
-string ArgumentType::apply(std::function<std::string(std::string)> &trans) const {
+TypeInfo ArgumentType::apply(function<TypeInfo(const string &)> &trans) const {
     return trans(name);
 }
 
-string TemplateType::apply(std::function<std::string(std::string)> &trans) const {
+TypeInfo TemplateType::apply(function<TypeInfo(const string &)> &trans) const {
     static const map<string, string> mapping {
         { "set",    "std::set" },
         { "option", "std::optional" },
@@ -250,37 +185,26 @@ string TemplateType::apply(std::function<std::string(std::string)> &trans) const
         { "pair",   "utility" }
     };
 
-    auto res = mapping.count(name) ? mapping.at(name) : name;
-
-    res += '<';
-    for (size_t i = 0; i < args.size(); ++i) {
-        if (i == 0) {
-            res += args[i]->apply(trans);
-        } else {
-            res += ", " + args[i]->apply(trans);
-        }
+    TypeInfo res(mapping.count(name) ? mapping.at(name) : name);
+    for (auto &arg : args) {
+        res.arguments.push_back(arg->apply(trans));
     }
-    return res + '>';
+    return res;
 }
 
-string FuncType::apply(std::function<std::string(std::string)> &trans) const {
-    string type = "std::function<" + result_type()->apply(trans) + '(';
-    for (size_t i = 0; i < types.size() - 1; ++i) {
-        if (i == 0) {
-            type += types[i]->apply(trans);
-        } else {
-            type += ", " + types[i]->apply(trans);
-        }
+TypeInfo FuncType::apply(function<TypeInfo(const string &)> &trans) const {
+    TypeInfo res("std::function");
+    for (auto &type : types) {
+        res.arguments.push_back(type->apply(trans));
     }
-    return type + ")>";
+    return res;
 }
 
 // --- build func entity ---
 void FuncType::build_func_entity(FuncEntity &entity) const {
-    for (size_t i = 0; i < types.size() - 1; ++i) {
-        entity.add_typeinfo(types[i]->gen_typeinfo(entity));
+    for (auto &type : types) {
+        entity.add_typeinfo(type->gen_typeinfo(entity));
     }
-    entity.add_typeinfo(result_type()->gen_typeinfo(entity));
 }
 
 void Equation::build_func_entity(FuncEntity &entity) const {
@@ -505,13 +429,13 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         }
     } else if (constructor == "take") {
         assert(args.size() == 2);
-        auto n = args[0]->gen_expr(entity, "nat");
-        auto xs = args[1]->gen_expr(entity, "");
+        auto n = args[0]->gen_expr(entity, TypeInfo("nat"));
+        auto xs = args[1]->gen_expr(entity, TypeInfo());
         return "decltype($){ $.begin(), std::next($.begin(), $) }"_fs.format(xs, xs, xs, n);
     } else if (constructor == "drop") {
         assert(args.size() == 2);
-        auto n = args[0]->gen_expr(entity, "nat");
-        auto xs = args[1]->gen_expr(entity, "");
+        auto n = args[0]->gen_expr(entity, TypeInfo("nat"));
+        auto xs = args[1]->gen_expr(entity, TypeInfo());
         return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
     }
 
@@ -521,13 +445,13 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         if (typeinfo.empty()) {
             auto texpr = args[1]->gen_expr(entity, typeinfo);
             auto fexpr = args[2]->gen_expr(entity, typeinfo);
-            auto ce = args[0]->gen_expr(entity, "bool");
+            auto ce = args[0]->gen_expr(entity, TypeInfo("bool"));
             return "$ ? $ : $"_fs.format(ce, texpr, fexpr);
         } else {
-            auto ce = args[0]->gen_expr(entity, "bool");
+            auto ce = args[0]->gen_expr(entity, TypeInfo("bool"));
             auto res = entity.gen_temp();
             entity
-                .add_expr("$ $;", type, res)
+                .add_expr("$ $;", typeinfo.to_str(), res)
                 .add_expr("if ($) {", ce).add_indent()
                     .add_expr("$ = $;", res, args[1]->gen_expr(entity, typeinfo)).sub_indent()
                 .add_expr("} else {").add_indent()
@@ -540,32 +464,36 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 
     else if (constructor == "Pair") {
         assert(args.size() == 2);
-        return "std::make_pair(" + args[0]->gen_expr(entity, argument_type(type, 0))
-            + ", " + args[1]->gen_expr(entity, argument_type(type, 1)) + ")"
+        return "std::make_pair(" + args[0]->gen_expr(entity, typeinfo.arguments.front())
+            + ", " + args[1]->gen_expr(entity, typeinfo.arguments[1]) + ")"
         ;
     }
 
-    else if (auto data_type = entity.code().find_data_type(main_of_type(type))) {
+    else if (auto data_type = entity.code().find_data_type(typeinfo.name)) {
         auto dot = data_type->is_recuisive() ? "->"s : "."s;
 
         auto temp = entity.gen_temp();
         if (data_type->is_recuisive()) {
             entity.add_expr("$ $ = std::make_shared<$>($Cons::$);",
-                type, temp, add_elem_for_type(type), data_type->name(), constructor
+                typeinfo.to_str(), temp, typeinfo.to_str_with(typeinfo.name + "Elem"), data_type->name(), constructor
             );
         } else {
             entity.add_expr("$ ${$Cons::$};",
-                type, temp, data_type->name(), constructor
+                typeinfo.to_str(), temp, data_type->name(), constructor
             );
+        }
+
+        auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
+        if (abstracts.empty()) {
+            return temp;
         }
 
         string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor) + 1) + "(";
 
-        function trans = [&](string arg_type) {
-            return argument_type(type, data_type->find_argument_type(arg_type));
+        function trans = [&](const string &arg_type) {
+            return typeinfo.arguments[data_type->find_argument_type(arg_type)];
         };
 
-        auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
         for (size_t i = 0; i < abstracts.size(); ++i) {
             if (i == 0) {
                 stmt += args[i]->gen_expr(entity, abstracts[i]->apply(trans));

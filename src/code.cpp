@@ -129,6 +129,8 @@ void Code::gen_type_rest(DataType &data_type) {
         name += "Elem";
     }
 
+    TypeInfo variant("std::variant");
+
     "struct $ {\n"_fs.outf(newline(), name);
     add_indent();
     auto &components = data_type.components();
@@ -136,6 +138,7 @@ void Code::gen_type_rest(DataType &data_type) {
         if (components[i].empty()) {
             continue;
         }
+        variant.arguments.emplace_back("c$"_fs.format(i + 1));
 
         "struct c$ {\n"_fs.outf(newline(), i + 1);
         add_indent();
@@ -185,15 +188,7 @@ void Code::gen_type_rest(DataType &data_type) {
         out_.get() << endl;
 
         "$Cons cons;\n"_fs.outf(newline(), origin);
-        "std::variant<"_fs.outf(newline());
-        for (size_t i = 0; i < components.size(); ++i) {
-            if (i == 0) {
-                "c$"_fs.outf(out_.get(), i + 1);;
-            } else {
-                ", c$"_fs.outf(out_.get(), i + 1);
-            }
-        }
-        "> value;\n"_fs.outf(out_.get());
+        "$ value;\n"_fs.outf(newline(), variant.to_str());
     sub_indent();
     "};\n\n"_fs.outf(newline());
 }
