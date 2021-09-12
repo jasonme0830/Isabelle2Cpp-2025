@@ -1,6 +1,7 @@
 #pragma once
 
 #include "token.hpp"
+#include "funcentity.hpp"
 
 #include <map>
 #include <memory>
@@ -29,7 +30,7 @@ struct Type {
      * receive the related function entity and return the type infomation
      * @entity: generate type infomation related with the given entity
     */
-    virtual std::string gen_typeinfo(FuncEntity &entity) const = 0;
+    virtual TypeInfo gen_typeinfo(FuncEntity &entity) const = 0;
     virtual std::string build_data_type(DataType &) const = 0;
     virtual std::string main_name() const;
     virtual std::string apply(std::function<std::string(std::string)> &trans) const = 0;
@@ -48,7 +49,7 @@ struct NormalType final : Type {
     */
     NormalType(std::string name) : name(std::move(name)) {}
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
     std::string main_name() const override;
     std::string apply(std::function<std::string(std::string)> &trans) const override;
@@ -67,7 +68,7 @@ struct ArgumentType final : Type {
     */
     ArgumentType(std::string name) : name(std::move(name)) {}
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
     std::string apply(std::function<std::string(std::string)> &trans) const override;
 };
@@ -90,7 +91,7 @@ struct TemplateType final : Type {
         args.push_back(std::move(arg));
     }
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
     std::string main_name() const override;
     std::string apply(std::function<std::string(std::string)> &trans) const override;
@@ -119,7 +120,7 @@ struct FuncType final : Type {
     */
     void build_func_entity(FuncEntity &entity) const;
 
-    std::string gen_typeinfo(FuncEntity &entity) const override;
+    TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string build_data_type(DataType &) const override;
     std::string apply(std::function<std::string(std::string)> &trans) const override;
 };
@@ -140,7 +141,7 @@ struct Expr {
      * method to generate code when expr occurs as the expression to return
      * return the expression and generate statements when needed
     */
-    virtual std::string gen_expr(FuncEntity &entity, const std::string &type) const = 0;
+    virtual std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const = 0;
 };
 
 struct IntegralExpr final : Expr {
@@ -149,7 +150,7 @@ struct IntegralExpr final : Expr {
     IntegralExpr(std::string value) : value(std::move(value)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 /**
@@ -166,7 +167,7 @@ struct VarExpr final : Expr {
     VarExpr(std::string name) : name(std::move(name)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 /**
@@ -185,7 +186,7 @@ struct ConsExpr final : Expr {
     ConsExpr(std::string constructor) : constructor(std::move(constructor)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 /**
@@ -198,10 +199,11 @@ struct ListExpr final : Expr {
     /**
      * @exprs: exprs in []
     */
+    ListExpr() = default;
     ListExpr(std::vector<Ptr<Expr>> &&exprs) : exprs(std::move(exprs)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 /**
@@ -214,10 +216,11 @@ struct SetExpr final : Expr {
     /**
      * @exprs: exprs in {}
     */
+    SetExpr() = default;
     SetExpr(std::vector<Ptr<Expr>> &&exprs) : exprs(std::move(exprs)) {}
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 struct BinaryOpExpr final : Expr {
@@ -230,7 +233,7 @@ struct BinaryOpExpr final : Expr {
     }
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &entity, const std::string &type) const override;
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 struct Equation final {

@@ -209,7 +209,7 @@ Ptr<Type> Parser::gen_pair_type() {
     if (current_token_.type == Token::Type::Star) {
         get_next_token();
 
-        auto template_type = make_unique<TemplateType>("Pair"s);
+        auto template_type = make_unique<TemplateType>("pair"s);
         template_type->args.push_back(move(type));
         template_type->args.push_back(gen_pair_type());
 
@@ -239,18 +239,19 @@ Ptr<Type> Parser::gen_template_type() {
 }
 
 Ptr<Type> Parser::gen_type_term() {
-    switch (current_token_.type)
-    {
+    switch (current_token_.type) {
         case Token::Type::TypeVariable:
             return gen_argument_type();
         case Token::Type::Identifier:
             return gen_normal_type();
         case Token::Type::LParen: {
+            get_next_token();
             auto type = gen_type();
             eat<Token::Type::RParen>("expected token RParen");
             return type;
         }
         case Token::Type::Quotation: {
+            get_next_token();
             auto type = gen_type();
             eat<Token::Type::Quotation>("expected token Quotation");
             return type;
@@ -379,17 +380,23 @@ Ptr<Expr> Parser::gen_ifelse() {
     return expr;
 }
 
-
 Ptr<Expr> Parser::gen_list() {
     eat<Token::Type::LBracket>("expected token LBracket");
+    if (meet<Token::Type::RBracket>()) {
+        get_next_token();
+        return make_unique<ListExpr>();
+    }
     auto expr = make_unique<ListExpr>(gen_exprs());
     eat<Token::Type::RBracket>("expected token RBracket");
     return expr;
 }
 
-
 Ptr<Expr> Parser::gen_set() {
     eat<Token::Type::LBrace>("expected token LBrace");
+    if (meet<Token::Type::RBrace>()) {
+        get_next_token();
+        return make_unique<SetExpr>();
+    }
     auto expr = make_unique<ListExpr>(gen_exprs());
     eat<Token::Type::RBrace>("expected token RBrace");
     return expr;

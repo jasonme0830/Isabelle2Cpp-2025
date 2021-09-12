@@ -87,7 +87,7 @@ void Code::generate_header() {
 void Code::generate_impl() {
     out_ = ref(impl_out_);
 
-    "#include \"$\"\n\n"_fs.outf(out_.get(), filename_.substr(filename_.find_last_of('/') + 1) + ".hpp");
+    "#include \"$\"\n\n"_fs.outf(out_.get(), filename_.substr(filename_.rfind('/') + 1) + ".hpp");
 
     for (auto &name : names_of_func_entities_) {
         gen_single_func(func_entities_.at(name));
@@ -273,13 +273,13 @@ void Code::gen_single_func(FuncEntity &entity, bool is_impl) {
 }
 
 void Code::gen_normal_func(FuncEntity &entity, bool is_impl) {
-    auto &types = entity.types();
-    "$ $("_fs.outf(newline(), types.back(), entity.name());
+    auto &types = entity.typeinfos();
+    "$ $("_fs.outf(newline(), types.back().to_str(), entity.name());
     for (size_t i = 0; i < types.size() - 1; ++i) {
         if (i == 0) {
-            "const $ &arg$"_fs.outf(out_.get(), types[i], i + 1);
+            "const $ &arg$"_fs.outf(out_.get(), types[i].to_str(), i + 1);
         } else {
-            ", const $ &arg$"_fs.outf(out_.get(), types[i], i + 1);
+            ", const $ &arg$"_fs.outf(out_.get(), types[i].to_str(), i + 1);
         }
     }
 

@@ -5,6 +5,77 @@
 using namespace std;
 
 namespace hol2cpp {
+TypeInfo::TypeInfo(string name) : name(move(name)) {}
+
+string TypeInfo::to_str() const {
+    if (arguments.empty()) {
+        return name;
+    }
+
+    if (is_function()) {
+        auto type = name + '<' + arguments.back().to_str() + '(';
+        for (size_t i = 0; i < arguments.size() - 1; ++i) {
+            if (i == 0) {
+                type += arguments[i].to_str();
+            } else {
+                type += ", " + arguments[i].to_str();
+            }
+        }
+        return type + ")>";
+    } else {
+        auto type = name + '<';
+        for (size_t i = 0; i < arguments.size(); ++i) {
+            if (i == 0) {
+                type += arguments[i].to_str();
+            } else {
+                type += ", " + arguments[i].to_str();
+            }
+        }
+        return type + '>';
+    }
+}
+
+string TypeInfo::to_str_with(const std::string &name) const {
+    if (arguments.empty()) {
+        return name;
+    }
+
+    if (is_function()) {
+        auto type = name + '<' + arguments.back().to_str() + '(';
+        for (size_t i = 0; i < arguments.size() - 1; ++i) {
+            if (i == 0) {
+                type += arguments[i].to_str();
+            } else {
+                type += ", " + arguments[i].to_str();
+            }
+        }
+        return type + ")>";
+    } else {
+        auto type = name + '<';
+        for (size_t i = 0; i < arguments.size(); ++i) {
+            if (i == 0) {
+                type += arguments[i].to_str();
+            } else {
+                type += ", " + arguments[i].to_str();
+            }
+        }
+        return type + '>';
+    }
+}
+
+bool TypeInfo::empty() const {
+    return name.empty();
+}
+
+bool TypeInfo::is_function() const {
+    return name == "std::function";
+}
+
+const TypeInfo &TypeInfo::result_typeinfo() {
+    assert(is_function());
+    return arguments.back();
+}
+
 FuncEntity::FuncEntity(Code &code)
   : code_(code), indent_(0) {
     // ...
@@ -32,8 +103,8 @@ const string &FuncEntity::name() const {
     return name_;
 }
 
-void FuncEntity::add_type(string type) {
-    types_.push_back(move(type));
+void FuncEntity::add_typeinfo(TypeInfo typeinfo) {
+    typeinfos_.push_back(move(typeinfo));
 }
 
 string FuncEntity::add_argument_type(string name) {
@@ -44,12 +115,12 @@ string FuncEntity::add_argument_type(string name) {
     return template_args_[template_mapping_[name]];
 }
 
-const string &FuncEntity::result_type() {
-    return types_.back();
+const TypeInfo &FuncEntity::result_typeinfo() {
+    return typeinfos_.back();
 }
 
-const vector<string> &FuncEntity::types() const {
-    return types_;
+const vector<TypeInfo> &FuncEntity::typeinfos() const {
+    return typeinfos_;
 }
 
 const vector<string> &FuncEntity::template_args() const {

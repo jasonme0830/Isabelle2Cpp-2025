@@ -9,6 +9,21 @@
 namespace hol2cpp {
 class Code;
 
+struct TypeInfo {
+    std::string name;
+    std::vector<TypeInfo> arguments;
+
+    TypeInfo() = default;
+    explicit TypeInfo(std::string name);
+
+    std::string to_str() const;
+    std::string to_str_with(const std::string &name) const;
+
+    bool empty() const;
+    bool is_function() const;
+    const TypeInfo &result_typeinfo();
+};
+
 /**
  * FuncEntity contains types occurs in the parsed function
  *  and generated statements
@@ -49,7 +64,7 @@ class FuncEntity {
      * add the determined type
      *  argument type or result type
     */
-    void add_type(std::string type);
+    void add_typeinfo(TypeInfo);
 
     /**
      * mapping the given name to the argument type in C++
@@ -62,13 +77,13 @@ class FuncEntity {
     /**
      * return the result type
     */
-    const std::string &result_type();
+    const TypeInfo &result_typeinfo();
 
     /**
      * return the types of this function
      * note: the types contain the result type, which is the last
     */
-    const std::vector<std::string> &types() const;
+    const std::vector<TypeInfo> &typeinfos() const;
 
     /**
      * return the template argument types
@@ -137,7 +152,7 @@ class FuncEntity {
     std::string name_;
 
     // the first type is the result type
-    std::vector<std::string> types_;
+    std::vector<TypeInfo> typeinfos_;
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
     std::map<std::string, std::string> varrm_mapping_;
