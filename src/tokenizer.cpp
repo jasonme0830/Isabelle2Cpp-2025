@@ -54,19 +54,28 @@ optional<Token> Tokenizer::try_get_symbol() {
     auto alts = localSymbolSet;
     size_t i = 0;
     for (; i < longest_len; ++i) {
+        bool increasable = false;
+
         set<string> temp;
         for (const auto &symbol : alts) {
-            if (symbol.size() <= i || symbol[i] == last_input_) {
+            if (symbol.size() <= i) {
                 temp.insert(symbol);
+            } else if (symbol[i] == last_input_) {
+                temp.insert(symbol);
+                increasable = true;
             }
         }
+
         swap(alts, temp);
-        if (alts.empty()) {
+        if (!increasable) {
             break;
         }
 
         get_next_input();
         backups.push_back(last_input_);
+        if (last_input_ == EOF) {
+            break;
+        }
     }
 
     size_t tell_g = input_.tellg();
@@ -133,7 +142,7 @@ Token Tokenizer::next_token() {
                 break;
 
             case State::InIdentifier:
-                if (isalpha(last_input_) || last_input_ == '_') {
+                if (isalpha(last_input_) || last_input_ == '_' || isdigit(last_input_)) {
                     value.push_back(last_input_);
                 } else {
                     return Token(value);

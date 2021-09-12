@@ -89,7 +89,7 @@ Theory Parser::gen_theory() {
     get_next_token(); // eat begin
 
     std::vector<Ptr<Declaration>> declarations;
-    while (current_token_.type != Token::Type::EndOfFile) {
+    while (!meet<Token::Type::End>()) {
         if (auto declaration = gen_declaration()) {
             theory.declarations.push_back(move(declaration));
         }
@@ -112,14 +112,14 @@ Ptr<Declaration> Parser::gen_declaration() {
 Ptr<DataTypeDecl> Parser::gen_datatype_declaration() {
     auto decl = make_unique<DataTypeDecl>();
 
-    eat<Token::Type::Datatype>();
+    eat<Token::Type::Datatype>("expected token Datatype");
     if (current_token_.type == Token::Type::Identifier) {
         decl->decl_type = gen_normal_type();
     } else {
         decl->decl_type = gen_template_type();
     }
 
-    eat<Token::Type::Equiv>();
+    eat<Token::Type::Equiv>("expected token Equiv");
     decl->components.push_back(gen_component());
     while (current_token_.type == Token::Type::Pipe) {
         get_next_token();
@@ -137,7 +137,7 @@ DataTypeDecl::Component Parser::gen_component() {
     get_next_token();
 
     /// TODO: !!! Be careful, it is necessary to support keywords like lemma to pass these
-    while (meet<Token::Type::TypeVariable, Token::Type::Identifier, Token::Type::Quotation>()) {
+    while (meet<Token::Type::End, Token::Type::TypeVariable, Token::Type::Identifier, Token::Type::Quotation>()) {
         componment.arguments.push_back(gen_type_term());
     }
 
@@ -147,19 +147,19 @@ DataTypeDecl::Component Parser::gen_component() {
 Ptr<FuncDecl> Parser::gen_function_declaration() {
     auto decl = make_unique<FuncDecl>();
 
-    eat<Token::Type::Fun, Token::Type::Function, Token::Type::Primrec>();
+    eat<Token::Type::Fun, Token::Type::Function, Token::Type::Primrec>("expected token Fun, Token::Type::Function, Token::Type::Primrec");
 
-    check<Token::Type::Identifier>();
+    check<Token::Type::Identifier>("expected token Identifier");
     decl->name = current_token_.value;
     get_next_token();
 
     eat<Token::Type::Colonn>("expected ::");
 
-    eat<Token::Type::Quotation>();
+    eat<Token::Type::Quotation>("expected token Quotation");
     decl->type = gen_func_type();
-    eat<Token::Type::Quotation>();
+    eat<Token::Type::Quotation>("expected token Quotation");
 
-    eat<Token::Type::Where>();
+    eat<Token::Type::Where>("expected token Where");
     decl->equations.push_back(gen_equation());
     while (current_token_.type == Token::Type::Pipe) {
         get_next_token();
@@ -172,15 +172,15 @@ Ptr<FuncDecl> Parser::gen_function_declaration() {
 Equation Parser::gen_equation() {
     Equation equation;
 
-    eat<Token::Type::Quotation>();
+    eat<Token::Type::Quotation>("expected token Quotation");
     /**
      * TODO: dispatch different term for default-func or infixl/r
      *  for infix, gen_spicial_expr
     */
     equation.pattern = gen_construction();
-    eat<Token::Type::Equiv>();
+    eat<Token::Type::Equiv>("expected token Equiv");
     equation.expr = gen_expr();
-    eat<Token::Type::Quotation>();
+    eat<Token::Type::Quotation>("expected token Quotation");
 
     return equation;
 }
@@ -247,12 +247,12 @@ Ptr<Type> Parser::gen_type_term() {
             return gen_normal_type();
         case Token::Type::LParen: {
             auto type = gen_type();
-            eat<Token::Type::RParen>();
+            eat<Token::Type::RParen>("expected token RParen");
             return type;
         }
         case Token::Type::Quotation: {
             auto type = gen_type();
-            eat<Token::Type::Quotation>();
+            eat<Token::Type::Quotation>("expected token Quotation");
             return type;
         }
         default:
@@ -261,14 +261,14 @@ Ptr<Type> Parser::gen_type_term() {
 }
 
 Ptr<ArgumentType> Parser::gen_argument_type() {
-    check<Token::Type::TypeVariable>();
+    check<Token::Type::TypeVariable>("expected token TypeVariable");
     auto type = make_unique<ArgumentType>(current_token_.value);
     get_next_token();
     return type;
 }
 
 Ptr<NormalType> Parser::gen_normal_type() {
-    check<Token::Type::Identifier>();
+    check<Token::Type::Identifier>("expected token Identifier");
     auto type = make_unique<NormalType>(current_token_.value);
     get_next_token();
     return type;
@@ -312,7 +312,7 @@ Ptr<Expr> Parser::gen_term() {
 }
 
 Ptr<Expr> Parser::gen_construction() {
-    check<Token::Type::Identifier>();
+    check<Token::Type::Identifier>("expected token Identifier");
     auto name = current_token_.value;
     get_next_token();
 
@@ -360,7 +360,7 @@ Ptr<Expr> Parser::gen_factor() {
 }
 
 Ptr<Expr> Parser::gen_var() {
-    check<Token::Type::Identifier>();
+    check<Token::Type::Identifier>("expected token Identifier");
     auto expr = make_unique<VarExpr>(current_token_.value);
     get_next_token();
     return expr;
@@ -369,11 +369,11 @@ Ptr<Expr> Parser::gen_var() {
 Ptr<Expr> Parser::gen_ifelse() {
     auto expr = make_unique<ConsExpr>("If"s);
 
-    eat<Token::Type::If>();
+    eat<Token::Type::If>("expected token If");
     expr->args.push_back(gen_expr());
-    eat<Token::Type::Then>();
+    eat<Token::Type::Then>("expected token Then");
     expr->args.push_back(gen_expr());
-    eat<Token::Type::Else>();
+    eat<Token::Type::Else>("expected token Else");
     expr->args.push_back(gen_expr());
 
     return expr;
@@ -381,24 +381,24 @@ Ptr<Expr> Parser::gen_ifelse() {
 
 
 Ptr<Expr> Parser::gen_list() {
-    eat<Token::Type::LBracket>();
+    eat<Token::Type::LBracket>("expected token LBracket");
     auto expr = make_unique<ListExpr>(gen_exprs());
-    eat<Token::Type::RBracket>();
+    eat<Token::Type::RBracket>("expected token RBracket");
     return expr;
 }
 
 
 Ptr<Expr> Parser::gen_set() {
-    eat<Token::Type::LBrace>();
+    eat<Token::Type::LBrace>("expected token LBrace");
     auto expr = make_unique<ListExpr>(gen_exprs());
-    eat<Token::Type::RBrace>();
+    eat<Token::Type::RBrace>("expected token RBrace");
     return expr;
 }
 
 Ptr<Expr> Parser::gen_pair() {
-    eat<Token::Type::LParen>();
+    eat<Token::Type::LParen>("expected token LParen");
     auto expr = gen_pair_helper();
-    eat<Token::Type::RParen>();
+    eat<Token::Type::RParen>("expected token RParen");
     return expr;
 }
 

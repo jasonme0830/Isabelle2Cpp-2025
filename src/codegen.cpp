@@ -382,8 +382,23 @@ void SetExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     entity.add_pattern_cond("!$.empty()", prev);
 }
 
-void BinaryOpExpr::gen_pattern(FuncEntity &, const string &) const {
-    throw runtime_error("pattern should be consturctor");
+void BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
+    switch (op.type)
+    {
+        case Token::Type::Sharp: {
+            ConsExpr cons_expr("Cons");
+            cons_expr.args.push_back(move(this->lhs));
+            cons_expr.args.push_back(move(this->rhs));
+            cons_expr.gen_pattern(entity, prev);
+
+            lhs = move(cons_expr.args[0]);
+            rhs = move(cons_expr.args[1]);
+        }
+            break;
+
+        default:
+            throw std::runtime_error("BinaryOpExpr::gen_pattern error");
+    }
 }
 
 // --- generate expression ---
@@ -733,6 +748,18 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const string &type) const {
                 ;
                 return temp0;
             }
+        }
+
+        case Token::Type::Sharp: {
+            ConsExpr cons_expr("Cons");
+            cons_expr.args.push_back(move(this->lhs));
+            cons_expr.args.push_back(move(this->rhs));
+            auto res = cons_expr.gen_expr(entity, type);
+
+            lhs = move(cons_expr.args[0]);
+            rhs = move(cons_expr.args[1]);
+
+            return res;
         }
 
         default:

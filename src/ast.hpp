@@ -222,7 +222,7 @@ struct SetExpr final : Expr {
 
 struct BinaryOpExpr final : Expr {
     Token op;
-    Ptr<Expr> lhs, rhs;
+    mutable Ptr<Expr> lhs, rhs;
 
     BinaryOpExpr(Token op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs)
       : op(std::move(op)) , lhs(std::move(lhs)), rhs(std::move(rhs)) {

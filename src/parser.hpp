@@ -16,7 +16,7 @@ class Parser {
 
   private:
     template<Token::Type type, Token::Type ...types>
-    void check(const std::string &err_info = "") {
+    void check(const std::string &err_info) {
         if (current_token_.type != type) {
             if constexpr (sizeof...(types) > 0) {
                 check<types...>(err_info);
@@ -27,7 +27,7 @@ class Parser {
     }
 
     template<Token::Type ...types>
-    void eat(const std::string &err_info = "") {
+    void eat(const std::string &err_info) {
         check<types...>(err_info);
         get_next_token();
     }
