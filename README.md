@@ -12,13 +12,14 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Reimplement the parser
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
 - [ ] Do some benchmarks between generated cpp codes and generated sml codes
 
 ## DONE
 
+- [x] Add new command line argument `-s` to assign the same output file with input
+- [x] Reimplement the parser, support compile complete theory file
 - [x] Remove `construct` and use `std::make_shared` directly now
 - [x] Add optimization of variables removal
 - [x] Try to reuse values as many as possible [Use `const T &` for parameters and update all conversions to make sure that parameters won't be edited]

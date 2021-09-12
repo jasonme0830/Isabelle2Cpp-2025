@@ -18,11 +18,20 @@ int main(int argc, char* argv[]) {
               .help("output hpp/cpp file")
               .default_value(""s)
     ;
+    arg_parser.add_argument("-s")
+              .help("choose the same path with input file")
+              .default_value(false)
+              .implict_value(true);
 
     try {
         arg_parser.parse(argc, argv);
 
         auto input_file = arg_parser.get<string>("input");
+        auto pos = input_file.rfind(".thy");
+        if (pos == input_file.npos) {
+            throw std::runtime_error("input file should be .thy file");
+        }
+
         ifstream fin(input_file);
         if (!fin.good()) {
             cout << "can't open file " << input_file << endl;
@@ -30,7 +39,17 @@ int main(int argc, char* argv[]) {
         }
 
         auto theory = Parser(fin).gen_theory();
-        auto output_file = arg_parser.get<string>("output");
+        string output_file;
+        if (auto same_path = arg_parser.get<bool>("s")) {
+            if (!arg_parser.get<string>("output").empty()) {
+                throw std::runtime_error("-s or assign output file");
+            } else {
+
+                output_file = input_file.substr(0, pos);
+            }
+        } else {
+            output_file = arg_parser.get<string>("output");
+        }
 
         Code code(output_file.empty() ? theory.name : output_file);
         theory.codegen(code);
