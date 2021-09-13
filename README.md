@@ -18,6 +18,7 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Skip unsupported declarations and provide helpful error outputs
 - [x] Add new command line argument `-s` to assign the same output file with input
 - [x] Reimplement the parser, support compile complete theory file
 - [x] Remove `construct` and use `std::make_shared` directly now

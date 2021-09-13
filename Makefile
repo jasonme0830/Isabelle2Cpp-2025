@@ -1,4 +1,4 @@
-bin/hol2cpp: src/*.cpp | bin/
+bin/hol2cpp: src/* | bin/
 	g++ -W -g -std=c++17 src/*.cpp -o bin/hol2cpp
 
 bin/:
