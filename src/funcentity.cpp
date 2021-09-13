@@ -1,5 +1,6 @@
 #include "code.hpp"
 #include "format.hpp"
+#include "assertt.hpp"
 #include "funcentity.hpp"
 
 using namespace std;
@@ -72,7 +73,7 @@ bool TypeInfo::is_function() const {
 }
 
 const TypeInfo &TypeInfo::result_typeinfo() {
-    assert(is_function());
+    assertt(is_function());
     return arguments.back();
 }
 

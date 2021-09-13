@@ -4,6 +4,7 @@
 
 #include <regex>
 #include <cctype>
+#include <iostream>
 #include <exception>
 #include <algorithm>
 
@@ -16,9 +17,40 @@ Declaration::~Declaration() = default;
 
 // --- code generation ---
 void Theory::codegen(Code &code) const {
-    for (auto &decl : declarations) {
-        decl->codegen(code);
+    size_t datatype_cnt = 0, fun_cnt = 0;
+    for (size_t i = 0; i < declarations.size(); ++i) {
+        auto decl = declarations[i].get();
+        if (decl) try {
+            decl->codegen(code);
+
+            if (decl->is_datatype_decl()) {
+                ++datatype_cnt;
+            } else {
+                ++fun_cnt;
+            }
+        } catch (const exception &e) {
+            string name;
+            if (auto datatype_decl = dynamic_cast<DataTypeDecl *>(decl)) {
+                name = "datatype " + datatype_decl->decl_type->main_name();
+            } else {
+                auto fun_decl = static_cast<FuncDecl *>(decl);
+                name = "function " + fun_decl->name;
+            }
+            "\033[1;31mcodegen error\033[0m at $nd declaration of $\n    $\n"_fs.outf(
+                cerr, i + 1, name, e.what()
+            );
+        }
     }
+
+    "\033[1;36mResult:\033[0m\n  scanned $ declarations;\n"_fs.outf(
+        cout, declarations.size()
+    );
+    "  generated $ declarations:\n"_fs.outf(
+        cout, datatype_cnt + fun_cnt
+    );
+    "    $ datatypes and $ functions.\n"_fs.outf(
+        cout, datatype_cnt, fun_cnt
+    );
 }
 
 void DataTypeDecl::codegen(Code &code) const {
@@ -246,7 +278,7 @@ void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 
 void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     if (constructor == entity.name()) {
-        assert(args.size() == entity.typeinfos().size() - 1);
+        assertt(args.size() == entity.typeinfos().size() - 1);
         for (size_t i = 0; i < args.size(); ++i) {
             args[i]->gen_pattern(entity, "arg" + to_string(i + 1));
         }
@@ -257,7 +289,7 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
         entity.add_pattern_cond("!$.has_value()", prev);
         args[0]->gen_pattern(entity, prev + ".value()");
     } else if (constructor == "Pair") {
-        assert(args.size() == 2);
+        assertt(args.size() == 2);
         args[0]->gen_pattern(entity, prev + ".first");
         args[1]->gen_pattern(entity, prev + ".second");
     }
@@ -294,7 +326,7 @@ void ListExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 }
 
 void SetExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
-    assert(exprs.empty());
+    assertt(exprs.empty());
     entity.add_pattern_cond("!$.empty()", prev);
 }
 
@@ -374,11 +406,11 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         }
         return expr + ')';
     } else if (constructor == "Suc") {
-        assert(args.size() == 1);
+        assertt(args.size() == 1);
         auto expr = args[0]->gen_expr(entity, typeinfo);
         return "(" + expr + ") + 1";
     } else if (constructor == "Some") {
-        assert(args.size() == 1);
+        assertt(args.size() == 1);
         if (typeinfo.empty()) {
             auto expr = args.front()->gen_expr(entity, typeinfo);
             if (expr == "{}") {
@@ -402,7 +434,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 
     // for List
     else if (constructor == "Cons") {
-        assert(args.size() == 2);
+        assertt(args.size() == 2);
         auto x = args[0]->gen_expr(entity, typeinfo.arguments.front());
         auto xs = args[1]->gen_expr(entity, typeinfo);
         if (xs == "{}") {
@@ -420,7 +452,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
             return temp;
         }
     } else if (constructor == "length") {
-        assert(args.size() == 1);
+        assertt(args.size() == 1);
         auto xs = args[0]->gen_expr(entity, typeinfo);
         if (xs == "{}") {
             return "0";
@@ -428,12 +460,12 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
             return xs + ".size()";
         }
     } else if (constructor == "take") {
-        assert(args.size() == 2);
+        assertt(args.size() == 2);
         auto n = args[0]->gen_expr(entity, TypeInfo("nat"));
         auto xs = args[1]->gen_expr(entity, TypeInfo());
         return "decltype($){ $.begin(), std::next($.begin(), $) }"_fs.format(xs, xs, xs, n);
     } else if (constructor == "drop") {
-        assert(args.size() == 2);
+        assertt(args.size() == 2);
         auto n = args[0]->gen_expr(entity, TypeInfo("nat"));
         auto xs = args[1]->gen_expr(entity, TypeInfo());
         return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
@@ -441,7 +473,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 
     // for If-expression
     else if (constructor == "If") {
-        assert(args.size() == 3);
+        assertt(args.size() == 3);
         if (typeinfo.empty()) {
             auto texpr = args[1]->gen_expr(entity, typeinfo);
             auto fexpr = args[2]->gen_expr(entity, typeinfo);
@@ -463,7 +495,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
     }
 
     else if (constructor == "Pair") {
-        assert(args.size() == 2);
+        assertt(args.size() == 2);
         return "std::make_pair(" + args[0]->gen_expr(entity, typeinfo.arguments.front())
             + ", " + args[1]->gen_expr(entity, typeinfo.arguments[1]) + ")"
         ;
@@ -683,7 +715,7 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
         }
 
         default:
-            assert(bop_mapping.count(op.type));
+            assertt(bop_mapping.count(op.type));
 
             return "($) $ ($)"_fs.format(
                 lhs->gen_expr(entity, typeinfo), bop_mapping.at(op.type), rhs->gen_expr(entity, typeinfo)

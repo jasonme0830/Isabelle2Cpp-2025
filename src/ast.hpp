@@ -1,13 +1,13 @@
 #pragma once
 
 #include "token.hpp"
+#include "assertt.hpp"
 #include "funcentity.hpp"
 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <cassert>
 #include <functional>
 
 namespace hol2cpp
@@ -111,7 +111,7 @@ struct FuncType final : Type {
      * return the raw pointer of result type
     */
     Type *result_type() const {
-        assert(!types.empty());
+        assertt(!types.empty());
         return types.back().get();
     }
 
@@ -245,7 +245,7 @@ struct Equation final {
 
 struct Declaration {
     virtual ~Declaration() = 0;
-
+    virtual bool is_datatype_decl() const = 0;
     virtual void codegen(Code &) const = 0;
 };
 
@@ -274,6 +274,7 @@ struct DataTypeDecl : Declaration {
     // mutable for codegen
     mutable std::vector<Component> components;
 
+    virtual bool is_datatype_decl() const override { return true; }
     void codegen(Code &) const override;
 };
 
@@ -282,6 +283,7 @@ struct FuncDecl final : Declaration {
     Ptr<FuncType> type;
     std::vector<Equation> equations;
 
+    virtual bool is_datatype_decl() const override { return false; }
     void codegen(Code &) const override;
 };
 

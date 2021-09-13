@@ -75,7 +75,9 @@ Token &Parser::next_token() {
 Theory Parser::gen_theory() {
     Theory theory;
 
-    eat<Token::Type::Theory>("expected keyword theory");
+    eat_until<Token::Type::Theory>();
+    get_next_token();
+
     check<Token::Type::Identifier>("expected an identifier");
     theory.name = current_token_.value;
     get_next_token();
@@ -88,19 +90,25 @@ Theory Parser::gen_theory() {
     }
     get_next_token(); // eat begin
 
-    std::vector<Ptr<Declaration>> declarations;
-    while (!meet<Token::Type::End, Token::Type::EndOfFile>()) {
-        if (auto declaration = gen_declaration()) {
-            theory.declarations.push_back(move(declaration));
+    while (!meet<Token::Type::EndOfFile>()) {
+        try {
+            if (auto decl = gen_declaration()) {
+                theory.declarations.push_back(move(decl));
+            }
+        } catch (const exception &e) {
+            theory.declarations.push_back(nullptr);
+            "\033[1;34mparse error\033[0m at $nd declaration:\n    $\n"_fs.outf(cerr,
+                theory.declarations.size(), e.what()
+            );
+            tokenizer_.get_next_input();
         }
     }
-    get_next_token(); // eat end
 
     return theory;
 }
 
 Ptr<Declaration> Parser::gen_declaration() {
-    eat_until<Token::Type::Datatype, Token::Type::Fun, Token::Type::Function, Token::Type::Primrec>();
+    eat_until<Token::Type::Datatype, Token::Type::Function>();
 
     if (meet<Token::Type::EndOfFile>()) {
         return nullptr;
@@ -138,8 +146,7 @@ DataTypeDecl::Component Parser::gen_component() {
     componment.constructor = current_token_.value;
     get_next_token();
 
-    /// TODO: !!! Be careful, it is necessary to support keywords like lemma to pass these
-    while (meet<Token::Type::End, Token::Type::TypeVariable, Token::Type::Identifier, Token::Type::Quotation>()) {
+    while (meet<Token::Type::TypeVariable, Token::Type::Identifier, Token::Type::Quotation>()) {
         componment.arguments.push_back(gen_type_term());
     }
 
@@ -149,7 +156,7 @@ DataTypeDecl::Component Parser::gen_component() {
 Ptr<FuncDecl> Parser::gen_function_declaration() {
     auto decl = make_unique<FuncDecl>();
 
-    eat<Token::Type::Fun, Token::Type::Function, Token::Type::Primrec>("expected token Fun, Token::Type::Function, Token::Type::Primrec");
+    eat<Token::Type::Function>("expected token Function");
 
     check<Token::Type::Identifier>("expected token Identifier");
     decl->name = current_token_.value;

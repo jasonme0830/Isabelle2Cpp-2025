@@ -38,16 +38,26 @@ Token &Token::operator=(const Token &other) noexcept {
 }
 
 static map<string, Token::Type> localMapping {
+    { "end", Token::Type::SkipKeyword },
+    { ".", Token::Type::SkipKeyword },
+    { ";", Token::Type::SkipKeyword },
+    { "\\", Token::Type::SkipKeyword },
+    { "!", Token::Type::SkipKeyword },
+    { "`", Token::Type::SkipKeyword },
+
+    { "(*", Token::Type::CommentStart },
+    { "*)", Token::Type::CommentEnd },
+
     { "theory", Token::Type::Theory },
     { "imports", Token::Type::Imports },
     { "begin", Token::Type::Begin },
-    { "end", Token::Type::End },
 
     { "datatype", Token::Type::Datatype },
 
-    { "fun", Token::Type::Fun },
+    { "fun", Token::Type::Function },
     { "function", Token::Type::Function },
-    { "primrec", Token::Type::Primrec },
+    { "primrec", Token::Type::Function },
+    { "definition", Token::Type::Function },
     { "where", Token::Type::Where },
 
     { "if", Token::Type::If },

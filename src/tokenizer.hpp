@@ -14,8 +14,9 @@ class Tokenizer {
     // this is special for (infix "..." <NUM>)
     std::string next_raw_str();
 
-  private:
     void get_next_input();
+
+  private:
     std::optional<Token> try_get_symbol();
 
     std::ifstream &input_;

@@ -7,16 +7,18 @@ namespace hol2cpp {
 struct Token {
   public:
     enum class Type : std::size_t {
+        SkipKeyword,    // such as lemma `
+
+        CommentStart,   // (*
+        CommentEnd,     // *)
+
         Theory,         // theory
         Imports,        // imports
         Begin,          // begin
-        End,            // end
 
         Datatype,       // datatype
 
-        Fun,            // fun
-        Function,       // function
-        Primrec,        // primrec
+        Function,       // fun function primrec definition
         Where,          // where
 
         Integer,        // [0-9]+

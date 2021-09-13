@@ -1,3 +1,4 @@
+#include "assertt.hpp"
 #include "tokenizer.hpp"
 
 #include <set>
@@ -11,6 +12,8 @@ using namespace std;
 
 namespace hol2cpp {
 static set<string> localSymbolSet {
+    ".", ";", "\\", "!", "`",
+
     ":", "::", ":=", "=", "|", "\"", "(", ")", "*", R"(\<Rightarrow>)",
     "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
     R"(\<le>)", R"(<)", R"(\<ge>)", R"(>)", R"(\<subseteq>)", R"(\<subset>)",
@@ -32,7 +35,7 @@ std::string Tokenizer::next_raw_str() {
         get_next_input();
     }
 
-    assert(last_input_ == '"');
+    assertt(last_input_ == '"');
     get_next_input();
 
     string value;
@@ -117,7 +120,23 @@ Token Tokenizer::next_token() {
         switch (state) {
             case State::Begin:
                 if (auto token = try_get_symbol()) {
-                    return *token;
+                    if (token->type == Token::Type::CommentStart) {
+                        while (!token.has_value() || token->type != Token::Type::CommentEnd) {
+                            while (last_input_ != '*' && last_input_ != EOF) {
+                                get_next_input();
+                            }
+                            token = try_get_symbol();
+                            if (!token.has_value()) {
+                                get_next_input();
+                            }
+                        }
+
+                        if (token = try_get_symbol()) {
+                            return *token;
+                        }
+                    } else {
+                        return *token;
+                    }
                 }
 
                 if (isdigit(last_input_)) {
