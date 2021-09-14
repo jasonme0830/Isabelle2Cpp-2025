@@ -1,12 +1,11 @@
 #pragma once
 
 #include "token.hpp"
-#include "assertt.hpp"
+#include "error.hpp"
 #include "funcentity.hpp"
 
 #include <map>
 #include <memory>
-#include <string>
 #include <vector>
 #include <functional>
 
@@ -110,10 +109,7 @@ struct FuncType final : Type {
     /**
      * return the raw pointer of result type
     */
-    Type *result_type() const {
-        assertt(!types.empty());
-        return types.back().get();
-    }
+    Type *result_type() const;
 
     /**
      * build the binded func entity

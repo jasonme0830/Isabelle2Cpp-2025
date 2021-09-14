@@ -1,12 +1,15 @@
 #include "ast.hpp"
 #include "code.hpp"
+#include "error.hpp"
 #include "format.hpp"
 
 #include <regex>
 #include <cctype>
 #include <iostream>
-#include <exception>
 #include <algorithm>
+
+#undef ERROR
+#define ERROR CodegenError
 
 using namespace std;
 
@@ -36,14 +39,14 @@ void Theory::codegen(Code &code) const {
                 auto fun_decl = static_cast<FuncDecl *>(decl);
                 name = "function " + fun_decl->name;
             }
-            "\033[1;31mcodegen error\033[0m at $nd declaration of $\n    $\n"_fs.outf(
-                cerr, i + 1, name, e.what()
+            "$ at $nd declaration of $\n    $\n"_fs.outf(
+                cerr, info::red("codegen error"), i + 1, name, e.what()
             );
         }
     }
 
-    "\033[1;36mResult:\033[0m\n  scanned $ declarations;\n"_fs.outf(
-        cout, declarations.size()
+    "$\n  scanned $ declarations;\n"_fs.outf(
+        cout, info::green("Result:"), declarations.size()
     );
     "  generated $ declarations:\n"_fs.outf(
         cout, datatype_cnt + fun_cnt
@@ -182,7 +185,7 @@ string FuncType::build_data_type(DataType &type) const {
 
 // --- get main name of type ---
 string Type::main_name() const {
-    throw runtime_error("fff");
+    throw CodegenError("failed call of Type::main_name()");
 }
 
 string NormalType::main_name() const {
@@ -247,7 +250,7 @@ void Equation::build_func_entity(FuncEntity &entity) const {
 
 // --- generate pattern ---
 void Expr::gen_pattern(FuncEntity &, const string &) const {
-    throw runtime_error("cannot be pattern");
+    throw CodegenError("failed call Expr::gen_pattern(...)");
 }
 
 void IntegralExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
@@ -310,7 +313,7 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
             args[i]->gen_pattern(entity, "$$get_c$().p$"_fs.format(prev, dot, pos + 1, i + 1));
         }
     } else {
-        throw std::runtime_error("no such name: " + constructor);
+        throw CodegenError("failed call VarExpr::gen_pattern(...): no such name: " + constructor);
     }
 }
 
@@ -345,7 +348,7 @@ void BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
             break;
 
         default:
-            throw std::runtime_error("BinaryOpExpr::gen_pattern error");
+            throw CodegenError("failed call BinaryOpExpr::gen_pattern(): unsupported binary operator " + op.value);
     }
 }
 
@@ -721,6 +724,12 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
                 lhs->gen_expr(entity, typeinfo), bop_mapping.at(op.type), rhs->gen_expr(entity, typeinfo)
             );
     }
-    throw runtime_error("Implementation error at line $ in file $!"_fs.format(__LINE__, __FILE__));
+    throw CodegenError("failed call BinaryOpExpr::gen_expr(...): unsupported binary operator " + op.value);
+}
+
+// --- others ---
+Type *FuncType::result_type() const {
+    assertt(!types.empty());
+    return types.back().get();
 }
 } // namespace hol2cpp

@@ -119,7 +119,7 @@ class ArgumentParser {
     template <typename ...Ts>
     Argument &add_argument(const std::string &key, const Ts & ...keys) {
         if (key.empty()) {
-            throw;
+            throw std::invalid_argument("key cannot be empty");
         }
 
         if (key[0] != '-') {

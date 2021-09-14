@@ -1,7 +1,10 @@
 #include "code.hpp"
+#include "error.hpp"
 #include "format.hpp"
-#include "assertt.hpp"
 #include "funcentity.hpp"
+
+#undef ERROR
+#define ERROR CodegenError
 
 using namespace std;
 

@@ -1,11 +1,10 @@
-#include "assertt.hpp"
+#include "error.hpp"
+#include "format.hpp"
 #include "tokenizer.hpp"
 
 #include <set>
 #include <vector>
-#include <cassert>
 #include <optional>
-#include <exception>
 #include <algorithm>
 
 using namespace std;
@@ -21,13 +20,27 @@ static set<string> localSymbolSet {
     R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(/)", R"(div)", R"(mod)", R"(^)",
 };
 
-Tokenizer::Tokenizer(ifstream &input) noexcept
-  : input_(input), last_input_(' ') {
+Tokenizer::Tokenizer(ifstream &input, std::string name) noexcept
+  : input_(input), name_of_input_(move(name)), last_input_(' ')
+  , cur_location_(1, 0), last_location_(1, 0) {
     // ...
 }
 
 void Tokenizer::get_next_input() {
     last_input_ = input_.get();
+    if (last_input_ == EOF) {
+        return;
+    }
+
+    if (last_input_ == '\n') {
+        ++cur_location_.first;
+        cur_location_.second = 0;
+        last_line_ = cur_line_;
+        cur_line_.clear();
+    } else {
+        ++cur_location_.second;
+        cur_line_ += last_input_;
+    }
 }
 
 std::string Tokenizer::next_raw_str() {
@@ -35,7 +48,9 @@ std::string Tokenizer::next_raw_str() {
         get_next_input();
     }
 
-    assertt(last_input_ == '"');
+    if (last_input_ != '"') {
+        throw error("expected char \"");
+    }
     get_next_input();
 
     string value;
@@ -111,6 +126,7 @@ Token Tokenizer::next_token() {
         return Token(Token::Type::EndOfFile);
     }
 
+    last_location_ = cur_location_;
     auto state = State::Begin;
 
     std::optional<Token> token;
@@ -148,7 +164,7 @@ Token Tokenizer::next_token() {
                 } else if (last_input_ == '\'') {
                     state = State::InTypeVariable;
                 } else {
-                    throw std::runtime_error("meet unexpected char "s + last_input_);
+                    throw error("meet unexpected char "s + last_input_);
                 }
                 break;
 
@@ -189,5 +205,31 @@ Token Tokenizer::next_token() {
     } else {
         return *token;
     }
+}
+
+string Tokenizer::get_err_info(const string &message) const {
+    auto line = (cur_location_.first != last_location_.first)
+        ? last_line_ : cur_line_
+    ;
+
+    auto line_num = last_location_.first,
+         char_at_line = last_location_.second
+    ;
+
+    return "$ $: \n$\n$$"_fs.format(
+        info::strong("$:$:$:"_fs.format(name_of_input_, line_num, char_at_line)),
+        info::light_red("error: "), message,
+        line, string(char_at_line == 0 ? 0 : char_at_line - 1, ' '), info::light_red("^")
+    );
+}
+
+TokenizeError Tokenizer::error(const string &message) {
+    auto backup = last_location_;
+
+    last_location_ = cur_location_;
+    auto err = get_err_info(message);
+
+    last_location_ = backup;
+    return TokenizeError(err);
 }
 } // namespace hol2cpp

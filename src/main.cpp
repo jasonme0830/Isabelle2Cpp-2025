@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
         auto input_file = arg_parser.get<string>("input");
         auto pos = input_file.rfind(".thy");
         if (pos == input_file.npos) {
-            throw std::runtime_error("input file should be .thy file");
+            throw std::invalid_argument("input file should be .thy file");
         }
 
         ifstream fin(input_file);
@@ -38,11 +38,11 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        auto theory = Parser(fin).gen_theory();
+        auto theory = Parser(fin, input_file).gen_theory();
         string output_file;
         if (auto same_path = arg_parser.get<bool>("s")) {
             if (!arg_parser.get<string>("output").empty()) {
-                throw std::runtime_error("-s or assign output file");
+                throw std::invalid_argument("-s or assign output file");
             } else {
 
                 output_file = input_file.substr(0, pos);

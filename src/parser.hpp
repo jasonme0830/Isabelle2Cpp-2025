@@ -2,26 +2,28 @@
 
 #include "ast.hpp"
 #include "token.hpp"
+#include "error.hpp"
 #include "tokenizer.hpp"
 
 #include <fstream>
-#include <exception>
 
 namespace hol2cpp {
 class Parser {
   public:
-    Parser(std::ifstream &input) noexcept;
+    Parser(std::ifstream &input, std::string name) noexcept;
 
     Theory gen_theory();
 
   private:
+    ParseError error(const std::string &message) const;
+
     template<Token::Type type, Token::Type ...types>
     void check(const std::string &err_info) {
         if (current_token_.type != type) {
             if constexpr (sizeof...(types) > 0) {
                 check<types...>(err_info);
             } else {
-                throw std::runtime_error(err_info);
+                throw error(err_info);
             }
         }
     }

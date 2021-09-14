@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "error.hpp"
 
 #include <set>
 #include <map>
@@ -59,8 +60,8 @@ set<Token::Type> &bops_at_layer(size_t layer) {
 }
 } // namespace operators
 
-Parser::Parser(ifstream &input) noexcept
-  : tokenizer_(input), current_token_(tokenizer_.next_token()) {
+Parser::Parser(ifstream &input, string name) noexcept
+  : tokenizer_(input, move(name)), current_token_(tokenizer_.next_token()) {
     // ...
 }
 
@@ -95,12 +96,16 @@ Theory Parser::gen_theory() {
             if (auto decl = gen_declaration()) {
                 theory.declarations.push_back(move(decl));
             }
-        } catch (const exception &e) {
-            theory.declarations.push_back(nullptr);
-            "\033[1;34mparse error\033[0m at $nd declaration:\n    $\n"_fs.outf(cerr,
-                theory.declarations.size(), e.what()
+        } catch (const TokenizeError &e) {
+            "$ after $nd declaration:\n    $\n"_fs.outf(cerr,
+                info::light_red("tokenize error"), theory.declarations.size(), e.what()
             );
             tokenizer_.get_next_input();
+        } catch (const ParseError &e) {
+            theory.declarations.push_back(nullptr);
+            "$ in $nd declaration:\n    $\n"_fs.outf(cerr,
+                info::light_red("parse error"), theory.declarations.size(), e.what()
+            );
         }
     }
 
@@ -266,7 +271,7 @@ Ptr<Type> Parser::gen_type_term() {
             return type;
         }
         default:
-            throw std::runtime_error("gen_type_term error");
+            throw error("expected token type in { TypeVariable, Identifier, LParen, Quotation }");
     }
 }
 
@@ -365,7 +370,7 @@ Ptr<Expr> Parser::gen_factor() {
             return gen_integral();
 
         default:
-            throw std::runtime_error("gen_factor error");
+            throw error("expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }");
     }
 }
 
@@ -436,5 +441,9 @@ Ptr<Expr> Parser::gen_integral() {
     auto expr = make_unique<IntegralExpr>(current_token_.value);
     get_next_token();
     return expr;
+}
+
+ParseError Parser::error(const string &message) const {
+    return ParseError(tokenizer_.get_err_info(message));
 }
 } // namespace hol2cpp
