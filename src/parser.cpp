@@ -97,14 +97,14 @@ Theory Parser::gen_theory() {
                 theory.declarations.push_back(move(decl));
             }
         } catch (const TokenizeError &e) {
-            "$ after $nd declaration:\n    $\n"_fs.outf(cerr,
-                info::light_red("tokenize error"), theory.declarations.size(), e.what()
+            "$ after No.$ declaration:\n$\n"_fs.outf(cerr,
+                info::light_blue("tokenize error"), theory.declarations.size(), e.what()
             );
             tokenizer_.get_next_input();
         } catch (const ParseError &e) {
             theory.declarations.push_back(nullptr);
-            "$ in $nd declaration:\n    $\n"_fs.outf(cerr,
-                info::light_red("parse error"), theory.declarations.size(), e.what()
+            "$ in No.$ declaration:\n$\n"_fs.outf(cerr,
+                info::light_blue("parse error"), theory.declarations.size(), e.what()
             );
         }
     }

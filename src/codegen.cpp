@@ -39,19 +39,19 @@ void Theory::codegen(Code &code) const {
                 auto fun_decl = static_cast<FuncDecl *>(decl);
                 name = "function " + fun_decl->name;
             }
-            "$ at $nd declaration of $\n    $\n"_fs.outf(
-                cerr, info::red("codegen error"), i + 1, name, e.what()
+            "$ at No.$ declaration of $:\n`$\n\n"_fs.outf(
+                cerr, info::light_red("codegen error"), i + 1, name, e.what()
             );
         }
     }
 
-    "$\n  scanned $ declarations;\n"_fs.outf(
-        cout, info::green("Result:"), declarations.size()
+    "$\n`scanned $ declarations;\n"_fs.outf(
+        cout, info::light_green("Result:"), declarations.size()
     );
-    "  generated $ declarations:\n"_fs.outf(
+    "`generated $ declarations:\n"_fs.outf(
         cout, datatype_cnt + fun_cnt
     );
-    "    $ datatypes and $ functions.\n"_fs.outf(
+    "``$ datatypes and $ functions.\n"_fs.outf(
         cout, datatype_cnt, fun_cnt
     );
 }

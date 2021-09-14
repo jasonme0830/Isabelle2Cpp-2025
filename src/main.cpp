@@ -44,7 +44,6 @@ int main(int argc, char* argv[]) {
             if (!arg_parser.get<string>("output").empty()) {
                 throw std::invalid_argument("-s or assign output file");
             } else {
-
                 output_file = input_file.substr(0, pos);
             }
         } else {

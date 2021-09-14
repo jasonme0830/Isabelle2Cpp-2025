@@ -64,10 +64,11 @@ std::string Tokenizer::next_raw_str() {
 }
 
 optional<Token> Tokenizer::try_get_symbol() {
-    auto longest_len = max_element(localSymbolSet.begin(), localSymbolSet.end(), [] (const string &lhs, const string &rhs) { return lhs.size() < rhs.size(); })->size();
+    auto tellg = input_.tellg();
+    auto backup = last_input_;
 
-    vector<char> backups;
-    backups.push_back(last_input_);
+    auto cmp = [] (const string &lhs, const string &rhs) { return lhs.size() < rhs.size(); };
+    auto longest_len = max_element(localSymbolSet.begin(), localSymbolSet.end(), cmp)->size();
 
     auto alts = localSymbolSet;
     size_t i = 0;
@@ -89,22 +90,21 @@ optional<Token> Tokenizer::try_get_symbol() {
             break;
         }
 
-        get_next_input();
-        backups.push_back(last_input_);
+        last_input_ = input_.get();
         if (last_input_ == EOF) {
             break;
         }
     }
 
-    size_t tell_g = input_.tellg();
+    input_.seekg(tellg);
+    last_input_ = backup;
     if (alts.empty()) {
-        input_.seekg(tell_g - i, ios::beg);
-        last_input_ = backups[0];
         return {};
     } else {
-        auto symbol = *max_element(alts.begin(), alts.end(), [] (const string &lhs, const string &rhs) { return lhs.size() < rhs.size(); });
-        input_.seekg(tell_g - i + symbol.size(), ios::beg);
-        last_input_ = backups[symbol.size()];
+        auto symbol = *max_element(alts.begin(), alts.end(), cmp);
+        for (size_t i = 0; i < symbol.size(); ++i) {
+            get_next_input();
+        }
         return Token(symbol);
     }
 }
@@ -216,10 +216,10 @@ string Tokenizer::get_err_info(const string &message) const {
          char_at_line = last_location_.second
     ;
 
-    return "$ $: \n$\n$$"_fs.format(
-        info::strong("$:$:$:"_fs.format(name_of_input_, line_num, char_at_line)),
-        info::light_red("error: "), message,
-        line, string(char_at_line == 0 ? 0 : char_at_line - 1, ' '), info::light_red("^")
+    return "`$$$\n`$\n`$$"_fs.format(
+        info::strong("$:$:$: "_fs.format(name_of_input_, line_num, char_at_line)),
+        info::light_red("error: "), message, line,
+        string(char_at_line == 0 ? 0 : char_at_line - 1, ' '), info::light_red("^")
     );
 }
 

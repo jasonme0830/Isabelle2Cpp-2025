@@ -23,6 +23,14 @@ string green(const string &str) {
 string light_red(const string &str) {
     return "\033[1;31m" + str + "\033[0m";
 }
+
+string light_blue(const string &str) {
+    return "\033[1;34m" + str + "\033[0m";
+}
+
+string light_green(const string &str) {
+    return "\033[1;32m" + str + "\033[0m";
+}
 } // namespace info
 
 TokenizeError::TokenizeError(string err) : err_(std::move(err)) {}

@@ -4,7 +4,7 @@
 #include <exception>
 
 #define ERROR 0
-#define assertt(expr) if (!(expr)) { throw ERROR(__FILE__ ":" + std::to_string(__LINE__) + ": Assertion `" #expr "' failed."); }
+#define assertt(expr) if (!(expr)) { throw ERROR(info::strong("$:$: "_fs.format(__FILE__, __LINE__)) + "Assertion `" #expr "' failed."); }
 
 namespace hol2cpp {
 namespace info {
@@ -15,6 +15,8 @@ std::string blue(const std::string &str);
 std::string green(const std::string &str);
 
 std::string light_red(const std::string &str);
+std::string light_blue(const std::string &str);
+std::string light_green(const std::string &str);
 } // namespace;
 
 class TokenizeError : public std::exception {
