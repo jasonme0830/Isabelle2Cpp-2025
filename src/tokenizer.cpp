@@ -11,7 +11,7 @@ using namespace std;
 
 namespace hol2cpp {
 static set<string> localSymbolSet {
-    ".", ";", "\\", "!", "`",
+    ".", ";", "\\", "!", "`", "?",
 
     ":", "::", ":=", "=", "|", "\"", "(", ")", "*", R"(\<Rightarrow>)",
     "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",

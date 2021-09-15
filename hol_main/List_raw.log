@@ -1,0 +1,851 @@
+parse error in No.1 definition:
+`hol_main/List_raw.thy:11:14: error: expected token RParen
+`datatype (set:
+`             ^
+parse error in No.2 definition:
+`hol_main/List_raw.thy:56:9: error: expected token Identifier
+`primrec (n
+`        ^
+parse error in No.4 definition:
+`hol_main/List_raw.thy:67:1: error: expected token Quotation
+`[s
+`^
+parse error in No.5 definition:
+`hol_main/List_raw.thy:69:73: error: expected token Where
+`primrec append :: "'a list \<Rightarrow> 'a list \<Rightarrow> 'a list" (i
+`                                                                        ^
+parse error in No.8 definition:
+`hol_main/List_raw.thy:90:1: error: expected token Quotation
+`fold_Nil:
+`^
+parse error in No.9 definition:
+`hol_main/List_raw.thy:94:1: error: expected token Quotation
+`foldr_Nil:
+`^
+parse error in No.10 definition:
+`hol_main/List_raw.thy:98:1: error: expected token Quotation
+`foldl_Nil:
+`^
+parse error in No.12 definition:
+`hol_main/List_raw.thy:106:1: error: expected token Quotation
+`drop_Nil:
+`^
+parse error in No.13 definition:
+`hol_main/List_raw.thy:108:70: error: expected token Identifier
+`  \<comment> \<open>Warning: simpset does not contain this definition,
+`                                                                     ^
+parse error in No.14 definition:
+`hol_main/List_raw.thy:112:1: error: expected token Quotation
+`take_Nil:
+`^
+parse error in No.15 definition:
+`hol_main/List_raw.thy:114:70: error: expected token Identifier
+`  \<comment> \<open>Warning: simpset does not contain this definition,
+`                                                                     ^
+parse error in No.16 definition:
+`hol_main/List_raw.thy:117:9: error: expected token Identifier
+`primrec (n
+`        ^
+parse error in No.17 definition:
+`hol_main/List_raw.thy:119:70: error: expected token Identifier
+`  \<comment> \<open>Warning: simpset does not contain this definition,
+`                                                                     ^
+parse error in No.18 definition:
+`hol_main/List_raw.thy:125:16: error: expected token RParen
+`  (case i of 0 \<Rightarrow>
+`               ^
+parse error in No.21 definition:
+`hol_main/List_raw.thy:147:65: error: expected token RParen
+`primrec zip :: "'a list \<Rightarrow> 'b list \<Rightarrow> ('a \<
+`                                                                ^
+parse error in No.22 definition:
+`hol_main/List_raw.thy:151:70: error: expected token Identifier
+`  \<comment> \<open>Warning: simpset does not contain this definition,
+`                                                                     ^
+parse error in No.23 definition:
+`hol_main/List_raw.thy:157:69: error: expected token RParen
+`primrec product :: "'a list \<Rightarrow> 'b list \<Rightarrow> ('a \<
+`                                                                    ^
+parse error in No.24 definition:
+`hol_main/List_raw.thy:165:42: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`"product_lists (xs # xss) = concat (map (\<
+`                                         ^
+parse error in No.25 definition:
+`hol_main/List_raw.thy:167:63: error: expected token Where
+`primrec upt :: "nat \<Rightarrow> nat \<Rightarrow> nat list" ("
+`                                                              ^
+parse error in No.30 definition:
+`hol_main/List_raw.thy:191:4: error: expected token Identifier
+`   "e
+`   ^
+parse error in No.31 definition:
+`hol_main/List_raw.thy:203:8: error: expected token RParen
+`  None \<Rightarrow>
+`       ^
+parse error in No.34 definition:
+`hol_main/List_raw.thy:215:14: error: expected token Equiv
+`"distinct [] \<
+`             ^
+parse error in No.37 definition:
+`hol_main/List_raw.thy:228:1: error: expected token Quotation
+`replicate_0:
+`^
+parse error in No.38 definition:
+`hol_main/List_raw.thy:238:71: error: expected token RParen
+`definition enumerate :: "nat \<Rightarrow> 'a list \<Rightarrow> (nat \<
+`                                                                      ^
+parse error in No.40 definition:
+`hol_main/List_raw.thy:246:22: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`"rotate n = rotate1 ^^
+`                     ^
+parse error in No.41 definition:
+`hol_main/List_raw.thy:248:29: error: expected token Quotation
+`definition nths :: "'a list =>
+`                            ^
+parse error in No.43 definition:
+`hol_main/List_raw.thy:257:36: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`"n_lists (Suc n) xs = concat (map (\<
+`                                   ^
+parse error in No.45 definition:
+`hol_main/List_raw.thy:269:19: error: expected ::
+`function shuffles where
+`                  ^
+parse error in No.46 definition:
+`hol_main/List_raw.thy:277:20: error: expected token Quotation
+`fun min_list :: "'a::o
+`                   ^
+parse error in No.47 definition:
+`hol_main/List_raw.thy:281:43: error: expected token RParen
+`fun arg_min_list :: "('a \<Rightarrow> ('b::l
+`                                          ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:316:21: error: meet unexpected char %
+`@{lemma "takeWhile (%
+`                    ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:317:21: error: meet unexpected char %
+`@{lemma "dropWhile (%
+`                    ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:324:21: error: meet unexpected char %
+`@{lemma "List.find (%
+`                    ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:325:21: error: meet unexpected char %
+`@{lemma "List.find (%
+`                    ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:327:24: error: meet unexpected char %
+`@{lemma "List.extract (%
+`                       ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:328:24: error: meet unexpected char %
+`@{lemma "List.extract (%
+`                       ^
+tokenize error after No.47 definition:
+`hol_main/List_raw.thy:346:7: error: meet unexpected char ~
+`Figure~
+`      ^
+parse error in No.48 definition:
+`hol_main/List_raw.thy:357:28: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`"sorted_wrt P (x # ys) = ((\<
+`                           ^
+parse error in No.49 definition:
+`hol_main/List_raw.thy:368:22: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`"sorted (x # ys) = ((\<
+`                     ^
+parse error in No.50 definition:
+`hol_main/List_raw.thy:372:29: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`"strict_sorted (x # ys) = ((\<
+`                            ^
+parse error in No.53 definition:
+`hol_main/List_raw.thy:396:19: error: expected token Then
+`  (if f x \<in> f `
+`                  ^
+parse error in No.54 definition:
+`hol_main/List_raw.thy:404:5: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
+`   (\<
+`    ^
+tokenize error after No.54 definition:
+`hol_main/List_raw.thy:423:1: error: meet unexpected char %
+`%
+`^
+tokenize error after No.54 definition:
+`hol_main/List_raw.thy:429:33: error: meet unexpected char %
+`optmized to \<^term>\<open>map (%
+`                                ^
+parse error in No.55 definition:
+`hol_main/List_raw.thy:458:14: error: expected ::
+`  fun single x
+`             ^
+tokenize error after No.55 definition:
+`hol_main/List_raw.thy:458:24: error: meet unexpected char $
+`  fun single x = ConsC $
+`                       ^
+tokenize error after No.55 definition:
+`hol_main/List_raw.thy:458:28: error: meet unexpected char $
+`  fun single x = ConsC $ x $
+`                           ^
+parse error in No.56 definition:
+`hol_main/List_raw.thy:460:14: error: expected ::
+`  fun pat_tr ctxt
+`             ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:460:33: error: meet unexpected char %
+`  fun pat_tr ctxt p e opti = (* %
+`                                ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:466:70: error: meet unexpected char $
+`      val case1 = Syntax.const \<^syntax_const>\<open>_case1\<close> $
+`                                                                     ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:466:74: error: meet unexpected char $
+`      val case1 = Syntax.const \<^syntax_const>\<open>_case1\<close> $ p $
+`                                                                         ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:468:60: error: meet unexpected char $
+`        Syntax.const \<^syntax_const>\<open>_case1\<close> $
+`                                                           ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:468:69: error: meet unexpected char $
+`        Syntax.const \<^syntax_const>\<open>_case1\<close> $ dummyC $
+`                                                                    ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:469:67: error: meet unexpected char $
+`      val cs = Syntax.const \<^syntax_const>\<open>_case2\<close> $
+`                                                                  ^
+tokenize error after No.56 definition:
+`hol_main/List_raw.thy:469:75: error: meet unexpected char $
+`      val cs = Syntax.const \<^syntax_const>\<open>_case2\<close> $ case1 $
+`                                                                          ^
+parse error in No.57 definition:
+`hol_main/List_raw.thy:472:19: error: expected ::
+`  fun pair_pat_tr (x
+`                  ^
+tokenize error after No.57 definition:
+`hol_main/List_raw.thy:473:22: error: meet unexpected char $
+`    | pair_pat_tr (_ $
+`                     ^
+tokenize error after No.57 definition:
+`hol_main/List_raw.thy:473:27: error: meet unexpected char $
+`    | pair_pat_tr (_ $ p1 $
+`                          ^
+tokenize error after No.57 definition:
+`hol_main/List_raw.thy:474:63: error: meet unexpected char $
+`        Syntax.const \<^const_syntax>\<open>case_prod\<close> $
+`                                                              ^
+parse error in No.58 definition:
+`hol_main/List_raw.thy:477:16: error: expected ::
+`  fun pair_pat ctxt
+`               ^
+tokenize error after No.58 definition:
+`hol_main/List_raw.thy:477:68: error: meet unexpected char $
+`  fun pair_pat ctxt (Const (\<^const_syntax>\<open>Pair\<close>,_) $
+`                                                                   ^
+tokenize error after No.58 definition:
+`hol_main/List_raw.thy:477:72: error: meet unexpected char $
+`  fun pair_pat ctxt (Const (\<^const_syntax>\<open>Pair\<close>,_) $ s $
+`                                                                       ^
+parse error in No.59 definition:
+`hol_main/List_raw.thy:486:14: error: expected ::
+`  fun abs_tr ctxt
+`             ^
+parse error in No.60 definition:
+`hol_main/List_raw.thy:493:13: error: expected ::
+`  fun lc_tr ctxt
+`            ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:493:73: error: meet unexpected char $
+`  fun lc_tr ctxt [e, Const (\<^syntax_const>\<open>_lc_test\<close>, _) $
+`                                                                        ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:498:64: error: meet unexpected char $
+`         | Const (\<^syntax_const>\<open>_lc_quals\<close>, _) $
+`                                                               ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:498:68: error: meet unexpected char $
+`         | Const (\<^syntax_const>\<open>_lc_quals\<close>, _) $ q $
+`                                                                   ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:499:12: error: meet unexpected char $
+`    in IfC $
+`           ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:499:16: error: meet unexpected char $
+`    in IfC $ b $
+`               ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:499:22: error: meet unexpected char $
+`    in IfC $ b $ res $
+`                     ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:501:61: error: meet unexpected char $
+`      [e, Const (\<^syntax_const>\<open>_lc_gen\<close>, _) $
+`                                                            ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:501:65: error: meet unexpected char $
+`      [e, Const (\<^syntax_const>\<open>_lc_gen\<close>, _) $ p $
+`                                                                ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:504:28: error: meet unexpected char $
+`         (f, true) => mapC $
+`                           ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:504:32: error: meet unexpected char $
+`         (f, true) => mapC $ f $
+`                               ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:505:32: error: meet unexpected char $
+`       | (f, false) => concatC $
+`                               ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:505:40: error: meet unexpected char $
+`       | (f, false) => concatC $ (mapC $
+`                                       ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:505:44: error: meet unexpected char $
+`       | (f, false) => concatC $ (mapC $ f $
+`                                           ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:507:61: error: meet unexpected char $
+`      [e, Const (\<^syntax_const>\<open>_lc_gen\<close>, _) $
+`                                                            ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:507:65: error: meet unexpected char $
+`      [e, Const (\<^syntax_const>\<open>_lc_gen\<close>, _) $ p $
+`                                                                ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:508:63: error: meet unexpected char $
+`          Const (\<^syntax_const>\<open>_lc_quals\<close>, _) $
+`                                                              ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:508:67: error: meet unexpected char $
+`          Const (\<^syntax_const>\<open>_lc_quals\<close>, _) $ q $
+`                                                                  ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:510:18: error: meet unexpected char $
+`      in concatC $
+`                 ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:510:26: error: meet unexpected char $
+`      in concatC $ (mapC $
+`                         ^
+tokenize error after No.60 definition:
+`hol_main/List_raw.thy:510:59: error: meet unexpected char $
+`      in concatC $ (mapC $ (fst (abs_tr ctxt p e' false)) $
+`                                                          ^
+parse error in No.61 definition:
+`hol_main/List_raw.thy:518:15: error: expected ::
+`    fun check s1
+`              ^
+parse error in No.62 definition:
+`hol_main/List_raw.thy:566:21: error: expected ::
+`fun all_exists_conv cv
+`                    ^
+tokenize error after No.62 definition:
+`hol_main/List_raw.thy:568:48: error: meet unexpected char $
+`    Const (\<^const_name>\<open>Ex\<close>, _) $
+`                                               ^
+parse error in No.63 definition:
+`hol_main/List_raw.thy:572:30: error: expected ::
+`fun all_but_last_exists_conv cv
+`                             ^
+tokenize error after No.63 definition:
+`hol_main/List_raw.thy:574:48: error: meet unexpected char $
+`    Const (\<^const_name>\<open>Ex\<close>, _) $
+`                                               ^
+tokenize error after No.63 definition:
+`hol_main/List_raw.thy:574:104: error: meet unexpected char $
+`    Const (\<^const_name>\<open>Ex\<close>, _) $ Abs (_, _, Const (\<^const_name>\<open>Ex\<close>, _) $
+`                                                                                                       ^
+parse error in No.64 definition:
+`hol_main/List_raw.thy:578:18: error: expected ::
+`fun Collect_conv cv
+`                 ^
+tokenize error after No.64 definition:
+`hol_main/List_raw.thy:580:53: error: meet unexpected char $
+`    Const (\<^const_name>\<open>Collect\<close>, _) $
+`                                                    ^
+parse error in No.65 definition:
+`hol_main/List_raw.thy:583:14: error: expected ::
+`fun rewr_conv'
+`             ^
+parse error in No.66 definition:
+`hol_main/List_raw.thy:585:25: error: expected ::
+`fun conjunct_assoc_conv ct
+`                        ^
+parse error in No.67 definition:
+`hol_main/List_raw.thy:589:39: error: expected ::
+`fun right_hand_set_comprehension_conv conv
+`                                      ^
+parse error in No.69 definition:
+`hol_main/List_raw.thy:605:12: error: expected ::
+`fun mk_set T
+`           ^
+parse error in No.70 definition:
+`hol_main/List_raw.thy:606:14: error: expected ::
+`fun dest_set (C
+`             ^
+tokenize error after No.70 definition:
+`hol_main/List_raw.thy:606:59: error: meet unexpected char $
+`fun dest_set (Const (\<^const_name>\<open>set\<close>, _) $
+`                                                          ^
+parse error in No.71 definition:
+`hol_main/List_raw.thy:608:25: error: expected ::
+`fun dest_singleton_list (C
+`                        ^
+tokenize error after No.71 definition:
+`hol_main/List_raw.thy:608:71: error: meet unexpected char $
+`fun dest_singleton_list (Const (\<^const_name>\<open>Cons\<close>, _) $
+`                                                                      ^
+tokenize error after No.71 definition:
+`hol_main/List_raw.thy:608:75: error: meet unexpected char $
+`fun dest_singleton_list (Const (\<^const_name>\<open>Cons\<close>, _) $ t $
+`                                                                          ^
+parse error in No.72 definition:
+`hol_main/List_raw.thy:613:38: error: expected ::
+`fun possible_index_of_singleton_case cases
+`                                     ^
+parse error in No.73 definition:
+`hol_main/List_raw.thy:615:15: error: expected ::
+`    fun check (i
+`              ^
+parse error in No.74 definition:
+`hol_main/List_raw.thy:624:13: error: expected ::
+`fun dest_if (C
+`            ^
+tokenize error after No.74 definition:
+`hol_main/List_raw.thy:624:57: error: meet unexpected char $
+`fun dest_if (Const (\<^const_name>\<open>If\<close>, _) $
+`                                                        ^
+tokenize error after No.74 definition:
+`hol_main/List_raw.thy:624:64: error: meet unexpected char $
+`fun dest_if (Const (\<^const_name>\<open>If\<close>, _) $ cond $
+`                                                               ^
+tokenize error after No.74 definition:
+`hol_main/List_raw.thy:624:73: error: meet unexpected char $
+`fun dest_if (Const (\<^const_name>\<open>If\<close>, _) $ cond $ then_t $
+`                                                                        ^
+parse error in No.75 definition:
+`hol_main/List_raw.thy:629:15: error: expected ::
+`fun dest_case ctxt
+`              ^
+parse error in No.76 definition:
+`hol_main/List_raw.thy:649:9: error: expected ::
+`fun tac ctxt
+`        ^
+parse error in No.77 definition:
+`hol_main/List_raw.thy:718:13: error: expected ::
+`fun simproc ctxt
+`            ^
+parse error in No.78 definition:
+`hol_main/List_raw.thy:720:24: error: expected ::
+`    fun make_inner_eqs bound_vs
+`                       ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:730:113: error: meet unexpected char $
+`            val constr_eq = Const (\<^const_name>\<open>HOL.eq\<close>, T --> T --> \<^typ>\<open>bool\<close>) $
+`                                                                                                                ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:730:124: error: meet unexpected char $
+`            val constr_eq = Const (\<^const_name>\<open>HOL.eq\<close>, T --> T --> \<^typ>\<open>bool\<close>) $ constr_t $
+`                                                                                                                           ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:745:109: error: meet unexpected char $
+`                      Const (\<^const_name>\<open>HOL.eq\<close>, rT --> rT --> \<^typ>\<open>bool\<close>) $
+`                                                                                                            ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:746:49: error: meet unexpected char $
+`                        Bound (length bound_vs) $
+`                                                ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:748:129: error: meet unexpected char $
+`                      Const (\<^const_name>\<open>Set.member\<close>, rT --> HOLogic.mk_setT rT --> \<^typ>\<open>bool\<close>) $
+`                                                                                                                                ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:749:49: error: meet unexpected char $
+`                        Bound (length bound_vs) $
+`                                                ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:749:62: error: meet unexpected char $
+`                        Bound (length bound_vs) $ (mk_set rT $
+`                                                             ^
+tokenize error after No.78 definition:
+`hol_main/List_raw.thy:755:69: error: meet unexpected char $
+`                  fold (fn (_, T) => fn t => HOLogic.exists_const T $
+`                                                                    ^
+parse error in No.79 definition:
+`hol_main/List_raw.thy:913:9: error: expected ::
+`fun len (C
+`        ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:914:53: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>Cons\<close>,_) $
+`                                                    ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:914:57: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>Cons\<close>,_) $ _ $
+`                                                        ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:915:55: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>append\<close>,_) $
+`                                                      ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:915:60: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>append\<close>,_) $ xs $
+`                                                           ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:916:52: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>rev\<close>,_) $
+`                                                   ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:917:52: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>map\<close>,_) $
+`                                                   ^
+tokenize error after No.79 definition:
+`hol_main/List_raw.thy:917:56: error: meet unexpected char $
+`  | len (Const(\<^const_name>\<open>map\<close>,_) $ _ $
+`                                                       ^
+parse error in No.80 definition:
+`hol_main/List_raw.thy:922:14: error: expected ::
+`fun list_neq ctxt
+`             ^
+tokenize error after No.80 definition:
+`hol_main/List_raw.thy:924:23: error: meet unexpected char $
+`    val (Const(_,eqT) $
+`                      ^
+tokenize error after No.80 definition:
+`hol_main/List_raw.thy:924:29: error: meet unexpected char $
+`    val (Const(_,eqT) $ lhs $
+`                            ^
+parse error in No.81 definition:
+`hol_main/List_raw.thy:926:18: error: expected ::
+`    fun prove_neq()
+`                 ^
+tokenize error after No.81 definition:
+`hol_main/List_raw.thy:930:42: error: meet unexpected char $
+`        val eq_len = HOLogic.mk_eq (size $
+`                                         ^
+tokenize error after No.81 definition:
+`hol_main/List_raw.thy:930:54: error: meet unexpected char $
+`        val eq_len = HOLogic.mk_eq (size $ lhs, size $
+`                                                     ^
+tokenize error after No.81 definition:
+`hol_main/List_raw.thy:931:56: error: meet unexpected char $
+`        val neq_len = HOLogic.mk_Trueprop (HOLogic.Not $
+`                                                       ^
+parse error in No.82 definition:
+`hol_main/List_raw.thy:1055:14: error: expected ::
+`    fun last (c
+`             ^
+tokenize error after No.82 definition:
+`hol_main/List_raw.thy:1055:68: error: meet unexpected char $
+`    fun last (cons as Const (\<^const_name>\<open>Cons\<close>, _) $
+`                                                                   ^
+tokenize error after No.82 definition:
+`hol_main/List_raw.thy:1055:72: error: meet unexpected char $
+`    fun last (cons as Const (\<^const_name>\<open>Cons\<close>, _) $ _ $
+`                                                                       ^
+tokenize error after No.82 definition:
+`hol_main/List_raw.thy:1057:60: error: meet unexpected char $
+`      | last (Const(\<^const_name>\<open>append\<close>,_) $
+`                                                           ^
+tokenize error after No.82 definition:
+`hol_main/List_raw.thy:1057:64: error: meet unexpected char $
+`      | last (Const(\<^const_name>\<open>append\<close>,_) $ _ $
+`                                                               ^
+parse error in No.83 definition:
+`hol_main/List_raw.thy:1060:15: error: expected ::
+`    fun list1 (C
+`              ^
+tokenize error after No.83 definition:
+`hol_main/List_raw.thy:1060:59: error: meet unexpected char $
+`    fun list1 (Const(\<^const_name>\<open>Cons\<close>,_) $
+`                                                          ^
+tokenize error after No.83 definition:
+`hol_main/List_raw.thy:1060:63: error: meet unexpected char $
+`    fun list1 (Const(\<^const_name>\<open>Cons\<close>,_) $ _ $
+`                                                              ^
+parse error in No.84 definition:
+`hol_main/List_raw.thy:1063:17: error: expected ::
+`    fun butlast ((
+`                ^
+tokenize error after No.84 definition:
+`hol_main/List_raw.thy:1063:70: error: meet unexpected char $
+`    fun butlast ((cons as Const(\<^const_name>\<open>Cons\<close>,_) $
+`                                                                     ^
+tokenize error after No.84 definition:
+`hol_main/List_raw.thy:1063:75: error: meet unexpected char $
+`    fun butlast ((cons as Const(\<^const_name>\<open>Cons\<close>,_) $ x) $
+`                                                                          ^
+tokenize error after No.84 definition:
+`hol_main/List_raw.thy:1064:85: error: meet unexpected char $
+`          (case xs of Const (\<^const_name>\<open>Nil\<close>, _) => xs | _ => cons $
+`                                                                                    ^
+tokenize error after No.84 definition:
+`hol_main/List_raw.thy:1065:73: error: meet unexpected char $
+`      | butlast ((app as Const (\<^const_name>\<open>append\<close>, _) $
+`                                                                        ^
+tokenize error after No.84 definition:
+`hol_main/List_raw.thy:1065:79: error: meet unexpected char $
+`      | butlast ((app as Const (\<^const_name>\<open>append\<close>, _) $ xs) $
+`                                                                              ^
+tokenize error after No.84 definition:
+`hol_main/List_raw.thy:1065:91: error: meet unexpected char $
+`      | butlast ((app as Const (\<^const_name>\<open>append\<close>, _) $ xs) $ ys) = app $
+`                                                                                          ^
+parse error in No.85 definition:
+`hol_main/List_raw.thy:1072:17: error: expected ::
+`    fun list_eq ctxt
+`                ^
+tokenize error after No.85 definition:
+`hol_main/List_raw.thy:1072:49: error: meet unexpected char $
+`    fun list_eq ctxt (F as (eq as Const(_,eqT)) $
+`                                                ^
+tokenize error after No.85 definition:
+`hol_main/List_raw.thy:1072:55: error: meet unexpected char $
+`    fun list_eq ctxt (F as (eq as Const(_,eqT)) $ lhs $
+`                                                      ^
+parse error in No.86 definition:
+`hol_main/List_raw.thy:1075:19: error: expected ::
+`        fun rearr conv
+`                  ^
+tokenize error after No.86 definition:
+`hol_main/List_raw.thy:1081:25: error: meet unexpected char $
+`            val F2 = eq $
+`                        ^
+tokenize error after No.86 definition:
+`hol_main/List_raw.thy:1081:31: error: meet unexpected char $
+`            val F2 = eq $ (app$
+`                              ^
+tokenize error after No.86 definition:
+`hol_main/List_raw.thy:1081:36: error: meet unexpected char $
+`            val F2 = eq $ (app$lhs1$
+`                                   ^
+tokenize error after No.86 definition:
+`hol_main/List_raw.thy:1081:44: error: meet unexpected char $
+`            val F2 = eq $ (app$lhs1$lastl) $
+`                                           ^
+tokenize error after No.86 definition:
+`hol_main/List_raw.thy:1081:50: error: meet unexpected char $
+`            val F2 = eq $ (app$lhs1$lastl) $ (app$
+`                                                 ^
+tokenize error after No.86 definition:
+`hol_main/List_raw.thy:1081:55: error: meet unexpected char $
+`            val F2 = eq $ (app$lhs1$lastl) $ (app$rhs1$
+`                                                      ^
+parse error in No.87 definition:
+`hol_main/List_raw.thy:1603:90: error: expected token Quotation
+`primrec partition :: "('a \<Rightarrow> bool) \<Rightarrow>'a list \<Rightarrow> 'a list \<
+`                                                                                         ^
+tokenize error after No.87 definition:
+`hol_main/List_raw.thy:1655:48: error: meet unexpected char %
+`lemma concat_map_singleton[simp]: "concat(map (%
+`                                               ^
+tokenize error after No.87 definition:
+`hol_main/List_raw.thy:2613:37: error: meet unexpected char %
+`  "map f (zip (map g xs) ys) = map (%
+`                                    ^
+tokenize error after No.87 definition:
+`hol_main/List_raw.thy:2617:37: error: meet unexpected char %
+`  "map f (zip xs (map g ys)) = map (%
+`                                    ^
+tokenize error after No.87 definition:
+`hol_main/List_raw.thy:3176:82: error: meet unexpected char &
+`lemma foldr_conv_foldl: \<comment> \<open>The ``Third Duality Theorem'' in Bird \&
+`                                                                                 ^
+parse error in No.88 definition:
+`hol_main/List_raw.thy:3357:65: error: expected token Where
+`function upto :: "int \<Rightarrow> int \<Rightarrow> int list" ("
+`                                                                ^
+tokenize error after No.88 definition:
+`hol_main/List_raw.thy:3361:22: error: meet unexpected char %
+`by(relation "measure(%
+`                     ^
+parse error in No.89 definition:
+`hol_main/List_raw.thy:3429:24: error: expected token RBracket
+`  "upto_aux i j js = [i..
+`                       ^
+tokenize error after No.89 definition:
+`hol_main/List_raw.thy:4657:42: error: meet unexpected char %
+`  "distinct xs \<Longrightarrow> filter (%
+`                                         ^
+parse error in No.90 definition:
+`hol_main/List_raw.thy:4892:20: error: expected ::
+`function transpose where
+`                   ^
+parse error in No.91 definition:
+`hol_main/List_raw.thy:5146:64: error: expected ::
+`text \<open>Sometimes the second equation in the definition of \<
+`                                                               ^
+parse error in No.92 definition:
+`hol_main/List_raw.thy:5237:64: error: expected ::
+`text \<open>Sometimes the second equation in the definition of \<
+`                                                               ^
+parse error in No.93 definition:
+`hol_main/List_raw.thy:5426:6: error: expected ::
+`that counts
+`     ^
+parse error in No.94 definition:
+`hol_main/List_raw.thy:5792:31: error: expected ::
+`text\<open>This function maps (f
+`                              ^
+parse error in No.95 definition:
+`hol_main/List_raw.thy:5801:32: error: expected token Quotation
+`  "sorted_list_of_set = folding.F
+`                               ^
+parse error in No.96 definition:
+`hol_main/List_raw.thy:5959:47: error: expected ::
+`subsubsection \<open>Inductive definition for membership\
+`                                              ^
+parse error in No.97 definition:
+`hol_main/List_raw.thy:5981:20: error: expected token RBrace
+`"set_Cons A XS = {z.
+`                   ^
+tokenize error after No.97 definition:
+`hol_main/List_raw.thy:5983:53: error: meet unexpected char %
+`lemma set_Cons_sing_Nil [simp]: "set_Cons A {[]} = (%
+`                                                    ^
+parse error in No.99 definition:
+`hol_main/List_raw.thy:6001:9: error: expected token Identifier
+`primrec \<
+`        ^
+tokenize error after No.99 definition:
+`hol_main/List_raw.thy:6005:14: error: meet unexpected char %
+`  (map_prod (%
+`             ^
+tokenize error after No.99 definition:
+`hol_main/List_raw.thy:6005:31: error: meet unexpected char %
+`  (map_prod (%(x, xs). x#xs) (%
+`                              ^
+parse error in No.100 definition:
+`hol_main/List_raw.thy:6008:24: error: expected token RParen
+`definition lex :: "('a \<
+`                       ^
+parse error in No.101 definition:
+`hol_main/List_raw.thy:6011:27: error: expected token RParen
+`definition lenlex :: "('a \<
+`                          ^
+parse error in No.102 definition:
+`hol_main/List_raw.thy:6217:27: error: expected token RParen
+`definition lexord :: "('a \<
+`                          ^
+tokenize error after No.102 definition:
+`hol_main/List_raw.thy:6257:25: error: meet unexpected char %
+`  apply (rule_tac f = "(%
+`                        ^
+parse error in No.103 definition:
+`hol_main/List_raw.thy:6529:12: error: expected token Identifier
+`definition "m
+`           ^
+tokenize error after No.103 definition:
+`hol_main/List_raw.thy:6529:54: error: meet unexpected char %
+`definition "measures fs = inv_image (lex less_than) (%
+`                                                     ^
+tokenize error after No.103 definition:
+`hol_main/List_raw.thy:6529:63: error: meet unexpected char %
+`definition "measures fs = inv_image (lex less_than) (%a. map (%
+`                                                              ^
+parse error in No.104 definition:
+`hol_main/List_raw.thy:6551:29: error: expected token RParen
+`definition listrel1 :: "('a \<
+`                            ^
+parse error in No.105 definition:
+`hol_main/List_raw.thy:6829:32: error: expected token Identifier
+`subsection \<open>Size function\<
+`                               ^
+parse error in No.109 definition:
+`hol_main/List_raw.thy:6905:1: error: expected token Quotation
+`[c
+`^
+parse error in No.110 definition:
+`hol_main/List_raw.thy:6924:1: error: expected token Quotation
+`list_ex_iff
+`^
+parse error in No.111 definition:
+`hol_main/List_raw.thy:6927:1: error: expected token Quotation
+`list_ex1_iff
+`^
+parse error in No.112 definition:
+`hol_main/List_raw.thy:6989:1: error: expected token Quotation
+`[c
+`^
+parse error in No.113 definition:
+`hol_main/List_raw.thy:6999:54: error: expected token RBrace
+`"listrel1p r xs ys = ((xs, ys) \<in> listrel1 {(x, y).
+`                                                     ^
+parse error in No.114 definition:
+`hol_main/List_raw.thy:7014:52: error: expected token RBrace
+`  "lexordp r xs ys = ((xs, ys) \<in> lexord {(x, y).
+`                                                   ^
+parse error in No.115 definition:
+`hol_main/List_raw.thy:7068:12: error: expected token Identifier
+`definition "B
+`           ^
+parse error in No.116 definition:
+`hol_main/List_raw.thy:7070:12: error: expected token Identifier
+`definition "a
+`           ^
+parse error in No.117 definition:
+`hol_main/List_raw.thy:7117:3: error: expected token Quotation
+`  [c
+`  ^
+parse error in No.118 definition:
+`hol_main/List_raw.thy:7138:3: error: expected token Quotation
+`  [c
+`  ^
+parse error in No.119 definition:
+`hol_main/List_raw.thy:7141:3: error: expected token Quotation
+`  [c
+`  ^
+parse error in No.120 definition:
+`hol_main/List_raw.thy:7170:27: error: expected token Equiv
+`  "all_interval_nat P i j \<
+`                          ^
+parse error in No.121 definition:
+`hol_main/List_raw.thy:7193:27: error: expected token Equiv
+`  "all_interval_int P i j \<
+`                          ^
+parse error in No.123 definition:
+`hol_main/List_raw.thy:7248:18: error: expected ::
+`fun implode_list t
+`                 ^
+parse error in No.124 definition:
+`hol_main/List_raw.thy:7250:19: error: expected ::
+`    fun dest_cons (I
+`                  ^
+tokenize error after No.124 definition:
+`hol_main/List_raw.thy:7250:98: error: meet unexpected char $
+`    fun dest_cons (IConst { sym = Code_Symbol.Constant \<^const_name>\<open>Cons\<close>, ... } `$
+`                                                                                                 ^
+tokenize error after No.124 definition:
+`hol_main/List_raw.thy:7250:104: error: meet unexpected char $
+`    fun dest_cons (IConst { sym = Code_Symbol.Constant \<^const_name>\<open>Cons\<close>, ... } `$ t1 `$
+`                                                                                                       ^
+parse error in No.125 definition:
+`hol_main/List_raw.thy:7258:16: error: expected ::
+`fun print_list (t
+`               ^
+parse error in No.126 definition:
+`hol_main/List_raw.thy:7265:22: error: expected ::
+`fun add_literal_list target
+`                     ^
+parse error in No.127 definition:
+`hol_main/List_raw.thy:7267:16: error: expected ::
+`    fun pretty literals
+`               ^
+parse error in No.128 definition:
+`hol_main/List_raw.thy:7420:24: error: expected token RBrace
+`  "map_project f A = {b.
+`                       ^
+tokenize error after No.128 definition:
+`hol_main/List_raw.thy:7471:42: error: meet unexpected char %
+`lemma map_rec: "map f xs = rec_list Nil (%
+`                                         ^
+codegen error at No.42 definition of function subseqs:
+`src/codegen.cpp:440: Assertion `args.size() == 2' failed.
+
+Result:
+`scanned 128 definitions;
+`generated 24 definitions:
+``1 datatypes and 23 functions.
