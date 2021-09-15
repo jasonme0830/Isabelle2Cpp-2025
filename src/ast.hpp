@@ -239,14 +239,14 @@ struct Equation final {
     void build_func_entity(FuncEntity &entity) const;
 };
 
-struct Declaration {
-    virtual ~Declaration() = 0;
+struct Definition {
+    virtual ~Definition() = 0;
     virtual bool is_datatype_decl() const = 0;
     virtual void codegen(Code &) const = 0;
 };
 
 /**
- * struct for the declaration of new datatype
+ * struct for the definition of new datatype
  * datatype 'a option = None | Some 'a
  * datatype 'a list = Nil | Cons 'a "'a list"
  *
@@ -256,7 +256,7 @@ struct Declaration {
  *
  * use enum type to determine which Constructor
 */
-struct DataTypeDecl : Declaration {
+struct DataTypeDef : Definition {
     /**
      * Component likes ConsExpr
      *  but arguments are types but not expressions
@@ -274,7 +274,7 @@ struct DataTypeDecl : Declaration {
     void codegen(Code &) const override;
 };
 
-struct FuncDecl final : Declaration {
+struct FunctionDef final : Definition {
     std::string name;
     Ptr<FuncType> type;
     std::vector<Equation> equations;
@@ -286,7 +286,7 @@ struct FuncDecl final : Declaration {
 struct Theory final {
     std::string name;
     std::vector<std::string> imports;
-    std::vector<Ptr<Declaration>> declarations;
+    std::vector<Ptr<Definition>> definitions;
 
     void codegen(Code &) const;
 };

@@ -51,7 +51,7 @@ class Code {
     void gen_template_type_header(DataType &data_type);
 
     /**
-     * generate code for each function declaration
+     * generate code for each function definition
     */
     void gen_single_func(FuncEntity &entity, bool is_impl = true);
     /**

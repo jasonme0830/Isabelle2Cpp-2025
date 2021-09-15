@@ -94,17 +94,17 @@ Theory Parser::gen_theory() {
     while (!meet<Token::Type::EndOfFile>()) {
         try {
             if (auto decl = gen_declaration()) {
-                theory.declarations.push_back(move(decl));
+                theory.definitions.push_back(move(decl));
             }
         } catch (const TokenizeError &e) {
-            "$ after No.$ declaration:\n$\n"_fs.outf(cerr,
-                info::light_blue("tokenize error"), theory.declarations.size(), e.what()
+            "$ after No.$ definition:\n$\n"_fs.outf(cerr,
+                info::light_blue("tokenize error"), theory.definitions.size(), e.what()
             );
             tokenizer_.get_next_input();
         } catch (const ParseError &e) {
-            theory.declarations.push_back(nullptr);
-            "$ in No.$ declaration:\n$\n"_fs.outf(cerr,
-                info::light_blue("parse error"), theory.declarations.size(), e.what()
+            theory.definitions.push_back(nullptr);
+            "$ in No.$ definition:\n$\n"_fs.outf(cerr,
+                info::light_blue("parse error"), theory.definitions.size(), e.what()
             );
         }
     }
@@ -112,7 +112,7 @@ Theory Parser::gen_theory() {
     return theory;
 }
 
-Ptr<Declaration> Parser::gen_declaration() {
+Ptr<Definition> Parser::gen_declaration() {
     eat_until<Token::Type::Datatype, Token::Type::Function>();
 
     if (meet<Token::Type::EndOfFile>()) {
@@ -124,8 +124,8 @@ Ptr<Declaration> Parser::gen_declaration() {
     }
 }
 
-Ptr<DataTypeDecl> Parser::gen_datatype_declaration() {
-    auto decl = make_unique<DataTypeDecl>();
+Ptr<DataTypeDef> Parser::gen_datatype_declaration() {
+    auto decl = make_unique<DataTypeDef>();
 
     eat<Token::Type::Datatype>("expected token Datatype");
     if (meet<Token::Type::Identifier>()) {
@@ -144,8 +144,8 @@ Ptr<DataTypeDecl> Parser::gen_datatype_declaration() {
     return decl;
 }
 
-DataTypeDecl::Component Parser::gen_component() {
-    DataTypeDecl::Component componment;
+DataTypeDef::Component Parser::gen_component() {
+    DataTypeDef::Component componment;
 
     check<Token::Type::Identifier>("expected an identifier");
     componment.constructor = current_token_.value;
@@ -158,8 +158,8 @@ DataTypeDecl::Component Parser::gen_component() {
     return componment;
 }
 
-Ptr<FuncDecl> Parser::gen_function_declaration() {
-    auto decl = make_unique<FuncDecl>();
+Ptr<FunctionDef> Parser::gen_function_declaration() {
+    auto decl = make_unique<FunctionDef>();
 
     eat<Token::Type::Function>("expected token Function");
 

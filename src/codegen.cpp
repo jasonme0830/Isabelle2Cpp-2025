@@ -16,13 +16,13 @@ using namespace std;
 namespace hol2cpp {
 Type::~Type() = default;
 Expr::~Expr() = default;
-Declaration::~Declaration() = default;
+Definition::~Definition() = default;
 
 // --- code generation ---
 void Theory::codegen(Code &code) const {
     size_t datatype_cnt = 0, fun_cnt = 0;
-    for (size_t i = 0; i < declarations.size(); ++i) {
-        auto decl = declarations[i].get();
+    for (size_t i = 0; i < definitions.size(); ++i) {
+        auto decl = definitions[i].get();
         if (decl) try {
             decl->codegen(code);
 
@@ -33,22 +33,22 @@ void Theory::codegen(Code &code) const {
             }
         } catch (const exception &e) {
             string name;
-            if (auto datatype_decl = dynamic_cast<DataTypeDecl *>(decl)) {
+            if (auto datatype_decl = dynamic_cast<DataTypeDef *>(decl)) {
                 name = "datatype " + datatype_decl->decl_type->main_name();
             } else {
-                auto fun_decl = static_cast<FuncDecl *>(decl);
+                auto fun_decl = static_cast<FunctionDef *>(decl);
                 name = "function " + fun_decl->name;
             }
-            "$ at No.$ declaration of $:\n`$\n\n"_fs.outf(
+            "$ at No.$ definition of $:\n`$\n\n"_fs.outf(
                 cerr, info::light_red("codegen error"), i + 1, name, e.what()
             );
         }
     }
 
-    "$\n`scanned $ declarations;\n"_fs.outf(
-        cout, info::light_green("Result:"), declarations.size()
+    "$\n`scanned $ definitions;\n"_fs.outf(
+        cout, info::light_green("Result:"), definitions.size()
     );
-    "`generated $ declarations:\n"_fs.outf(
+    "`generated $ definitions:\n"_fs.outf(
         cout, datatype_cnt + fun_cnt
     );
     "``$ datatypes and $ functions.\n"_fs.outf(
@@ -56,7 +56,7 @@ void Theory::codegen(Code &code) const {
     );
 }
 
-void DataTypeDecl::codegen(Code &code) const {
+void DataTypeDef::codegen(Code &code) const {
     code.add_header("variant");
 
     auto name = decl_type->main_name();
@@ -84,7 +84,7 @@ void DataTypeDecl::codegen(Code &code) const {
     data_type.abstracts() = move(abstracts);
 }
 
-void FuncDecl::codegen(Code &code) const {
+void FunctionDef::codegen(Code &code) const {
     auto &entity = code.entry_func_entity(name);
 
     entity.name() = name;

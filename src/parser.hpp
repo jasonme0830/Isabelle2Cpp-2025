@@ -57,10 +57,10 @@ class Parser {
     void get_next_token();
     Token &next_token();
 
-    Ptr<Declaration> gen_declaration();
-    Ptr<DataTypeDecl> gen_datatype_declaration();
-        DataTypeDecl::Component gen_component();
-    Ptr<FuncDecl> gen_function_declaration();
+    Ptr<Definition> gen_declaration();
+    Ptr<DataTypeDef> gen_datatype_declaration();
+        DataTypeDef::Component gen_component();
+    Ptr<FunctionDef> gen_function_declaration();
         Equation gen_equation();
 
     Ptr<Type> gen_type();
