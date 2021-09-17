@@ -182,14 +182,10 @@ parse error in No.63 definition:
 `hol_main/List_raw.thy:6552:23: error: expected token RBrace
 `"listrel1 r = {(xs,ys).
 `                      ^
-parse error in No.68 definition:
-`hol_main/List_raw.thy:6924:13: error: expected token Colon
-`list_ex_iff [code_abbrev]: "list_ex P xs \<longleftrightarrow> Bex (set xs) P"
-`            ^
 parse error in No.69 definition:
-`hol_main/List_raw.thy:6927:14: error: expected token Colon
+`hol_main/List_raw.thy:6927:67: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `list_ex1_iff [code_abbrev]: "list_ex1 P xs \<longleftrightarrow> (\<exists>! x. x \<in> set xs \<and> P x)"
-`             ^
+`                                                                  ^
 parse error in No.70 definition:
 `hol_main/List_raw.thy:6989:35: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `[code_abbrev]: "can_select P A = (\<exists>!x\<in>A. P x)"
@@ -244,5 +240,5 @@ codegen error at No.51 definition of function partition:
 
 Result:
 `scanned 81 definitions;
-`generated 29 definitions:
-``0 datatypes and 29 functions.
+`generated 30 definitions:
+``0 datatypes and 30 functions.

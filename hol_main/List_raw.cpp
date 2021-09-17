@@ -627,6 +627,14 @@ bool member(const std::list<T1> &arg1, const T1 &arg2) {
 }
 
 template<typename T1>
+bool list_ex(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+    for (;;) {
+        return Bex(set(arg2), arg1);
+    }
+    std::abort();
+}
+
+template<typename T1>
 bool null(const std::list<T1> &arg1) {
     for (;;) {
         return (arg1) == (bool());

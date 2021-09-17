@@ -97,6 +97,9 @@ template<typename T1>
 bool member(const std::list<T1> &arg1, const T1 &arg2);
 
 template<typename T1>
+bool list_ex(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2);
+
+template<typename T1>
 bool null(const std::list<T1> &arg1);
 
 template<typename T1, typename T2>
