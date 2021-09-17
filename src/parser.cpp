@@ -210,6 +210,10 @@ Equation Parser::gen_equation() {
         eat<Token::Type::RBracket>("expected token RBracket");
         eat<Token::Type::Colon>("expected token Colon");
     } else if (try_eat<Token::Type::Identifier>()) {
+        if (try_eat<Token::Type::LBracket>()) {
+            eat<Token::Type::Identifier>("expected token Identifier");
+            eat<Token::Type::RBracket>("expected token RBracket");
+        }
         eat<Token::Type::Colon>("expected token Colon");
     }
 

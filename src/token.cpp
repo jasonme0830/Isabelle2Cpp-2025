@@ -45,6 +45,7 @@ static map<string, Token::Type> localMapping {
     { "!", Token::Type::SkipKeyword },
     { "`", Token::Type::SkipKeyword },
     { "?", Token::Type::SkipKeyword },
+    { R"(\<comment>)", Token::Type::SkipKeyword },
 
     { "(*", Token::Type::CommentStart },
     { "*)", Token::Type::CommentEnd },
