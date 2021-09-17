@@ -239,12 +239,6 @@ string Tokenizer::get_err_info(const string &message) const {
 }
 
 TokenizeError Tokenizer::error(const string &message) {
-    auto backup = last_location_;
-
-    last_location_ = cur_location_;
-    auto err = get_err_info(message);
-
-    last_location_ = backup;
-    return TokenizeError(err);
+    return TokenizeError(get_err_info(message));
 }
 } // namespace hol2cpp

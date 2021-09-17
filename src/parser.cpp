@@ -169,8 +169,8 @@ Ptr<FunctionDef> Parser::gen_function_declaration() {
 
     if (meet<Token::Type::Quotation>()) {
         decl->name = tokenizer_.next_raw_str();
-
-        if (!meet<Token::Type::Colon>()) {
+        get_next_token();
+        if (!meet<Token::Type::Colonn>()) {
             /**
              * TODO: support exprs' application
              *  record the name and parameter names

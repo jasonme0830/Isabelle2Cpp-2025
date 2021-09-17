@@ -47,9 +47,9 @@ parse error in No.21 definition:
 `primrec upt :: "nat \<Rightarrow> nat \<Rightarrow> nat list" ("(1[_..</_'])") where
 `                                                              ^
 parse error in No.26 definition:
-`hol_main/List_raw.thy:191:4: error: expected token Colon
-`   "extract" :: "('a \<Rightarrow> bool) \<Rightarrow> 'a list \<Rightarrow> ('a list * 'a * 'a list) option"
-`   ^
+`hol_main/List_raw.thy:193:24: error: expected token RParen
+`  (case dropWhile (Not \<circ> P) xs of
+`                       ^
 parse error in No.27 definition:
 `hol_main/List_raw.thy:203:8: error: expected token RParen
 `  None \<Rightarrow> None
@@ -175,9 +175,9 @@ tokenize error after No.61 definition:
 `  apply (rule_tac f = "(% a b. a \<or> b)" in arg_cong2)
 `                        ^
 parse error in No.62 definition:
-`hol_main/List_raw.thy:6529:12: error: expected token Colon
-`definition "measures fs = inv_image (lex less_than) (%a. map (%f. f a) fs)"
-`           ^
+`hol_main/List_raw.thy:6531:1: error: expected token Colon
+`lemma wf_measures[simp]: "wf (measures fs)"
+`^
 parse error in No.63 definition:
 `hol_main/List_raw.thy:6552:23: error: expected token RBrace
 `"listrel1 r = {(xs,ys).
@@ -203,13 +203,13 @@ parse error in No.72 definition:
 `  "lexordp r xs ys = ((xs, ys) \<in> lexord {(x, y). r x y})"
 `                                                   ^
 parse error in No.73 definition:
-`hol_main/List_raw.thy:7068:12: error: expected token Colon
-`definition "Bleast S P = (LEAST x. x \<in> S \<and> P x)"
-`           ^
-parse error in No.74 definition:
-`hol_main/List_raw.thy:7070:12: error: expected token Colon
+`hol_main/List_raw.thy:7070:1: error: expected token Colon
 `definition "abort_Bleast S P = (LEAST x. x \<in> S \<and> P x)"
-`           ^
+`^
+parse error in No.74 definition:
+`hol_main/List_raw.thy:7072:1: error: expected token Colon
+`declare [[code abort: abort_Bleast]]
+`^
 parse error in No.77 definition:
 `hol_main/List_raw.thy:7141:44: error: expected token RParen
 `  [code_post]: "map_filter f xs = map (the \<circ> f) (filter (\<lambda>x. f x \<noteq> None) xs)"
