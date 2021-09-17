@@ -22,6 +22,7 @@ struct TypeInfo {
     bool empty() const;
     bool is_function() const;
     const TypeInfo &result_typeinfo();
+    std::size_t args_size() const;
 };
 
 /**
@@ -84,6 +85,7 @@ class FuncEntity {
      * note: the types contain the result type, which is the last
     */
     const std::vector<TypeInfo> &typeinfos() const;
+    std::size_t args_size() const;
 
     /**
      * return the template argument types

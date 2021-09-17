@@ -80,6 +80,10 @@ const TypeInfo &TypeInfo::result_typeinfo() {
     return arguments.back();
 }
 
+size_t TypeInfo::args_size() const {
+    return arguments.size();
+}
+
 FuncEntity::FuncEntity(Code &code)
   : code_(code), indent_(0) {
     // ...
@@ -125,6 +129,10 @@ const TypeInfo &FuncEntity::result_typeinfo() {
 
 const vector<TypeInfo> &FuncEntity::typeinfos() const {
     return typeinfos_;
+}
+
+size_t FuncEntity::args_size() const {
+    return typeinfos_.size() - 1;
 }
 
 const vector<string> &FuncEntity::template_args() const {

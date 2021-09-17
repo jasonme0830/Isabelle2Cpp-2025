@@ -390,6 +390,7 @@ string VarExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
     if (constructor == entity.name()) {
         string expr = constructor + '(';
+        assertt(entity.args_size() == args.size());
         for (size_t i = 0; i < args.size(); ++i) {
             if (i == 0) {
                 expr += args[i]->gen_expr(entity, entity.typeinfos()[i]);
@@ -400,6 +401,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         return expr + ')';
     } else if (auto func = entity.code().find_func_entity(constructor)) {
         string expr = constructor + '(';
+        assertt(func->args_size() == args.size());
         for (size_t i = 0; i < args.size(); ++i) {
             if (i == 0) {
                 expr += args[i]->gen_expr(entity, func->typeinfos()[i]);

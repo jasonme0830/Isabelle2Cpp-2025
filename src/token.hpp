@@ -11,6 +11,9 @@ struct Token {
 
         CommentStart,   // (*
         CommentEnd,     // *)
+        // pass now
+        Open,           // \<open>
+        Close,          // \<close>
 
         Theory,         // theory
         Imports,        // imports
@@ -32,13 +35,12 @@ struct Token {
         Colon,          // :
         Colonn,         // ::
         ColonEquiv,     // :=
-        Equiv,          // =
+        Equiv,          // = \<longleftrightarrow>
         Pipe,           // |
         Quotation,      // "
         LParen,         // (
         RParen,         // )
-        Star,           // *
-        Rightarrow,     // \<Rightarrow>
+        Rightarrow,     // \<Rightarrow> =>
         LBracket,       // [
         RBracket,       // ]
         LBrace,         // {
@@ -63,7 +65,7 @@ struct Token {
         Inter,          // \<inter>
         Add,            // +
         Sub,            // -
-        Mul,            // *
+        Mul,            // * \<times>
         Div,            // / or div
         Mod,            // mod
         Pow,            // ^

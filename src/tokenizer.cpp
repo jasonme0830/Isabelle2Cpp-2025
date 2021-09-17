@@ -13,17 +13,34 @@ namespace hol2cpp {
 static set<string> localSymbolSet {
     ".", ";", "\\", "!", "`", "?",
 
-    ":", "::", ":=", "=", "|", "\"", "(", ")", "*", R"(\<Rightarrow>)",
-    "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
+    R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
+
+    ":", "::", ":=", "=", R"(\<longleftrightarrow>)", "|", "\"", "(", ")",
+    R"(\<Rightarrow>)", "=>", "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
     R"(\<le>)", R"(<)", R"(\<ge>)", R"(>)", R"(\<subseteq>)", R"(\<subset>)",
     R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)",
-    R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(/)", R"(div)", R"(mod)", R"(^)",
+    R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(\<times>)", R"(/)", R"(div)", R"(mod)", R"(^)",
 };
 
 Tokenizer::Tokenizer(ifstream &input, std::string name) noexcept
   : input_(input), name_of_input_(move(name)), last_input_(' ')
   , cur_location_(1, 0), last_location_(1, 0) {
-    // ...
+      string cur_line;
+      while (!input_.eof()) {
+          auto chr = input_.get();
+          if (chr == '\n') {
+              file_content_.push_back(cur_line);
+              cur_line.clear();
+          } else {
+              cur_line.push_back(chr);
+          }
+      }
+      if (!cur_line.empty()) {
+          file_content_.push_back(move(cur_line));
+      }
+
+      input_.clear();
+      input_.seekg(ios::beg);
 }
 
 void Tokenizer::get_next_input() {
@@ -35,24 +52,12 @@ void Tokenizer::get_next_input() {
     if (last_input_ == '\n') {
         ++cur_location_.first;
         cur_location_.second = 0;
-        last_line_ = cur_line_;
-        cur_line_.clear();
     } else {
         ++cur_location_.second;
-        cur_line_ += last_input_;
     }
 }
 
 std::string Tokenizer::next_raw_str() {
-    while (std::isspace(last_input_)) {
-        get_next_input();
-    }
-
-    if (last_input_ != '"') {
-        throw error("expected char \"");
-    }
-    get_next_input();
-
     string value;
     while (last_input_ != '"') {
         value.push_back(last_input_);
@@ -96,6 +101,7 @@ optional<Token> Tokenizer::try_get_symbol() {
         }
     }
 
+    input_.clear();
     input_.seekg(tellg);
     last_input_ = backup;
     if (alts.empty()) {
@@ -146,10 +152,23 @@ Token Tokenizer::next_token() {
                                 get_next_input();
                             }
                         }
-
-                        if (token = try_get_symbol()) {
-                            return *token;
+                        return next_token();
+                    } else if (token->type == Token::Type::Open) {
+                        size_t cnt = 1;
+                        while (cnt) {
+                            while (last_input_ != '\\' && last_input_ != EOF) {
+                                get_next_input();
+                            }
+                            token = try_get_symbol();
+                            if (!token.has_value()) {
+                                get_next_input();
+                            } else if (token->type == Token::Type::Open) {
+                                ++cnt;
+                            } else if (token->type == Token::Type::Close) {
+                                --cnt;
+                            }
                         }
+                        return next_token();
                     } else {
                         return *token;
                     }
@@ -208,17 +227,13 @@ Token Tokenizer::next_token() {
 }
 
 string Tokenizer::get_err_info(const string &message) const {
-    auto line = (cur_location_.first != last_location_.first)
-        ? last_line_ : cur_line_
-    ;
-
-    auto line_num = last_location_.first,
-         char_at_line = last_location_.second
+    const auto &line_num = last_location_.first,
+        &char_at_line = last_location_.second
     ;
 
     return "`$$$\n`$\n`$$"_fs.format(
         info::strong("$:$:$: "_fs.format(name_of_input_, line_num, char_at_line)),
-        info::light_red("error: "), message, line,
+        info::light_red("error: "), message, file_content_[line_num - 1],
         string(char_at_line == 0 ? 0 : char_at_line - 1, ' '), info::light_red("^")
     );
 }

@@ -35,6 +35,20 @@ class Parser {
     }
 
     template<Token::Type type, Token::Type ...types>
+    bool try_eat() {
+        if (current_token_.type == type) {
+            get_next_token();
+            return true;
+        }
+
+        if constexpr (sizeof...(types) > 0) {
+            return try_eat<types...>();
+        } else {
+            return false;
+        }
+    }
+
+    template<Token::Type type, Token::Type ...types>
     bool meet() {
         if (current_token_.type == type) {
             return true;

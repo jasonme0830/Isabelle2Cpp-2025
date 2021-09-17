@@ -136,8 +136,7 @@ Ptr<DataTypeDef> Parser::gen_datatype_declaration() {
 
     eat<Token::Type::Equiv>("expected token Equiv");
     decl->components.push_back(gen_component());
-    while (meet<Token::Type::Pipe>()) {
-        get_next_token();
+    while (try_eat<Token::Type::Pipe>()) {
         decl->components.push_back(gen_component());
     }
 
@@ -163,9 +162,30 @@ Ptr<FunctionDef> Parser::gen_function_declaration() {
 
     eat<Token::Type::Function>("expected token Function");
 
-    check<Token::Type::Identifier>("expected token Identifier");
-    decl->name = current_token_.value;
-    get_next_token();
+    if (try_eat<Token::Type::LParen>()) {
+        eat<Token::Type::Identifier>("expected token Identifier");
+        eat<Token::Type::RParen>("expected token RParen");
+    }
+
+    if (meet<Token::Type::Quotation>()) {
+        decl->name = tokenizer_.next_raw_str();
+
+        if (!meet<Token::Type::Colon>()) {
+            /**
+             * TODO: support exprs' application
+             *  record the name and parameter names
+             *  and the corresponding expr
+             *
+             * when using this definition, call expr's method apply
+             *  to get a new expr
+            */
+            throw error("expected token Colon");
+        }
+    } else {
+        check<Token::Type::Identifier>("expected token Identifier");
+        decl->name = current_token_.value;
+        get_next_token();
+    }
 
     eat<Token::Type::Colonn>("expected ::");
 
@@ -175,8 +195,7 @@ Ptr<FunctionDef> Parser::gen_function_declaration() {
 
     eat<Token::Type::Where>("expected token Where");
     decl->equations.push_back(gen_equation());
-    while (meet<Token::Type::Pipe>()) {
-        get_next_token();
+    while (try_eat<Token::Type::Pipe>()) {
         decl->equations.push_back(gen_equation());
     }
 
@@ -185,6 +204,14 @@ Ptr<FunctionDef> Parser::gen_function_declaration() {
 
 Equation Parser::gen_equation() {
     Equation equation;
+
+    if (try_eat<Token::Type::LBracket>()) {
+        eat<Token::Type::Identifier>("expected token Identifier");
+        eat<Token::Type::RBracket>("expected token RBracket");
+        eat<Token::Type::Colon>("expected token Colon");
+    } else if (try_eat<Token::Type::Identifier>()) {
+        eat<Token::Type::Colon>("expected token Colon");
+    }
 
     eat<Token::Type::Quotation>("expected token Quotation");
     /**
@@ -211,8 +238,7 @@ Ptr<Type> Parser::gen_type() {
 Ptr<FuncType> Parser::gen_func_type() {
     auto type = make_unique<FuncType>();
     type->types.push_back(gen_pair_type());
-    while (meet<Token::Type::Rightarrow>()) {
-        get_next_token();
+    while (try_eat<Token::Type::Rightarrow>()) {
         type->types.push_back(gen_pair_type());
     }
     return type;
@@ -220,9 +246,7 @@ Ptr<FuncType> Parser::gen_func_type() {
 
 Ptr<Type> Parser::gen_pair_type() {
     auto type = gen_template_type();
-    if (meet<Token::Type::Star>()) {
-        get_next_token();
-
+    if (try_eat<Token::Type::Mul>()) {
         auto template_type = make_unique<TemplateType>("pair"s);
         template_type->args.push_back(move(type));
         template_type->args.push_back(gen_pair_type());
@@ -292,8 +316,7 @@ Ptr<NormalType> Parser::gen_normal_type() {
 vector<Ptr<Expr>> Parser::gen_exprs() {
     vector<Ptr<Expr>> exprs;
     exprs.push_back(gen_expr());
-    while (meet<Token::Type::Comma>()) {
-        get_next_token();
+    while (try_eat<Token::Type::Comma>()) {
         exprs.push_back(gen_expr());
     }
     return exprs;
@@ -396,8 +419,7 @@ Ptr<Expr> Parser::gen_ifelse() {
 
 Ptr<Expr> Parser::gen_list() {
     eat<Token::Type::LBracket>("expected token LBracket");
-    if (meet<Token::Type::RBracket>()) {
-        get_next_token();
+    if (try_eat<Token::Type::RBracket>()) {
         return make_unique<ListExpr>();
     }
     auto expr = make_unique<ListExpr>(gen_exprs());
@@ -407,8 +429,7 @@ Ptr<Expr> Parser::gen_list() {
 
 Ptr<Expr> Parser::gen_set() {
     eat<Token::Type::LBrace>("expected token LBrace");
-    if (meet<Token::Type::RBrace>()) {
-        get_next_token();
+    if (try_eat<Token::Type::RBrace>()) {
         return make_unique<SetExpr>();
     }
     auto expr = make_unique<ListExpr>(gen_exprs());
@@ -425,9 +446,7 @@ Ptr<Expr> Parser::gen_pair() {
 
 Ptr<Expr> Parser::gen_pair_helper() {
     auto expr = gen_expr();
-    if (meet<Token::Type::Comma>()) {
-        get_next_token();
-
+    if (try_eat<Token::Type::Comma>()) {
         auto cons_expr = make_unique<ConsExpr>("Pair"s);
         cons_expr->args.push_back(move(expr));
         cons_expr->args.push_back(gen_pair_helper());

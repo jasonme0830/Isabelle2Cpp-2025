@@ -3,6 +3,7 @@
 #include "token.hpp"
 #include "error.hpp"
 
+#include <vector>
 #include <fstream>
 #include <optional>
 
@@ -34,7 +35,6 @@ class Tokenizer {
 
     Location cur_location_;
     Location last_location_;
-    std::string cur_line_;
-    std::string last_line_;
+    std::vector<std::string> file_content_;
 };
 } // namespace hol2cpp
