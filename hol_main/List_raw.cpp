@@ -1,6 +1,25 @@
 #include "List_raw.hpp"
 
 template<typename T1>
+T1 last(const std::list<T1> &arg1) {
+    for (;;) {
+        if (arg1.empty()) {
+            break;
+        }
+        auto x = arg1.front();
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        T1 temp0;
+        if ((xs) == (bool())) {
+            temp0 = x;
+        } else {
+            temp0 = last(xs);
+        }
+        return temp0;
+    }
+    std::abort();
+}
+
+template<typename T1>
 std::list<T1> butlast(const std::list<T1> &arg1) {
     for (;;) {
         if (!arg1.empty()) {
@@ -72,6 +91,25 @@ std::list<T1> filter(const std::function<bool(T1)> &arg1, const std::list<T1> &a
             temp0 = filter(arg1, xs);
         }
         return temp0;
+    }
+    std::abort();
+}
+
+template<typename T1, typename T2>
+T1 foldl(const std::function<T1(T1, T2)> &arg1, const T1 &arg2, const std::list<T2> &arg3) {
+    for (;;) {
+        if (!arg3.empty()) {
+            break;
+        }
+        return arg2;
+    }
+    for (;;) {
+        if (arg3.empty()) {
+            break;
+        }
+        auto x = arg3.front();
+        auto xs = decltype(arg3){std::next(arg3.begin()), arg3.end()};
+        return foldl(arg1, f(arg2, x), xs);
     }
     std::abort();
 }
@@ -148,6 +186,24 @@ std::list<T1> dropWhile(const std::function<bool(T1)> &arg1, const std::list<T1>
             temp0 = temp1;
         }
         return temp0;
+    }
+    std::abort();
+}
+
+template<typename T1, typename T2>
+std::list<std::pair<T1, T2>> product(const std::list<T1> &arg1, const std::list<T2> &arg2) {
+    for (;;) {
+        if (!arg1.empty()) {
+            break;
+        }
+        return std::list<std::pair<T1, T2>>();
+    }
+    for (;;) {
+        if (arg1.empty()) {
+            break;
+        }
+        auto x = arg1.front();
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
     }
     std::abort();
 }
@@ -282,6 +338,25 @@ std::list<T1> removeAll(const T1 &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1>
+bool distinct(const std::list<T1> &arg1) {
+    for (;;) {
+        if (!arg1.empty()) {
+            break;
+        }
+        return true;
+    }
+    for (;;) {
+        if (arg1.empty()) {
+            break;
+        }
+        auto x = arg1.front();
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        return (!set(xs).count(x)) && (distinct(xs));
+    }
+    std::abort();
+}
+
+template<typename T1>
 std::list<T1> remdups(const std::list<T1> &arg1) {
     for (;;) {
         if (!arg1.empty()) {
@@ -345,6 +420,26 @@ std::list<T1> remdups_adj(const std::list<T1> &arg1) {
             temp3.push_front(x);
             temp0 = temp3;
         }
+        return temp0;
+    }
+    std::abort();
+}
+
+template<typename T1>
+std::list<T1> replicate(const std::uint64_t &arg1, const T1 &arg2) {
+    for (;;) {
+        if (arg1 != 0) {
+            break;
+        }
+        return std::list<T1>();
+    }
+    for (;;) {
+        if (arg1 == 0) {
+            break;
+        }
+        auto n = (arg1) - 1;
+        auto temp0 = replicate(n, arg2);
+        temp0.push_front(arg2);
         return temp0;
     }
     std::abort();
@@ -445,7 +540,24 @@ std::list<T1> insort_key(const std::function<T2(T1)> &arg1, const T1 &arg2, cons
 template<typename T1, typename T2>
 std::list<T1> sort_key(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
-        return foldr(insort_key(arg1), arg2, {});
+    }
+    std::abort();
+}
+
+template<typename T1>
+std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+    for (;;) {
+        if (!arg2.empty()) {
+            break;
+        }
+        return std::make_pair(std::list<T1>(), std::list<T1>());
+    }
+    for (;;) {
+        if (arg2.empty()) {
+            break;
+        }
+        auto x = arg2.front();
+        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
     }
     std::abort();
 }
@@ -502,6 +614,30 @@ template<typename T1, typename T2>
 std::list<T2> map_tailrec(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         return rev(map_tailrec_rev(arg1, arg2, std::list<T2>()));
+    }
+    std::abort();
+}
+
+template<typename T1>
+bool member(const std::list<T1> &arg1, const T1 &arg2) {
+    for (;;) {
+        return set(arg1).count(arg2);
+    }
+    std::abort();
+}
+
+template<typename T1>
+bool null(const std::list<T1> &arg1) {
+    for (;;) {
+        return (arg1) == (bool());
+    }
+    std::abort();
+}
+
+template<typename T1, typename T2>
+std::list<T2> maps(const std::function<std::list<T2>(T1)> &arg1, const std::list<T1> &arg2) {
+    for (;;) {
+        return concat(map(arg1, arg2));
     }
     std::abort();
 }
