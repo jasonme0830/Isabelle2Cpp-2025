@@ -285,18 +285,14 @@ void Code::gen_normal_func(FuncEntity &entity, bool is_impl) {
 
     ") {\n"_fs.outf(out_.get());
 
-    auto &patterns = entity.patterns();
-    auto &exprs = entity.exprs();
+    auto &statements = entity.statements();
     add_indent();
-    for (size_t i = 0; i < patterns.size(); ++i) {
+    for (size_t i = 0; i < statements.size(); ++i) {
         "for (;;) {\n"_fs.outf(newline());
 
         add_indent();
-        for (auto &pattern : patterns[i]) {
-            newline() << pattern << endl;
-        }
-        for (auto &expr : exprs[i]) {
-            newline() << expr << endl;
+        for (auto &statement : statements[i]) {
+            newline() << statement << endl;
         }
         sub_indent();
 

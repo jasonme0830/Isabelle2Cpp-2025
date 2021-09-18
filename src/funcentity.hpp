@@ -137,15 +137,7 @@ class FuncEntity {
         return add_expr(fs.format(std::forward<Args>(args)...));
     }
 
-    /**
-     * get generated statements for pattern
-    */
-    const std::vector<std::vector<std::string>> &patterns() const;
-
-    /**
-     * get generated statements for expression
-    */
-    const std::vector<std::vector<std::string>> &exprs() const;
+    const std::vector<std::vector<std::string>> &statements() const;
 
   private:
     Code &code_;
@@ -160,7 +152,6 @@ class FuncEntity {
     std::map<std::string, std::string> varrm_mapping_;
 
     std::size_t temp_count_;
-    std::vector<std::vector<std::string>> patterns_;
-    std::vector<std::vector<std::string>> exprs_;
+    std::vector<std::vector<std::string>> statements_;
 };
 } // namespace hol2cpp

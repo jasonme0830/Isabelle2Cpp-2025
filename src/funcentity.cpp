@@ -149,33 +149,28 @@ string FuncEntity::gen_temp() {
 
 void FuncEntity::entry_euqation() {
     temp_count_ = 0;
-    patterns_.emplace_back();
-    exprs_.emplace_back();
+    statements_.emplace_back();
     varrm_mapping_.clear();
 }
 
 void FuncEntity::add_pattern(const string &pattern) {
-    patterns_.back().push_back(pattern + ";");
+    statements_.back().push_back(pattern + ";");
 }
 
 void FuncEntity::add_pattern_cond(const string &cond) {
-    patterns_.back().push_back("if ($) {"_fs.format(cond));
+    statements_.back().push_back("if ($) {"_fs.format(cond));
     add_indent();
-        patterns_.back().push_back(string(indent_, ' ') + "break;");
+        statements_.back().push_back(string(indent_, ' ') + "break;");
     sub_indent();
-    patterns_.back().push_back("}");
+    statements_.back().push_back("}");
 }
 
 FuncEntity &FuncEntity::add_expr(const string &expr) {
-    exprs_.back().push_back(std::string(indent_, ' ') + expr);
+    statements_.back().push_back(std::string(indent_, ' ') + expr);
     return *this;
 }
 
-const vector<vector<string>> &FuncEntity::patterns() const {
-    return patterns_;
-}
-
-const vector<vector<string>> &FuncEntity::exprs() const {
-    return exprs_;
+const vector<vector<string>> &FuncEntity::statements() const {
+    return statements_;
 }
 } // namespace hol2cpp
