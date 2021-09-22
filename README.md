@@ -19,6 +19,10 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Pass comments of definitions for proof
+- [x] Enable the name of definition could be paired by `"`
+- [x] Enable write `<=>` which is equal to `=`
+- [x] Support let-in and case expressions
 - [x] Skip unsupported definitions and provide helpful error outputs
 - [x] Add new command line argument `-s` to assign the same output file with input
 - [x] Reimplement the parser, support compile complete theory file

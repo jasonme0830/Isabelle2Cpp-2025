@@ -239,6 +239,24 @@ struct Equation final {
     void build_func_entity(FuncEntity &entity) const;
 };
 
+struct LetinExpr final : Expr {
+    Equation equation;
+    Ptr<Expr> expr;
+
+    LetinExpr(Equation &&equation) : equation(std::move(equation)) {}
+
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
+};
+
+struct CaseExpr final : Expr {
+    Ptr<Expr> expr;
+    std::vector<Equation> equations;
+
+    CaseExpr(Ptr<Expr> &&expr) : expr(std::move(expr)) {}
+
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
+};
+
 struct Definition {
     virtual ~Definition() = 0;
     virtual bool is_datatype_decl() const = 0;

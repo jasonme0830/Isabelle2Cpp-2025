@@ -68,6 +68,12 @@ static map<string, Token::Type> localMapping {
     { "else", Token::Type::Else },
     { "then", Token::Type::Then },
 
+    { "let", Token::Type::Let },
+    { "in", Token::Type::KeyIn },
+
+    { "case", Token::Type::Case },
+    { "of", Token::Type::Of },
+
     { ":", Token::Type::Colon },
     { "::", Token::Type::Colonn },
     { ":=", Token::Type::ColonEquiv },

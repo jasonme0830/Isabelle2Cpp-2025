@@ -35,9 +35,11 @@ void Theory::codegen(Code &code) const {
             string name;
             if (auto datatype_decl = dynamic_cast<DataTypeDef *>(decl)) {
                 name = "datatype " + datatype_decl->decl_type->main_name();
+                code.pop_datatype();
             } else {
                 auto fun_decl = static_cast<FunctionDef *>(decl);
                 name = "function " + fun_decl->name;
+                code.pop_function();
             }
             "$ at No.$ definition of $:\n`$\n\n"_fs.outf(
                 cerr, info::light_red("codegen error"), i + 1, name, e.what()
@@ -727,6 +729,36 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
             );
     }
     throw CodegenError("failed call BinaryOpExpr::gen_expr(...): unsupported binary operator " + op.value);
+}
+
+string CaseExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
+    if (typeinfo.empty()) {
+        throw CodegenError("need type info");
+    }
+
+    auto temp0 = entity.gen_temp();
+    entity.add_expr("$ $;", typeinfo.to_str(), temp0);
+
+    auto e = expr->gen_expr(entity, TypeInfo());
+    auto temp1 = entity.gen_temp();
+    entity.add_expr("auto $ = $;", temp1, e);
+
+    for (auto &equation : equations) {
+        entity.add_expr("for(;;) {").add_indent();
+        equation.pattern->gen_pattern(entity, temp1);
+        entity.add_expr("$ = $;", temp0, equation.expr->gen_expr(entity, typeinfo)).sub_indent()
+            .add_expr("}")
+        ;
+    }
+
+    return temp0;
+}
+
+string LetinExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
+    auto temp0 = entity.gen_temp();
+    entity.add_expr("auto $ = $;", temp0, equation.expr->gen_expr(entity, TypeInfo()));
+    equation.pattern->gen_pattern(entity, temp0);
+    return expr->gen_expr(entity, typeinfo);
 }
 
 // --- others ---

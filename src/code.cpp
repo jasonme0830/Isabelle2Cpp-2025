@@ -103,6 +103,21 @@ void Code::add_header(const string &header) {
     headers_.insert(header);
 }
 
+void Code::pop_datatype() {
+    auto name = names_of_data_types_.back();
+    for (auto &cons : data_types_[name].constructors()) {
+        cons_types_.erase(cons);
+    }
+    data_types_.erase(name);
+    names_of_data_types_.pop_back();
+}
+
+void Code::pop_function() {
+    auto name = names_of_func_entities_.back();
+    func_entities_.erase(name);
+    names_of_func_entities_.pop_back();
+}
+
 void Code::gen_data_type(DataType &data_type) {
     indent_ = 0;
 

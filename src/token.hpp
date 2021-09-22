@@ -32,6 +32,12 @@ struct Token {
         Else,           // else
         Then,           // then
 
+        Let,            // let
+        KeyIn,             // in
+
+        Case,           // case
+        Of,             // of
+
         Colon,          // :
         Colonn,         // ::
         ColonEquiv,     // :=

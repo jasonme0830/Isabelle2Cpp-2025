@@ -39,10 +39,10 @@ class Code {
     */
     static std::size_t &indent_size();
 
-    /**
-     * add header file
-    */
     void add_header(const std::string &header);
+
+    void pop_datatype();
+    void pop_function();
 
   private:
     void gen_data_type(DataType &data_type);

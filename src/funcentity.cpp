@@ -158,11 +158,11 @@ void FuncEntity::add_pattern(const string &pattern) {
 }
 
 void FuncEntity::add_pattern_cond(const string &cond) {
-    statements_.back().push_back("if ($) {"_fs.format(cond));
+    statements_.back().push_back(string(indent_, ' ') + "if ($) {"_fs.format(cond));
     add_indent();
         statements_.back().push_back(string(indent_, ' ') + "break;");
     sub_indent();
-    statements_.back().push_back("}");
+    statements_.back().push_back(string(indent_, ' ') + "}");
 }
 
 FuncEntity &FuncEntity::add_expr(const string &expr) {

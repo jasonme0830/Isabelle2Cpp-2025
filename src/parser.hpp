@@ -90,6 +90,10 @@ class Parser {
     Ptr<Expr> gen_term();
     Ptr<Expr> gen_construction();
     Ptr<Expr> gen_factor();
+    Ptr<Expr> gen_letin();
+        Equation gen_letin_equation();
+    Ptr<Expr> gen_case();
+        Equation gen_case_equation();
     Ptr<Expr> gen_var();
     Ptr<Expr> gen_ifelse();
     Ptr<Expr> gen_list();

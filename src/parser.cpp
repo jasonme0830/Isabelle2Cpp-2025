@@ -307,6 +307,12 @@ Ptr<ArgumentType> Parser::gen_argument_type() {
     check<Token::Type::TypeVariable>("expected token TypeVariable");
     auto type = make_unique<ArgumentType>(current_token_.value);
     get_next_token();
+
+    // pass the type requirement
+    if (try_eat<Token::Type::Colonn>()) {
+        eat<Token::Type::Identifier>("expected token Identifier");
+    }
+
     return type;
 }
 
@@ -383,6 +389,10 @@ Ptr<Expr> Parser::gen_construction() {
 Ptr<Expr> Parser::gen_factor() {
     switch (current_token_.type)
     {
+        case Token::Type::Let:
+            return gen_letin();
+        case Token::Type::Case:
+            return gen_case();
         case Token::Type::Identifier:
             return gen_var();
         case Token::Type::If:
@@ -399,6 +409,49 @@ Ptr<Expr> Parser::gen_factor() {
         default:
             throw error("expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }");
     }
+}
+
+Equation Parser::gen_letin_equation() {
+    Equation equation;
+
+    equation.pattern = gen_factor();
+    eat<Token::Type::Equiv>("expected token Equiv");
+    equation.expr = gen_expr();
+
+    return equation;
+}
+
+Ptr<Expr> Parser::gen_letin() {
+    eat<Token::Type::Let>("expected token Let");
+    auto letin_expr = make_unique<LetinExpr>(gen_letin_equation());
+
+    eat<Token::Type::KeyIn>("expected token KeyIn");
+    letin_expr->expr = gen_expr();
+
+    return letin_expr;
+}
+
+Equation Parser::gen_case_equation() {
+    Equation equation;
+
+    equation.pattern = gen_expr();
+    eat<Token::Type::Rightarrow>("expected token Rightarrow");
+    equation.expr = gen_expr();
+
+    return equation;
+}
+
+Ptr<Expr> Parser::gen_case() {
+    eat<Token::Type::Case>("expected token Case");
+    auto case_expr = make_unique<CaseExpr>(gen_expr());
+
+    eat<Token::Type::Of>("expected token Of");
+    case_expr->equations.push_back(gen_case_equation());
+    while (try_eat<Token::Type::Pipe>()) {
+        case_expr->equations.push_back(gen_case_equation());
+    }
+
+    return case_expr;
 }
 
 Ptr<Expr> Parser::gen_var() {
