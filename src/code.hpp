@@ -29,14 +29,13 @@ class Code {
     FuncEntity &entry_func_entity(const std::string &);
     FuncEntity *find_func_entity(const std::string &);
 
+    void add_short_def(const std::string &, Ptr<ShortDef> short_def);
+    const ShortDef *get_short_def(const std::string &) const;
+
     void generate();
     void generate_header();
     void generate_impl();
 
-    /**
-     * define or get the indent size
-     * 4 by default
-    */
     static std::size_t &indent_size();
 
     void add_header(const std::string &header);
@@ -66,18 +65,9 @@ class Code {
     */
     void gen_template_func(FuncEntity &entity, bool is_impl);
 
-    /**
-     * start a new line with the indent
-    */
     std::ostream &newline();
 
-    /**
-     * add the indent's length by indent size
-    */
     void add_indent();
-    /**
-     * sub the indent's length by indent size
-    */
     void sub_indent();
 
     std::string filename_;
@@ -93,5 +83,7 @@ class Code {
     std::vector<std::string> names_of_func_entities_;
     std::map<std::string, FuncEntity> func_entities_;
     std::set<std::string> headers_;
+
+    std::map<std::string, Ptr<ShortDef>> short_defs_;
 };
 } // namespace hol2cpp

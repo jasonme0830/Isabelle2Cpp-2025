@@ -275,7 +275,7 @@ Ptr<Type> Parser::gen_template_type() {
     }
 
     /**
-     * TODO: chech the type is types or not
+     * TODO: check the type is types or not
     */
 
     return type;
@@ -509,7 +509,7 @@ Ptr<Expr> Parser::gen_list() {
     auto list_expr = make_unique<ListExpr>();
 
     if (try_eat<Token::Type::RBracket>()) {
-        return list_expr;
+        return make_unique<VarExpr>("Nil"s);
     }
 
     auto expr = gen_expr();

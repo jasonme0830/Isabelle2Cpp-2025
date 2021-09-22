@@ -260,8 +260,8 @@ struct LambdaExpr final : Expr {
 
 struct Definition {
     virtual ~Definition() = 0;
-    virtual bool is_predefined() const = 0;
-    virtual bool is_datatype_decl() const { return false; };
+    virtual bool is_predefined() const { return false; }
+    virtual bool is_datatype_decl() const { return false; }
     virtual void codegen(Code &) const = 0;
 };
 
@@ -306,10 +306,15 @@ struct FunctionDef final : Definition {
 
 struct ShortDef final : Definition {
     std::string name;
-    std::vector<std::string> parameters;
-    Ptr<Expr> expr;
+    mutable std::vector<std::string> parameters;
+    mutable Ptr<Expr> expr;
 
-    bool is_predefined() const override;
+    ShortDef() = default;
+    ShortDef(std::string name, std::vector<std::string> params, Ptr<Expr> expr)
+      : name(std::move(name)), parameters(std::move(params)), expr(std::move(expr)) {
+        // ...
+    }
+
     void codegen(Code &) const override;
 };
 

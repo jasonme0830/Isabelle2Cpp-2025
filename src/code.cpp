@@ -62,6 +62,18 @@ FuncEntity *Code::find_func_entity(const string &name) {
     }
 }
 
+void Code::add_short_def(const string &name, Ptr<ShortDef> short_def) {
+    short_defs_.emplace(name, move(short_def));
+}
+
+const ShortDef *Code::get_short_def(const string &name) const {
+    if (short_defs_.count(name)) {
+        return short_defs_.at(name).get();
+    } else {
+        return nullptr;
+    }
+}
+
 void Code::generate() {
     generate_header();
     generate_impl();

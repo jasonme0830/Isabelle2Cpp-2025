@@ -1,5 +1,5 @@
 bin/hol2cpp: src/* | bin/
-	g++ -W -g -std=c++17 src/*.cpp -o bin/hol2cpp
+	g++ -W -Wno-implicit-fallthrough -g -std=c++17 src/*.cpp -o bin/hol2cpp
 
 bin/:
 	mkdir bin

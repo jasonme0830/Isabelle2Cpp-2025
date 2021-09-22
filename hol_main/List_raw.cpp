@@ -9,7 +9,7 @@ T1 last(const std::list<T1> &arg1) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         T1 temp0;
-        if ((xs) == ({})) {
+        if (xs.empty()) {
             temp0 = x;
         } else {
             temp0 = last(xs);
@@ -34,7 +34,7 @@ std::list<T1> butlast(const std::list<T1> &arg1) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
-        if ((xs) == ({})) {
+        if (xs.empty()) {
             temp0 = std::list<T1>();
         } else {
             auto temp1 = butlast(xs);
@@ -766,7 +766,7 @@ bool list_ex(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &a
 template<typename T1>
 bool null(const std::list<T1> &arg1) {
     for (;;) {
-        return (arg1) == ({});
+        return arg1.empty();
     }
     std::abort();
 }

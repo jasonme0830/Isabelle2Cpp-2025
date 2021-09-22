@@ -116,7 +116,7 @@ void FunctionDef::codegen(Code &code) const {
 }
 
 void ShortDef::codegen(Code &code) const {
-
+    code.add_short_def(name, make_unique<ShortDef>(name, move(parameters), move(expr)));
 }
 
 // --- generate typeinfo ---
@@ -554,7 +554,13 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
     }
 
     // for ShortDef
-    else if ()
+    else if (auto short_def = entity.code().get_short_def(constructor)) {
+        assertt(short_def->parameters.size() == args.size());
+        for (size_t i = 0; i < args.size(); ++i) {
+            entity.add_expr("auto $ = $;", short_def->parameters[i], args[i]->gen_expr(entity, TypeInfo()));
+        }
+        return short_def->expr->gen_expr(entity, typeinfo);
+    }
 
     // else as the common call without determined function
     else {
@@ -779,6 +785,22 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
 
             return res;
         }
+
+        /**
+         * WARN: BE CAREFUL HERE!
+        */
+        case Token::Type::Equiv:
+            if (auto val_expr = dynamic_cast<VarExpr *>(lhs.get())) {
+                if (val_expr->name == "Nil") {
+                    return "$.empty()"_fs.format(rhs->gen_expr(entity, TypeInfo()));
+                }
+            }
+
+            if (auto val_expr = dynamic_cast<VarExpr *>(rhs.get())) {
+                if (val_expr->name == "Nil") {
+                    return "$.empty()"_fs.format(lhs->gen_expr(entity, TypeInfo()));
+                }
+            }
 
         default:
             assertt(bop_mapping.count(op.type));

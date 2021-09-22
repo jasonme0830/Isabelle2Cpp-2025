@@ -19,6 +19,7 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Support definitions with only one equation
 - [x] Support parsing lambda expression
 - [x] Supported predefined definitions will be skipped
 - [x] Support expressions `[i..j]` and `[i..<j]`
