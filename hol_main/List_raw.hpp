@@ -25,19 +25,28 @@ template<typename T1>
 std::list<T1> concat(const std::list<std::list<T1>> &arg1);
 
 template<typename T1>
+std::list<T1> drop(const std::uint64_t &arg1, const std::list<T1> &arg2);
+
+template<typename T1>
+std::list<T1> take(const std::uint64_t &arg1, const std::list<T1> &arg2);
+
+template<typename T1>
+std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, const T1 &arg3);
+
+template<typename T1>
 std::list<T1> takeWhile(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
 std::list<T1> dropWhile(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2);
 
 template<typename T1, typename T2>
-std::list<std::pair<T1, T2>> product(const std::list<T1> &arg1, const std::list<T2> &arg2);
+std::list<std::pair<T1, T2>> zip(const std::list<T1> &arg1, const std::list<T2> &arg2);
 
 template<typename T1>
 std::list<T1> insert(const T1 &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
-std::list<T1> union(const std::list<T1> &arg1, const std::list<T1> &arg2);
+std::list<T1> unionn(const std::list<T1> &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
 std::optional<T1> find(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2);
@@ -67,16 +76,16 @@ template<typename T1>
 std::list<T1> rotate1(const std::list<T1> &arg1);
 
 template<typename T1>
-std::list<std::list<T1>> subseqs(const std::list<T1> &arg1);
+std::list<T1> splice(const std::list<T1> &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
-std::list<T1> splice(const std::list<T1> &arg1, const std::list<T1> &arg2);
+T1 min_list(const std::list<T1> &arg1);
+
+template<typename T1, typename T2>
+T1 arg_min_list(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2);
 
 template<typename T1, typename T2>
 std::list<T1> insort_key(const std::function<T2(T1)> &arg1, const T1 &arg2, const std::list<T1> &arg3);
-
-template<typename T1, typename T2>
-std::list<T1> sort_key(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
 std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2);

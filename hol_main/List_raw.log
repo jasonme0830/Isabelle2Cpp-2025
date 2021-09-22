@@ -18,26 +18,10 @@ parse error in No.9 definition:
 `hol_main/List_raw.thy:95:37: error: expected token Quotation
 `foldr_Cons: "foldr f (x # xs) = f x \<circ> foldr f xs"
 `                                    ^
-parse error in No.12 definition:
-`hol_main/List_raw.thy:107:44: error: expected token RParen
-`drop_Cons: "drop n (x # xs) = (case n of 0 \<Rightarrow> x # xs | Suc m \<Rightarrow> drop m xs)"
-`                                           ^
-parse error in No.13 definition:
-`hol_main/List_raw.thy:113:44: error: expected token RParen
-`take_Cons: "take n (x # xs) = (case n of 0 \<Rightarrow> [] | Suc m \<Rightarrow> x # take m xs)"
-`                                           ^
 parse error in No.14 definition:
 `hol_main/List_raw.thy:117:55: error: expected token Where
 `primrec (nonexhaustive) nth :: "'a list => nat => 'a" (infixl "!" 100) where
 `                                                      ^
-parse error in No.15 definition:
-`hol_main/List_raw.thy:125:16: error: expected token RParen
-`  (case i of 0 \<Rightarrow> v # xs | Suc j \<Rightarrow> x # list_update xs j v)"
-`               ^
-parse error in No.18 definition:
-`hol_main/List_raw.thy:150:18: error: expected token RParen
-`  (case xs of [] \<Rightarrow> [] | z # zs \<Rightarrow> (z, y) # zip zs ys)"
-`                 ^
 parse error in No.20 definition:
 `hol_main/List_raw.thy:165:42: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"product_lists (xs # xss) = concat (map (\<lambda>x. map (Cons x) (product_lists xss)) xs)"
@@ -50,10 +34,6 @@ parse error in No.26 definition:
 `hol_main/List_raw.thy:193:24: error: expected token RParen
 `  (case dropWhile (Not \<circ> P) xs of
 `                       ^
-parse error in No.27 definition:
-`hol_main/List_raw.thy:203:8: error: expected token RParen
-`  None \<Rightarrow> None
-`       ^
 parse error in No.34 definition:
 `hol_main/List_raw.thy:239:43: error: expected token RBracket
 `enumerate_eq_zip: "enumerate n xs = zip [n..<n + length xs] xs"
@@ -74,14 +54,6 @@ parse error in No.41 definition:
 `hol_main/List_raw.thy:269:19: error: expected ::
 `function shuffles where
 `                  ^
-parse error in No.42 definition:
-`hol_main/List_raw.thy:277:20: error: expected token Quotation
-`fun min_list :: "'a::ord list \<Rightarrow> 'a" where
-`                   ^
-parse error in No.43 definition:
-`hol_main/List_raw.thy:281:43: error: expected token RParen
-`fun arg_min_list :: "('a \<Rightarrow> ('b::linorder)) \<Rightarrow> 'a list \<Rightarrow> 'a" where
-`                                          ^
 parse error in No.44 definition:
 `hol_main/List_raw.thy:357:28: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"sorted_wrt P (x # ys) = ((\<forall>y \<in> set ys. P x y) \<and> sorted_wrt P ys)"
@@ -227,18 +199,18 @@ tokenize error after No.81 definition:
 `lemma map_rec: "map f xs = rec_list Nil (%x _ y. Cons (f x) y) xs"
 `                                         ^
 codegen error at No.19 definition of function product:
-`src/codegen.cpp:503: Assertion `args.size() == 2' failed.
+`src/codegen.cpp:505: Assertion `args.size() == 2' failed.
+
+codegen error at No.27 definition of function those:
+`src/codegen.cpp:444: Assertion `args.size() == 2' failed.
 
 codegen error at No.38 definition of function subseqs:
-`src/codegen.cpp:393: Assertion `entity.args_size() == args.size()' failed.
+`src/codegen.cpp:444: Assertion `args.size() == 2' failed.
 
 codegen error at No.48 definition of function sort_key:
-`src/codegen.cpp:404: Assertion `func->args_size() == args.size()' failed.
-
-codegen error at No.51 definition of function partition:
-`src/codegen.cpp:393: Assertion `entity.args_size() == args.size()' failed.
+`src/codegen.cpp:406: Assertion `func->args_size() == args.size()' failed.
 
 Result:
 `scanned 81 definitions;
-`generated 30 definitions:
-``0 datatypes and 30 functions.
+`generated 37 definitions:
+``0 datatypes and 37 functions.
