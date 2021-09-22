@@ -21,7 +21,7 @@ struct Token {
 
         Datatype,       // datatype
 
-        Function,       // fun function primrec definition
+        Function,       // fun function primrec definition abbreviation
         Where,          // where
 
         Integer,        // [0-9]+
@@ -33,7 +33,7 @@ struct Token {
         Then,           // then
 
         Let,            // let
-        KeyIn,             // in
+        KeyIn,          // in
 
         Case,           // case
         Of,             // of
@@ -41,7 +41,7 @@ struct Token {
         Colon,          // :
         Colonn,         // ::
         ColonEquiv,     // :=
-        Equiv,          // = \<longleftrightarrow>
+        Equiv,          // = \<longleftrightarrow> \<equiv>
         Pipe,           // |
         Quotation,      // "
         LParen,         // (

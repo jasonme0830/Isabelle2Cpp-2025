@@ -354,7 +354,7 @@ std::list<T1> insert(const T1 &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1>
-std::list<T1> unionn(const std::list<T1> &arg1, const std::list<T1> &arg2) {
+std::list<T1> union(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         auto union = ;
         return fold(insert);
@@ -570,6 +570,15 @@ std::list<T1> replicate(const std::uint64_t &arg1, const T1 &arg2) {
         auto temp0 = replicate(n, arg2);
         temp0.push_front(arg2);
         return temp0;
+    }
+    std::abort();
+}
+
+template<typename T1>
+std::uint64_t length(const std::list<T1> &arg1) {
+    for (;;) {
+        auto length = ;
+        return size;
     }
     std::abort();
 }
@@ -830,7 +839,7 @@ std::list<T2> maps(const std::function<std::list<T2>(T1)> &arg1, const std::list
 template<typename T1>
 std::uint64_t gen_length(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     for (;;) {
-        return (arg1) + (arg2.size());
+        return (arg1) + (length(arg2));
     }
     std::abort();
 }

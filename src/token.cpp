@@ -62,6 +62,7 @@ static map<string, Token::Type> localMapping {
     { "function", Token::Type::Function },
     { "primrec", Token::Type::Function },
     { "definition", Token::Type::Function },
+    { "abbreviation", Token::Type::Function },
     { "where", Token::Type::Where },
 
     { "if", Token::Type::If },
@@ -79,6 +80,7 @@ static map<string, Token::Type> localMapping {
     { ":=", Token::Type::ColonEquiv },
     { "=", Token::Type::Equiv },
     { R"(\<longleftrightarrow>)", Token::Type::Equiv },
+    { R"(\<equiv>)", Token::Type::Equiv },
     { "|", Token::Type::Pipe },
     { "\"", Token::Type::Quotation },
     { "(", Token::Type::LParen },

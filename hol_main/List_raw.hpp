@@ -46,7 +46,7 @@ template<typename T1>
 std::list<T1> insert(const T1 &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
-std::list<T1> unionn(const std::list<T1> &arg1, const std::list<T1> &arg2);
+std::list<T1> union(const std::list<T1> &arg1, const std::list<T1> &arg2);
 
 template<typename T1>
 std::optional<T1> find(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2);
@@ -71,6 +71,9 @@ std::list<T1> remdups_adj(const std::list<T1> &arg1);
 
 template<typename T1>
 std::list<T1> replicate(const std::uint64_t &arg1, const T1 &arg2);
+
+template<typename T1>
+std::uint64_t length(const std::list<T1> &arg1);
 
 template<typename T1>
 std::list<T1> rotate1(const std::list<T1> &arg1);

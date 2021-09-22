@@ -15,7 +15,7 @@ static set<string> localSymbolSet {
 
     R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
 
-    ":", "::", ":=", "=", R"(\<longleftrightarrow>)", "|", "\"", "(", ")",
+    ":", "::", ":=", "=", R"(\<longleftrightarrow>)", R"(\<equiv>)", "|", "\"", "(", ")",
     R"(\<Rightarrow>)", "=>", "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
     R"(\<le>)", R"(<)", R"(\<ge>)", R"(>)", R"(\<subseteq>)", R"(\<subset>)",
     R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)",
