@@ -162,7 +162,7 @@ void FuncEntity::entry_euqation() {
 }
 
 void FuncEntity::add_pattern(const string &pattern) {
-    statements_.back().push_back(pattern + ";");
+    statements_.back().push_back(string(indent_, ' ') + pattern + ";");
 }
 
 void FuncEntity::add_pattern_cond(const string &cond) {

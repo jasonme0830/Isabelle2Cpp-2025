@@ -164,7 +164,7 @@ std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, 
                 if (temp1 == 0) {
                     break;
                 }
-        auto j = (temp1) - 1;
+                auto j = (temp1) - 1;
                 auto temp3 = list_update(xs, j, arg3);
                 temp3.push_front(x);
                 return temp3;
@@ -255,8 +255,8 @@ std::list<std::pair<T1, T2>> zip(const std::list<T1> &arg1, const std::list<T2> 
                 if (temp1.empty()) {
                     break;
                 }
-        auto z = temp1.front();
-        auto zs = decltype(temp1){std::next(temp1.begin()), temp1.end()};
+                auto z = temp1.front();
+                auto zs = decltype(temp1){std::next(temp1.begin()), temp1.end()};
                 auto temp2 = zip(zs, ys);
                 temp2.push_front(std::make_pair(z, y));
                 return temp2;
@@ -569,7 +569,7 @@ T1 min_list(const std::list<T1> &arg1) {
                 return x;
             }
             for(;;) {
-        auto _ = temp1;
+                auto _ = temp1;
                 return min(x, min_list(xs));
             }
         })();
