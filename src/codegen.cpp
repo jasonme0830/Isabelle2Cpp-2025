@@ -31,6 +31,9 @@ Expr::~Expr() = default;
 Definition::~Definition() = default;
 
 // --- code generation ---
+/**
+ * TODO: distinguish ShortDef with others
+*/
 void Theory::codegen(Code &code) const {
     size_t datatype_cnt = 0, fun_cnt = 0, predefined = 0;
     for (size_t i = 0; i < definitions.size(); ++i) {
@@ -110,6 +113,10 @@ void FunctionDef::codegen(Code &code) const {
     for (auto &equation : equations) {
         equation.build_func_entity(entity);
     }
+}
+
+void ShortDef::codegen(Code &code) const {
+
 }
 
 // --- generate typeinfo ---
@@ -509,6 +516,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         ;
     }
 
+    // For Datatype
     else if (auto data_type = entity.code().find_data_type(typeinfo.name)) {
         auto dot = data_type->is_recuisive() ? "->"s : "."s;
 
@@ -544,6 +552,9 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         entity.add_expr(stmt + ");");
         return temp;
     }
+
+    // for ShortDef
+    else if ()
 
     // else as the common call without determined function
     else {

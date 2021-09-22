@@ -72,9 +72,9 @@ class Parser {
     Token &next_token();
 
     Ptr<Definition> gen_declaration();
-    Ptr<DataTypeDef> gen_datatype_declaration();
+    Ptr<DataTypeDef> gen_datatype_definition();
         DataTypeDef::Component gen_component();
-    Ptr<FunctionDef> gen_function_declaration();
+    Ptr<Definition> gen_function_definition();
         Equation gen_equation();
 
     Ptr<Type> gen_type();

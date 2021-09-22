@@ -261,7 +261,7 @@ struct LambdaExpr final : Expr {
 struct Definition {
     virtual ~Definition() = 0;
     virtual bool is_predefined() const = 0;
-    virtual bool is_datatype_decl() const = 0;
+    virtual bool is_datatype_decl() const { return false; };
     virtual void codegen(Code &) const = 0;
 };
 
@@ -301,7 +301,15 @@ struct FunctionDef final : Definition {
     std::vector<Equation> equations;
 
     bool is_predefined() const override;
-    bool is_datatype_decl() const override { return false; }
+    void codegen(Code &) const override;
+};
+
+struct ShortDef final : Definition {
+    std::string name;
+    std::vector<std::string> parameters;
+    Ptr<Expr> expr;
+
+    bool is_predefined() const override;
     void codegen(Code &) const override;
 };
 

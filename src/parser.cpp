@@ -121,13 +121,13 @@ Ptr<Definition> Parser::gen_declaration() {
     if (meet<Token::Type::EndOfFile>()) {
         return nullptr;
     } else if (meet<Token::Type::Datatype>()) {
-        return gen_datatype_declaration();
+        return gen_datatype_definition();
     } else {
-        return gen_function_declaration();
+        return gen_function_definition();
     }
 }
 
-Ptr<DataTypeDef> Parser::gen_datatype_declaration() {
+Ptr<DataTypeDef> Parser::gen_datatype_definition() {
     auto decl = make_unique<DataTypeDef>();
 
     eat<Token::Type::Datatype>("expected token Datatype");
@@ -159,7 +159,7 @@ DataTypeDef::Component Parser::gen_component() {
     return componment;
 }
 
-Ptr<FunctionDef> Parser::gen_function_declaration() {
+Ptr<Definition> Parser::gen_function_definition() {
     auto decl = make_unique<FunctionDef>();
 
     eat<Token::Type::Function>("expected token Function");
@@ -169,19 +169,20 @@ Ptr<FunctionDef> Parser::gen_function_declaration() {
         eat<Token::Type::RParen>("expected token RParen");
     }
 
-    if (meet<Token::Type::Quotation>()) {
-        decl->name = tokenizer_.next_raw_str();
-        get_next_token();
-        if (!meet<Token::Type::Colonn>()) {
-            /**
-             * TODO: support exprs' application
-             *  record the name and parameter names
-             *  and the corresponding expr
-             *
-             * when using this definition, call expr's method apply
-             *  to get a new expr
-            */
-            throw error("expected token Colon");
+    if (try_eat<Token::Type::Quotation>()) {
+        auto name = gen_ident_str();
+        if (try_eat<Token::Type::Quotation>()) {
+            decl->name = move(name);
+        } else {
+            auto short_def = make_unique<ShortDef>();
+            short_def->name = name;
+            while (meet<Token::Type::Identifier>()) {
+                short_def->parameters.push_back(gen_ident_str());
+            }
+            eat<Token::Type::Equiv>("expected token Equiv");
+            short_def->expr = gen_expr();
+            eat<Token::Type::Quotation>("expected token Quotation");
+            return short_def;
         }
     } else {
         check<Token::Type::Identifier>("expected token Identifier");
