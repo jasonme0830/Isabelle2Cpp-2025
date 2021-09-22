@@ -39,14 +39,13 @@ Token &Token::operator=(const Token &other) noexcept {
 
 static map<string, Token::Type> localMapping {
     { "end", Token::Type::SkipKeyword },
-    { ".", Token::Type::SkipKeyword },
     { ";", Token::Type::SkipKeyword },
     { "\\", Token::Type::SkipKeyword },
     { "!", Token::Type::SkipKeyword },
     { "`", Token::Type::SkipKeyword },
     { "?", Token::Type::SkipKeyword },
-    { R"(\<comment>)", Token::Type::SkipKeyword },
 
+    { R"(\<comment>)", Token::Type::Comment },
     { "(*", Token::Type::CommentStart },
     { "*)", Token::Type::CommentEnd },
     { R"(\<open>)", Token::Type::Open },
@@ -74,6 +73,13 @@ static map<string, Token::Type> localMapping {
 
     { "case", Token::Type::Case },
     { "of", Token::Type::Of },
+
+    { R"(\<lambda>)", Token::Type::Lambda },
+    { R"(%)", Token::Type::Lambda },
+    { ".", Token::Type::Dot },
+
+    { "..", Token::Type::Doot },
+    { "..<", Token::Type::DootLt },
 
     { ":", Token::Type::Colon },
     { "::", Token::Type::Colonn },

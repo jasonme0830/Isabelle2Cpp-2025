@@ -287,9 +287,9 @@ void Code::gen_normal_func(FuncEntity &entity, bool is_impl) {
     "$ $("_fs.outf(newline(), types.back().to_str(), entity.name());
     for (size_t i = 0; i < types.size() - 1; ++i) {
         if (i == 0) {
-            "const $ &arg$"_fs.outf(out_.get(), types[i].to_str(), i + 1);
+            "$arg$"_fs.outf(out_.get(), types[i].to_str_as_arg(), i + 1);
         } else {
-            ", const $ &arg$"_fs.outf(out_.get(), types[i].to_str(), i + 1);
+            ", $arg$"_fs.outf(out_.get(), types[i].to_str_as_arg(), i + 1);
         }
     }
 

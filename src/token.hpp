@@ -9,6 +9,7 @@ struct Token {
     enum class Type : std::size_t {
         SkipKeyword,    // such as lemma `
 
+        Comment,        // \<comment>
         CommentStart,   // (*
         CommentEnd,     // *)
         // pass now
@@ -37,6 +38,12 @@ struct Token {
 
         Case,           // case
         Of,             // of
+
+        Lambda,         // lambda %
+        Dot,            // .
+
+        Doot,           // ..
+        DootLt,         // ..<
 
         Colon,          // :
         Colonn,         // ::

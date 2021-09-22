@@ -18,11 +18,14 @@ struct TypeInfo {
 
     std::string to_str() const;
     std::string to_str_with(const std::string &name) const;
+    std::string to_str_as_arg() const;
 
     bool empty() const;
     bool is_function() const;
-    const TypeInfo &result_typeinfo();
+    const TypeInfo &result_typeinfo() const;
     std::size_t args_size() const;
+
+    const TypeInfo &operator[](int i) const;
 };
 
 /**

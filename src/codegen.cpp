@@ -14,17 +14,33 @@
 using namespace std;
 
 namespace hol2cpp {
+static const map<string, string> local_ntype_mapping {
+    { "nat", "std::uint64_t" },
+    { "int", "std::int64_t" }
+};
+
+static const map<string, string> local_ttype_mapping {
+    { "set",    "std::set" },
+    { "option", "std::optional" },
+    { "list",   "std::list" },
+    { "pair",   "std::pair" }
+};
+
 Type::~Type() = default;
 Expr::~Expr() = default;
 Definition::~Definition() = default;
 
 // --- code generation ---
 void Theory::codegen(Code &code) const {
-    size_t datatype_cnt = 0, fun_cnt = 0;
+    size_t datatype_cnt = 0, fun_cnt = 0, predefined = 0;
     for (size_t i = 0; i < definitions.size(); ++i) {
         auto decl = definitions[i].get();
         if (decl) try {
-            decl->codegen(code);
+            if (decl->is_predefined()) {
+                ++predefined;
+            } else {
+                decl->codegen(code);
+            }
 
             if (decl->is_datatype_decl()) {
                 ++datatype_cnt;
@@ -50,8 +66,8 @@ void Theory::codegen(Code &code) const {
     "$\n`scanned $ definitions;\n"_fs.outf(
         cout, info::light_green("Result:"), definitions.size()
     );
-    "`generated $ definitions:\n"_fs.outf(
-        cout, datatype_cnt + fun_cnt
+    "`generated $ definitions ($ predefined):\n"_fs.outf(
+        cout, datatype_cnt + fun_cnt, predefined
     );
     "``$ datatypes and $ functions.\n"_fs.outf(
         cout, datatype_cnt, fun_cnt
@@ -98,14 +114,9 @@ void FunctionDef::codegen(Code &code) const {
 
 // --- generate typeinfo ---
 TypeInfo NormalType::gen_typeinfo(FuncEntity &entity) const {
-    static const map<string, string> mapping {
-        { "nat", "std::uint64_t" },
-        { "int", "std::int64_t" }
-    };
-
-    if (mapping.count(name)) {
+    if (local_ntype_mapping.count(name)) {
         entity.code().add_header("cstdint");
-        return TypeInfo(mapping.at(name));
+        return TypeInfo(local_ntype_mapping.at(name));
     } else {
         // e.g. bool
         return TypeInfo(name);
@@ -117,13 +128,6 @@ TypeInfo ArgumentType::gen_typeinfo(FuncEntity &entity) const {
 }
 
 TypeInfo TemplateType::gen_typeinfo(FuncEntity &entity) const {
-    static const map<string, string> mapping {
-        { "set",    "std::set" },
-        { "option", "std::optional" },
-        { "list",   "std::list" },
-        { "pair",   "std::pair" }
-    };
-
     static const map<string, string> mapping_header {
         { "set",    "set" },
         { "option", "optional" },
@@ -135,7 +139,7 @@ TypeInfo TemplateType::gen_typeinfo(FuncEntity &entity) const {
         entity.code().add_header(mapping_header.at(name));
     }
 
-    TypeInfo res(mapping.count(name) ? mapping.at(name) : name);
+    TypeInfo res(local_ttype_mapping.count(name) ? local_ttype_mapping.at(name) : name);
     for (auto &arg : args) {
         res.arguments.push_back(arg->gen_typeinfo(entity));
     }
@@ -208,13 +212,6 @@ TypeInfo ArgumentType::apply(function<TypeInfo(const string &)> &trans) const {
 }
 
 TypeInfo TemplateType::apply(function<TypeInfo(const string &)> &trans) const {
-    static const map<string, string> mapping {
-        { "set",    "std::set" },
-        { "option", "std::optional" },
-        { "list",   "std::list" },
-        { "pair",   "std::pair" }
-    };
-
     static const map<string, string> mapping_header {
         { "set",    "set" },
         { "option", "optional" },
@@ -222,7 +219,7 @@ TypeInfo TemplateType::apply(function<TypeInfo(const string &)> &trans) const {
         { "pair",   "utility" }
     };
 
-    TypeInfo res(mapping.count(name) ? mapping.at(name) : name);
+    TypeInfo res(local_ttype_mapping.count(name) ? local_ttype_mapping.at(name) : name);
     for (auto &arg : args) {
         res.arguments.push_back(arg->apply(trans));
     }
@@ -260,7 +257,9 @@ void IntegralExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 }
 
 void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
-    if (name == "True") {
+    if (name == entity.name()) {
+        assertt(entity.args_size() == 0);
+    } else if (name == "True") {
         entity.add_pattern_cond("$ != true", prev);
     } else if (name == "False") {
         entity.add_pattern_cond("$ != false", prev);
@@ -283,7 +282,7 @@ void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 
 void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     if (constructor == entity.name()) {
-        assertt(args.size() == entity.typeinfos().size() - 1);
+        assertt(args.size() == entity.args_size());
         for (size_t i = 0; i < args.size(); ++i) {
             args[i]->gen_pattern(entity, "arg" + to_string(i + 1));
         }
@@ -406,9 +405,11 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         assertt(func->args_size() == args.size());
         for (size_t i = 0; i < args.size(); ++i) {
             if (i == 0) {
-                expr += args[i]->gen_expr(entity, func->typeinfos()[i]);
+                // expr += args[i]->gen_expr(entity, func->typeinfos()[i]);
+                expr += args[i]->gen_expr(entity, TypeInfo());
             } else {
-                expr += ", " + args[i]->gen_expr(entity, func->typeinfos()[i]);
+                // expr += ", " + args[i]->gen_expr(entity, func->typeinfos()[i]);
+                expr += ", " + args[i]->gen_expr(entity, TypeInfo());
             }
         }
         return expr + ')';
@@ -504,7 +505,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
     else if (constructor == "Pair") {
         assertt(args.size() == 2);
         return "std::make_pair(" + args[0]->gen_expr(entity, typeinfo.arguments.front())
-            + ", " + args[1]->gen_expr(entity, typeinfo.arguments[1]) + ")"
+            + ", " + args[1]->gen_expr(entity, typeinfo[1]) + ")"
         ;
     }
 
@@ -530,7 +531,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor) + 1) + "(";
 
         function trans = [&](const string &arg_type) {
-            return typeinfo.arguments[data_type->find_argument_type(arg_type)];
+            return typeinfo[data_type->find_argument_type(arg_type)];
         };
 
         for (size_t i = 0; i < abstracts.size(); ++i) {
@@ -708,7 +709,6 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
                 return temp0;
             }
         }
-
         case Token::Type::Sharp: {
             ConsExpr cons_expr("Cons");
             cons_expr.args.push_back(move(this->lhs));
@@ -720,24 +720,68 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
 
             return res;
         }
+        case Token::Type::Doot: {
+            auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
+
+            auto start = entity.gen_temp();
+            entity.add_expr("auto $ = $;", start, lhs->gen_expr(entity, elem_typeinfo));
+
+            auto end = entity.gen_temp();
+            entity.add_expr("auto $ = $;", end, rhs->gen_expr(entity, elem_typeinfo));
+
+            auto res = entity.gen_temp();
+            if (typeinfo.empty()) {
+                entity.add_expr("std::list<decltype($)> $;", start, res);
+            } else {
+                entity.add_expr("$ $;", typeinfo.to_str(), res);
+            }
+
+            auto i = entity.gen_temp();
+            entity.add_expr("for (auto $ = $; $ <= $; ++$) {", i, start, i, end, i).add_indent()
+                .add_expr("$.push_back($);", res, i).sub_indent()
+                .add_expr("}")
+            ;
+
+            return res;
+        }
+        case Token::Type::DootLt: {
+            auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
+
+            auto start = entity.gen_temp();
+            entity.add_expr("auto $ = $;", start, lhs->gen_expr(entity, elem_typeinfo));
+
+            auto end = entity.gen_temp();
+            entity.add_expr("auto $ = $;", end, rhs->gen_expr(entity, elem_typeinfo));
+
+            auto res = entity.gen_temp();
+            if (typeinfo.empty()) {
+                entity.add_expr("std::list<decltype($)> $;", start, res);
+            } else {
+                entity.add_expr("$ $;", typeinfo.to_str(), res);
+            }
+
+            auto i = entity.gen_temp();
+            entity.add_expr("for (auto $ = $; $ < $; ++$) {", i, start, i, end, i).add_indent()
+                .add_expr("$.push_back($);", res, i).sub_indent()
+                .add_expr("}")
+            ;
+
+            return res;
+        }
 
         default:
             assertt(bop_mapping.count(op.type));
 
             return "($) $ ($)"_fs.format(
-                lhs->gen_expr(entity, typeinfo), bop_mapping.at(op.type), rhs->gen_expr(entity, typeinfo)
+                lhs->gen_expr(entity, TypeInfo()), bop_mapping.at(op.type), rhs->gen_expr(entity, TypeInfo())
             );
     }
     throw CodegenError("failed call BinaryOpExpr::gen_expr(...): unsupported binary operator " + op.value);
 }
 
 string CaseExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
-    if (typeinfo.empty()) {
-        throw CodegenError("need type info");
-    }
-
     auto temp0 = entity.gen_temp();
-    entity.add_expr("$ $;", typeinfo.to_str(), temp0);
+    entity.add_expr("auto $ = ([&] {", temp0).add_indent();
 
     auto e = expr->gen_expr(entity, TypeInfo());
     auto temp1 = entity.gen_temp();
@@ -746,24 +790,64 @@ string CaseExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
     for (auto &equation : equations) {
         entity.add_expr("for(;;) {").add_indent();
         equation.pattern->gen_pattern(entity, temp1);
-        entity.add_expr("$ = $;", temp0, equation.expr->gen_expr(entity, typeinfo)).sub_indent()
+        entity.add_expr("return $;", equation.expr->gen_expr(entity, typeinfo)).sub_indent()
             .add_expr("}")
         ;
     }
+
+    entity.sub_indent()
+        .add_expr("})();")
+    ;
 
     return temp0;
 }
 
 string LetinExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
-    auto temp0 = entity.gen_temp();
-    entity.add_expr("auto $ = $;", temp0, equation.expr->gen_expr(entity, TypeInfo()));
-    equation.pattern->gen_pattern(entity, temp0);
+    auto temp = entity.gen_temp();
+    entity.add_expr("auto $ = $;", temp, equation.expr->gen_expr(entity, TypeInfo()));
+    equation.pattern->gen_pattern(entity, temp);
     return expr->gen_expr(entity, typeinfo);
+}
+
+string LambdaExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
+    assertt(!typeinfo.empty());
+    assertt(typeinfo.is_function());
+    assertt(typeinfo.args_size() == parameters.size());
+
+    entity.code().add_header("functional");
+
+    string params;
+    for (size_t i = 0; i < parameters.size(); ++i) {
+        if (i == 0) {
+            params += typeinfo[i].to_str_as_arg() + parameters[i];
+        } else {
+            params += ", " + typeinfo[i].to_str_as_arg() + parameters[i];
+        }
+    }
+
+    auto temp = entity.gen_temp();
+    entity.add_expr("std::function $ = [&] ($) {", temp, params).add_indent()
+        .add_expr("return $;", expr->gen_expr(entity, typeinfo[-1])).sub_indent()
+        .add_expr("};")
+    ;
+
+    return temp;
 }
 
 // --- others ---
 Type *FuncType::result_type() const {
     assertt(!types.empty());
     return types.back().get();
+}
+
+bool DataTypeDef::is_predefined() const {
+    return local_ntype_mapping.count(decl_type->main_name()) || local_ttype_mapping.count(decl_type->main_name());
+}
+
+bool FunctionDef::is_predefined() const {
+    static set<string> predefined_func {
+        "length", "take", "drop"
+    };
+    return predefined_func.count(name);
 }
 } // namespace hol2cpp

@@ -19,6 +19,9 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Support parsing lambda expression
+- [x] Supported predefined definitions will be skipped
+- [x] Support expressions `[i..j]` and `[i..<j]`
 - [x] Pass comments of definitions for proof
 - [x] Enable the name of definition could be wrapped in `""`
 - [x] Enable write `<=>` and `\<equiv>` which are equal to `=`

@@ -94,6 +94,8 @@ class Parser {
         Equation gen_letin_equation();
     Ptr<Expr> gen_case();
         Equation gen_case_equation();
+    Ptr<Expr> gen_lambda();
+        std::string gen_ident_str();
     Ptr<Expr> gen_var();
     Ptr<Expr> gen_ifelse();
     Ptr<Expr> gen_list();

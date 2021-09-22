@@ -20,9 +20,9 @@ string TypeInfo::to_str() const {
         auto type = name + '<' + arguments.back().to_str() + '(';
         for (size_t i = 0; i < arguments.size() - 1; ++i) {
             if (i == 0) {
-                type += arguments[i].to_str();
+                type += arguments[i].to_str_as_arg();
             } else {
-                type += ", " + arguments[i].to_str();
+                type += ", " + arguments[i].to_str_as_arg();
             }
         }
         return type + ")>";
@@ -48,9 +48,9 @@ string TypeInfo::to_str_with(const std::string &name) const {
         auto type = name + '<' + arguments.back().to_str() + '(';
         for (size_t i = 0; i < arguments.size() - 1; ++i) {
             if (i == 0) {
-                type += arguments[i].to_str();
+                type += arguments[i].to_str_as_arg();
             } else {
-                type += ", " + arguments[i].to_str();
+                type += ", " + arguments[i].to_str_as_arg();
             }
         }
         return type + ")>";
@@ -67,6 +67,10 @@ string TypeInfo::to_str_with(const std::string &name) const {
     }
 }
 
+string TypeInfo::to_str_as_arg() const {
+    return "const " + to_str() + " &";
+}
+
 bool TypeInfo::empty() const {
     return name.empty();
 }
@@ -75,13 +79,17 @@ bool TypeInfo::is_function() const {
     return name == "std::function";
 }
 
-const TypeInfo &TypeInfo::result_typeinfo() {
+const TypeInfo &TypeInfo::result_typeinfo() const {
     assertt(is_function());
     return arguments.back();
 }
 
 size_t TypeInfo::args_size() const {
-    return arguments.size();
+    return arguments.size() - 1;
+}
+
+const TypeInfo &TypeInfo::operator[](int i) const {
+    return (i == -1) ? result_typeinfo() : arguments[i];
 }
 
 FuncEntity::FuncEntity(Code &code)

@@ -192,12 +192,6 @@ struct ConsExpr final : Expr {
 struct ListExpr final : Expr {
     std::vector<Ptr<Expr>> exprs;
 
-    /**
-     * @exprs: exprs in []
-    */
-    ListExpr() = default;
-    ListExpr(std::vector<Ptr<Expr>> &&exprs) : exprs(std::move(exprs)) {}
-
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -257,8 +251,16 @@ struct CaseExpr final : Expr {
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
+struct LambdaExpr final : Expr {
+    std::vector<std::string> parameters;
+    Ptr<Expr> expr;
+
+    std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
+};
+
 struct Definition {
     virtual ~Definition() = 0;
+    virtual bool is_predefined() const = 0;
     virtual bool is_datatype_decl() const = 0;
     virtual void codegen(Code &) const = 0;
 };
@@ -288,7 +290,8 @@ struct DataTypeDef : Definition {
     // mutable for codegen
     mutable std::vector<Component> components;
 
-    virtual bool is_datatype_decl() const override { return true; }
+    bool is_predefined() const override;
+    bool is_datatype_decl() const override { return true; }
     void codegen(Code &) const override;
 };
 
@@ -297,7 +300,8 @@ struct FunctionDef final : Definition {
     Ptr<FuncType> type;
     std::vector<Equation> equations;
 
-    virtual bool is_datatype_decl() const override { return false; }
+    bool is_predefined() const override;
+    bool is_datatype_decl() const override { return false; }
     void codegen(Code &) const override;
 };
 

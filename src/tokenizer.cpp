@@ -11,9 +11,13 @@ using namespace std;
 
 namespace hol2cpp {
 static set<string> localSymbolSet {
-    ".", ";", "\\", "!", "`", "?", R"(\<comment>)",
+    ";", "\\", "!", "`", "?",
 
-    R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
+    R"(\<comment>)", R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
+
+    R"(\<lambda>)", "%", ".",
+
+    "..", "..<",
 
     ":", "::", ":=", "=", R"(\<longleftrightarrow>)", R"(\<equiv>)", "|", "\"", "(", ")",
     R"(\<Rightarrow>)", "=>", "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
@@ -168,6 +172,8 @@ Token Tokenizer::next_token() {
                                 --cnt;
                             }
                         }
+                        return next_token();
+                    } else if (token->type == Token::Type::Comment) {
                         return next_token();
                     } else {
                         return *token;

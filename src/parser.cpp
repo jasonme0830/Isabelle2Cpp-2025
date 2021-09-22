@@ -1,9 +1,12 @@
-#include "parser.hpp"
 #include "error.hpp"
+#include "parser.hpp"
 
 #include <set>
 #include <map>
 #include <vector>
+
+#undef ERROR
+#define ERROR CodegenError
 
 using namespace std;
 
@@ -135,10 +138,9 @@ Ptr<DataTypeDef> Parser::gen_datatype_declaration() {
     }
 
     eat<Token::Type::Equiv>("expected token Equiv");
-    decl->components.push_back(gen_component());
-    while (try_eat<Token::Type::Pipe>()) {
+    do {
         decl->components.push_back(gen_component());
-    }
+    } while (try_eat<Token::Type::Pipe>());
 
     return decl;
 }
@@ -194,10 +196,9 @@ Ptr<FunctionDef> Parser::gen_function_declaration() {
     eat<Token::Type::Quotation>("expected token Quotation");
 
     eat<Token::Type::Where>("expected token Where");
-    decl->equations.push_back(gen_equation());
-    while (try_eat<Token::Type::Pipe>()) {
+    do {
         decl->equations.push_back(gen_equation());
-    }
+    } while (try_eat<Token::Type::Pipe>());
 
     return decl;
 }
@@ -241,10 +242,9 @@ Ptr<Type> Parser::gen_type() {
 
 Ptr<FuncType> Parser::gen_func_type() {
     auto type = make_unique<FuncType>();
-    type->types.push_back(gen_pair_type());
-    while (try_eat<Token::Type::Rightarrow>()) {
+    do {
         type->types.push_back(gen_pair_type());
-    }
+    } while (try_eat<Token::Type::Rightarrow>());
     return type;
 }
 
@@ -325,10 +325,10 @@ Ptr<NormalType> Parser::gen_normal_type() {
 
 vector<Ptr<Expr>> Parser::gen_exprs() {
     vector<Ptr<Expr>> exprs;
-    exprs.push_back(gen_expr());
-    while (try_eat<Token::Type::Comma>()) {
+    do {
         exprs.push_back(gen_expr());
-    }
+    } while (try_eat<Token::Type::Comma>());
+
     return exprs;
 }
 
@@ -393,6 +393,8 @@ Ptr<Expr> Parser::gen_factor() {
             return gen_letin();
         case Token::Type::Case:
             return gen_case();
+        case Token::Type::Lambda:
+            return gen_lambda();
         case Token::Type::Identifier:
             return gen_var();
         case Token::Type::If:
@@ -446,12 +448,39 @@ Ptr<Expr> Parser::gen_case() {
     auto case_expr = make_unique<CaseExpr>(gen_expr());
 
     eat<Token::Type::Of>("expected token Of");
-    case_expr->equations.push_back(gen_case_equation());
-    while (try_eat<Token::Type::Pipe>()) {
+    do {
         case_expr->equations.push_back(gen_case_equation());
-    }
+    } while (try_eat<Token::Type::Pipe>());
 
     return case_expr;
+}
+
+std::string Parser::gen_ident_str() {
+    check<Token::Type::Identifier>("expected token Identifier");
+    auto res = current_token_.value;
+    get_next_token();
+    return res;
+}
+
+Ptr<Expr> Parser::gen_lambda() {
+    eat<Token::Type::Lambda>("expected token Lambda");
+    auto lambda_expr = make_unique<LambdaExpr>();
+
+    if (try_eat<Token::Type::LParen>()) {
+        do {
+            lambda_expr->parameters.push_back(gen_ident_str());
+        } while (try_eat<Token::Type::Comma>());
+        eat<Token::Type::RParen>("expected token RParen");
+    } else {
+        do {
+            lambda_expr->parameters.push_back(gen_ident_str());
+        } while (meet<Token::Type::Identifier>());
+    }
+
+    eat<Token::Type::Dot>("expected token Dot");
+    lambda_expr->expr = gen_expr();
+
+    return lambda_expr;
 }
 
 Ptr<Expr> Parser::gen_var() {
@@ -476,12 +505,27 @@ Ptr<Expr> Parser::gen_ifelse() {
 
 Ptr<Expr> Parser::gen_list() {
     eat<Token::Type::LBracket>("expected token LBracket");
+    auto list_expr = make_unique<ListExpr>();
+
     if (try_eat<Token::Type::RBracket>()) {
-        return make_unique<ListExpr>();
+        return list_expr;
     }
-    auto expr = make_unique<ListExpr>(gen_exprs());
+
+    auto expr = gen_expr();
+    if (meet<Token::Type::Doot, Token::Type::DootLt>()) {
+        auto op = current_token_;
+        get_next_token();
+        auto res = make_unique<BinaryOpExpr>(move(op), move(expr), gen_expr());
+        eat<Token::Type::RBracket>("expected token RBracket");
+        return res;
+    }
+
+    list_expr->exprs.push_back(move(expr));
+    while (try_eat<Token::Type::Comma>()) {
+        list_expr->exprs.push_back(gen_expr());
+    }
     eat<Token::Type::RBracket>("expected token RBracket");
-    return expr;
+    return list_expr;
 }
 
 Ptr<Expr> Parser::gen_set() {
@@ -489,7 +533,7 @@ Ptr<Expr> Parser::gen_set() {
     if (try_eat<Token::Type::RBrace>()) {
         return make_unique<SetExpr>();
     }
-    auto expr = make_unique<ListExpr>(gen_exprs());
+    auto expr = make_unique<SetExpr>(gen_exprs());
     eat<Token::Type::RBrace>("expected token RBrace");
     return expr;
 }
@@ -514,6 +558,7 @@ Ptr<Expr> Parser::gen_pair_helper() {
 }
 
 Ptr<Expr> Parser::gen_integral() {
+    check<Token::Type::Integer>("expected token Integer");
     auto expr = make_unique<IntegralExpr>(current_token_.value);
     get_next_token();
     return expr;
