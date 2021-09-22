@@ -9,7 +9,7 @@ T1 last(const std::list<T1> &arg1) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         T1 temp0;
-        if ((xs) == (bool())) {
+        if ((xs) == ({})) {
             temp0 = x;
         } else {
             temp0 = last(xs);
@@ -34,7 +34,7 @@ std::list<T1> butlast(const std::list<T1> &arg1) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
-        if ((xs) == (bool())) {
+        if ((xs) == ({})) {
             temp0 = std::list<T1>();
         } else {
             auto temp1 = butlast(xs);
@@ -69,7 +69,7 @@ std::list<T1> rev(const std::list<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> filter(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+std::list<T1> filter(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         if (!arg2.empty()) {
             break;
@@ -96,7 +96,7 @@ std::list<T1> filter(const std::function<bool(T1)> &arg1, const std::list<T1> &a
 }
 
 template<typename T1, typename T2>
-T1 foldl(const std::function<T1(T1, T2)> &arg1, const T1 &arg2, const std::list<T2> &arg3) {
+T1 foldl(const std::function<T1(const T1 &, const T2 &)> &arg1, const T1 &arg2, const std::list<T2> &arg3) {
     for (;;) {
         if (!arg3.empty()) {
             break;
@@ -137,78 +137,6 @@ std::list<T1> concat(const std::list<std::list<T1>> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> drop(const std::uint64_t &arg1, const std::list<T1> &arg2) {
-    for (;;) {
-        if (!arg2.empty()) {
-            break;
-        }
-        return std::list<T1>();
-    }
-    for (;;) {
-        if (arg2.empty()) {
-            break;
-        }
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
-        std::list<T1> temp0;
-        auto temp1 = arg1;
-        for(;;) {
-            if (temp1 != 0) {
-                break;
-            }
-            auto temp2 = xs;
-            temp2.push_front(x);
-            temp0 = temp2;
-        }
-        for(;;) {
-            if (temp1 == 0) {
-                break;
-            }
-        auto m = (temp1) - 1;
-            temp0 = drop(m, xs);
-        }
-        return temp0;
-    }
-    std::abort();
-}
-
-template<typename T1>
-std::list<T1> take(const std::uint64_t &arg1, const std::list<T1> &arg2) {
-    for (;;) {
-        if (!arg2.empty()) {
-            break;
-        }
-        return std::list<T1>();
-    }
-    for (;;) {
-        if (arg2.empty()) {
-            break;
-        }
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
-        std::list<T1> temp0;
-        auto temp1 = arg1;
-        for(;;) {
-            if (temp1 != 0) {
-                break;
-            }
-            temp0 = std::list<T1>();
-        }
-        for(;;) {
-            if (temp1 == 0) {
-                break;
-            }
-        auto m = (temp1) - 1;
-            auto temp2 = take(m, xs);
-            temp2.push_front(x);
-            temp0 = temp2;
-        }
-        return temp0;
-    }
-    std::abort();
-}
-
-template<typename T1>
 std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, const T1 &arg3) {
     for (;;) {
         if (!arg1.empty()) {
@@ -222,32 +150,33 @@ std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, 
         }
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
-        std::list<T1> temp0;
-        auto temp1 = arg2;
-        for(;;) {
-            if (temp1 != 0) {
-                break;
+        auto temp0 = ([&] {
+            auto temp1 = arg2;
+            for(;;) {
+                if (temp1 != 0) {
+                    break;
+                }
+                auto temp2 = xs;
+                temp2.push_front(arg3);
+                return temp2;
             }
-            auto temp2 = xs;
-            temp2.push_front(arg3);
-            temp0 = temp2;
-        }
-        for(;;) {
-            if (temp1 == 0) {
-                break;
-            }
+            for(;;) {
+                if (temp1 == 0) {
+                    break;
+                }
         auto j = (temp1) - 1;
-            auto temp3 = list_update(xs, j, arg3);
-            temp3.push_front(x);
-            temp0 = temp3;
-        }
+                auto temp3 = list_update(xs, j, arg3);
+                temp3.push_front(x);
+                return temp3;
+            }
+        })();
         return temp0;
     }
     std::abort();
 }
 
 template<typename T1>
-std::list<T1> takeWhile(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+std::list<T1> takeWhile(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         if (!arg2.empty()) {
             break;
@@ -274,7 +203,7 @@ std::list<T1> takeWhile(const std::function<bool(T1)> &arg1, const std::list<T1>
 }
 
 template<typename T1>
-std::list<T1> dropWhile(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+std::list<T1> dropWhile(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         if (!arg2.empty()) {
             break;
@@ -314,24 +243,25 @@ std::list<std::pair<T1, T2>> zip(const std::list<T1> &arg1, const std::list<T2> 
         }
         auto y = arg2.front();
         auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
-        std::list<std::pair<T1, T2>> temp0;
-        auto temp1 = arg1;
-        for(;;) {
-            if (!temp1.empty()) {
-                break;
+        auto temp0 = ([&] {
+            auto temp1 = arg1;
+            for(;;) {
+                if (!temp1.empty()) {
+                    break;
+                }
+                return std::list<std::pair<T1, T2>>();
             }
-            temp0 = std::list<std::pair<T1, T2>>();
-        }
-        for(;;) {
-            if (temp1.empty()) {
-                break;
-            }
+            for(;;) {
+                if (temp1.empty()) {
+                    break;
+                }
         auto z = temp1.front();
         auto zs = decltype(temp1){std::next(temp1.begin()), temp1.end()};
-            auto temp2 = zip(zs, ys);
-            temp2.push_front(std::make_pair(z, y));
-            temp0 = temp2;
-        }
+                auto temp2 = zip(zs, ys);
+                temp2.push_front(std::make_pair(z, y));
+                return temp2;
+            }
+        })();
         return temp0;
     }
     std::abort();
@@ -354,16 +284,7 @@ std::list<T1> insert(const T1 &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1>
-std::list<T1> union(const std::list<T1> &arg1, const std::list<T1> &arg2) {
-    for (;;) {
-        auto union = ;
-        return fold(insert);
-    }
-    std::abort();
-}
-
-template<typename T1>
-std::optional<T1> find(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+std::optional<T1> find(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         if (!arg2.empty()) {
             break;
@@ -575,10 +496,15 @@ std::list<T1> replicate(const std::uint64_t &arg1, const T1 &arg2) {
 }
 
 template<typename T1>
-std::uint64_t length(const std::list<T1> &arg1) {
+std::list<std::pair<std::uint64_t, T1>> enumerate(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     for (;;) {
-        auto length = ;
-        return size;
+        auto temp0 = arg1;
+        auto temp1 = (arg1) + (arg2.size());
+        std::list<decltype(temp0)> temp2;
+        for (auto temp3 = temp0; temp3 < temp1; ++temp3) {
+            temp2.push_back(temp3);
+        }
+        return zip(temp2, arg2);
     }
     std::abort();
 }
@@ -634,25 +560,26 @@ T1 min_list(const std::list<T1> &arg1) {
         }
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
-        T1 temp0;
-        auto temp1 = xs;
-        for(;;) {
-            if (!temp1.empty()) {
-                break;
+        auto temp0 = ([&] {
+            auto temp1 = xs;
+            for(;;) {
+                if (!temp1.empty()) {
+                    break;
+                }
+                return x;
             }
-            temp0 = x;
-        }
-        for(;;) {
+            for(;;) {
         auto _ = temp1;
-            temp0 = min(x, min_list(xs));
-        }
+                return min(x, min_list(xs));
+            }
+        })();
         return temp0;
     }
     std::abort();
 }
 
 template<typename T1, typename T2>
-T1 arg_min_list(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2) {
+T1 arg_min_list(const std::function<T2(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         if (arg2.size() != 1) {
             break;
@@ -686,7 +613,7 @@ T1 arg_min_list(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1, typename T2>
-std::list<T1> insort_key(const std::function<T2(T1)> &arg1, const T1 &arg2, const std::list<T1> &arg3) {
+std::list<T1> insort_key(const std::function<T2(const T1 &)> &arg1, const T1 &arg2, const std::list<T1> &arg3) {
     for (;;) {
         if (!arg3.empty()) {
             break;
@@ -717,7 +644,7 @@ std::list<T1> insort_key(const std::function<T2(T1)> &arg1, const T1 &arg2, cons
 }
 
 template<typename T1>
-std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         if (!arg2.empty()) {
             break;
@@ -748,6 +675,22 @@ std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(T1)> 
     std::abort();
 }
 
+std::list<std::int64_t> upto_aux(const std::int64_t &arg1, const std::int64_t &arg2, const std::list<std::int64_t> &arg3) {
+    for (;;) {
+        auto temp0 = arg1;
+        auto temp1 = arg2;
+        std::list<std::int64_t> temp2;
+        for (auto temp3 = temp0; temp3 <= temp1; ++temp3) {
+            temp2.push_back(temp3);
+        }
+        auto temp4 = temp2;
+        auto temp5 = arg3;
+        temp4.insert(temp4.end(), temp5.begin(), temp5.end());
+        return temp4;
+    }
+    std::abort();
+}
+
 template<typename T1>
 std::set<std::list<T1>> listset(const std::list<std::set<T1>> &arg1) {
     for (;;) {
@@ -768,7 +711,7 @@ std::set<std::list<T1>> listset(const std::list<std::set<T1>> &arg1) {
 }
 
 template<typename T1, typename T2>
-std::list<T2> bind(const std::list<T1> &arg1, const std::function<std::list<T2>(T1)> &arg2) {
+std::list<T2> bind(const std::list<T1> &arg1, const std::function<std::list<T2>(const T1 &)> &arg2) {
     for (;;) {
         return concat(map(arg2, arg1));
     }
@@ -776,7 +719,7 @@ std::list<T2> bind(const std::list<T1> &arg1, const std::function<std::list<T2>(
 }
 
 template<typename T1, typename T2>
-std::list<T2> map_tailrec_rev(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2, const std::list<T2> &arg3) {
+std::list<T2> map_tailrec_rev(const std::function<T2(const T1 &)> &arg1, const std::list<T1> &arg2, const std::list<T2> &arg3) {
     for (;;) {
         if (!arg2.empty()) {
             break;
@@ -797,9 +740,9 @@ std::list<T2> map_tailrec_rev(const std::function<T2(T1)> &arg1, const std::list
 }
 
 template<typename T1, typename T2>
-std::list<T2> map_tailrec(const std::function<T2(T1)> &arg1, const std::list<T1> &arg2) {
+std::list<T2> map_tailrec(const std::function<T2(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
-        return rev(map_tailrec_rev(arg1, arg2, std::list<T2>()));
+        return rev(map_tailrec_rev(arg1, arg2, {}));
     }
     std::abort();
 }
@@ -813,7 +756,7 @@ bool member(const std::list<T1> &arg1, const T1 &arg2) {
 }
 
 template<typename T1>
-bool list_ex(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
+bool list_ex(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         return Bex(set(arg2), arg1);
     }
@@ -823,13 +766,13 @@ bool list_ex(const std::function<bool(T1)> &arg1, const std::list<T1> &arg2) {
 template<typename T1>
 bool null(const std::list<T1> &arg1) {
     for (;;) {
-        return (arg1) == (bool());
+        return (arg1) == ({});
     }
     std::abort();
 }
 
 template<typename T1, typename T2>
-std::list<T2> maps(const std::function<std::list<T2>(T1)> &arg1, const std::list<T1> &arg2) {
+std::list<T2> maps(const std::function<std::list<T2>(const T1 &)> &arg1, const std::list<T1> &arg2) {
     for (;;) {
         return concat(map(arg1, arg2));
     }
@@ -839,7 +782,7 @@ std::list<T2> maps(const std::function<std::list<T2>(T1)> &arg1, const std::list
 template<typename T1>
 std::uint64_t gen_length(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     for (;;) {
-        return (arg1) + (length(arg2));
+        return (arg1) + (arg2.size());
     }
     std::abort();
 }
