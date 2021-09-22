@@ -22,195 +22,146 @@ parse error in No.14 definition:
 `hol_main/List_raw.thy:117:55: error: expected token Where
 `primrec (nonexhaustive) nth :: "'a list => nat => 'a" (infixl "!" 100) where
 `                                                      ^
-parse error in No.20 definition:
-`hol_main/List_raw.thy:165:42: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
-`"product_lists (xs # xss) = concat (map (\<lambda>x. map (Cons x) (product_lists xss)) xs)"
-`                                         ^
-parse error in No.21 definition:
+parse error in No.22 definition:
 `hol_main/List_raw.thy:167:63: error: expected token Where
 `primrec upt :: "nat \<Rightarrow> nat \<Rightarrow> nat list" ("(1[_..</_'])") where
 `                                                              ^
-parse error in No.26 definition:
+parse error in No.27 definition:
 `hol_main/List_raw.thy:193:24: error: expected token RParen
 `  (case dropWhile (Not \<circ> P) xs of
 `                       ^
-parse error in No.34 definition:
-`hol_main/List_raw.thy:239:43: error: expected token RBracket
-`enumerate_eq_zip: "enumerate n xs = zip [n..<n + length xs] xs"
-`                                          ^
-parse error in No.36 definition:
+parse error in No.38 definition:
 `hol_main/List_raw.thy:246:22: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"rotate n = rotate1 ^^ n"
 `                     ^
-parse error in No.37 definition:
-`hol_main/List_raw.thy:249:31: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
-`"nths xs A = map fst (filter (\<lambda>p. snd p \<in> A) (zip xs [0..<size xs]))"
-`                              ^
-parse error in No.39 definition:
-`hol_main/List_raw.thy:257:36: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
-`"n_lists (Suc n) xs = concat (map (\<lambda>ys. map (\<lambda>y. y # ys) xs) (n_lists n xs))"
-`                                   ^
-parse error in No.41 definition:
+parse error in No.43 definition:
 `hol_main/List_raw.thy:269:19: error: expected ::
 `function shuffles where
 `                  ^
-parse error in No.44 definition:
+parse error in No.46 definition:
 `hol_main/List_raw.thy:357:28: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"sorted_wrt P (x # ys) = ((\<forall>y \<in> set ys. P x y) \<and> sorted_wrt P ys)"
 `                           ^
-parse error in No.45 definition:
+parse error in No.47 definition:
 `hol_main/List_raw.thy:368:22: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"sorted (x # ys) = ((\<forall>y \<in> set ys. x \<le> y) \<and> sorted ys)"
 `                     ^
-parse error in No.46 definition:
+parse error in No.48 definition:
 `hol_main/List_raw.thy:372:29: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"strict_sorted (x # ys) = ((\<forall>y \<in> List.set ys. x < y) \<and> strict_sorted ys)"
 `                            ^
-parse error in No.49 definition:
+parse error in No.51 definition:
 `hol_main/List_raw.thy:396:19: error: expected token Then
 `  (if f x \<in> f ` set xs then xs else insort_key f x xs)"
 `                  ^
-parse error in No.50 definition:
+parse error in No.55 definition:
 `hol_main/List_raw.thy:404:5: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `   (\<forall>f xs k. filter (\<lambda>y. f y = k) (sk f xs) = filter (\<lambda>y. f y = k) xs)"
 `    ^
-tokenize error after No.51 definition:
-`hol_main/List_raw.thy:1655:48: error: meet unexpected char %
-`lemma concat_map_singleton[simp]: "concat(map (%x. [f x]) xs) = map f xs"
-`                                               ^
-tokenize error after No.51 definition:
-`hol_main/List_raw.thy:2613:37: error: meet unexpected char %
-`  "map f (zip (map g xs) ys) = map (%(x,y). f(g x, y)) (zip xs ys)"
-`                                    ^
-tokenize error after No.51 definition:
-`hol_main/List_raw.thy:2617:37: error: meet unexpected char %
-`  "map f (zip xs (map g ys)) = map (%(x,y). f(x, g y)) (zip xs ys)"
-`                                    ^
-parse error in No.52 definition:
+parse error in No.57 definition:
 `hol_main/List_raw.thy:3357:65: error: expected token Where
 `function upto :: "int \<Rightarrow> int \<Rightarrow> int list" ("(1[_../_])") where
 `                                                                ^
-tokenize error after No.52 definition:
-`hol_main/List_raw.thy:3361:22: error: meet unexpected char %
-`by(relation "measure(%(i::int,j). nat(j - i + 1))") auto
-`                     ^
-parse error in No.53 definition:
-`hol_main/List_raw.thy:3429:24: error: expected token RBracket
-`  "upto_aux i j js = [i..j] @ js"
-`                       ^
-tokenize error after No.53 definition:
-`hol_main/List_raw.thy:4657:42: error: meet unexpected char %
-`  "distinct xs \<Longrightarrow> filter (%x. x \<in> set (nths xs s)) xs = nths xs s"
-`                                         ^
-parse error in No.54 definition:
+parse error in No.59 definition:
 `hol_main/List_raw.thy:4892:20: error: expected ::
 `function transpose where
 `                   ^
-parse error in No.55 definition:
+parse error in No.60 definition:
 `hol_main/List_raw.thy:5801:32: error: expected token Quotation
 `  "sorted_list_of_set = folding.F insort []"
 `                               ^
-parse error in No.56 definition:
+parse error in No.61 definition:
 `hol_main/List_raw.thy:5981:20: error: expected token RBrace
 `"set_Cons A XS = {z. \<exists>x xs. z = x # xs \<and> x \<in> A \<and> xs \<in> XS}"
 `                   ^
-tokenize error after No.56 definition:
-`hol_main/List_raw.thy:5983:53: error: meet unexpected char %
-`lemma set_Cons_sing_Nil [simp]: "set_Cons A {[]} = (%x. [x])`A"
-`                                                    ^
-parse error in No.58 definition:
-`hol_main/List_raw.thy:6001:9: error: expected token Identifier
-`primrec \<comment> \<open>The lexicographic ordering for lists of the specified length\<close>
-`        ^
-tokenize error after No.58 definition:
-`hol_main/List_raw.thy:6005:14: error: meet unexpected char %
+parse error in No.63 definition:
+`hol_main/List_raw.thy:6005:47: error: expected token RParen
 `  (map_prod (%(x, xs). x#xs) (%(x, xs). x#xs) ` (r <*lex*> lexn r n)) Int
-`             ^
-tokenize error after No.58 definition:
-`hol_main/List_raw.thy:6005:31: error: meet unexpected char %
-`  (map_prod (%(x, xs). x#xs) (%(x, xs). x#xs) ` (r <*lex*> lexn r n)) Int
-`                              ^
-parse error in No.59 definition:
+`                                              ^
+parse error in No.64 definition:
 `hol_main/List_raw.thy:6009:11: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"lex r = (\<Union>n. lexn r n)" \<comment> \<open>Holds only between lists of the same length\<close>
 `          ^
-parse error in No.60 definition:
+parse error in No.65 definition:
 `hol_main/List_raw.thy:6012:35: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `"lenlex r = inv_image (less_than <*lex*> lex r) (\<lambda>xs. (length xs, xs))"
 `                                  ^
-parse error in No.61 definition:
+parse error in No.66 definition:
 `hol_main/List_raw.thy:6218:19: error: expected token RBrace
 `"lexord r = {(x,y). \<exists> a v. y = x @ a # v \<or>
 `                  ^
-tokenize error after No.61 definition:
-`hol_main/List_raw.thy:6257:25: error: meet unexpected char %
-`  apply (rule_tac f = "(% a b. a \<or> b)" in arg_cong2)
-`                        ^
-parse error in No.62 definition:
-`hol_main/List_raw.thy:6531:1: error: expected token Colon
-`lemma wf_measures[simp]: "wf (measures fs)"
-`^
-parse error in No.63 definition:
+parse error in No.68 definition:
 `hol_main/List_raw.thy:6552:23: error: expected token RBrace
 `"listrel1 r = {(xs,ys).
 `                      ^
-parse error in No.69 definition:
+parse error in No.74 definition:
 `hol_main/List_raw.thy:6927:67: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `list_ex1_iff [code_abbrev]: "list_ex1 P xs \<longleftrightarrow> (\<exists>! x. x \<in> set xs \<and> P x)"
 `                                                                  ^
-parse error in No.70 definition:
+parse error in No.75 definition:
 `hol_main/List_raw.thy:6989:35: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `[code_abbrev]: "can_select P A = (\<exists>!x\<in>A. P x)"
 `                                  ^
-parse error in No.71 definition:
+parse error in No.76 definition:
 `hol_main/List_raw.thy:6999:54: error: expected token RBrace
 `"listrel1p r xs ys = ((xs, ys) \<in> listrel1 {(x, y). r x y})"
 `                                                     ^
-parse error in No.72 definition:
+parse error in No.77 definition:
 `hol_main/List_raw.thy:7014:52: error: expected token RBrace
 `  "lexordp r xs ys = ((xs, ys) \<in> lexord {(x, y). r x y})"
 `                                                   ^
-parse error in No.73 definition:
-`hol_main/List_raw.thy:7070:1: error: expected token Colon
+parse error in No.78 definition:
+`hol_main/List_raw.thy:7068:34: error: expected token RParen
+`definition "Bleast S P = (LEAST x. x \<in> S \<and> P x)"
+`                                 ^
+parse error in No.79 definition:
+`hol_main/List_raw.thy:7070:40: error: expected token RParen
 `definition "abort_Bleast S P = (LEAST x. x \<in> S \<and> P x)"
-`^
-parse error in No.74 definition:
-`hol_main/List_raw.thy:7072:1: error: expected token Colon
-`declare [[code abort: abort_Bleast]]
-`^
-parse error in No.77 definition:
+`                                       ^
+parse error in No.82 definition:
 `hol_main/List_raw.thy:7141:44: error: expected token RParen
 `  [code_post]: "map_filter f xs = map (the \<circ> f) (filter (\<lambda>x. f x \<noteq> None) xs)"
 `                                           ^
-parse error in No.78 definition:
+parse error in No.83 definition:
 `hol_main/List_raw.thy:7170:50: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `  "all_interval_nat P i j \<longleftrightarrow> (\<forall>n \<in> {i..<j}. P n)"
 `                                                 ^
-parse error in No.79 definition:
+parse error in No.84 definition:
 `hol_main/List_raw.thy:7193:50: error: expected token in { Identifier, If, LBracket, LBrace, LParen, Integer }
 `  "all_interval_int P i j \<longleftrightarrow> (\<forall>k \<in> {i..j}. P k)"
 `                                                 ^
-parse error in No.81 definition:
+parse error in No.86 definition:
 `hol_main/List_raw.thy:7420:24: error: expected token RBrace
 `  "map_project f A = {b. \<exists> a \<in> A. f a = Some b}"
 `                       ^
-tokenize error after No.81 definition:
-`hol_main/List_raw.thy:7471:42: error: meet unexpected char %
-`lemma map_rec: "map f xs = rec_list Nil (%x _ y. Cons (f x) y) xs"
-`                                         ^
-codegen error at No.19 definition of function product:
-`src/codegen.cpp:505: Assertion `args.size() == 2' failed.
+codegen error at No.19 definition of function map2:
+`src/codegen.cpp:846: Assertion `!typeinfo.empty()' failed.
 
-codegen error at No.27 definition of function those:
-`src/codegen.cpp:444: Assertion `args.size() == 2' failed.
+codegen error at No.20 definition of function product:
+`src/codegen.cpp:513: Assertion `args.size() == 2' failed.
 
-codegen error at No.38 definition of function subseqs:
-`src/codegen.cpp:444: Assertion `args.size() == 2' failed.
+codegen error at No.21 definition of function product_lists:
+`src/codegen.cpp:846: Assertion `!typeinfo.empty()' failed.
 
-codegen error at No.48 definition of function sort_key:
-`src/codegen.cpp:406: Assertion `func->args_size() == args.size()' failed.
+codegen error at No.24 definition of function union:
+`src/codegen.cpp:268: Assertion `entity.args_size() == 0' failed.
+
+codegen error at No.28 definition of function those:
+`src/codegen.cpp:452: Assertion `args.size() == 2' failed.
+
+codegen error at No.39 definition of function nths:
+`src/codegen.cpp:846: Assertion `!typeinfo.empty()' failed.
+
+codegen error at No.40 definition of function subseqs:
+`src/codegen.cpp:452: Assertion `args.size() == 2' failed.
+
+codegen error at No.41 definition of function n_lists:
+`src/codegen.cpp:846: Assertion `!typeinfo.empty()' failed.
+
+codegen error at No.50 definition of function sort_key:
+`src/codegen.cpp:412: Assertion `func->args_size() == args.size()' failed.
 
 Result:
-`scanned 81 definitions;
-`generated 37 definitions:
-``0 datatypes and 37 functions.
+`scanned 86 definitions;
+`generated 43 definitions (3 predefined):
+``0 datatypes and 43 functions.
