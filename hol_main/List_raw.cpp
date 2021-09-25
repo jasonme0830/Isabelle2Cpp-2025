@@ -137,6 +137,35 @@ std::list<T1> concat(const std::list<std::list<T1>> &arg1) {
 }
 
 template<typename T1>
+T1 nth(const std::list<T1> &arg1, const std::uint64_t &arg2) {
+    for (;;) {
+        if (arg1.empty()) {
+            break;
+        }
+        auto x = arg1.front();
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto temp0 = ([&] {
+            auto temp1 = arg2;
+            for(;;) {
+                if (temp1 != 0) {
+                    break;
+                }
+                return x;
+            }
+            for(;;) {
+                if (temp1 == 0) {
+                    break;
+                }
+                auto k = (temp1) - 1;
+                return nth(xs, k);
+            }
+        })();
+        return temp0;
+    }
+    std::abort();
+}
+
+template<typename T1>
 std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, const T1 &arg3) {
     for (;;) {
         if (!arg1.empty()) {

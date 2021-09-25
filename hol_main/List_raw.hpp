@@ -25,6 +25,9 @@ template<typename T1>
 std::list<T1> concat(const std::list<std::list<T1>> &arg1);
 
 template<typename T1>
+T1 nth(const std::list<T1> &arg1, const std::uint64_t &arg2);
+
+template<typename T1>
 std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, const T1 &arg3);
 
 template<typename T1>

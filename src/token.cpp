@@ -37,11 +37,11 @@ Token &Token::operator=(const Token &other) noexcept {
     return *this;
 }
 
-static map<string, Token::Type> localMapping {
+static size_t localEndOfToken = size_t(Token::Type::EndOfFile);
+static map<string, Token::Type> localTokenMapping {
     { "end", Token::Type::SkipKeyword },
     { ";", Token::Type::SkipKeyword },
     { "\\", Token::Type::SkipKeyword },
-    { "!", Token::Type::SkipKeyword },
     { "`", Token::Type::SkipKeyword },
     { "?", Token::Type::SkipKeyword },
 
@@ -63,6 +63,9 @@ static map<string, Token::Type> localMapping {
     { "definition", Token::Type::Function },
     { "abbreviation", Token::Type::Function },
     { "where", Token::Type::Where },
+
+    { "infixl", Token::Type::Infixl },
+    { "infixr", Token::Type::Infixr },
 
     { "if", Token::Type::If },
     { "else", Token::Type::Else },
@@ -127,7 +130,15 @@ static map<string, Token::Type> localMapping {
 
 Token::Token(string value) noexcept
   : value(move(value)) {
-    auto it = localMapping.find(this->value);
-    type = (it == localMapping.end() ? Token::Type::Identifier : it->second);
+    auto it = localTokenMapping.find(this->value);
+    type = (it == localTokenMapping.end() ? Token::Type::Identifier : it->second);
+}
+
+optional<Token::Type> Token::add_token(const string &literal) {
+    if (localTokenMapping.count(literal)) {
+        return {};
+    } else {
+        return localTokenMapping[literal] = Token::Type(++localEndOfToken);
+    }
 }
 } // namespace hol2cpp

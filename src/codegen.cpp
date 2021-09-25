@@ -14,12 +14,12 @@
 using namespace std;
 
 namespace hol2cpp {
-static const map<string, string> local_ntype_mapping {
+static const map<string, string> localNormalTypeMapping {
     { "nat", "std::uint64_t" },
     { "int", "std::int64_t" }
 };
 
-static const map<string, string> local_ttype_mapping {
+static const map<string, string> localTemplateTypeMapping {
     { "set",    "std::set" },
     { "option", "std::optional" },
     { "list",   "std::list" },
@@ -121,9 +121,9 @@ void ShortDef::codegen(Code &code) const {
 
 // --- generate typeinfo ---
 TypeInfo NormalType::gen_typeinfo(FuncEntity &entity) const {
-    if (local_ntype_mapping.count(name)) {
+    if (localNormalTypeMapping.count(name)) {
         entity.code().add_header("cstdint");
-        return TypeInfo(local_ntype_mapping.at(name));
+        return TypeInfo(localNormalTypeMapping.at(name));
     } else {
         // e.g. bool
         return TypeInfo(name);
@@ -146,7 +146,7 @@ TypeInfo TemplateType::gen_typeinfo(FuncEntity &entity) const {
         entity.code().add_header(mapping_header.at(name));
     }
 
-    TypeInfo res(local_ttype_mapping.count(name) ? local_ttype_mapping.at(name) : name);
+    TypeInfo res(localTemplateTypeMapping.count(name) ? localTemplateTypeMapping.at(name) : name);
     for (auto &arg : args) {
         res.arguments.push_back(arg->gen_typeinfo(entity));
     }
@@ -226,7 +226,7 @@ TypeInfo TemplateType::apply(function<TypeInfo(const string &)> &trans) const {
         { "pair",   "utility" }
     };
 
-    TypeInfo res(local_ttype_mapping.count(name) ? local_ttype_mapping.at(name) : name);
+    TypeInfo res(localTemplateTypeMapping.count(name) ? localTemplateTypeMapping.at(name) : name);
     for (auto &arg : args) {
         res.arguments.push_back(arg->apply(trans));
     }
@@ -874,7 +874,7 @@ Type *FuncType::result_type() const {
 }
 
 bool DataTypeDef::is_predefined() const {
-    return local_ntype_mapping.count(decl_type->main_name()) || local_ttype_mapping.count(decl_type->main_name());
+    return localNormalTypeMapping.count(decl_type->main_name()) || localTemplateTypeMapping.count(decl_type->main_name());
 }
 
 bool FunctionDef::is_predefined() const {

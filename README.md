@@ -19,6 +19,7 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Support define infix operators
 - [x] Support definitions with only one equation
 - [x] Support parsing lambda expression
 - [x] Supported predefined definitions will be skipped

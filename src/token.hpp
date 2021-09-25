@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <optional>
 
 namespace hol2cpp {
 struct Token {
@@ -28,6 +29,9 @@ struct Token {
         Integer,        // [0-9]+
         Identifier,     // [_a-zA-Z]+
         TypeVariable,   // '[_a-zA-Z]+
+
+        Infixl,         // infixl
+        Infixr,         // infixr
 
         If,             // if
         Else,           // else
@@ -88,6 +92,9 @@ struct Token {
 
     Type type;
     std::string value;
+
+  public:
+    static std::optional<Type> add_token(const std::string &value);
 
   public:
     Token(Type type) noexcept;

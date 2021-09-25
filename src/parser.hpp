@@ -10,6 +10,11 @@
 namespace hol2cpp {
 class Parser {
   public:
+    static void add_infix_op(Token::Type, std::size_t,
+        const std::string &, bool is_infixl
+    );
+
+  public:
     Parser(std::ifstream &input, std::string name) noexcept;
 
     Theory gen_theory();
@@ -70,6 +75,7 @@ class Parser {
 
     void get_next_token();
     Token &next_token();
+    std::string next_raw_str();
 
     Ptr<Definition> gen_declaration();
     Ptr<DataTypeDef> gen_datatype_definition();

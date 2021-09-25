@@ -15,6 +15,9 @@ using Location = std::pair<std::size_t, std::size_t>;
 
 class Tokenizer {
   public:
+    static std::optional<Token::Type> add_token(const std::string &literal);
+
+  public:
     Tokenizer(std::ifstream &input, std::string name) noexcept;
 
     Token next_token();

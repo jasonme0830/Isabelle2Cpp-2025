@@ -5,9 +5,6 @@
 #include <map>
 #include <vector>
 
-#undef ERROR
-#define ERROR CodegenError
-
 using namespace std;
 
 namespace hol2cpp {
@@ -58,10 +55,29 @@ set<Token::Type> bop_right_associativity {
     Token::Type::Sharp, Token::Type::At
 };
 
+map<Token::Type, string> bop_func_mapping;
+
+set<Token::Type> temp_ignored_ops;
+
 set<Token::Type> &bops_at_layer(size_t layer) {
     return bop_precedences[layer].second;
 }
 } // namespace operators
+
+void Parser::add_infix_op(Token::Type type, size_t precedence, const string &func, bool is_infixl) {
+    auto lower = lower_bound(operators::bop_precedences.begin(),
+        operators::bop_precedences.end(), std::make_pair(precedence, std::set<Token::Type>()),
+        [] (const std::pair<size_t, std::set<Token::Type>> &lhs, const std::pair<size_t, std::set<Token::Type>> &rhs)
+        {
+            return lhs.first < rhs.first;
+        }
+    );
+    operators::bop_precedences.insert(lower, std::make_pair(precedence, std::set<Token::Type>{ type }));
+    operators::bop_func_mapping.emplace(type, func);
+    if (!is_infixl) {
+        operators::bop_right_associativity.insert(type);
+    }
+}
 
 Parser::Parser(ifstream &input, string name) noexcept
   : tokenizer_(input, move(name)), current_token_(tokenizer_.next_token()) {
@@ -74,6 +90,22 @@ void Parser::get_next_token() {
 
 Token &Parser::next_token() {
     return current_token_ = tokenizer_.next_token();
+}
+
+std::string Parser::next_raw_str() {
+    /** the position after `check`
+     * "..."
+     *  ^
+    */
+    check<Token::Type::Quotation>("expected token Quotation");
+    /** the position after `next_raw_str`
+     * "..."
+     *     ^
+    */
+    auto res = tokenizer_.next_raw_str();
+    get_next_token();
+    eat<Token::Type::Quotation>("expected token Quotation");
+    return res;
 }
 
 Theory Parser::gen_theory() {
@@ -196,6 +228,26 @@ Ptr<Definition> Parser::gen_function_definition() {
     decl->type = gen_func_type();
     eat<Token::Type::Quotation>("expected token Quotation");
 
+    if (try_eat<Token::Type::LParen>()) {
+        bool is_infixl = try_eat<Token::Type::Infixl>();
+        if (!is_infixl) {
+            eat<Token::Type::Infixr>("expected token Infixr");
+        }
+
+        auto op_str = next_raw_str();
+        auto type = Tokenizer::add_token(op_str);
+        if (!type.has_value()) {
+            throw error("already used operator " + op_str);
+        }
+
+        check<Token::Type::Integer>("expected token Integer");
+        auto precedence = stoull(current_token_.value);
+        add_infix_op(type.value(), precedence, decl->name, is_infixl);
+
+        get_next_token();
+        eat<Token::Type::RParen>("expected token RParen");
+    }
+
     eat<Token::Type::Where>("expected token Where");
     do {
         decl->equations.push_back(gen_equation());
@@ -220,11 +272,9 @@ Equation Parser::gen_equation() {
     }
 
     eat<Token::Type::Quotation>("expected token Quotation");
-    /**
-     * TODO: dispatch different term for default-func or infixl/r
-     *  for infix, gen_spicial_expr
-    */
-    equation.pattern = gen_construction();
+    operators::temp_ignored_ops.insert(Token::Type::Equiv);
+    equation.pattern = gen_expr();
+    operators::temp_ignored_ops.erase(Token::Type::Equiv);
     eat<Token::Type::Equiv>("expected token Equiv");
     equation.expr = gen_expr();
     eat<Token::Type::Quotation>("expected token Quotation");
@@ -340,13 +390,25 @@ Ptr<Expr> Parser::gen_expr(size_t layer) {
 
     auto lhs = gen_expr(layer + 1);
     auto op = current_token_;
-    while (operators::bops_at_layer(layer).count(op.type)) {
+    while (!operators::temp_ignored_ops.count(op.type)
+        && operators::bops_at_layer(layer).count(op.type)) {
         get_next_token();
-        if (operators::bop_right_associativity.count(op.type)) {
-            return make_unique<BinaryOpExpr>(op, move(lhs), gen_expr(layer));
+
+        auto is_right_associative = operators::bop_right_associativity.count(op.type);
+        auto rhs = is_right_associative
+            ? gen_expr(layer)
+            : gen_expr(layer + 1)
+        ;
+
+        if (operators::bop_func_mapping.count(op.type)) {
+            lhs = make_unique<ConsExpr>(operators::bop_func_mapping[op.type], move(lhs), move(rhs));
+        } else {
+            lhs = make_unique<BinaryOpExpr>(op, move(lhs), move(rhs));
         }
 
-        lhs = make_unique<BinaryOpExpr>(op, move(lhs), gen_expr(layer + 1));
+        if (is_right_associative) {
+            return lhs;
+        }
         op = current_token_;
     }
     return lhs;

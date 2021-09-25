@@ -180,6 +180,11 @@ struct ConsExpr final : Expr {
      * @args: arguments for the constructor
     */
     ConsExpr(std::string constructor) : constructor(std::move(constructor)) {}
+    ConsExpr(std::string constructor, Ptr<Expr> lhs, Ptr<Expr> rhs)
+      : constructor(std::move(constructor)) {
+        args.push_back(move(lhs));
+        args.push_back(move(rhs));
+    }
 
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;

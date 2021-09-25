@@ -11,7 +11,7 @@ using namespace std;
 
 namespace hol2cpp {
 static set<string> localSymbolSet {
-    ";", "\\", "!", "`", "?",
+    ";", "\\", "`", "?",
 
     R"(\<comment>)", R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
 
@@ -25,6 +25,18 @@ static set<string> localSymbolSet {
     R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)",
     R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(\<times>)", R"(/)", R"(div)", R"(mod)", R"(^)",
 };
+
+optional<Token::Type> Tokenizer::add_token(const string &literal) {
+    if (localSymbolSet.count(literal)) {
+        return {};
+    }
+
+    auto type = Token::add_token(literal);
+    if (type.has_value()) {
+        localSymbolSet.insert(literal);
+    }
+    return type;
+}
 
 Tokenizer::Tokenizer(ifstream &input, std::string name) noexcept
   : input_(input), name_of_input_(move(name)), last_input_(' ')
@@ -67,8 +79,6 @@ std::string Tokenizer::next_raw_str() {
         value.push_back(last_input_);
         get_next_input();
     }
-    get_next_input(); // eat "
-
     return value;
 }
 
