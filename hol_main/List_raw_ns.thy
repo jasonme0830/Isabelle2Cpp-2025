@@ -89,6 +89,7 @@ definition map_project :: "('a \<Rightarrow> 'b option) \<Rightarrow> 'a set \<R
   "map_project f A = {b. \<exists> a \<in> A. f a = Some b}"
 
 (* --- functional && lambda without typeinfo--- *)
+(* 可以做 *)
 (*21*)
 definition rotate :: "nat \<Rightarrow> 'a list \<Rightarrow> 'a list" where
 "rotate n = rotate1 ^^ n"
@@ -165,6 +166,7 @@ where "extract P xs =
      y#ys \<Rightarrow> Some(takeWhile (Not \<circ> P) xs, y, ys))"
 
 (* --- no function typeinfo --- *)
+(* 可以做 *)
 (*36*)
 function shuffles where
   "shuffles [] ys = {ys}"
