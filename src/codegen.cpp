@@ -35,7 +35,7 @@ Definition::~Definition() = default;
  * TODO: distinguish ShortDef with others
 */
 void Theory::codegen(Code &code) const {
-    size_t datatype_cnt = 0, fun_cnt = 0, predefined = 0;
+    size_t predefined = 0, datatype_cnt = 0, fun_cnt = 0, shortdef_cnt = 0;
     for (size_t i = 0; i < definitions.size(); ++i) {
         auto decl = definitions[i].get();
         if (decl) try {
@@ -47,8 +47,10 @@ void Theory::codegen(Code &code) const {
 
             if (decl->is_datatype_decl()) {
                 ++datatype_cnt;
-            } else {
+            } else if (decl->is_function_decl()) {
                 ++fun_cnt;
+            } else {
+                ++shortdef_cnt;
             }
         } catch (const exception &e) {
             string name;
@@ -66,8 +68,8 @@ void Theory::codegen(Code &code) const {
         }
     }
 
-    "$\n`scanned $ definitions;\n"_fs.outf(
-        cout, info::light_green("Result:"), definitions.size()
+    "$\n`scanned about $ definitions;\n"_fs.outf(
+        cout, info::light_green("Result:"), definitions.size() - shortdef_cnt
     );
     "`generated $ definitions ($ predefined):\n"_fs.outf(
         cout, datatype_cnt + fun_cnt, predefined
@@ -484,6 +486,72 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         auto n = args[0]->gen_expr(entity, TypeInfo("nat"));
         auto xs = args[1]->gen_expr(entity, TypeInfo());
         return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
+    } else if (constructor == "append") {
+        assertt(args.size() == 2);
+        auto l = args[0]->gen_expr(entity, typeinfo);
+        auto r = args[1]->gen_expr(entity, typeinfo);
+        if (l == "{}" && r == "{}") {
+            return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
+        } else if (l == "{}") {
+            return r;
+        } else if (r == "{}") {
+            return l;
+        } else {
+            auto temp0 = entity.gen_temp();
+            auto temp1 = entity.gen_temp();
+            entity
+                .add_expr("auto $ = $;", temp0, l)
+                .add_expr("auto $ = $;", temp1, r)
+                .add_expr("$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1)
+            ;
+            return temp0;
+        }
+    } else if (constructor == "upto") {
+        auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
+
+        auto start = entity.gen_temp();
+        entity.add_expr("auto $ = $;", start, args[0]->gen_expr(entity, elem_typeinfo));
+
+        auto end = entity.gen_temp();
+        entity.add_expr("auto $ = $;", end, args[1]->gen_expr(entity, elem_typeinfo));
+
+        auto res = entity.gen_temp();
+        if (typeinfo.empty()) {
+            entity.add_expr("std::list<decltype($)> $;", start, res);
+        } else {
+            entity.add_expr("$ $;", typeinfo.to_str(), res);
+        }
+
+        auto i = entity.gen_temp();
+        entity.add_expr("for (auto $ = $; $ <= $; ++$) {", i, start, i, end, i).add_indent()
+            .add_expr("$.push_back($);", res, i).sub_indent()
+            .add_expr("}")
+        ;
+
+        return res;
+    } else if (constructor == "upt") {
+        auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
+
+        auto start = entity.gen_temp();
+        entity.add_expr("auto $ = $;", start, args[0]->gen_expr(entity, elem_typeinfo));
+
+        auto end = entity.gen_temp();
+        entity.add_expr("auto $ = $;", end, args[1]->gen_expr(entity, elem_typeinfo));
+
+        auto res = entity.gen_temp();
+        if (typeinfo.empty()) {
+            entity.add_expr("std::list<decltype($)> $;", start, res);
+        } else {
+            entity.add_expr("$ $;", typeinfo.to_str(), res);
+        }
+
+        auto i = entity.gen_temp();
+        entity.add_expr("for (auto $ = $; $ < $; ++$) {", i, start, i, end, i).add_indent()
+            .add_expr("$.push_back($);", res, i).sub_indent()
+            .add_expr("}")
+        ;
+
+        return res;
     }
 
     // for If-expression
@@ -706,86 +774,6 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
                 lhs->gen_expr(entity, typeinfo), rhs->gen_expr(entity, typeinfo)
             );
 
-        case Token::Type::At: {
-            auto l = lhs->gen_expr(entity, typeinfo);
-            auto r = rhs->gen_expr(entity, typeinfo);
-            if (l == "{}" && r == "{}") {
-                return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-            } else if (l == "{}") {
-                return r;
-            } else if (r == "{}") {
-                return l;
-            } else {
-                auto temp0 = entity.gen_temp();
-                auto temp1 = entity.gen_temp();
-                entity
-                    .add_expr("auto $ = $;", temp0, l)
-                    .add_expr("auto $ = $;", temp1, r)
-                    .add_expr("$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1)
-                ;
-                return temp0;
-            }
-        }
-        case Token::Type::Sharp: {
-            ConsExpr cons_expr("Cons");
-            cons_expr.args.push_back(move(this->lhs));
-            cons_expr.args.push_back(move(this->rhs));
-            auto res = cons_expr.gen_expr(entity, typeinfo);
-
-            lhs = move(cons_expr.args[0]);
-            rhs = move(cons_expr.args[1]);
-
-            return res;
-        }
-        case Token::Type::Doot: {
-            auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
-
-            auto start = entity.gen_temp();
-            entity.add_expr("auto $ = $;", start, lhs->gen_expr(entity, elem_typeinfo));
-
-            auto end = entity.gen_temp();
-            entity.add_expr("auto $ = $;", end, rhs->gen_expr(entity, elem_typeinfo));
-
-            auto res = entity.gen_temp();
-            if (typeinfo.empty()) {
-                entity.add_expr("std::list<decltype($)> $;", start, res);
-            } else {
-                entity.add_expr("$ $;", typeinfo.to_str(), res);
-            }
-
-            auto i = entity.gen_temp();
-            entity.add_expr("for (auto $ = $; $ <= $; ++$) {", i, start, i, end, i).add_indent()
-                .add_expr("$.push_back($);", res, i).sub_indent()
-                .add_expr("}")
-            ;
-
-            return res;
-        }
-        case Token::Type::DootLt: {
-            auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
-
-            auto start = entity.gen_temp();
-            entity.add_expr("auto $ = $;", start, lhs->gen_expr(entity, elem_typeinfo));
-
-            auto end = entity.gen_temp();
-            entity.add_expr("auto $ = $;", end, rhs->gen_expr(entity, elem_typeinfo));
-
-            auto res = entity.gen_temp();
-            if (typeinfo.empty()) {
-                entity.add_expr("std::list<decltype($)> $;", start, res);
-            } else {
-                entity.add_expr("$ $;", typeinfo.to_str(), res);
-            }
-
-            auto i = entity.gen_temp();
-            entity.add_expr("for (auto $ = $; $ < $; ++$) {", i, start, i, end, i).add_indent()
-                .add_expr("$.push_back($);", res, i).sub_indent()
-                .add_expr("}")
-            ;
-
-            return res;
-        }
-
         /**
          * WARN: BE CAREFUL HERE!
         */
@@ -879,7 +867,7 @@ bool DataTypeDef::is_predefined() const {
 
 bool FunctionDef::is_predefined() const {
     static set<string> predefined_func {
-        "length", "take", "drop"
+        "length", "take", "drop", "append", "upto", "upt"
     };
     return predefined_func.count(name);
 }

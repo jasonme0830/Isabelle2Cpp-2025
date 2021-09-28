@@ -55,7 +55,10 @@ set<Token::Type> bop_right_associativity {
     Token::Type::Sharp, Token::Type::At
 };
 
-map<Token::Type, string> bop_func_mapping;
+map<Token::Type, string> bop_func_mapping {
+    { Token::Type::Sharp, "Cons" },
+    { Token::Type::At, "append" },
+};
 
 set<Token::Type> temp_ignored_ops;
 
@@ -169,6 +172,10 @@ Ptr<DataTypeDef> Parser::gen_datatype_definition() {
         decl->decl_type = gen_template_type();
     }
 
+    if (decl->is_predefined()) {
+        return decl;
+    }
+
     eat<Token::Type::Equiv>("expected token Equiv");
     do {
         decl->components.push_back(gen_component());
@@ -220,6 +227,10 @@ Ptr<Definition> Parser::gen_function_definition() {
         check<Token::Type::Identifier>("expected token Identifier");
         decl->name = current_token_.value;
         get_next_token();
+    }
+
+    if (decl->is_predefined()) {
+        return decl;
     }
 
     eat<Token::Type::Colonn>("expected ::");
@@ -576,9 +587,11 @@ Ptr<Expr> Parser::gen_list() {
 
     auto expr = gen_expr();
     if (meet<Token::Type::Doot, Token::Type::DootLt>()) {
-        auto op = current_token_;
+        auto op = current_token_.type;
         get_next_token();
-        auto res = make_unique<BinaryOpExpr>(move(op), move(expr), gen_expr());
+        auto res = make_unique<ConsExpr>(op == Token::Type::Doot ? "upto"s : "upt"s,
+            move(expr), gen_expr()
+        );
         eat<Token::Type::RBracket>("expected token RBracket");
         return res;
     }

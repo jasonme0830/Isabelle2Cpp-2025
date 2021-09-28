@@ -267,6 +267,7 @@ struct Definition {
     virtual ~Definition() = 0;
     virtual bool is_predefined() const { return false; }
     virtual bool is_datatype_decl() const { return false; }
+    virtual bool is_function_decl() const { return false; }
     virtual void codegen(Code &) const = 0;
 };
 
@@ -306,6 +307,7 @@ struct FunctionDef final : Definition {
     std::vector<Equation> equations;
 
     bool is_predefined() const override;
+    bool is_function_decl() const override { return true; }
     void codegen(Code &) const override;
 };
 
