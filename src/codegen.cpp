@@ -368,13 +368,19 @@ string IntegralExpr::gen_expr(FuncEntity &, const TypeInfo &) const {
 }
 
 string VarExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
+    // for bool
     if (name == "True") {
         return "true";
     } else if (name == "False") {
         return "false";
-    } else if (name == "Nil") {
+    }
+
+    // for list
+    else if (name == "Nil") {
         return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-    } else if (name == "None") {
+    }
+
+    else if (name == "None") {
         return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
     } else if (auto data_type = entity.code().find_data_type_by_cons(name)) {
         if (data_type->is_recuisive()) {

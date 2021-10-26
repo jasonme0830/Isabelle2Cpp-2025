@@ -1,0 +1,29 @@
+# 1. type mapping
+# 2. operation mapping
+# 3. operation depends on type
+# 4. type depends on header
+
+[list]
+header => "list"
+target_type => "std::list"
+
+[list.pattern]
+
+[list.pattern.nil]
+source = "Nil"
+target = "!$curr.empty()"
+
+[list.pattern.cons]
+source = "Cons $1 $2"
+target = """$curr.empty()
+%match $1 $curr.front()
+%match $2 decltype($curr){std::next($curr.begin()), $curr.end()}
+"""
+
+[list.expr]
+
+# some expressions like Nil need to be built-in
+#  because they may need more logic instead of simple mapping
+[list.expr.nil]
+source = "Nil"
+target = "{}"
