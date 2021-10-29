@@ -12,28 +12,23 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Implement function bind to support function currying
-- [ ] Reimplement the function definition
-    ```cpp
-    std::uint64_t fib(const std::uint64_t &arg1) {
-        // print the source equation
-        if (arg1 == 0) {
-            return 1;
-        }
-
-        if (arg1 != 0) {
-            if (arg1 - 1 == 0) {
-                return 1;
-            }
-        }
-    }
-    ```
+- [ ] Reimplement function to support function currying
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
 - [ ] Do some benchmarks between generated cpp codes and generated sml codes
 
 ## DONE
 
+- [x] Reimplement the function conversion
+    ```cpp
+    std::uint64_t fib(const std::uint64_t &arg1) {
+        // fib 0 = 1
+        if (arg1 == 0) {
+            return 1;
+        }
+        ...
+    }
+    ```
 - [x] Support define infix operators
 - [x] Support definitions with only one equation
 - [x] Support parsing lambda expression
