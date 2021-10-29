@@ -158,7 +158,7 @@ std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
-        if ((x) < (arg2)) {
+        if (x < arg2) {
             temp0 = std::list<T1>{x};
         } else {
             temp0 = std::list<T1>();
@@ -182,14 +182,12 @@ template<typename T1, typename T2>
 T1 fst(const std::pair<T1, T2> &arg1) {
     // fst (first, second) = first
     auto first = arg1.first;
-    auto second = arg1.second;
     return first;
 }
 
 template<typename T1, typename T2>
 T2 snd(const std::pair<T1, T2> &arg1) {
     // snd (first, second) = second
-    auto first = arg1.first;
     auto second = arg1.second;
     return second;
 }
@@ -232,6 +230,11 @@ std::uint64_t fib(const std::uint64_t &arg1) {
     }
 
     // fib n = (fib (n - 1)) + (fib (n - 2))
-    return (fib((arg1) - (1))) + (fib((arg1) - (2)));
+    return (fib(arg1 - 1)) + (fib(arg1 - 2));
+}
+
+bool altrue(const std::uint64_t &arg1) {
+    // altrue _ = True
+    return true;
 }
 

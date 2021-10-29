@@ -319,8 +319,8 @@ std::uint64_t count_list(const std::list<T1> &arg1, const T1 &arg2) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::uint64_t temp0;
-        if ((x) == (arg2)) {
-            temp0 = (count_list(xs, arg2)) + (1);
+        if (x == arg2) {
+            temp0 = (count_list(xs, arg2)) + 1;
         } else {
             temp0 = count_list(xs, arg2);
         }
@@ -342,7 +342,7 @@ std::list<T1> remove1(const T1 &arg1, const std::list<T1> &arg2) {
         auto y = arg2.front();
         auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
-        if ((arg1) == (y)) {
+        if (arg1 == y) {
             temp0 = xs;
         } else {
             auto temp1 = remove1(arg1, xs);
@@ -367,7 +367,7 @@ std::list<T1> removeAll(const T1 &arg1, const std::list<T1> &arg2) {
         auto y = arg2.front();
         auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
-        if ((arg1) == (y)) {
+        if (arg1 == y) {
             temp0 = removeAll(arg1, xs);
         } else {
             auto temp1 = removeAll(arg1, xs);
@@ -391,7 +391,7 @@ bool distinct(const std::list<T1> &arg1) {
     if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
-        return (!set(xs).count(x)) && (distinct(xs));
+        return !set(xs).count(x) && distinct(xs);
     } else { // auto-generated for -Wreturn-type
         std::abort();
     }
@@ -443,7 +443,7 @@ std::list<T1> remdups_adj(const std::list<T1> &arg1) {
             auto y = temp0.front();
             auto xs = decltype(temp0){std::next(temp0.begin()), temp0.end()};
             std::list<T1> temp1;
-            if ((x) == (y)) {
+            if (x == y) {
                 auto temp2 = xs;
                 temp2.push_front(x);
                 temp1 = remdups_adj(temp2);
@@ -483,7 +483,7 @@ template<typename T1>
 std::list<std::pair<std::uint64_t, T1>> enumerate(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     // enumerate n xs = zip [n..<n + length xs] xs
     auto temp0 = arg1;
-    auto temp1 = (arg1) + (arg2.size());
+    auto temp1 = arg1 + arg2.size();
     std::list<decltype(temp0)> temp2;
     for (auto temp3 = temp0; temp3 < temp1; ++temp3) {
         temp2.push_back(temp3);
@@ -543,7 +543,6 @@ T1 min_list(const std::list<T1> &arg1) {
                     return x;
                 }
                 for(;;) {
-                    auto _ = temp1;
                     return min(x, min_list(xs));
                 }
             })();
@@ -574,7 +573,7 @@ T1 arg_min_list(const std::function<T2(const T1 &)> &arg1, const std::list<T1> &
             auto temp1 = arg_min_list(arg1, temp2);
             auto m = temp1;
             T1 temp3;
-            if ((f(x)) <= (f(m))) {
+            if (f(x) <= f(m)) {
                 temp3 = x;
             } else {
                 temp3 = m;
@@ -598,7 +597,7 @@ std::list<T1> insort_key(const std::function<T2(const T1 &)> &arg1, const T1 &ar
         auto y = arg3.front();
         auto ys = decltype(arg3){std::next(arg3.begin()), arg3.end()};
         std::list<T1> temp0;
-        if ((f(arg2)) <= (f(y))) {
+        if (f(arg2) <= f(y)) {
             auto temp1 = ys;
             temp1.push_front(y);
             auto temp2 = temp1;
@@ -734,6 +733,6 @@ std::list<T2> maps(const std::function<std::list<T2>(const T1 &)> &arg1, const s
 template<typename T1>
 std::uint64_t gen_length(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     // gen_length n xs = n + length xs
-    return (arg1) + (arg2.size());
+    return arg1 + arg2.size();
 }
 

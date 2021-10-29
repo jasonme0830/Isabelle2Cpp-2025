@@ -19,7 +19,7 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
             auto y = arg2.front();
             auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
             std::list<std::uint64_t> temp0;
-            if ((x) <= (y)) {
+            if (x <= y) {
                 auto temp1 = ys;
                 temp1.push_front(y);
                 auto temp2 = merge(xs, temp1);
@@ -52,7 +52,7 @@ std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1) {
     }
 
     // merge_sort xs = merge (merge_sort (take ((length xs) div 2) xs)) (merge_sort (drop ((length xs) div 2) xs))
-    return merge(merge_sort(decltype(arg1){ arg1.begin(), std::next(arg1.begin(), (arg1.size()) / (2)) }), merge_sort(decltype(arg1){ std::next(arg1.begin(), (arg1.size()) / (2)), arg1.end() }));
+    return merge(merge_sort(decltype(arg1){ arg1.begin(), std::next(arg1.begin(), arg1.size() / 2) }), merge_sort(decltype(arg1){ std::next(arg1.begin(), arg1.size() / 2), arg1.end() }));
 }
 
 template<typename T1>
@@ -64,7 +64,6 @@ std::uint64_t slength(const slist<T1> &arg1) {
 
     // slength (sCons x xs) = Suc (slength xs)
     if (arg1->cons == slistCons::sCons) {
-        auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
         return (slength(xs)) + 1;
     } else { // auto-generated for -Wreturn-type
@@ -115,7 +114,6 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
     if (arg1 != 0) {
         auto m = (arg1) - 1;
         if (arg2->cons == slistCons::sCons) {
-            auto x = arg2->get_c2().p1;
             auto xs = arg2->get_c2().p2;
             return sdrop(m, xs);
         }
@@ -143,7 +141,7 @@ slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::u
             auto y = arg2->get_c2().p1;
             auto ys = arg2->get_c2().p2;
             slist<std::uint64_t> temp0;
-            if ((x) <= (y)) {
+            if (x <= y) {
                 slist<std::uint64_t> temp1 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
                 slist<std::uint64_t> temp2 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
                 temp2->set_c2(y, ys);
@@ -180,6 +178,6 @@ slist<std::uint64_t> smerge_sort(const slist<std::uint64_t> &arg1) {
     }
 
     // smerge_sort xs = smerge (smerge_sort (stake ((slength xs) div 2) xs)) (smerge_sort (sdrop ((slength xs) div 2) xs))
-    return smerge(smerge_sort(stake((slength(arg1)) / (2), arg1)), smerge_sort(sdrop((slength(arg1)) / (2), arg1)));
+    return smerge(smerge_sort(stake(slength(arg1) / 2, arg1)), smerge_sort(sdrop(slength(arg1) / 2, arg1)));
 }
 

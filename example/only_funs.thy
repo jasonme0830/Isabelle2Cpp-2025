@@ -54,4 +54,7 @@ fun fib :: "nat \<Rightarrow> nat" where
   "fib (Suc 0) = 1" |
   "fib n = (fib (n - 1)) + (fib (n - 2))"
 
+fun altrue :: "nat \<Rightarrow> bool" where
+  "altrue _ = True"
+
 end

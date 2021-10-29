@@ -41,3 +41,5 @@ bool evn(const std::uint64_t &arg1);
 
 std::uint64_t fib(const std::uint64_t &arg1);
 
+bool altrue(const std::uint64_t &arg1);
+

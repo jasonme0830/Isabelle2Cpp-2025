@@ -56,7 +56,7 @@ std::uint64_t natofsnat(const snat &arg1) {
     // natofsnat (sSucc n) = (natofsnat n) + 1
     if (arg1->cons == snatCons::sSucc) {
         auto n = arg1->get_c2().p1;
-        return (natofsnat(n)) + (1);
+        return natofsnat(n) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
     }
@@ -131,7 +131,6 @@ snat len(const slist<T1> &arg1) {
 
     // len (sCons x xs) = sSucc (len xs)
     if (arg1->cons == slistCons::sCons) {
-        auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
         snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
         temp0->set_c2(len(xs));
@@ -167,9 +166,8 @@ std::uint64_t leninnat(const slist<T1> &arg1) {
 
     // leninnat (sCons x xs) = (leninnat xs) + 1
     if (arg1->cons == slistCons::sCons) {
-        auto x = arg1->get_c2().p1;
         auto xs = arg1->get_c2().p2;
-        return (leninnat(xs)) + (1);
+        return leninnat(xs) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
     }
