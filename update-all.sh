@@ -1,0 +1,9 @@
+#!/bin/bash
+for file in `find example/*.thy`
+do
+    echo "<CONVERT> $file"
+    bin/hol2cpp $file -s
+    echo ""
+done
+
+bin/hol2cpp hol_main/List_raw.thy -s
