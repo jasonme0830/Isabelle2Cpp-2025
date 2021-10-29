@@ -147,8 +147,12 @@ const vector<string> &FuncEntity::template_args() const {
     return template_args_;
 }
 
-std::map<std::string, std::string> &FuncEntity::varrm_mapping() {
+map<string, string> &FuncEntity::varrm_mapping() {
     return varrm_mapping_;
+}
+
+map<string, size_t> &FuncEntity::unused_varrm_count() {
+    return unused_varrm_count_;
 }
 
 string FuncEntity::gen_temp() {
@@ -160,12 +164,16 @@ void FuncEntity::entry_equation() {
     condition_count_ = 0;
     statements_.emplace_back();
     varrm_mapping_.clear();
+    unused_varrm_count_.clear();
 }
 
 void FuncEntity::close_equation() {
     while (condition_count_--) {
         sub_indent();
         statements_.back().push_back(string(indent_, ' ') + "}");
+    }
+    for (auto &[_, ind] : unused_varrm_count_) {
+        statements_.back()[ind].clear();
     }
 }
 

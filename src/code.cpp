@@ -320,7 +320,9 @@ void Code::gen_normal_func(FuncEntity &entity, bool is_impl) {
         }
 
         for (auto &statement : statements[i]) {
-            newline() << statement << endl;
+            if (!statement.empty()) {
+                newline() << statement << endl;
+            }
         }
     }
     sub_indent();

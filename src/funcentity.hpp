@@ -97,6 +97,7 @@ class FuncEntity {
     const std::vector<std::string> &template_args() const;
 
     std::map<std::string, std::string> &varrm_mapping();
+    std::map<std::string, std::size_t> &unused_varrm_count();
 
     /**
      * generate a temporary variable name
@@ -156,6 +157,7 @@ class FuncEntity {
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
     std::map<std::string, std::string> varrm_mapping_;
+    std::map<std::string, std::size_t> unused_varrm_count_;
 
     std::size_t temp_count_;
     std::size_t condition_count_;

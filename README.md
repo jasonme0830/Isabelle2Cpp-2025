@@ -19,6 +19,8 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Remove unused variable declarations
+- [x] Remove unused parens
 - [x] Reimplement the function conversion
     ```cpp
     std::uint64_t fib(const std::uint64_t &arg1) {

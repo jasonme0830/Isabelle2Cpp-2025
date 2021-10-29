@@ -294,6 +294,7 @@ void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
         if (std::regex_match(prev, arg_regex)) {
             entity.varrm_mapping()[name] = prev;
         } else {
+            entity.unused_varrm_count()[name] = entity.statements().back().size();
             entity.add_pattern("auto $ = $;", name, prev);
         }
     }
@@ -415,6 +416,7 @@ string VarExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         if (it != varrm_mapping.end()) {
             return it->second;
         } else {
+            entity.unused_varrm_count().erase(name);
             return name;
         }
     }
@@ -813,12 +815,18 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
                 }
             }
 
-        default:
+        default: {
             assertt(bop_mapping.count(op.type));
 
-            return "($) $ ($)"_fs.format(
-                lhs->gen_expr(entity, TypeInfo()), bop_mapping.at(op.type), rhs->gen_expr(entity, TypeInfo())
+            auto lhs_e = lhs->gen_expr(entity, TypeInfo());
+            auto rhs_e = rhs->gen_expr(entity, TypeInfo());
+
+            return "$ $ $"_fs.format(
+                (lhs_e.find(' ') != lhs_e.npos ? '(' + lhs_e + ')' : lhs_e),
+                bop_mapping.at(op.type),
+                (rhs_e.find(' ') != rhs_e.npos ? '(' + rhs_e + ')' : rhs_e)
             );
+        }
     }
     throw CodegenError("failed call BinaryOpExpr::gen_expr(...): unsupported binary operator " + op.value);
 }

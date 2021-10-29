@@ -90,29 +90,29 @@ class ArgumentParser {
     void print_help(std::ostream &out = std::cout) {
         out << "Usage: " << program_ << " [options]";
 
-        for (auto &ind_key : positional_arguments_) {
-            out << " " << ind_key.second;
+        for (auto &[_, key] : positional_arguments_) {
+            out << " " << key;
         }
 
         out << "\n\nPositional arguments:" << std::endl;
 
-        for (auto &ind_key : positional_arguments_) {
-            out << ind_key.second << "\t"
-                << arguments_[ind_key.first].help_info()
+        for (auto &[ind, key] : positional_arguments_) {
+            out << key << "\t"
+                << arguments_[ind].help_info()
                 << std::endl
             ;
         }
 
         out << "\nOptional arguments:" << std::endl;
 
-        for (auto &ind_keys : optional_arguments_) {
-            for (std::size_t i = 0; i < ind_keys.second.size(); ++i) {
+        for (auto &[ind, keys] : optional_arguments_) {
+            for (std::size_t i = 0; i < keys.size(); ++i) {
                 if (i) {
                     out << ", ";
                 }
-                out << ind_keys.second[i];
+                out << keys[i];
             }
-            out << "\t" << arguments_[ind_keys.first].help_info() << std::endl;
+            out << "\t" << arguments_[ind].help_info() << std::endl;
         }
     }
 
