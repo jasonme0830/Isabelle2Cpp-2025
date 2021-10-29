@@ -73,30 +73,6 @@ struct sbool {
     std::variant value;
 };
 
-enum optionCons {
-    None,
-    Some,
-};
-
-template<typename T1>
-struct option {
-    struct c2 {
-        T1 p1;
-    };
-
-    option(optionCons cons) : cons(cons) {}
-
-    c2 &get_c2() {
-        return std::get<c2>(value);
-    };
-    void set_c2(T1 _p1) {
-        value = c2{_p1};
-    }
-
-    optionCons cons;
-    std::variant<c2> value;
-};
-
 snat add(const snat &arg1, const snat &arg2);
 
 snat fib(const snat &arg1);

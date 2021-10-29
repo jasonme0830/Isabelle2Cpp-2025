@@ -1,76 +1,65 @@
 #include "only_funs.hpp"
 
 std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
-    for (;;) {
-        if (arg1 != 0) {
-            break;
-        }
+    // add 0 n = n
+    if (arg1 == 0) {
         return arg2;
     }
-    for (;;) {
-        if (arg1 == 0) {
-            break;
-        }
+
+    // add (Suc m) n = Suc (add m n)
+    if (arg1 != 0) {
         auto m = (arg1) - 1;
         return (add(m, arg2)) + 1;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::list<T1> app(const std::list<T1> &arg1, const std::list<T1> &arg2) {
-    for (;;) {
-        if (!arg1.empty()) {
-            break;
-        }
+    // app Nil ys = ys
+    if (arg1.empty()) {
         return arg2;
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // app (Cons x xs) ys = Cons x (app xs ys)
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = app(xs, arg2);
         temp0.push_front(x);
         return temp0;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::list<T1> rev(const std::list<T1> &arg1) {
-    for (;;) {
-        if (!arg1.empty()) {
-            break;
-        }
+    // rev Nil = Nil
+    if (arg1.empty()) {
         return std::list<T1>();
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // rev (Cons x xs) = app (rev xs) (Cons x Nil)
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
-        auto temp0 = std::list<T1>();
-        temp0.push_front(x);
-        return app(rev(xs), temp0);
+        return app(rev(xs), std::list<decltype(x)>{x});
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::list<T1> rev2(const std::list<T1> &arg1) {
-    for (;;) {
-        if (!arg1.empty()) {
-            break;
-        }
+    // rev2 Nil = Nil
+    if (arg1.empty()) {
         return std::list<T1>();
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // rev2 (x # xs) = (rev2 xs) @ (x # Nil)
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::list<T1>();
@@ -79,62 +68,56 @@ std::list<T1> rev2(const std::list<T1> &arg1) {
         auto temp2 = temp0;
         temp1.insert(temp1.end(), temp2.begin(), temp2.end());
         return temp1;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::list<T1> rev3(const std::list<T1> &arg1) {
-    for (;;) {
-        if (!arg1.empty()) {
-            break;
-        }
+    // rev3 [] = []
+    if (arg1.empty()) {
         return std::list<T1>();
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // rev3 (x # xs) = (rev3 xs) @ [x]
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = rev3(xs);
         auto temp1 = std::list<T1>{x};
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
         return temp0;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::optional<std::list<T1>> testoption(const std::optional<T1> &arg1) {
-    for (;;) {
-        if (arg1.has_value()) {
-            break;
-        }
+    // testoption None = Some Nil
+    if (!arg1.has_value()) {
         return std::make_optional<std::list<T1>>(std::list<T1>());
     }
-    for (;;) {
-        if (!arg1.has_value()) {
-            break;
-        }
+
+    // testoption (Some x) = Some [x]
+    if (arg1.has_value()) {
         auto x = arg1.value();
         return std::make_optional<std::list<T1>>(std::list<T1>{x});
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::set<T1> testset(const std::list<T1> &arg1) {
-    for (;;) {
-        if (!arg1.empty()) {
-            break;
-        }
+    // testset Nil = {}
+    if (arg1.empty()) {
         return std::set<T1>();
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // testset (x # xs) = {x} \<inter> testset(xs)
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
@@ -147,10 +130,9 @@ std::set<T1> testset(const std::list<T1> &arg1) {
         }
         return temp2;
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // testset (x # xs) = {x} \<union> testset(xs)
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
@@ -159,22 +141,20 @@ std::set<T1> testset(const std::list<T1> &arg1) {
             temp0.insert(temp2);
         }
         return temp0;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1>
 std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
-    for (;;) {
-        if (!arg1.empty()) {
-            break;
-        }
+    // testifelse [] n = []
+    if (arg1.empty()) {
         return std::list<T1>();
     }
-    for (;;) {
-        if (arg1.empty()) {
-            break;
-        }
+
+    // testifelse (x # xs) n = (if (x < n) then [x] else []) @ (testifelse xs n)
+    if (!arg1.empty()) {
         auto x = arg1.front();
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
@@ -187,86 +167,71 @@ std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
         auto temp2 = testifelse(xs, arg2);
         temp1.insert(temp1.end(), temp2.begin(), temp2.end());
         return temp1;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    std::abort();
 }
 
 template<typename T1, typename T2>
 std::pair<T1, T2> pair(const T1 &arg1, const T2 &arg2) {
-    for (;;) {
-        return std::make_pair(arg1, arg2);
-    }
-    std::abort();
+    // pair f s = (f, s)
+    return std::make_pair(arg1, arg2);
 }
 
 template<typename T1, typename T2>
 T1 fst(const std::pair<T1, T2> &arg1) {
-    for (;;) {
-        auto first = arg1.first;
-        auto second = arg1.second;
-        return first;
-    }
-    std::abort();
+    // fst (first, second) = first
+    auto first = arg1.first;
+    auto second = arg1.second;
+    return first;
 }
 
 template<typename T1, typename T2>
 T2 snd(const std::pair<T1, T2> &arg1) {
-    for (;;) {
-        auto first = arg1.first;
-        auto second = arg1.second;
-        return second;
-    }
-    std::abort();
+    // snd (first, second) = second
+    auto first = arg1.first;
+    auto second = arg1.second;
+    return second;
 }
 
 bool evn(const std::uint64_t &arg1) {
-    for (;;) {
-        if (arg1 != 0) {
-            break;
-        }
+    // evn 0 = True
+    if (arg1 == 0) {
         return true;
     }
-    for (;;) {
-        if (arg1 == 0) {
-            break;
-        }
-        if ((arg1) - 1 != 0) {
-            break;
-        }
-        return false;
-    }
-    for (;;) {
-        if (arg1 == 0) {
-            break;
-        }
+
+    // evn (Suc 0) = False
+    if (arg1 != 0) {
         if ((arg1) - 1 == 0) {
-            break;
+            return false;
         }
-        auto n = ((arg1) - 1) - 1;
-        return evn(n);
     }
-    std::abort();
+
+    // evn (Suc (Suc n)) = evn n
+    if (arg1 != 0) {
+        if ((arg1) - 1 != 0) {
+            auto n = ((arg1) - 1) - 1;
+            return evn(n);
+        }
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
+    }
 }
 
 std::uint64_t fib(const std::uint64_t &arg1) {
-    for (;;) {
-        if (arg1 != 0) {
-            break;
-        }
+    // fib 0 = 1
+    if (arg1 == 0) {
         return 1;
     }
-    for (;;) {
-        if (arg1 == 0) {
-            break;
+
+    // fib (Suc 0) = 1
+    if (arg1 != 0) {
+        if ((arg1) - 1 == 0) {
+            return 1;
         }
-        if ((arg1) - 1 != 0) {
-            break;
-        }
-        return 1;
     }
-    for (;;) {
-        return (fib((arg1) - (1))) + (fib((arg1) - (2)));
-    }
-    std::abort();
+
+    // fib n = (fib (n - 1)) + (fib (n - 2))
+    return (fib((arg1) - (1))) + (fib((arg1) - (2)));
 }
 
