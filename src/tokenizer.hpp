@@ -28,6 +28,9 @@ class Tokenizer {
 
     std::string get_err_info(const std::string &message) const;
 
+    Location last_location() const;
+    const std::vector<std::string> &file_content() const;
+
   private:
     TokenizeError error(const std::string &message);
     std::optional<Token> try_get_symbol();

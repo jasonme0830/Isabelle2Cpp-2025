@@ -234,6 +234,8 @@ struct BinaryOpExpr final : Expr {
 struct Equation final {
     Ptr<Expr> pattern;
     Ptr<Expr> expr;
+    // helper
+    std::string raw_str;
 
     void build_func_entity(FuncEntity &entity) const;
 };

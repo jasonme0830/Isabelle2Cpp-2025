@@ -284,11 +284,23 @@ Equation Parser::gen_equation() {
 
     eat<Token::Type::Quotation>("expected token Quotation");
     operators::temp_ignored_ops.insert(Token::Type::Equiv);
+
+    auto start = tokenizer_.last_location();
     equation.pattern = gen_expr();
     operators::temp_ignored_ops.erase(Token::Type::Equiv);
     eat<Token::Type::Equiv>("expected token Equiv");
     equation.expr = gen_expr();
+    auto end = tokenizer_.last_location();
+
     eat<Token::Type::Quotation>("expected token Quotation");
+
+    if (start.first == end.first) {
+        auto line = tokenizer_.file_content()[start.first - 1];
+        equation.raw_str = line.substr(start.second - 1, end.second - start.second);
+    } else {
+        auto line = tokenizer_.file_content()[start.first - 1];
+        equation.raw_str = line.substr(start.second - 1) + " ...";
+    }
 
     return equation;
 }

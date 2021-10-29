@@ -315,17 +315,14 @@ void Code::gen_normal_func(FuncEntity &entity, bool is_impl) {
     auto &statements = entity.statements();
     add_indent();
     for (size_t i = 0; i < statements.size(); ++i) {
-        "for (;;) {\n"_fs.outf(newline());
+        if (i) {
+            "\n"_fs.outf(out_.get());
+        }
 
-        add_indent();
         for (auto &statement : statements[i]) {
             newline() << statement << endl;
         }
-        sub_indent();
-
-        "}\n"_fs.outf(newline());
     }
-    "std::abort();\n"_fs.outf(newline());
     sub_indent();
     "}\n\n"_fs.outf(newline());
 }

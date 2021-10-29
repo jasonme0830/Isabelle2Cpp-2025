@@ -107,7 +107,8 @@ class FuncEntity {
     /**
      * entry a new equation
     */
-    void entry_euqation();
+    void entry_equation();
+    void close_equation();
 
     /**
      * add a pattern condition
@@ -140,6 +141,7 @@ class FuncEntity {
         return add_expr(fs.format(std::forward<Args>(args)...));
     }
 
+    void app_last_stmt(const std::string &app_stmt);
     const std::vector<std::vector<std::string>> &statements() const;
 
   private:
@@ -147,6 +149,7 @@ class FuncEntity {
     std::size_t indent_;
 
     std::string name_;
+    std::vector<std::string> raw_equations_;
 
     // the first type is the result type
     std::vector<TypeInfo> typeinfos_;
@@ -155,6 +158,7 @@ class FuncEntity {
     std::map<std::string, std::string> varrm_mapping_;
 
     std::size_t temp_count_;
+    std::size_t condition_count_;
     std::vector<std::vector<std::string>> statements_;
 };
 } // namespace hol2cpp

@@ -155,27 +155,37 @@ string FuncEntity::gen_temp() {
     return "temp" + to_string(temp_count_++);
 }
 
-void FuncEntity::entry_euqation() {
+void FuncEntity::entry_equation() {
     temp_count_ = 0;
+    condition_count_ = 0;
     statements_.emplace_back();
     varrm_mapping_.clear();
 }
 
+void FuncEntity::close_equation() {
+    while (condition_count_--) {
+        sub_indent();
+        statements_.back().push_back(string(indent_, ' ') + "}");
+    }
+}
+
 void FuncEntity::add_pattern(const string &pattern) {
-    statements_.back().push_back(string(indent_, ' ') + pattern + ";");
+    statements_.back().push_back(string(indent_, ' ') + pattern);
 }
 
 void FuncEntity::add_pattern_cond(const string &cond) {
     statements_.back().push_back(string(indent_, ' ') + "if ($) {"_fs.format(cond));
     add_indent();
-        statements_.back().push_back(string(indent_, ' ') + "break;");
-    sub_indent();
-    statements_.back().push_back(string(indent_, ' ') + "}");
+    ++condition_count_;
 }
 
 FuncEntity &FuncEntity::add_expr(const string &expr) {
     statements_.back().push_back(std::string(indent_, ' ') + expr);
     return *this;
+}
+
+void FuncEntity::app_last_stmt(const string &app_stmt) {
+    statements_.back().back() += app_stmt;
 }
 
 const vector<vector<string>> &FuncEntity::statements() const {

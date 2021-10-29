@@ -113,7 +113,18 @@ void FunctionDef::codegen(Code &code) const {
     entity.name() = name;
     type->build_func_entity(entity);
     for (auto &equation : equations) {
+        entity.entry_equation();
+        entity.add_expr("// $", equation.raw_str);
         equation.build_func_entity(entity);
+        entity.close_equation();
+    }
+
+    if (!entity.statements().empty() && !entity.statements().back().empty()) {
+        auto &last_stmt = entity.statements().back().back();
+        if (last_stmt.back() == '}') {
+            entity.app_last_stmt(" else { // auto-generated for -Wreturn-type");
+            entity.add_indent().add_expr("std::abort();").sub_indent().add_expr("}");
+        }
     }
 }
 
@@ -251,7 +262,6 @@ void FuncType::build_func_entity(FuncEntity &entity) const {
 }
 
 void Equation::build_func_entity(FuncEntity &entity) const {
-    entity.entry_euqation();
     pattern->gen_pattern(entity, "");
     entity.add_expr("return $;", expr->gen_expr(entity, entity.result_typeinfo()));
 }
@@ -262,29 +272,29 @@ void Expr::gen_pattern(FuncEntity &, const string &) const {
 }
 
 void IntegralExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
-    entity.add_pattern_cond("$ != $", prev, value);
+    entity.add_pattern_cond("$ == $", prev, value);
 }
 
 void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     if (name == entity.name()) {
         assertt(entity.args_size() == 0);
     } else if (name == "True") {
-        entity.add_pattern_cond("$ != true", prev);
+        entity.add_pattern_cond("$ == true", prev);
     } else if (name == "False") {
-        entity.add_pattern_cond("$ != false", prev);
+        entity.add_pattern_cond("$ == false", prev);
     } else if (name == "Nil") {
-        entity.add_pattern_cond("!$.empty()", prev);
+        entity.add_pattern_cond("$.empty()", prev);
     } else if (name == "None") {
-        entity.add_pattern_cond("$.has_value()", prev);
+        entity.add_pattern_cond("!$.has_value()", prev);
     } else if (auto data_type = entity.code().find_data_type_by_cons(name)) {
         string dot = data_type->is_recuisive() ? "->"s : "."s;
-        entity.add_pattern_cond("$$cons != $Cons::$", prev, dot, data_type->name(), name);
+        entity.add_pattern_cond("$$cons == $Cons::$", prev, dot, data_type->name(), name);
     } else {
         static std::regex arg_regex(R"(arg[1-9][0-9]*)");
         if (std::regex_match(prev, arg_regex)) {
             entity.varrm_mapping()[name] = prev;
         } else {
-            entity.add_pattern("auto $ = $", name, prev);
+            entity.add_pattern("auto $ = $;", name, prev);
         }
     }
 }
@@ -296,10 +306,10 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
             args[i]->gen_pattern(entity, "arg" + to_string(i + 1));
         }
     } else if (constructor == "Suc") {
-        entity.add_pattern_cond("$ == 0", prev);
+        entity.add_pattern_cond("$ != 0", prev);
         args[0]->gen_pattern(entity, "(" + prev + ") - 1");
     } else if (constructor == "Some") {
-        entity.add_pattern_cond("!$.has_value()", prev);
+        entity.add_pattern_cond("$.has_value()", prev);
         args[0]->gen_pattern(entity, prev + ".value()");
     } else if (constructor == "Pair") {
         assertt(args.size() == 2);
@@ -309,15 +319,22 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 
     // for List
     else if (constructor == "Cons") {
-        entity.add_pattern_cond("$.empty()", prev);
+        entity.add_pattern_cond("!$.empty()", prev);
         args[0]->gen_pattern(entity, prev + ".front()");
-        args[1]->gen_pattern(entity, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+
+        if (dynamic_cast<VarExpr *>(args[1].get())) {
+            args[1]->gen_pattern(entity, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+        } else {
+            auto temp = entity.gen_temp();
+            entity.add_pattern("decltype($) temp(std::next($).begin(), $.end());", prev, prev, prev);
+            args[1]->gen_pattern(entity, temp);
+        }
     }
 
     // for Datatype
     else if (auto data_type = entity.code().find_data_type_by_cons(constructor)) {
         string dot = data_type->is_recuisive() ? "->"s : "."s;
-        entity.add_pattern_cond("$$cons != $Cons::$", prev, dot, data_type->name(), constructor);
+        entity.add_pattern_cond("$$cons == $Cons::$", prev, dot, data_type->name(), constructor);
         auto pos = data_type->pos_of_cons(constructor);
         for (size_t i = 0; i < args.size(); ++i) {
             args[i]->gen_pattern(entity, "$$get_c$().p$"_fs.format(prev, dot, pos + 1, i + 1));
@@ -331,7 +348,7 @@ void ListExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     if (exprs.empty()) {
         VarExpr("Nil").gen_pattern(entity, prev);
     } else {
-        entity.add_pattern_cond("$.size() != $", prev, exprs.size());
+        entity.add_pattern_cond("$.size() == $", prev, exprs.size());
         for (std::size_t i = 0; i < exprs.size(); ++i) {
             exprs[i]->gen_pattern(entity, "*std::next($.begin(), $)"_fs.format(prev, i));
         }
@@ -340,7 +357,7 @@ void ListExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 
 void SetExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     assertt(exprs.empty());
-    entity.add_pattern_cond("!$.empty()", prev);
+    entity.add_pattern_cond("$.empty()", prev);
 }
 
 void BinaryOpExpr::gen_pattern(FuncEntity &entity, const string &prev) const {

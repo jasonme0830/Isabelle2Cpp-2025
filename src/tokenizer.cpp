@@ -257,4 +257,12 @@ string Tokenizer::get_err_info(const string &message) const {
 TokenizeError Tokenizer::error(const string &message) {
     return TokenizeError(get_err_info(message));
 }
+
+Location Tokenizer::last_location() const {
+    return last_location_;
+}
+
+const vector<string> &Tokenizer::file_content() const {
+    return file_content_;
+}
 } // namespace hol2cpp
