@@ -85,7 +85,7 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // stake (Suc m) (sCons x xs) = sCons x (stake m xs)
     if (arg1 != 0) {
-        auto m = (arg1) - 1;
+        auto m = arg1 - 1;
         if (arg2->cons == slistCons::sCons) {
             auto x = arg2->get_c2().p1;
             auto xs = arg2->get_c2().p2;
@@ -112,7 +112,7 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // sdrop (Suc m) (sCons x xs) = sdrop m xs
     if (arg1 != 0) {
-        auto m = (arg1) - 1;
+        auto m = arg1 - 1;
         if (arg2->cons == slistCons::sCons) {
             auto xs = arg2->get_c2().p2;
             return sdrop(m, xs);
@@ -189,12 +189,12 @@ std::uint64_t fib(const std::uint64_t &arg1) {
 
     // fib (Suc 0) = 1
     if (arg1 != 0) {
-        if ((arg1) - 1 == 0) {
+        if (arg1 - 1 == 0) {
             return 1;
         }
     }
 
     // fib n = (fib (n - 1)) + (fib (n - 2))
-    return (fib(arg1 - 1)) + (fib(arg1 - 2));
+    return fib(arg1 - 1) + fib(arg1 - 2);
 }
 

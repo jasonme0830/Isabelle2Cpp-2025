@@ -70,7 +70,7 @@ snat snatofnat(const std::uint64_t &arg1) {
 
     // snatofnat (Suc n) = sSucc (snatofnat n)
     if (arg1 != 0) {
-        auto n = (arg1) - 1;
+        auto n = arg1 - 1;
         snat temp0 = std::make_shared<snatElem>(snatCons::sSucc);
         temp0->set_c2(snatofnat(n));
         return temp0;
@@ -148,7 +148,7 @@ slist<std::uint64_t> listwithlen(const std::uint64_t &arg1) {
 
     // listwithlen (Suc n) = sCons 1 (listwithlen n)
     if (arg1 != 0) {
-        auto n = (arg1) - 1;
+        auto n = arg1 - 1;
         slist<std::uint64_t> temp0 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
         temp0->set_c2(1, listwithlen(n));
         return temp0;
