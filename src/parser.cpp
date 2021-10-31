@@ -290,17 +290,9 @@ Equation Parser::gen_equation() {
     operators::temp_ignored_ops.erase(Token::Type::Equiv);
     eat<Token::Type::Equiv>("expected token Equiv");
     equation.expr = gen_expr();
-    auto end = tokenizer_.last_location();
+    equation.raw_str = tokenizer_.file_content(start, tokenizer_.last_location());
 
     eat<Token::Type::Quotation>("expected token Quotation");
-
-    if (start.first == end.first) {
-        auto line = tokenizer_.file_content()[start.first - 1];
-        equation.raw_str = line.substr(start.second - 1, end.second - start.second);
-    } else {
-        auto line = tokenizer_.file_content()[start.first - 1];
-        equation.raw_str = line.substr(start.second - 1) + " ...";
-    }
 
     return equation;
 }
@@ -522,9 +514,11 @@ Ptr<Expr> Parser::gen_letin() {
 Equation Parser::gen_case_equation() {
     Equation equation;
 
+    auto start = tokenizer_.last_location();
     equation.pattern = gen_expr();
     eat<Token::Type::Rightarrow>("expected token Rightarrow");
     equation.expr = gen_expr();
+    equation.raw_str = tokenizer_.file_content(start, tokenizer_.last_location());
 
     return equation;
 }

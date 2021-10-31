@@ -177,6 +177,14 @@ void FuncEntity::close_equation() {
     }
 }
 
+void FuncEntity::close_sub_equation(size_t n) {
+    while (condition_count_ > n) {
+        --condition_count_;
+        sub_indent();
+        statements_.back().push_back(string(indent_, ' ') + "}");
+    }
+}
+
 void FuncEntity::add_pattern(const string &pattern) {
     statements_.back().push_back(string(indent_, ' ') + pattern);
 }
@@ -190,6 +198,10 @@ void FuncEntity::add_pattern_cond(const string &cond) {
 FuncEntity &FuncEntity::add_expr(const string &expr) {
     statements_.back().push_back(std::string(indent_, ' ') + expr);
     return *this;
+}
+
+size_t FuncEntity::condition_count() const {
+    return condition_count_;
 }
 
 void FuncEntity::app_last_stmt(const string &app_stmt) {

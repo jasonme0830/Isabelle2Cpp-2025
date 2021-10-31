@@ -262,7 +262,21 @@ Location Tokenizer::last_location() const {
     return last_location_;
 }
 
-const vector<string> &Tokenizer::file_content() const {
-    return file_content_;
+string Tokenizer::file_content(const Location &start, const Location &end) const {
+    string res;
+
+    if (start.first == end.first) {
+        auto line = file_content_[start.first - 1];
+        res = line.substr(start.second - 1, end.second - start.second);
+    } else {
+        auto line = file_content_[start.first - 1];
+        res = line.substr(start.second - 1) + " ...";
+    }
+
+    while (!res.empty() && res.back() == ' ') {
+        res.pop_back();
+    }
+
+    return res;
 }
 } // namespace hol2cpp

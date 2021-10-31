@@ -29,7 +29,7 @@ class Tokenizer {
     std::string get_err_info(const std::string &message) const;
 
     Location last_location() const;
-    const std::vector<std::string> &file_content() const;
+    std::string file_content(const Location &start, const Location &end) const;
 
   private:
     TokenizeError error(const std::string &message);

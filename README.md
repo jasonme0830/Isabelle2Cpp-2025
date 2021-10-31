@@ -20,8 +20,8 @@ You can see some examples in [example/](example/)
 ## DONE
 
 - [x] Remove unused variable declarations
-- [x] Remove unused parens
-- [x] Reimplement the function conversion
+- [x] Remove unused parens when generating expressions
+- [x] Reimplement the function conversion by using if directly instead of for(;;) {}
     ```cpp
     std::uint64_t fib(const std::uint64_t &arg1) {
         // fib 0 = 1

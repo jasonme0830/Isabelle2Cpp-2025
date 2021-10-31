@@ -110,6 +110,7 @@ class FuncEntity {
     */
     void entry_equation();
     void close_equation();
+    void close_sub_equation(size_t n);
 
     /**
      * add a pattern condition
@@ -142,6 +143,7 @@ class FuncEntity {
         return add_expr(fs.format(std::forward<Args>(args)...));
     }
 
+    std::size_t condition_count() const;
     void app_last_stmt(const std::string &app_stmt);
     const std::vector<std::vector<std::string>> &statements() const;
 

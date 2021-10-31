@@ -13,6 +13,37 @@
 
 using namespace std;
 
+namespace {
+bool is_unit(const string &expr) {
+    if (expr.find(' ') == expr.npos) {
+        return true;
+    }
+
+    int cnt = 0;
+    for (auto chr : expr) {
+        if (chr == '(' || chr == '[' || chr == '{') {
+            ++cnt;
+        } else if (chr == ')' || chr == ']' || chr == '}') {
+            --cnt;
+        } else {
+            if (cnt == 0 && chr == ' ') {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+string enclose_expr(const string &expr) {
+    if (is_unit(expr)) {
+        return expr;
+    } else {
+        return '(' + expr + ')';
+    }
+}
+};
+
 namespace hol2cpp {
 static const map<string, string> localNormalTypeMapping {
     { "nat", "std::uint64_t" },
@@ -308,7 +339,7 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
         }
     } else if (constructor == "Suc") {
         entity.add_pattern_cond("$ != 0", prev);
-        args[0]->gen_pattern(entity, "(" + prev + ") - 1");
+        args[0]->gen_pattern(entity, enclose_expr(prev) + " - 1");
     } else if (constructor == "Some") {
         entity.add_pattern_cond("$.has_value()", prev);
         args[0]->gen_pattern(entity, prev + ".value()");
@@ -327,7 +358,7 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
             args[1]->gen_pattern(entity, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
         } else {
             auto temp = entity.gen_temp();
-            entity.add_pattern("decltype($) temp(std::next($).begin(), $.end());", prev, prev, prev);
+            entity.add_pattern("decltype($) $(std::next($).begin(), $.end());", prev, temp, prev, prev);
             args[1]->gen_pattern(entity, temp);
         }
     }
@@ -818,13 +849,10 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
         default: {
             assertt(bop_mapping.count(op.type));
 
-            auto lhs_e = lhs->gen_expr(entity, TypeInfo());
-            auto rhs_e = rhs->gen_expr(entity, TypeInfo());
-
             return "$ $ $"_fs.format(
-                (lhs_e.find(' ') != lhs_e.npos ? '(' + lhs_e + ')' : lhs_e),
+                enclose_expr(lhs->gen_expr(entity, TypeInfo())),
                 bop_mapping.at(op.type),
-                (rhs_e.find(' ') != rhs_e.npos ? '(' + rhs_e + ')' : rhs_e)
+                enclose_expr(rhs->gen_expr(entity, TypeInfo()))
             );
         }
     }
@@ -837,14 +865,23 @@ string CaseExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 
     auto e = expr->gen_expr(entity, TypeInfo());
     auto temp1 = entity.gen_temp();
-    entity.add_expr("auto $ = $;", temp1, e);
+    entity.add_expr("auto $ = $;\n", temp1, e);
 
-    for (auto &equation : equations) {
-        entity.add_expr("for(;;) {").add_indent();
-        equation.pattern->gen_pattern(entity, temp1);
-        entity.add_expr("return $;", equation.expr->gen_expr(entity, typeinfo)).sub_indent()
-            .add_expr("}")
-        ;
+    for (size_t i = 0; i < equations.size(); ++i) {
+        if (i) {
+            entity.app_last_stmt("\n");
+        }
+
+        auto condition_cnt = entity.condition_count();
+        entity.add_expr("// $", equations[i].raw_str);
+        equations[i].pattern->gen_pattern(entity, temp1);
+        entity.add_expr("return $;", equations[i].expr->gen_expr(entity, typeinfo));
+        entity.close_sub_equation(condition_cnt);
+    }
+
+    if (entity.statements().back().back().back() == '}') {
+        entity.app_last_stmt(" else { // auto-generated for -Wreturn-type");
+        entity.add_indent().add_expr("std::abort();").sub_indent().add_expr("}");
     }
 
     entity.sub_indent()
