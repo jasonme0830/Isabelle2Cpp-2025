@@ -4,8 +4,8 @@
 # 4. type depends on header
 
 [list]
-header => "list"
-target_type => "std::list"
+header = "list"
+target_type = "std::list"
 
 [list.pattern]
 
@@ -15,15 +15,23 @@ target = "!$curr.empty()"
 
 [list.pattern.cons]
 source = "Cons $1 $2"
-target = """$curr.empty()
+target = "$curr.empty()
 %match $1 $curr.front()
 %match $2 decltype($curr){std::next($curr.begin()), $curr.end()}
-"""
+"
 
 [list.expr]
 
 # some expressions like Nil need to be built-in
 #  because they may need more logic instead of simple mapping
 [list.expr.nil]
-source = "Nil"
+source = ["Nil", "[]"]
 target = "{}"
+
+[list.expr.cons]
+source = "Cons $1 $2"
+target = "auto $temp = $2; $temp.push_front($1);"
+
+# simple mapping cannot hold
+[list.expr.cons2]
+source = "[...]"
