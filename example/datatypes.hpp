@@ -30,20 +30,20 @@ struct snatElem {
 };
 
 template<typename T1>
-struct slistElem;
+struct slistImpl;
 template<typename T1>
-using slist = std::shared_ptr<slistElem<T1>>;
+using slist = std::shared_ptr<slistImpl<T1>>;
 
 template<typename T1>
-struct slistElem {
+struct slistImpl {
     static slist sNil() {
-        auto temp0 = std::make_shared<slistElem<T1>>();
+        auto temp0 = std::make_shared<slistImpl<T1>>();
         temp0->value = _sNil {};
         return temp0;
     }
 
     static slist sCons(T1 p1, slist<T1> p2) {
-        auto temp0 = std::make_shared<slistElem<T1>>();
+        auto temp0 = std::make_shared<slistImpl<T1>>();
         temp0->value = _sCons { p1, p2 };
         return temp0;
     }
