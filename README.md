@@ -12,9 +12,8 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Reimplement the target class definition
-- [ ] Re-think the implementation of the conversion based on definitions
-- [ ] Use more const reference to void copying and re-think the relations between values
+- [ ] Reimplement the conversion based on definitions
+- [ ] Use more const reference to void copying and make sure copy only happens when constructing values
 - [ ] Reimplement function to support function currying
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
