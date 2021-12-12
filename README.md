@@ -48,3 +48,7 @@ You can see some examples in [example/](example/)
 - [x] Remove `construct` and use `std::make_shared` directly now
 - [x] Add optimization of variables removal
 - [x] Try to reuse values as many as possible [Use `const T &` for parameters and update all conversions to make sure that parameters won't be edited]
+
+## Tips
+
+1. Use shared_ptr in order to reuse existed values. For example, in `Cons x xs = Cons x xs`, xs will be reused without copy.
