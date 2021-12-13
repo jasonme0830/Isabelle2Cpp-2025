@@ -29,46 +29,34 @@ struct snatElem {
     std::variant<c2> value;
 };
 
-template<typename T1>
-struct slistImpl;
-template<typename T1>
-using slist = std::shared_ptr<slistImpl<T1>>;
+enum slistCons {
+    sNil,
+    sCons,
+};
 
 template<typename T1>
-struct slistImpl {
-    static slist sNil() {
-        auto temp0 = std::make_shared<slistImpl<T1>>();
-        temp0->value = _sNil {};
-        return temp0;
-    }
+struct slistElem;
+template<typename T1>
+using slist = std::shared_ptr<slistElem<T1>>;
 
-    static slist sCons(T1 p1, slist<T1> p2) {
-        auto temp0 = std::make_shared<slistImpl<T1>>();
-        temp0->value = _sCons { p1, p2 };
-        return temp0;
-    }
-
-    bool is_sNil() const {
-        return std::holds_alternative<_sNil>(value);
-    }
-
-    bool is_sCons() const {
-        return std::holds_alternative<_sCons>(value);
-    }
-
-    const _sCons &as_sCons() const {
-        return std::get<_sCons>(value);
-    }
-
-  private:
-    struct _sNil {};
-
-    struct _sCons {
+template<typename T1>
+struct slistElem {
+    struct c2 {
         T1 p1;
         slist<T1> p2;
     };
 
-    std::variant<_sNil, _sCons> value;
+    slistElem(slistCons cons) : cons(cons) {}
+
+    c2 &get_c2() {
+        return std::get<c2>(value);
+    };
+    void set_c2(T1 _p1, slist<T1> _p2) {
+        value = c2{_p1, _p2};
+    }
+
+    slistCons cons;
+    std::variant<c2> value;
 };
 
 enum sboolCons {
