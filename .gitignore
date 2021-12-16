@@ -31,14 +31,11 @@
 *.out
 *.app
 
-
-#Added by cargo
-#
-#already existing elements are commented out
-
+# Added manually
 /target
 **/*.rs.bk
 .vscode/
 bin/
 *.out
 test/
+*.dSYM
