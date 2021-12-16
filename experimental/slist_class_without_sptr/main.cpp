@@ -38,6 +38,6 @@ slist<T1> rev(const slist<T1> &arg1) {
 int main() {
     auto l = slist<int>::sCons(1, slist<int>::sCons(2, slist<int>::sNil()));
     std::cout << l.as_sCons().p1() << std::endl;
-    l = rev(l);
-    std::cout << l.as_sCons().p1() << std::endl;
+    auto rl = rev(l);
+    std::cout << rl.as_sCons().p1() << std::endl;
 }

@@ -27,6 +27,7 @@ public:
         elem->ref++;
     }
 
+    // not need move ctor because it only has the pointer to the elem
     slist(const slist &other) : elem(other.elem) {
         elem->ref++;
     }

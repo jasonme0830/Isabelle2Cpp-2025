@@ -2,7 +2,7 @@
 #include <variant>
 
 template<typename T1>
-struct slist {
+class slist {
     struct _sNil {};
     struct _sCons {
         T1 p1_;
@@ -13,6 +13,7 @@ struct slist {
     };
 
     std::variant<_sNil, _sCons> value;
+    slist(std::variant<_sNil, _sCons> value) : value(std::move(value)) {}
 
   public:
     static slist<T1> sNil() {
@@ -29,4 +30,7 @@ struct slist {
     const _sCons &as_sCons() const {
         return std::get<_sCons>(value);
     }
+
+    slist(const slist &other) : value(other.value) {}
+    slist(slist &&other) : value(std::move(other.value)) {}
 };
