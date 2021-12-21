@@ -12,6 +12,7 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
+- [ ] Generate function templates in .hpp file
 - [ ] Reimplement function to support function currying
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
