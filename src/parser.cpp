@@ -140,7 +140,7 @@ Theory Parser::gen_theory() {
             );
             tokenizer_.get_next_input();
         } catch (const ParseError &e) {
-            theory.definitions.push_back(nullptr);
+            theory.definitions.push_back(make_unique<ErrorDefinition>(e.error_type()));
             "$ in No.$ definition:\n$\n"_fs.outf(cerr,
                 info::light_blue("parse error"), theory.definitions.size(), e.what()
             );
@@ -156,9 +156,17 @@ Ptr<Definition> Parser::gen_declaration() {
     if (meet<Token::Type::EndOfFile>()) {
         return nullptr;
     } else if (meet<Token::Type::Datatype>()) {
-        return gen_datatype_definition();
+        try {
+            return gen_datatype_definition();
+        } catch (const ParseError &e) {
+            throw ParseError(e, PEType::DataType);
+        }
     } else {
-        return gen_function_definition();
+        try {
+            return gen_function_definition();
+        } catch (const ParseError &e) {
+            throw ParseError(e, PEType::Function);
+        }
     }
 }
 

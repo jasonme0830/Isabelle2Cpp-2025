@@ -3,74 +3,72 @@
 #include <memory>
 #include <variant>
 
-enum snatCons {
-    sZero,
-    sSucc,
-};
+struct snat {
+    struct _sZero {};
+    struct _sSucc {
+        std::shared_ptr<snat> p1_;
 
-struct snatElem;
-using snat = std::shared_ptr<snatElem>;
-
-struct snatElem {
-    struct c2 {
-        snat p1;
+        snat p1() const { return *p1_; }
     };
 
-    snatElem(snatCons cons) : cons(cons) {}
+    std::variant<_sZero, _sSucc> value_;
 
-    c2 &get_c2() {
-        return std::get<c2>(value);
-    };
-    void set_c2(snat _p1) {
-        value = c2{_p1};
+    static snat sZero() {
+        return snat { _sZero {} };
+    }
+    static snat sSucc(snat p1) {
+        return snat { _sSucc {std::make_shared<snat>(p1)} };
     }
 
-    snatCons cons;
-    std::variant<c2> value;
-};
+    bool is_sZero() const { return std::holds_alternative<_sZero>(value_); }
+    bool is_sSucc() const { return std::holds_alternative<_sSucc>(value_); }
 
-enum slistCons {
-    sNil,
-    sCons,
+    const _sSucc &as_sSucc() const { return std::get<_sSucc>(value_); }
 };
 
 template<typename T1>
-struct slistElem;
-template<typename T1>
-using slist = std::shared_ptr<slistElem<T1>>;
+struct slist {
+    struct _sNil {};
+    struct _sCons {
+        T1 p1_;
+        std::shared_ptr<slist<T1>> p2_;
 
-template<typename T1>
-struct slistElem {
-    struct c2 {
-        T1 p1;
-        slist<T1> p2;
+        const T1 &p1() const { return p1_; }
+        slist<T1> p2() const { return *p2_; }
     };
 
-    slistElem(slistCons cons) : cons(cons) {}
+    std::variant<_sNil, _sCons> value_;
 
-    c2 &get_c2() {
-        return std::get<c2>(value);
-    };
-    void set_c2(T1 _p1, slist<T1> _p2) {
-        value = c2{_p1, _p2};
+    static slist<T1> sNil() {
+        return slist<T1> { _sNil {} };
+    }
+    static slist<T1> sCons(T1 p1, slist<T1> p2) {
+        return slist<T1> { _sCons {p1, std::make_shared<slist<T1>>(p2)} };
     }
 
-    slistCons cons;
-    std::variant<c2> value;
-};
+    bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
+    bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
 
-enum sboolCons {
-    sTrue,
-    sFalse,
+    const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 };
 
 struct sbool {
+    struct _sTrue {};
+    struct _sFalse {};
 
-    sbool(sboolCons cons) : cons(cons) {}
+    std::variant<_sTrue, _sFalse> value_;
+
+    static sbool sTrue() {
+        return sbool { _sTrue {} };
+    }
+    static sbool sFalse() {
+        return sbool { _sFalse {} };
+    }
+
+    bool is_sTrue() const { return std::holds_alternative<_sTrue>(value_); }
+    bool is_sFalse() const { return std::holds_alternative<_sFalse>(value_); }
 
 
-    sboolCons cons;
-    std::variant value;
 };
 
 snat add(const snat &arg1, const snat &arg2);

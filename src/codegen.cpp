@@ -66,23 +66,22 @@ Definition::~Definition() = default;
  * TODO: distinguish ShortDef with others
 */
 void Theory::codegen(Code &code) const {
-    size_t predefined = 0, datatype_cnt = 0, fun_cnt = 0, shortdef_cnt = 0;
+    size_t datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
+    size_t predefined = 0, datatype_gens = 0, function_gens = 0, shortdef_gens = 0;
     for (size_t i = 0; i < definitions.size(); ++i) {
         auto decl = definitions[i].get();
-        if (decl) try {
-            if (decl->is_predefined()) {
-                ++predefined;
-            } else {
-                decl->codegen(code);
-            }
 
-            if (decl->is_datatype_decl()) {
-                ++datatype_cnt;
-            } else if (decl->is_function_decl()) {
-                ++fun_cnt;
-            } else {
-                ++shortdef_cnt;
-            }
+        if      (decl->is_datatype_decl()) { ++datatype_defs; }
+        else if (decl->is_function_decl()) { ++function_defs; }
+        else                               { ++shortdef_defs; }
+
+        if (!decl->is_error()) try {
+            if (decl->is_predefined()) { ++predefined; }
+            else { decl->codegen(code); }
+
+            if      (decl->is_datatype_decl()) { ++datatype_gens; }
+            else if (decl->is_function_decl()) { ++function_gens; }
+            else                               { ++shortdef_gens; }
         } catch (const exception &e) {
             string name;
             if (auto datatype_decl = dynamic_cast<DataTypeDef *>(decl)) {
@@ -99,14 +98,16 @@ void Theory::codegen(Code &code) const {
         }
     }
 
-    "$\n`scanned about $ definitions;\n"_fs.outf(
-        cout, info::light_green("Result:"), definitions.size() - shortdef_cnt
+    auto defs = definitions.size() - shortdef_defs;
+    auto gens = datatype_gens + function_gens;
+    "$\n`scanned $ definitions, contain $ datatypes and $ functions;\n"_fs.outf(
+        cout, info::light_green("Result:"), defs, datatype_defs, function_defs
     );
-    "`generated $ definitions ($ predefined):\n"_fs.outf(
-        cout, datatype_cnt + fun_cnt, predefined
+    "`generated $ definitions, contain $ predefined:\n"_fs.outf(
+        cout, gens, predefined
     );
     "``$ datatypes and $ functions.\n"_fs.outf(
-        cout, datatype_cnt, fun_cnt
+        cout, datatype_gens, function_gens
     );
 }
 
@@ -115,8 +116,9 @@ void DataTypeDef::codegen(Code &code) const {
 
     auto name = decl_type->main_name();
     auto &data_type = code.entry_data_type(name);
+
     data_type.name() = name;
-    auto self = decl_type->build_data_type(data_type);
+    data_type.self() = decl_type->build_data_type(data_type);
 
     vector<vector<Ptr<Type>>> abstracts;
     for (size_t i = 0; i < components.size(); ++i) {
@@ -128,7 +130,7 @@ void DataTypeDef::codegen(Code &code) const {
         for (auto &type : components[i].arguments) {
             auto field_type = type->build_data_type(data_type);
             data_type.add_field_type(field_type);
-            if (field_type == self) {
+            if (field_type == data_type.self()) {
                 data_type.is_recuisive() = true;
                 code.add_header("memory");
             }
@@ -317,16 +319,21 @@ void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
         entity.add_pattern_cond("$.empty()", prev);
     } else if (name == "None") {
         entity.add_pattern_cond("!$.has_value()", prev);
-    } else if (auto data_type = entity.code().find_data_type_by_cons(name)) {
-        string dot = data_type->is_recuisive() ? "->"s : "."s;
-        entity.add_pattern_cond("$$cons == $Cons::$", prev, dot, data_type->name(), name);
-    } else {
+    }
+    
+    // for constructors
+    else if (auto data_type = entity.code().find_data_type_by_cons(name)) {
+        entity.add_pattern_cond("$.is_$()", prev, name);
+    } 
+    
+    // for variables
+    else {
         static std::regex arg_regex(R"(arg[1-9][0-9]*)");
         if (std::regex_match(prev, arg_regex)) {
             entity.varrm_mapping()[name] = prev;
         } else {
             entity.unused_varrm_count()[name] = entity.statements().back().size();
-            entity.add_pattern("auto $ = $;", name, prev);
+            entity.add_pattern("auto &&$ = $;", name, prev);
         }
     }
 }
@@ -365,11 +372,10 @@ void ConsExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
 
     // for Datatype
     else if (auto data_type = entity.code().find_data_type_by_cons(constructor)) {
-        string dot = data_type->is_recuisive() ? "->"s : "."s;
-        entity.add_pattern_cond("$$cons == $Cons::$", prev, dot, data_type->name(), constructor);
+        entity.add_pattern_cond("$.is_$()", prev, constructor);
         auto pos = data_type->pos_of_cons(constructor);
         for (size_t i = 0; i < args.size(); ++i) {
-            args[i]->gen_pattern(entity, "$$get_c$().p$"_fs.format(prev, dot, pos + 1, i + 1));
+            args[i]->gen_pattern(entity, "$.as_$().p$()"_fs.format(prev, constructor, i + 1));
         }
     } else {
         throw CodegenError("failed call VarExpr::gen_pattern(...): no such name: " + constructor);
@@ -431,17 +437,15 @@ string VarExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 
     else if (name == "None") {
         return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-    } else if (auto data_type = entity.code().find_data_type_by_cons(name)) {
-        if (data_type->is_recuisive()) {
-            return "std::make_shared<$>($Cons::$)"_fs.format(
-                typeinfo.to_str_with(typeinfo.name + "Elem"), data_type->name(), name
-            );
-        } else {
-            return "$($Cons::$)"_fs.format(
-                typeinfo.to_str(), data_type->name(), name
-            );
-        }
-    } else {
+    }
+
+    // for user-defined datatypes
+    else if (entity.code().find_data_type_by_cons(name)) {
+        return "$::$()"_fs.format(typeinfo.to_str(), name);
+    }
+
+    // for variables
+    else {
         auto &varrm_mapping = entity.varrm_mapping();
         auto it = varrm_mapping.find(name);
         if (it != varrm_mapping.end()) {
@@ -454,6 +458,7 @@ string VarExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
 }
 
 string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
+    // for tail calls
     if (constructor == entity.name()) {
         string expr = constructor + '(';
         assertt(entity.args_size() == args.size());
@@ -465,7 +470,10 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
             }
         }
         return expr + ')';
-    } else if (auto func = entity.code().find_func_entity(constructor)) {
+    }
+    
+    // for common calls
+    else if (auto func = entity.code().find_func_entity(constructor)) {
         string expr = constructor + '(';
         assertt(func->args_size() == args.size());
         for (size_t i = 0; i < args.size(); ++i) {
@@ -478,11 +486,17 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
             }
         }
         return expr + ')';
-    } else if (constructor == "Suc") {
+    }
+    
+    // for nat
+    else if (constructor == "Suc") {
         assertt(args.size() == 1);
         auto expr = args[0]->gen_expr(entity, typeinfo);
         return "(" + expr + ") + 1";
-    } else if (constructor == "Some") {
+    }
+    
+    // for option
+    else if (constructor == "Some") {
         assertt(args.size() == 1);
         if (typeinfo.empty()) {
             auto expr = args.front()->gen_expr(entity, typeinfo);
@@ -505,7 +519,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         }
     }
 
-    // for List
+    // for list
     else if (constructor == "Cons") {
         assertt(args.size() == 2);
         auto x = args[0]->gen_expr(entity, typeinfo.arguments.front());
@@ -633,6 +647,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         }
     }
 
+    // for pairs
     else if (constructor == "Pair") {
         assertt(args.size() == 2);
         return "std::make_pair(" + args[0]->gen_expr(entity, typeinfo.arguments.front())
@@ -640,40 +655,30 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         ;
     }
 
-    // For Datatype
+    // for user-defined datatypes
     else if (auto data_type = entity.code().find_data_type(typeinfo.name)) {
-        auto dot = data_type->is_recuisive() ? "->"s : "."s;
-
-        auto temp = entity.gen_temp();
-        if (data_type->is_recuisive()) {
-            entity.add_expr("$ $ = std::make_shared<$>($Cons::$);",
-                typeinfo.to_str(), temp, typeinfo.to_str_with(typeinfo.name + "Elem"), data_type->name(), constructor
-            );
-        } else {
-            entity.add_expr("$ ${$Cons::$};",
-                typeinfo.to_str(), temp, data_type->name(), constructor
-            );
-        }
-
-        auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
-        if (abstracts.empty()) {
-            return temp;
-        }
-
-        string stmt = temp + dot + "set_c" + to_string(data_type->pos_of_cons(constructor) + 1) + "(";
+        std::string res = "$::$("_fs.format(typeinfo.to_str(), constructor);
 
         function trans = [&](const string &arg_type) {
             return typeinfo[data_type->find_argument_type(arg_type)];
         };
 
+        vector<string> arguments;
+        auto &abstracts = data_type->abstracts()[data_type->pos_of_cons(constructor)];
         for (size_t i = 0; i < abstracts.size(); ++i) {
+            arguments.push_back(args[i]->gen_expr(entity, abstracts[i]->apply(trans)));
+        }
+
+        auto temp = entity.gen_temp();
+        entity.add_expr("auto $ = $::$(", temp, typeinfo.to_str(), constructor).add_indent();
+        for (size_t i = 0; i < arguments.size(); ++i) {
             if (i == 0) {
-                stmt += args[i]->gen_expr(entity, abstracts[i]->apply(trans));
+                entity.add_expr(arguments[i]);
             } else {
-                stmt += ", " + args[i]->gen_expr(entity, abstracts[i]->apply(trans));
+                entity.app_last_stmt(", " + arguments[i]);
             }
         }
-        entity.add_expr(stmt + ");");
+        entity.sub_indent().add_expr(");");
         return temp;
     }
 

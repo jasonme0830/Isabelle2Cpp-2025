@@ -46,7 +46,6 @@ class Code {
   private:
     void gen_data_type(DataType &data_type);
     void gen_type_rest(DataType &data_type);
-    void gen_normal_type_header(DataType &data_type);
     void gen_template_type_header(DataType &data_type);
 
     /**

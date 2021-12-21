@@ -1,7 +1,7 @@
 #include "slist.hpp"
 #include <iostream>
 
-template<typename T1>
+using T1 = int;
 slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
     // app sNil ys = ys
     if (arg1.is_sNil()) {
@@ -10,8 +10,8 @@ slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
 
     // app (sCons x xs) ys = sCons x (app xs ys)
     if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
-        auto xs = arg1.as_sCons().p2();
+        auto &&x = arg1.as_sCons().p1();
+        auto &&xs = arg1.as_sCons().p2();
         return slist<T1>::sCons(x, app(xs, arg2));
     } else { // auto-generated for -Wreturn-type
         std::abort();

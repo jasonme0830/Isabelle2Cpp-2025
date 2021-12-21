@@ -133,147 +133,117 @@ void Code::pop_function() {
 void Code::gen_data_type(DataType &data_type) {
     indent_ = 0;
 
-    "enum $Cons {\n"_fs.outf(newline(), data_type.name());
-    add_indent();
-    for (auto &cons : data_type.constructors()) {
-        "$,\n"_fs.outf(newline(), cons);
-    }
-    sub_indent();
-    "};\n\n"_fs.outf(newline());
-
-    if (data_type.is_normal_type()) {
-        gen_normal_type_header(data_type);
-    } else {
+    if (!data_type.is_normal_type()) {
         gen_template_type_header(data_type);
     }
     gen_type_rest(data_type);
 }
 
 void Code::gen_type_rest(DataType &data_type) {
-    const auto &origin = data_type.name();
-    auto name = data_type.name();
-    if (data_type.is_recuisive()) {
-        name += "Elem";
-    }
+    auto &name = data_type.name();
+    auto &self = data_type.self();
+    auto &constructors = data_type.constructors();
 
     TypeInfo variant("std::variant");
 
     "struct $ {\n"_fs.outf(newline(), name);
     add_indent();
     auto &components = data_type.components();
+
+    // generate struct _Ci { ... };
     for (size_t i = 0; i < components.size(); ++i) {
+        variant.arguments.emplace_back("_$"_fs.format(constructors[i]));
+
         if (components[i].empty()) {
-            continue;
+            "struct _$ {};\n"_fs.outf(newline(), constructors[i]);
+        } else {
+            "struct _$ {\n"_fs.outf(newline(), constructors[i]);
+            add_indent();
+            // generate members
+            for (size_t j = 0; j < components[i].size(); ++j) {
+                if (components[i][j] == self) {
+                    "std::shared_ptr<$> p$_;\n"_fs.outf(newline(), components[i][j], j + 1);
+                } else {
+                    "$ p$_;\n"_fs.outf(newline(), components[i][j], j + 1);
+                }
+            }
+            out_.get() << endl;
+
+            // generate methods
+            for (size_t j = 0; j < components[i].size(); ++j) {
+                if (components[i][j] == self) {
+                    "$ p$() const { return *p$_; }\n"_fs.outf(newline(), components[i][j], j + 1, j + 1);
+                } else {
+                    "const $ &p$() const { return p$_; }\n"_fs.outf(newline(), components[i][j], j + 1, j + 1);
+                }
+            }
+            sub_indent();
+            "};\n"_fs.outf(newline());
         }
-        variant.arguments.emplace_back("c$"_fs.format(i + 1));
+    }
+    out_.get() << endl;
 
-        "struct c$ {\n"_fs.outf(newline(), i + 1);
-        add_indent();
-        for (size_t j = 0; j < components[i].size(); ++j) {
-            "$ p$;\n"_fs.outf(newline(), components[i][j], j + 1);
-        }
-        sub_indent();
-        "};\n"_fs.outf(newline());
-    }   out_.get() << endl;
+    // generate std::variant<_C0, ..., _Ck> value_;
+    "$ value_;\n\n"_fs.outf(newline(), variant.to_str());
 
-        "$($Cons cons) : cons(cons) {}\n\n"_fs.outf(newline(), name, origin);
-
+    // generate static constructions
     for (size_t i = 0; i < components.size(); ++i) {
-        if (components[i].empty()) {
-            continue;
-        }
-
-        "c$ &get_c$() {\n"_fs.outf(newline(), i + 1, i + 1);
-        add_indent();
-            "return std::get<c$>(value);\n"_fs.outf(newline(), i + 1);
-        sub_indent();
-        "};\n"_fs.outf(newline());
-
-        "void set_c$("_fs.outf(newline(), i + 1);
+        "static $ $("_fs.outf(newline(), self, constructors[i]);
         for (size_t j = 0; j < components[i].size(); ++j) {
             if (j == 0) {
-                "$ _p1"_fs.outf(out_.get(), components[i][j]);;
+                "$ p1"_fs.outf(out_.get(), components[i][j]);;
             } else {
-                ", $ _p$"_fs.outf(out_.get(), components[i][j], j + 1);
+                ", $ p$"_fs.outf(out_.get(), components[i][j], j + 1);
             }
         }
         ") {\n"_fs.outf(out_.get());
-
         add_indent();
-            "value = c${"_fs.outf(newline(), i + 1);
+
+        "return $ { _$ {"_fs.outf(newline(), self, constructors[i]);
         for (size_t j = 0; j < components[i].size(); ++j) {
-            if (j == 0) {
-                "_p1"_fs.outf(out_.get());
+            if (components[i][j] == self) {
+                if (j == 0) {
+                    "std::make_shared<$>(p1)"_fs.outf(out_.get(), self);
+                } else {
+                    ", std::make_shared<$>(p$)"_fs.outf(out_.get(), self, j + 1);
+                }
             } else {
-                ", _p$"_fs.outf(out_.get(), j + 1);
+                if (j == 0) {
+                    "p1"_fs.outf(out_.get());
+                } else {
+                    ", p$"_fs.outf(out_.get(), j + 1);
+                }
             }
         }
-        "};\n"_fs.outf(out_.get());
+        "} };\n"_fs.outf(out_.get());
+
         sub_indent();
         "}\n"_fs.outf(newline());
     }
-        out_.get() << endl;
+    out_.get() << endl;
 
-        "$Cons cons;\n"_fs.outf(newline(), origin);
-        "$ value;\n"_fs.outf(newline(), variant.to_str());
+    // generate is_Ci()
+    for (auto &constructor : constructors) {
+        "bool is_$() const { return std::holds_alternative<_$>(value_); }\n"_fs.outf(newline(), constructor, constructor);
+    } 
+    out_.get() << endl;
+
+    // generate as_Ci()
+    for (size_t i = 0; i < components.size(); ++i) {
+        if (components[i].empty()) {
+            continue;
+        }
+
+        "const _$ &as_$() const { return std::get<_$>(value_); }"_fs.outf(newline(), constructors[i], constructors[i], constructors[i]);
+    }
+    out_.get() << endl;
+
     sub_indent();
     "};\n\n"_fs.outf(newline());
 }
 
-void Code::gen_normal_type_header(DataType &data_type) {
-    if (!data_type.is_recuisive()) {
-        return;
-    }
-
-    const auto &origin = data_type.name();
-    auto name = data_type.name() + "Elem";
-
-    "struct $;\n"_fs                        .outf(newline(), name);
-    "using $ = std::shared_ptr<$>;\n\n"_fs  .outf(newline(), origin, name);
-}
-
 void Code::gen_template_type_header(DataType &data_type) {
-    const auto &origin = data_type.name();
-    auto name = data_type.name();
     auto &targs = data_type.template_args();
-    "template<"_fs.outf(newline());
-    for (size_t i = 0; i < targs.size(); ++i) {
-        if (i == 0) {
-            "typename $"_fs.outf(out_.get(), targs[i]);
-        } else {
-            ", typename $"_fs.outf(out_.get(), targs[i]);
-        }
-    }
-    ">\n"_fs.outf(out_.get());
-
-    if (!data_type.is_recuisive()) {
-        return;
-    } else {
-        name += "Elem";
-    }
-
-    "struct $;\n"_fs.outf(newline(), name);
-    if (data_type.is_recuisive()) {
-        "template<"_fs.outf(newline());
-        for (size_t i = 0; i < targs.size(); ++i) {
-            if (i == 0) {
-                "typename $"_fs.outf(out_.get(), targs[i]);
-            } else {
-                ", typename $"_fs.outf(out_.get(), targs[i]);
-            }
-        }
-        ">\n"_fs.outf(out_.get());
-        "using $ = std::shared_ptr<$<"_fs.outf(newline(), origin, name);
-        for (size_t i = 0; i < targs.size(); ++i) {
-            if (i == 0) {
-                out_.get() << targs[i];
-            } else {
-                ", $"_fs.outf(out_.get(), targs[i]);
-            }
-        }
-        ">>;\n\n"_fs.outf(out_.get());
-    }
-
     "template<"_fs.outf(newline());
     for (size_t i = 0; i < targs.size(); ++i) {
         if (i == 0) {

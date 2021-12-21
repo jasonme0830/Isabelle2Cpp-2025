@@ -12,8 +12,6 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Reimplement the conversion based on definitions
-- [ ] Use more const reference to void copying and make sure copy only happens when constructing values
 - [ ] Reimplement function to support function currying
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
@@ -21,6 +19,8 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Reimplement the conversion based on definitions
+- [x] Use more const reference to void copying and make sure copy only happens when constructing values
 - [x] Remove unused variable declarations
 - [x] Remove unused parens when generating expressions
 - [x] Reimplement the function conversion by using if directly instead of for(;;) {}

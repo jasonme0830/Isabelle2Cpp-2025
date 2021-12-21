@@ -267,10 +267,25 @@ struct LambdaExpr final : Expr {
 
 struct Definition {
     virtual ~Definition() = 0;
+
+    virtual bool is_error() const { return false; }
+
     virtual bool is_predefined() const { return false; }
+
     virtual bool is_datatype_decl() const { return false; }
     virtual bool is_function_decl() const { return false; }
-    virtual void codegen(Code &) const = 0;
+
+    virtual void codegen(Code &) const { throw; };
+};
+
+struct ErrorDefinition : Definition {
+    PEType type;
+
+    ErrorDefinition(PEType type) : type(type) {}
+
+    bool is_error() const override { return true; }
+    bool is_datatype_decl() const override { return type == PEType::DataType; }
+    bool is_function_decl() const override { return type == PEType::Function; }
 };
 
 /**

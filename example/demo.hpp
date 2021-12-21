@@ -4,34 +4,30 @@
 #include <memory>
 #include <variant>
 
-enum slistCons {
-    sNil,
-    sCons,
-};
+template<typename T1>
+struct slist {
+    struct _sNil {};
+    struct _sCons {
+        T1 p1_;
+        std::shared_ptr<slist<T1>> p2_;
 
-template<typename T1>
-struct slistElem;
-template<typename T1>
-using slist = std::shared_ptr<slistElem<T1>>;
-
-template<typename T1>
-struct slistElem {
-    struct c2 {
-        T1 p1;
-        slist<T1> p2;
+        const T1 &p1() const { return p1_; }
+        slist<T1> p2() const { return *p2_; }
     };
 
-    slistElem(slistCons cons) : cons(cons) {}
+    std::variant<_sNil, _sCons> value_;
 
-    c2 &get_c2() {
-        return std::get<c2>(value);
-    };
-    void set_c2(T1 _p1, slist<T1> _p2) {
-        value = c2{_p1, _p2};
+    static slist<T1> sNil() {
+        return slist<T1> { _sNil {} };
+    }
+    static slist<T1> sCons(T1 p1, slist<T1> p2) {
+        return slist<T1> { _sCons {p1, std::make_shared<slist<T1>>(p2)} };
     }
 
-    slistCons cons;
-    std::variant<c2> value;
+    bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
+    bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
+
+    const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 };
 
 std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::list<std::uint64_t> &arg2);

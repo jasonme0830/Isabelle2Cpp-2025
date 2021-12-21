@@ -9,6 +9,8 @@ namespace hol2cpp {
 class DataType {
   public:
     bool &is_recuisive();
+    std::string &self();
+
     bool is_normal_type();
 
     std::string &name();
@@ -30,6 +32,8 @@ class DataType {
 
   private:
     bool is_recuisive_;
+    std::string self_;
+
     std::string name_;
 
     std::vector<std::string> types_;

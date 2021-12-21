@@ -13,11 +13,11 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
 
     // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         if (!arg2.empty()) {
-            auto y = arg2.front();
-            auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+            auto &&y = arg2.front();
+            auto &&ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
             std::list<std::uint64_t> temp0;
             if (x <= y) {
                 auto temp1 = ys;
@@ -47,7 +47,7 @@ std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1) {
 
     // merge_sort [x] = [x]
     if (arg1.size() == 1) {
-        auto x = *std::next(arg1.begin(), 0);
+        auto &&x = *std::next(arg1.begin(), 0);
         return std::list<std::uint64_t>{x};
     }
 
@@ -58,13 +58,13 @@ std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1) {
 template<typename T1>
 std::uint64_t slength(const slist<T1> &arg1) {
     // slength sNil = 0
-    if (arg1->cons == slistCons::sNil) {
+    if (arg1.is_sNil()) {
         return 0;
     }
 
     // slength (sCons x xs) = Suc (slength xs)
-    if (arg1->cons == slistCons::sCons) {
-        auto xs = arg1->get_c2().p2;
+    if (arg1.is_sCons()) {
+        auto &&xs = arg1.as_sCons().p2();
         return (slength(xs)) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -74,23 +74,24 @@ std::uint64_t slength(const slist<T1> &arg1) {
 template<typename T1>
 slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
     // stake n sNil = sNil
-    if (arg2->cons == slistCons::sNil) {
-        return std::make_shared<slistElem<T1>>(slistCons::sNil);
+    if (arg2.is_sNil()) {
+        return slist<T1>::sNil();
     }
 
     // stake 0 _ = sNil
     if (arg1 == 0) {
-        return std::make_shared<slistElem<T1>>(slistCons::sNil);
+        return slist<T1>::sNil();
     }
 
     // stake (Suc m) (sCons x xs) = sCons x (stake m xs)
     if (arg1 != 0) {
-        auto m = arg1 - 1;
-        if (arg2->cons == slistCons::sCons) {
-            auto x = arg2->get_c2().p1;
-            auto xs = arg2->get_c2().p2;
-            slist<T1> temp0 = std::make_shared<slistElem<T1>>(slistCons::sCons);
-            temp0->set_c2(x, stake(m, xs));
+        auto &&m = arg1 - 1;
+        if (arg2.is_sCons()) {
+            auto &&x = arg2.as_sCons().p1();
+            auto &&xs = arg2.as_sCons().p2();
+            auto temp0 = slist<T1>::sCons(
+                x, stake(m, xs)
+            );
             return temp0;
         }
     } else { // auto-generated for -Wreturn-type
@@ -101,8 +102,8 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
 template<typename T1>
 slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
     // sdrop n sNil = sNil
-    if (arg2->cons == slistCons::sNil) {
-        return std::make_shared<slistElem<T1>>(slistCons::sNil);
+    if (arg2.is_sNil()) {
+        return slist<T1>::sNil();
     }
 
     // sdrop 0 xs = xs
@@ -112,9 +113,9 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // sdrop (Suc m) (sCons x xs) = sdrop m xs
     if (arg1 != 0) {
-        auto m = arg1 - 1;
-        if (arg2->cons == slistCons::sCons) {
-            auto xs = arg2->get_c2().p2;
+        auto &&m = arg1 - 1;
+        if (arg2.is_sCons()) {
+            auto &&xs = arg2.as_sCons().p2();
             return sdrop(m, xs);
         }
     } else { // auto-generated for -Wreturn-type
@@ -124,35 +125,39 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
 slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::uint64_t> &arg2) {
     // smerge xs sNil = xs
-    if (arg2->cons == slistCons::sNil) {
+    if (arg2.is_sNil()) {
         return arg1;
     }
 
     // smerge sNil ys = ys
-    if (arg1->cons == slistCons::sNil) {
+    if (arg1.is_sNil()) {
         return arg2;
     }
 
     // smerge (sCons x xs) (sCons y ys) = If (x \<le> y) (sCons x (smerge xs (sCons y ys))) (sCons y (smerge (sCons x xs) ys))
-    if (arg1->cons == slistCons::sCons) {
-        auto x = arg1->get_c2().p1;
-        auto xs = arg1->get_c2().p2;
-        if (arg2->cons == slistCons::sCons) {
-            auto y = arg2->get_c2().p1;
-            auto ys = arg2->get_c2().p2;
+    if (arg1.is_sCons()) {
+        auto &&x = arg1.as_sCons().p1();
+        auto &&xs = arg1.as_sCons().p2();
+        if (arg2.is_sCons()) {
+            auto &&y = arg2.as_sCons().p1();
+            auto &&ys = arg2.as_sCons().p2();
             slist<std::uint64_t> temp0;
             if (x <= y) {
-                slist<std::uint64_t> temp1 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
-                slist<std::uint64_t> temp2 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
-                temp2->set_c2(y, ys);
-                temp1->set_c2(x, smerge(xs, temp2));
-                temp0 = temp1;
+                auto temp1 = slist<std::uint64_t>::sCons(
+                    y, ys
+                );
+                auto temp2 = slist<std::uint64_t>::sCons(
+                    x, smerge(xs, temp1)
+                );
+                temp0 = temp2;
             } else {
-                slist<std::uint64_t> temp3 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
-                slist<std::uint64_t> temp4 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
-                temp4->set_c2(x, xs);
-                temp3->set_c2(y, smerge(temp4, ys));
-                temp0 = temp3;
+                auto temp3 = slist<std::uint64_t>::sCons(
+                    x, xs
+                );
+                auto temp4 = slist<std::uint64_t>::sCons(
+                    y, smerge(temp3, ys)
+                );
+                temp0 = temp4;
             }
             return temp0;
         }
@@ -163,16 +168,17 @@ slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::u
 
 slist<std::uint64_t> smerge_sort(const slist<std::uint64_t> &arg1) {
     // smerge_sort sNil = sNil
-    if (arg1->cons == slistCons::sNil) {
-        return std::make_shared<slistElem<std::uint64_t>>(slistCons::sNil);
+    if (arg1.is_sNil()) {
+        return slist<std::uint64_t>::sNil();
     }
 
     // smerge_sort (sCons x sNil) = sCons x sNil
-    if (arg1->cons == slistCons::sCons) {
-        auto x = arg1->get_c2().p1;
-        if (arg1->get_c2().p2->cons == slistCons::sNil) {
-            slist<std::uint64_t> temp0 = std::make_shared<slistElem<std::uint64_t>>(slistCons::sCons);
-            temp0->set_c2(x, std::make_shared<slistElem<std::uint64_t>>(slistCons::sNil));
+    if (arg1.is_sCons()) {
+        auto &&x = arg1.as_sCons().p1();
+        if (arg1.as_sCons().p2().is_sNil()) {
+            auto temp0 = slist<std::uint64_t>::sCons(
+                x, slist<std::uint64_t>::sNil()
+            );
             return temp0;
         }
     }

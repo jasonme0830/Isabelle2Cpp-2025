@@ -5,6 +5,10 @@ bool &DataType::is_recuisive() {
     return is_recuisive_;
 }
 
+std::string &DataType::self() {
+    return self_;
+}
+
 bool DataType::is_normal_type() {
     return template_args_.empty();
 }

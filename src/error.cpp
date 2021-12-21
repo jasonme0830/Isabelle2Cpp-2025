@@ -34,7 +34,6 @@ string light_green(const string &str) {
 } // namespace info
 
 TokenizeError::TokenizeError(string err) : err_(std::move(err)) {}
-
 TokenizeError &TokenizeError::operator=(const TokenizeError &other) noexcept {
     err_ = other.err_;
     return *this;
@@ -45,7 +44,7 @@ const char *TokenizeError::what() const noexcept {
 }
 
 ParseError::ParseError(string err) : err_(std::move(err)) {}
-
+ParseError::ParseError(const ParseError &other, PEType type) : err_(other.err_), type_(type) {}
 ParseError &ParseError::operator=(const ParseError &other) noexcept {
     err_ = other.err_;
     return *this;
@@ -56,7 +55,6 @@ const char *ParseError::what() const noexcept {
 }
 
 CodegenError::CodegenError(string err) : err_(std::move(err)) {}
-
 CodegenError &CodegenError::operator=(const CodegenError &other) noexcept {
     err_ = other.err_;
     return *this;

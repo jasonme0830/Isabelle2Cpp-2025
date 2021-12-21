@@ -30,15 +30,23 @@ class TokenizeError : public std::exception {
     std::string err_;
 };
 
+enum class PEType {
+    DataType, Function
+};
+
 class ParseError : public std::exception {
   public:
     ParseError(std::string err);
+    ParseError(const ParseError &other, PEType type);
     ParseError &operator=(const ParseError &other) noexcept;
 
     const char *what() const noexcept override;
 
+    PEType error_type() const { return type_; }
+
   private:
     std::string err_;
+    PEType type_;
 };
 
 class CodegenError : public std::exception {

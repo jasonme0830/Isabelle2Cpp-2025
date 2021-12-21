@@ -4,8 +4,8 @@ template<typename T1>
 T1 last(const std::list<T1> &arg1) {
     // last (x # xs) = (if xs = [] then x else last xs)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         T1 temp0;
         if (xs.empty()) {
             temp0 = x;
@@ -27,8 +27,8 @@ std::list<T1> butlast(const std::list<T1> &arg1) {
 
     // butlast (x # xs) = (if xs = [] then [] else x # butlast xs)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
         if (xs.empty()) {
             temp0 = std::list<T1>();
@@ -52,8 +52,8 @@ std::list<T1> rev(const std::list<T1> &arg1) {
 
     // rev (x # xs) = rev xs @ [x]
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = rev(xs);
         auto temp1 = std::list<T1>{x};
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
@@ -72,8 +72,8 @@ std::list<T1> filter(const std::function<bool(const T1 &)> &arg1, const std::lis
 
     // filter P (x # xs) = (if P x then x # filter P xs else filter P xs)
     if (!arg2.empty()) {
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&x = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
         if (P(x)) {
             auto temp1 = filter(arg1, xs);
@@ -97,8 +97,8 @@ T1 foldl(const std::function<T1(const T1 &, const T2 &)> &arg1, const T1 &arg2, 
 
     // foldl f a (x # xs) = foldl f (f a x) xs
     if (!arg3.empty()) {
-        auto x = arg3.front();
-        auto xs = decltype(arg3){std::next(arg3.begin()), arg3.end()};
+        auto &&x = arg3.front();
+        auto &&xs = decltype(arg3){std::next(arg3.begin()), arg3.end()};
         return foldl(arg1, f(arg2, x), xs);
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -114,8 +114,8 @@ std::list<T1> concat(const std::list<std::list<T1>> &arg1) {
 
     // concat (x # xs) = x @ concat xs
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = x;
         auto temp1 = concat(xs);
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
@@ -129,8 +129,8 @@ template<typename T1>
 T1 nth(const std::list<T1> &arg1, const std::uint64_t &arg2) {
     // (x # xs) ! n = (case n of 0 \<Rightarrow> x | Suc k \<Rightarrow> xs ! k)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = ([&] {
             auto temp1 = arg2;
 
@@ -141,7 +141,7 @@ T1 nth(const std::list<T1> &arg1, const std::uint64_t &arg2) {
 
             // Suc k \<Rightarrow> xs ! k
             if (temp1 != 0) {
-                auto k = temp1 - 1;
+                auto &&k = temp1 - 1;
                 return nth(xs, k);
             } else { // auto-generated for -Wreturn-type
                 std::abort();
@@ -162,8 +162,8 @@ std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, 
 
     // list_update (x # xs) i v = ...
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = ([&] {
             auto temp1 = arg2;
 
@@ -176,7 +176,7 @@ std::list<T1> list_update(const std::list<T1> &arg1, const std::uint64_t &arg2, 
 
             // Suc j \<Rightarrow> x # list_update xs j v
             if (temp1 != 0) {
-                auto j = temp1 - 1;
+                auto &&j = temp1 - 1;
                 auto temp3 = list_update(xs, j, arg3);
                 temp3.push_front(x);
                 return temp3;
@@ -199,8 +199,8 @@ std::list<T1> takeWhile(const std::function<bool(const T1 &)> &arg1, const std::
 
     // takeWhile P (x # xs) = (if P x then x # takeWhile P xs else [])
     if (!arg2.empty()) {
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&x = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
         if (P(x)) {
             auto temp1 = takeWhile(arg1, xs);
@@ -224,8 +224,8 @@ std::list<T1> dropWhile(const std::function<bool(const T1 &)> &arg1, const std::
 
     // dropWhile P (x # xs) = (if P x then dropWhile P xs else x # xs)
     if (!arg2.empty()) {
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&x = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
         if (P(x)) {
             temp0 = dropWhile(arg1, xs);
@@ -249,8 +249,8 @@ std::list<std::pair<T1, T2>> zip(const std::list<T1> &arg1, const std::list<T2> 
 
     // zip xs (y # ys) = ...
     if (!arg2.empty()) {
-        auto y = arg2.front();
-        auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&y = arg2.front();
+        auto &&ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         auto temp0 = ([&] {
             auto temp1 = arg1;
 
@@ -261,8 +261,8 @@ std::list<std::pair<T1, T2>> zip(const std::list<T1> &arg1, const std::list<T2> 
 
             // z # zs \<Rightarrow> (z, y) # zip zs ys
             if (!temp1.empty()) {
-                auto z = temp1.front();
-                auto zs = decltype(temp1){std::next(temp1.begin()), temp1.end()};
+                auto &&z = temp1.front();
+                auto &&zs = decltype(temp1){std::next(temp1.begin()), temp1.end()};
                 auto temp2 = zip(zs, ys);
                 temp2.push_front(std::make_pair(z, y));
                 return temp2;
@@ -299,8 +299,8 @@ std::optional<T1> find(const std::function<bool(const T1 &)> &arg1, const std::l
 
     // find P (x#xs) = (if P x then Some x else find P xs)
     if (!arg2.empty()) {
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&x = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::optional<T1> temp0;
         if (P(x)) {
             temp0 = std::make_optional<T1>(x);
@@ -322,8 +322,8 @@ std::uint64_t count_list(const std::list<T1> &arg1, const T1 &arg2) {
 
     // count_list (x#xs) y = (if x=y then count_list xs y + 1 else count_list xs y)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::uint64_t temp0;
         if (x == arg2) {
             temp0 = count_list(xs, arg2) + 1;
@@ -345,8 +345,8 @@ std::list<T1> remove1(const T1 &arg1, const std::list<T1> &arg2) {
 
     // remove1 x (y # xs) = (if x = y then xs else y # remove1 x xs)
     if (!arg2.empty()) {
-        auto y = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&y = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
         if (arg1 == y) {
             temp0 = xs;
@@ -370,8 +370,8 @@ std::list<T1> removeAll(const T1 &arg1, const std::list<T1> &arg2) {
 
     // removeAll x (y # xs) = (if x = y then removeAll x xs else y # removeAll x xs)
     if (!arg2.empty()) {
-        auto y = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&y = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         std::list<T1> temp0;
         if (arg1 == y) {
             temp0 = removeAll(arg1, xs);
@@ -395,8 +395,8 @@ bool distinct(const std::list<T1> &arg1) {
 
     // distinct (x # xs) \<longleftrightarrow> x \<notin> set xs \<and> distinct xs
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         return !set(xs).count(x) && distinct(xs);
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -412,8 +412,8 @@ std::list<T1> remdups(const std::list<T1> &arg1) {
 
     // remdups (x # xs) = (if x \<in> set xs then remdups xs else x # remdups xs)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
         if (set(xs).count(x)) {
             temp0 = remdups(xs);
@@ -437,17 +437,17 @@ std::list<T1> remdups_adj(const std::list<T1> &arg1) {
 
     // remdups_adj [x] = [x]
     if (arg1.size() == 1) {
-        auto x = *std::next(arg1.begin(), 0);
+        auto &&x = *std::next(arg1.begin(), 0);
         return std::list<T1>{x};
     }
 
     // remdups_adj (x # y # xs) = (if x = y then remdups_adj (x # xs) else x # remdups_adj (y # xs))
     if (!arg1.empty()) {
-        auto x = arg1.front();
+        auto &&x = arg1.front();
         decltype(arg1) temp0(std::next(arg1).begin(), arg1.end());
         if (!temp0.empty()) {
-            auto y = temp0.front();
-            auto xs = decltype(temp0){std::next(temp0.begin()), temp0.end()};
+            auto &&y = temp0.front();
+            auto &&xs = decltype(temp0){std::next(temp0.begin()), temp0.end()};
             std::list<T1> temp1;
             if (x == y) {
                 auto temp2 = xs;
@@ -476,7 +476,7 @@ std::list<T1> replicate(const std::uint64_t &arg1, const T1 &arg2) {
 
     // replicate (Suc n) x = x # replicate n x
     if (arg1 != 0) {
-        auto n = arg1 - 1;
+        auto &&n = arg1 - 1;
         auto temp0 = replicate(n, arg2);
         temp0.push_front(arg2);
         return temp0;
@@ -506,8 +506,8 @@ std::list<T1> rotate1(const std::list<T1> &arg1) {
 
     // rotate1 (x # xs) = xs @ [x]
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = xs;
         auto temp1 = std::list<T1>{x};
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
@@ -526,8 +526,8 @@ std::list<T1> splice(const std::list<T1> &arg1, const std::list<T1> &arg2) {
 
     // splice (x#xs) ys = x # splice ys xs
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = splice(arg2, xs);
         temp0.push_front(x);
         return temp0;
@@ -540,8 +540,8 @@ template<typename T1>
 T1 min_list(const std::list<T1> &arg1) {
     // min_list (x # xs) = (case xs of [] \<Rightarrow> x | _ \<Rightarrow> min x (min_list xs))
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = ([&] {
             auto temp1 = xs;
 
@@ -563,21 +563,21 @@ template<typename T1, typename T2>
 T1 arg_min_list(const std::function<T2(const T1 &)> &arg1, const std::list<T1> &arg2) {
     // arg_min_list f [x] = x
     if (arg2.size() == 1) {
-        auto x = *std::next(arg2.begin(), 0);
+        auto &&x = *std::next(arg2.begin(), 0);
         return x;
     }
 
     // arg_min_list f (x#y#zs) = (let m = arg_min_list f (y#zs) in if f x \<le> f m then x else m)
     if (!arg2.empty()) {
-        auto x = arg2.front();
+        auto &&x = arg2.front();
         decltype(arg2) temp0(std::next(arg2).begin(), arg2.end());
         if (!temp0.empty()) {
-            auto y = temp0.front();
-            auto zs = decltype(temp0){std::next(temp0.begin()), temp0.end()};
+            auto &&y = temp0.front();
+            auto &&zs = decltype(temp0){std::next(temp0.begin()), temp0.end()};
             auto temp2 = zs;
             temp2.push_front(y);
             auto temp1 = arg_min_list(arg1, temp2);
-            auto m = temp1;
+            auto &&m = temp1;
             T1 temp3;
             if (f(x) <= f(m)) {
                 temp3 = x;
@@ -600,8 +600,8 @@ std::list<T1> insort_key(const std::function<T2(const T1 &)> &arg1, const T1 &ar
 
     // insort_key f x (y#ys) = ...
     if (!arg3.empty()) {
-        auto y = arg3.front();
-        auto ys = decltype(arg3){std::next(arg3.begin()), arg3.end()};
+        auto &&y = arg3.front();
+        auto &&ys = decltype(arg3){std::next(arg3.begin()), arg3.end()};
         std::list<T1> temp0;
         if (f(arg2) <= f(y)) {
             auto temp1 = ys;
@@ -629,11 +629,11 @@ std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(const
 
     // partition P (x # xs) = ...
     if (!arg2.empty()) {
-        auto x = arg2.front();
-        auto xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&x = arg2.front();
+        auto &&xs = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         auto temp0 = partition(arg1, xs);
-        auto yes = temp0.first;
-        auto no = temp0.second;
+        auto &&yes = temp0.first;
+        auto &&no = temp0.second;
         std::pair<std::list<T1>, std::list<T1>> temp1;
         if (P(x)) {
             auto temp2 = yes;
@@ -673,8 +673,8 @@ std::set<std::list<T1>> listset(const std::list<std::set<T1>> &arg1) {
 
     // listset (A # As) = set_Cons A (listset As)
     if (!arg1.empty()) {
-        auto A = arg1.front();
-        auto As = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&A = arg1.front();
+        auto &&As = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         return set_Cons(A, listset(As));
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -696,8 +696,8 @@ std::list<T2> map_tailrec_rev(const std::function<T2(const T1 &)> &arg1, const s
 
     // map_tailrec_rev f (a#as) bs = map_tailrec_rev f as (f a # bs)
     if (!arg2.empty()) {
-        auto a = arg2.front();
-        auto as = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+        auto &&a = arg2.front();
+        auto &&as = decltype(arg2){std::next(arg2.begin()), arg2.end()};
         auto temp0 = arg3;
         temp0.push_front(f(a));
         return map_tailrec_rev(arg1, as, temp0);

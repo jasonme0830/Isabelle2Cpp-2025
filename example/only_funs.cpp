@@ -8,7 +8,7 @@ std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
 
     // add (Suc m) n = Suc (add m n)
     if (arg1 != 0) {
-        auto m = arg1 - 1;
+        auto &&m = arg1 - 1;
         return (add(m, arg2)) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -24,8 +24,8 @@ std::list<T1> app(const std::list<T1> &arg1, const std::list<T1> &arg2) {
 
     // app (Cons x xs) ys = Cons x (app xs ys)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = app(xs, arg2);
         temp0.push_front(x);
         return temp0;
@@ -43,8 +43,8 @@ std::list<T1> rev(const std::list<T1> &arg1) {
 
     // rev (Cons x xs) = app (rev xs) (Cons x Nil)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         return app(rev(xs), std::list<decltype(x)>{x});
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -60,8 +60,8 @@ std::list<T1> rev2(const std::list<T1> &arg1) {
 
     // rev2 (x # xs) = (rev2 xs) @ (x # Nil)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::list<T1>();
         temp0.push_front(x);
         auto temp1 = rev2(xs);
@@ -82,8 +82,8 @@ std::list<T1> rev3(const std::list<T1> &arg1) {
 
     // rev3 (x # xs) = (rev3 xs) @ [x]
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = rev3(xs);
         auto temp1 = std::list<T1>{x};
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
@@ -102,7 +102,7 @@ std::optional<std::list<T1>> testoption(const std::optional<T1> &arg1) {
 
     // testoption (Some x) = Some [x]
     if (arg1.has_value()) {
-        auto x = arg1.value();
+        auto &&x = arg1.value();
         return std::make_optional<std::list<T1>>(std::list<T1>{x});
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -118,8 +118,8 @@ std::set<T1> testset(const std::list<T1> &arg1) {
 
     // testset (x # xs) = {x} \<inter> testset(xs)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
         decltype(temp0) temp2;
@@ -133,8 +133,8 @@ std::set<T1> testset(const std::list<T1> &arg1) {
 
     // testset (x # xs) = {x} \<union> testset(xs)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
         for (auto temp2 : temp1) {
@@ -155,8 +155,8 @@ std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
 
     // testifelse (x # xs) n = (if (x < n) then [x] else []) @ (testifelse xs n)
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto &&x = arg1.front();
+        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         std::list<T1> temp0;
         if (x < arg2) {
             temp0 = std::list<T1>{x};
@@ -181,14 +181,14 @@ std::pair<T1, T2> pair(const T1 &arg1, const T2 &arg2) {
 template<typename T1, typename T2>
 T1 fst(const std::pair<T1, T2> &arg1) {
     // fst (first, second) = first
-    auto first = arg1.first;
+    auto &&first = arg1.first;
     return first;
 }
 
 template<typename T1, typename T2>
 T2 snd(const std::pair<T1, T2> &arg1) {
     // snd (first, second) = second
-    auto second = arg1.second;
+    auto &&second = arg1.second;
     return second;
 }
 
@@ -208,7 +208,7 @@ bool evn(const std::uint64_t &arg1) {
     // evn (Suc (Suc n)) = evn n
     if (arg1 != 0) {
         if (arg1 - 1 != 0) {
-            auto n = (arg1 - 1) - 1;
+            auto &&n = (arg1 - 1) - 1;
             return evn(n);
         }
     } else { // auto-generated for -Wreturn-type
