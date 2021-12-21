@@ -14,10 +14,10 @@ struct snat {
     std::variant<_sZero, _sSucc> value_;
 
     static snat sZero() {
-        return snat { _sZero {} };
+        return snat { _sZero {  } };
     }
     static snat sSucc(snat p1) {
-        return snat { _sSucc {std::make_shared<snat>(p1)} };
+        return snat { _sSucc { std::make_shared<snat>(p1) } };
     }
 
     bool is_sZero() const { return std::holds_alternative<_sZero>(value_); }
@@ -40,10 +40,10 @@ struct slist {
     std::variant<_sNil, _sCons> value_;
 
     static slist<T1> sNil() {
-        return slist<T1> { _sNil {} };
+        return slist<T1> { _sNil {  } };
     }
     static slist<T1> sCons(T1 p1, slist<T1> p2) {
-        return slist<T1> { _sCons {p1, std::make_shared<slist<T1>>(p2)} };
+        return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
     }
 
     bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
@@ -59,10 +59,10 @@ struct sbool {
     std::variant<_sTrue, _sFalse> value_;
 
     static sbool sTrue() {
-        return sbool { _sTrue {} };
+        return sbool { _sTrue {  } };
     }
     static sbool sFalse() {
-        return sbool { _sFalse {} };
+        return sbool { _sFalse {  } };
     }
 
     bool is_sTrue() const { return std::holds_alternative<_sTrue>(value_); }

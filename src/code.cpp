@@ -199,7 +199,7 @@ void Code::gen_type_rest(DataType &data_type) {
         ") {\n"_fs.outf(out_.get());
         add_indent();
 
-        "return $ { _$ {"_fs.outf(newline(), self, constructors[i]);
+        "return $ { _$ { "_fs.outf(newline(), self, constructors[i]);
         for (size_t j = 0; j < components[i].size(); ++j) {
             if (components[i][j] == self) {
                 if (j == 0) {
@@ -215,7 +215,7 @@ void Code::gen_type_rest(DataType &data_type) {
                 }
             }
         }
-        "} };\n"_fs.outf(out_.get());
+        " } };\n"_fs.outf(out_.get());
 
         sub_indent();
         "}\n"_fs.outf(newline());
@@ -225,7 +225,7 @@ void Code::gen_type_rest(DataType &data_type) {
     // generate is_Ci()
     for (auto &constructor : constructors) {
         "bool is_$() const { return std::holds_alternative<_$>(value_); }\n"_fs.outf(newline(), constructor, constructor);
-    } 
+    }
     out_.get() << endl;
 
     // generate as_Ci()

@@ -18,10 +18,10 @@ struct slist {
     std::variant<_sNil, _sCons> value_;
 
     static slist<T1> sNil() {
-        return slist<T1> { _sNil {} };
+        return slist<T1> { _sNil {  } };
     }
     static slist<T1> sCons(T1 p1, slist<T1> p2) {
-        return slist<T1> { _sCons {p1, std::make_shared<slist<T1>>(p2)} };
+        return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
     }
 
     bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
