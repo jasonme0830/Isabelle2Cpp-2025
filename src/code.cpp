@@ -226,23 +226,29 @@ void Code::gen_type_rest(DataType &data_type) {
     }
 
     // generate is_Ci()
-    for (auto &constructor : constructors) {
-        out_.get() << endl;
-        "bool is_$() const { return std::holds_alternative<_$>(value_); }"_fs.outf(newline(), constructor, constructor);
-    }
     out_.get() << endl;
+    for (auto &constructor : constructors) {
+        "bool is_$() const { return std::holds_alternative<_$>(value_); }\n"_fs.outf(newline(), constructor, constructor);
+    }
 
     // generate as_Ci()
+    bool need_as_methods = false;
     for (size_t i = 0; i < components.size(); ++i) {
-        if (components[i].empty()) {
-            continue;
+        if (!components[i].empty()) {
+            need_as_methods = true;
+            break;
         }
-
-        out_.get() << endl;
-        "const _$ &as_$() const { return std::get<_$>(value_); }"_fs.outf(newline(), constructors[i], constructors[i], constructors[i]);
     }
-    out_.get() << endl;
 
+    if (need_as_methods) {
+        out_.get() << endl;
+        for (size_t i = 0; i < components.size(); ++i) {
+            if (!components[i].empty()) {
+                "const _$ &as_$() const { return std::get<_$>(value_); }\n"_fs.outf(newline(), constructors[i], constructors[i], constructors[i]);
+            }
+        }
+    }
+    
     sub_indent();
     "};\n\n"_fs.outf(newline());
 }

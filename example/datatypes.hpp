@@ -67,7 +67,6 @@ struct sbool {
 
     bool is_sTrue() const { return std::holds_alternative<_sTrue>(value_); }
     bool is_sFalse() const { return std::holds_alternative<_sFalse>(value_); }
-
 };
 
 snat add(const snat &arg1, const snat &arg2);
