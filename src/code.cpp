@@ -92,7 +92,8 @@ void Code::generate_header() {
     }
 
     for (auto &name : names_of_func_entities_) {
-        gen_single_func(func_entities_.at(name), false);
+        auto &entity = func_entities_.at(name);
+        gen_single_func(entity, !entity.template_args().empty());
     }
 }
 
@@ -102,7 +103,10 @@ void Code::generate_impl() {
     "#include \"$\"\n\n"_fs.outf(out_.get(), filename_.substr(filename_.rfind('/') + 1) + ".hpp");
 
     for (auto &name : names_of_func_entities_) {
-        gen_single_func(func_entities_.at(name));
+        auto &entity = func_entities_.at(name);
+        if (entity.template_args().empty()) {
+            gen_single_func(entity);
+        }
     }
 }
 
@@ -220,11 +224,11 @@ void Code::gen_type_rest(DataType &data_type) {
         sub_indent();
         "}\n"_fs.outf(newline());
     }
-    out_.get() << endl;
 
     // generate is_Ci()
     for (auto &constructor : constructors) {
-        "bool is_$() const { return std::holds_alternative<_$>(value_); }\n"_fs.outf(newline(), constructor, constructor);
+        out_.get() << endl;
+        "bool is_$() const { return std::holds_alternative<_$>(value_); }"_fs.outf(newline(), constructor, constructor);
     }
     out_.get() << endl;
 
@@ -234,6 +238,7 @@ void Code::gen_type_rest(DataType &data_type) {
             continue;
         }
 
+        out_.get() << endl;
         "const _$ &as_$() const { return std::get<_$>(value_); }"_fs.outf(newline(), constructors[i], constructors[i], constructors[i]);
     }
     out_.get() << endl;

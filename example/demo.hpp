@@ -35,13 +35,72 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
 std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1);
 
 template<typename T1>
-std::uint64_t slength(const slist<T1> &arg1);
+std::uint64_t slength(const slist<T1> &arg1) {
+    // slength sNil = 0
+    if (arg1.is_sNil()) {
+        return 0;
+    }
+
+    // slength (sCons x xs) = Suc (slength xs)
+    if (arg1.is_sCons()) {
+        auto xs = arg1.as_sCons().p2();
+        return (slength(xs)) + 1;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
+    }
+}
 
 template<typename T1>
-slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2);
+slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
+    // stake n sNil = sNil
+    if (arg2.is_sNil()) {
+        return slist<T1>::sNil();
+    }
+
+    // stake 0 _ = sNil
+    if (arg1 == 0) {
+        return slist<T1>::sNil();
+    }
+
+    // stake (Suc m) (sCons x xs) = sCons x (stake m xs)
+    if (arg1 != 0) {
+        auto m = arg1 - 1;
+        if (arg2.is_sCons()) {
+            auto x = arg2.as_sCons().p1();
+            auto xs = arg2.as_sCons().p2();
+            auto temp0 = slist<T1>::sCons(
+                x, stake(m, xs)
+            );
+            return temp0;
+        }
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
+    }
+}
 
 template<typename T1>
-slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2);
+slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
+    // sdrop n sNil = sNil
+    if (arg2.is_sNil()) {
+        return slist<T1>::sNil();
+    }
+
+    // sdrop 0 xs = xs
+    if (arg1 == 0) {
+        return arg2;
+    }
+
+    // sdrop (Suc m) (sCons x xs) = sdrop m xs
+    if (arg1 != 0) {
+        auto m = arg1 - 1;
+        if (arg2.is_sCons()) {
+            auto xs = arg2.as_sCons().p2();
+            return sdrop(m, xs);
+        }
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
+    }
+}
 
 slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::uint64_t> &arg2);
 

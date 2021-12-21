@@ -12,7 +12,6 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Generate function templates in .hpp file
 - [ ] Reimplement function to support function currying
 - [ ] Provide configurable conversion rules
 - [ ] Do some benchmarks between generated cpp codes and native cpp codes
@@ -20,6 +19,7 @@ You can see some examples in [example/](example/)
 
 ## DONE
 
+- [x] Generate function templates in .hpp file
 - [x] Reimplement the conversion based on definitions
 - [x] Use more const reference to void copying and make sure copy only happens when constructing values
 - [x] Remove unused variable declarations
