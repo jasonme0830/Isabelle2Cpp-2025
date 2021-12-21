@@ -8,7 +8,7 @@ snat add(const snat &arg1, const snat &arg2) {
 
     // add (sSucc m) n = sSucc (add m n)
     if (arg1.is_sSucc()) {
-        auto &&m = arg1.as_sSucc().p1();
+        auto m = arg1.as_sSucc().p1();
         auto temp0 = snat::sSucc(
             add(m, arg2)
         );
@@ -40,7 +40,7 @@ snat fib(const snat &arg1) {
     // fib (sSucc (sSucc m)) = add (fib (sSucc m)) (fib m)
     if (arg1.is_sSucc()) {
         if (arg1.as_sSucc().p1().is_sSucc()) {
-            auto &&m = arg1.as_sSucc().p1().as_sSucc().p1();
+            auto m = arg1.as_sSucc().p1().as_sSucc().p1();
             auto temp0 = snat::sSucc(
                 m
             );
@@ -59,7 +59,7 @@ std::uint64_t natofsnat(const snat &arg1) {
 
     // natofsnat (sSucc n) = (natofsnat n) + 1
     if (arg1.is_sSucc()) {
-        auto &&n = arg1.as_sSucc().p1();
+        auto n = arg1.as_sSucc().p1();
         return natofsnat(n) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -74,7 +74,7 @@ snat snatofnat(const std::uint64_t &arg1) {
 
     // snatofnat (Suc n) = sSucc (snatofnat n)
     if (arg1 != 0) {
-        auto &&n = arg1 - 1;
+        auto n = arg1 - 1;
         auto temp0 = snat::sSucc(
             snatofnat(n)
         );
@@ -93,8 +93,8 @@ slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
 
     // app (sCons x xs) ys = sCons x (app xs ys)
     if (arg1.is_sCons()) {
-        auto &&x = arg1.as_sCons().p1();
-        auto &&xs = arg1.as_sCons().p2();
+        auto x = arg1.as_sCons().p1();
+        auto xs = arg1.as_sCons().p2();
         auto temp0 = slist<T1>::sCons(
             x, app(xs, arg2)
         );
@@ -113,8 +113,8 @@ slist<T1> rev(const slist<T1> &arg1) {
 
     // rev (sCons x xs) = app (rev xs) (sCons x sNil)
     if (arg1.is_sCons()) {
-        auto &&x = arg1.as_sCons().p1();
-        auto &&xs = arg1.as_sCons().p2();
+        auto x = arg1.as_sCons().p1();
+        auto xs = arg1.as_sCons().p2();
         return app(rev(xs), sCons(x, ::sNil()));
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -138,7 +138,7 @@ snat len(const slist<T1> &arg1) {
 
     // len (sCons x xs) = sSucc (len xs)
     if (arg1.is_sCons()) {
-        auto &&xs = arg1.as_sCons().p2();
+        auto xs = arg1.as_sCons().p2();
         auto temp0 = snat::sSucc(
             len(xs)
         );
@@ -156,7 +156,7 @@ slist<std::uint64_t> listwithlen(const std::uint64_t &arg1) {
 
     // listwithlen (Suc n) = sCons 1 (listwithlen n)
     if (arg1 != 0) {
-        auto &&n = arg1 - 1;
+        auto n = arg1 - 1;
         auto temp0 = slist<std::uint64_t>::sCons(
             1, listwithlen(n)
         );
@@ -175,7 +175,7 @@ std::uint64_t leninnat(const slist<T1> &arg1) {
 
     // leninnat (sCons x xs) = (leninnat xs) + 1
     if (arg1.is_sCons()) {
-        auto &&xs = arg1.as_sCons().p2();
+        auto xs = arg1.as_sCons().p2();
         return leninnat(xs) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -191,7 +191,7 @@ slist<T1> dblist(const slist<T1> &arg1) {
 
     // dblist (sCons x sNil) = sCons x (sCons x sNil)
     if (arg1.is_sCons()) {
-        auto &&x = arg1.as_sCons().p1();
+        auto x = arg1.as_sCons().p1();
         if (arg1.as_sCons().p2().is_sNil()) {
             auto temp0 = slist<T1>::sCons(
                 x, slist<T1>::sNil()
@@ -205,8 +205,8 @@ slist<T1> dblist(const slist<T1> &arg1) {
 
     // dblist (sCons x xs) = app (dblist (sCons x sNil)) (dblist xs)
     if (arg1.is_sCons()) {
-        auto &&x = arg1.as_sCons().p1();
-        auto &&xs = arg1.as_sCons().p2();
+        auto x = arg1.as_sCons().p1();
+        auto xs = arg1.as_sCons().p2();
         auto temp0 = slist<T1>::sCons(
             x, slist<T1>::sNil()
         );

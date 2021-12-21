@@ -13,11 +13,11 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
 
     // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
     if (!arg1.empty()) {
-        auto &&x = arg1.front();
-        auto &&xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        auto x = arg1.front();
+        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         if (!arg2.empty()) {
-            auto &&y = arg2.front();
-            auto &&ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+            auto y = arg2.front();
+            auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
             std::list<std::uint64_t> temp0;
             if (x <= y) {
                 auto temp1 = ys;
@@ -47,7 +47,7 @@ std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1) {
 
     // merge_sort [x] = [x]
     if (arg1.size() == 1) {
-        auto &&x = *std::next(arg1.begin(), 0);
+        auto x = *std::next(arg1.begin(), 0);
         return std::list<std::uint64_t>{x};
     }
 
@@ -64,7 +64,7 @@ std::uint64_t slength(const slist<T1> &arg1) {
 
     // slength (sCons x xs) = Suc (slength xs)
     if (arg1.is_sCons()) {
-        auto &&xs = arg1.as_sCons().p2();
+        auto xs = arg1.as_sCons().p2();
         return (slength(xs)) + 1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -85,10 +85,10 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // stake (Suc m) (sCons x xs) = sCons x (stake m xs)
     if (arg1 != 0) {
-        auto &&m = arg1 - 1;
+        auto m = arg1 - 1;
         if (arg2.is_sCons()) {
-            auto &&x = arg2.as_sCons().p1();
-            auto &&xs = arg2.as_sCons().p2();
+            auto x = arg2.as_sCons().p1();
+            auto xs = arg2.as_sCons().p2();
             auto temp0 = slist<T1>::sCons(
                 x, stake(m, xs)
             );
@@ -113,9 +113,9 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // sdrop (Suc m) (sCons x xs) = sdrop m xs
     if (arg1 != 0) {
-        auto &&m = arg1 - 1;
+        auto m = arg1 - 1;
         if (arg2.is_sCons()) {
-            auto &&xs = arg2.as_sCons().p2();
+            auto xs = arg2.as_sCons().p2();
             return sdrop(m, xs);
         }
     } else { // auto-generated for -Wreturn-type
@@ -136,11 +136,11 @@ slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::u
 
     // smerge (sCons x xs) (sCons y ys) = If (x \<le> y) (sCons x (smerge xs (sCons y ys))) (sCons y (smerge (sCons x xs) ys))
     if (arg1.is_sCons()) {
-        auto &&x = arg1.as_sCons().p1();
-        auto &&xs = arg1.as_sCons().p2();
+        auto x = arg1.as_sCons().p1();
+        auto xs = arg1.as_sCons().p2();
         if (arg2.is_sCons()) {
-            auto &&y = arg2.as_sCons().p1();
-            auto &&ys = arg2.as_sCons().p2();
+            auto y = arg2.as_sCons().p1();
+            auto ys = arg2.as_sCons().p2();
             slist<std::uint64_t> temp0;
             if (x <= y) {
                 auto temp1 = slist<std::uint64_t>::sCons(
@@ -174,7 +174,7 @@ slist<std::uint64_t> smerge_sort(const slist<std::uint64_t> &arg1) {
 
     // smerge_sort (sCons x sNil) = sCons x sNil
     if (arg1.is_sCons()) {
-        auto &&x = arg1.as_sCons().p1();
+        auto x = arg1.as_sCons().p1();
         if (arg1.as_sCons().p2().is_sNil()) {
             auto temp0 = slist<std::uint64_t>::sCons(
                 x, slist<std::uint64_t>::sNil()
