@@ -320,12 +320,12 @@ void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
     } else if (name == "None") {
         entity.add_pattern_cond("!$.has_value()", prev);
     }
-    
+
     // for constructors
     else if (auto data_type = entity.code().find_data_type_by_cons(name)) {
         entity.add_pattern_cond("$.is_$()", prev, name);
-    } 
-    
+    }
+
     // for variables
     else {
         static std::regex arg_regex(R"(arg[1-9][0-9]*)");
@@ -333,7 +333,8 @@ void VarExpr::gen_pattern(FuncEntity &entity, const string &prev) const {
             entity.varrm_mapping()[name] = prev;
         } else {
             entity.unused_varrm_count()[name] = entity.statements().back().size();
-            entity.add_pattern("auto &&$ = $;", name, prev);
+            // entity.add_pattern("auto &&$ = $;", name, prev);
+            entity.add_pattern("auto $ = $;", name, prev);
         }
     }
 }
@@ -471,7 +472,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         }
         return expr + ')';
     }
-    
+
     // for common calls
     else if (auto func = entity.code().find_func_entity(constructor)) {
         string expr = constructor + '(';
@@ -487,14 +488,14 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         }
         return expr + ')';
     }
-    
+
     // for nat
     else if (constructor == "Suc") {
         assertt(args.size() == 1);
         auto expr = args[0]->gen_expr(entity, typeinfo);
         return "(" + expr + ") + 1";
     }
-    
+
     // for option
     else if (constructor == "Some") {
         assertt(args.size() == 1);
