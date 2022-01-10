@@ -33,7 +33,7 @@ target = "{}"
 // error: {} without type info
 [list.expr.cons]
 source = "Cons $1 $2"
-target = "auto $temp = $2; $temp.push_front($1);"
+target = "auto $temp = $2; $temp.push_front($1); $temp"
 
 // simple mapping cannot hold
 [list.expr.cons2]
