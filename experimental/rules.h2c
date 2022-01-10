@@ -2,8 +2,8 @@
 // 2. operation mapping
 // 3. operation depends on type
 // 4. type depends on header
-// 5. generic types
-// 6. types of sub-exprs
+// 5. generic types (may)
+// 6. types of sub-exprs (may)
 
 [list]
 header = "list"
