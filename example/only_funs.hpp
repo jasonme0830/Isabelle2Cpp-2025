@@ -114,8 +114,8 @@ std::set<T1> testset(const std::list<T1> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
-        decltype(temp0) temp2;
-        for (auto temp3 : temp1) {
+        std::set<T1> temp2;
+        for (auto &temp3 : temp1) {
             if (temp0.count(temp3)) {
                 temp2.insert(temp3);
             }

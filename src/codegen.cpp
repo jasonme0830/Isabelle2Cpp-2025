@@ -66,8 +66,9 @@ Definition::~Definition() = default;
  * TODO: distinguish ShortDef with others
 */
 void Theory::codegen(Code &code) const {
-    size_t datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
-    size_t predefined = 0, datatype_gens = 0, function_gens = 0, shortdef_gens = 0;
+    size_t predefined = 0, datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
+    vector<string> datatype_gens, function_gens, shortdef_gens;
+
     for (size_t i = 0; i < definitions.size(); ++i) {
         auto decl = definitions[i].get();
 
@@ -79,9 +80,13 @@ void Theory::codegen(Code &code) const {
             if (decl->is_predefined()) { ++predefined; }
             else { decl->codegen(code); }
 
-            if      (decl->is_datatype_decl()) { ++datatype_gens; }
-            else if (decl->is_function_decl()) { ++function_gens; }
-            else                               { ++shortdef_gens; }
+            if (decl->is_datatype_decl()) {
+                datatype_gens.push_back(decl->def_name());
+            } else if (decl->is_function_decl()) {
+                function_gens.push_back(decl->def_name());
+            } else {
+                shortdef_gens.push_back(decl->def_name());
+            }
         } catch (const exception &e) {
             string name;
             if (auto datatype_decl = dynamic_cast<DataTypeDef *>(decl)) {
@@ -99,7 +104,7 @@ void Theory::codegen(Code &code) const {
     }
 
     auto defs = definitions.size() - shortdef_defs;
-    auto gens = datatype_gens + function_gens;
+    auto gens = datatype_gens.size() + function_gens.size();
     "$\n`scanned $ definitions, contain $ datatypes and $ functions;\n"_fs.outf(
         cout, info::light_green("Result:"), defs, datatype_defs, function_defs
     );
@@ -107,8 +112,20 @@ void Theory::codegen(Code &code) const {
         cout, gens, predefined
     );
     "``$ datatypes and $ functions.\n"_fs.outf(
-        cout, datatype_gens, function_gens
+        cout, datatype_gens.size(), function_gens.size()
     );
+
+    cout << "````datatypes:" << endl;
+    for (auto &datatype : datatype_gens) {
+        cout << datatype << ", ";
+    }
+
+    cout << "\n````functions:" << endl;
+    for (auto &function : function_gens) {
+        cout << function << ", ";
+    }
+
+    cout << endl;
 }
 
 void DataTypeDef::codegen(Code &code) const {
@@ -785,9 +802,14 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
             auto res = entity.gen_temp();
             auto term = entity.gen_temp();
 
+            if (typeinfo.empty()) {
+                entity.add_expr("decltype($) $;", lv, res);
+            } else {
+                entity.add_expr("$ $;", typeinfo.to_str(), res);
+            }
+
             entity
-                .add_expr("decltype($) $;", lv, res)
-                .add_expr("for (auto $ : $) {", term, rv).add_indent()
+                .add_expr("for (auto &$ : $) {", term, rv).add_indent()
                     .add_expr("if ($.count($)) {", lv, term).add_indent()
                         .add_expr("$.insert($);", res, term).sub_indent()
                     .add_expr("}").sub_indent()

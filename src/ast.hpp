@@ -268,6 +268,8 @@ struct LambdaExpr final : Expr {
 struct Definition {
     virtual ~Definition() = 0;
 
+    virtual std::string def_name() const { return ""; }
+
     virtual bool is_error() const { return false; }
 
     virtual bool is_predefined() const { return false; }
@@ -313,6 +315,8 @@ struct DataTypeDef : Definition {
     // mutable for codegen
     mutable std::vector<Component> components;
 
+    std::string def_name() const override { return decl_type->main_name(); }
+
     bool is_predefined() const override;
     bool is_datatype_decl() const override { return true; }
     void codegen(Code &) const override;
@@ -322,6 +326,8 @@ struct FunctionDef final : Definition {
     std::string name;
     Ptr<FuncType> type;
     std::vector<Equation> equations;
+
+    std::string def_name() const override { return name; }
 
     bool is_predefined() const override;
     bool is_function_decl() const override { return true; }
@@ -338,6 +344,8 @@ struct ShortDef final : Definition {
       : name(std::move(name)), parameters(std::move(params)), expr(std::move(expr)) {
         // ...
     }
+
+    std::string def_name() const override { return name; }
 
     void codegen(Code &) const override;
 };

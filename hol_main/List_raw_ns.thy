@@ -58,10 +58,10 @@ definition
   lexordp :: "('a \<Rightarrow> 'a \<Rightarrow> bool) \<Rightarrow> 'a list \<Rightarrow> 'a list \<Rightarrow> bool" where
   "lexordp r xs ys = ((xs, ys) \<in> lexord {(x, y). r x y})"
 
-(*14*)
+(*--14*)
 definition "Bleast S P = (LEAST x. x \<in> S \<and> P x)"
 
-(*15*)
+(*--15*)
 definition "abort_Bleast S P = (LEAST x. x \<in> S \<and> P x)"
 
 (*16*)
@@ -167,7 +167,7 @@ where "extract P xs =
 
 (* --- no function typeinfo --- *)
 (* 可以做 *)
-(*36*)
+(*--36*)
 function shuffles where
   "shuffles [] ys = {ys}"
 | "shuffles xs [] = {xs}"
@@ -175,7 +175,7 @@ function shuffles where
   by pat_completeness simp_all
 termination by lexicographic_order
 
-(*37*)
+(*--37*)
 function transpose where
 "transpose []             = []" |
 "transpose ([]     # xss) = transpose xss" |
