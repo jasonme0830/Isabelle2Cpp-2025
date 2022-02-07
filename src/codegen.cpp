@@ -436,6 +436,7 @@ string VarExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
         return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
     }
 
+    // for option
     else if (name == "None") {
         return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
     }
