@@ -10,7 +10,7 @@ std::list<std::int64_t> upto_aux(const std::int64_t &arg1, const std::int64_t &a
     }
     auto temp4 = temp2;
     auto temp5 = arg3;
-    temp4.insert(temp4.end(), temp5.begin(), temp5.end());
+    temp4.splice(temp4.end(), temp5);
     return temp4;
 }
 

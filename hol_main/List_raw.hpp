@@ -62,7 +62,7 @@ std::list<T1> rev(const std::list<T1> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = rev(xs);
         auto temp1 = std::list<T1>{x};
-        temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+        temp0.splice(temp0.end(), temp1);
         return temp0;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -124,7 +124,7 @@ std::list<T1> concat(const std::list<std::list<T1>> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = x;
         auto temp1 = concat(xs);
-        temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+        temp0.splice(temp0.end(), temp1);
         return temp0;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -516,7 +516,7 @@ std::list<T1> rotate1(const std::list<T1> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = xs;
         auto temp1 = std::list<T1>{x};
-        temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+        temp0.splice(temp0.end(), temp1);
         return temp0;
     } else { // auto-generated for -Wreturn-type
         std::abort();

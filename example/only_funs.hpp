@@ -58,7 +58,7 @@ std::list<T1> rev2(const std::list<T1> &arg1) {
         temp0.push_front(x);
         auto temp1 = rev2(xs);
         auto temp2 = temp0;
-        temp1.insert(temp1.end(), temp2.begin(), temp2.end());
+        temp1.splice(temp1.end(), temp2);
         return temp1;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -78,7 +78,7 @@ std::list<T1> rev3(const std::list<T1> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = rev3(xs);
         auto temp1 = std::list<T1>{x};
-        temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+        temp0.splice(temp0.end(), temp1);
         return temp0;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -114,13 +114,8 @@ std::set<T1> testset(const std::list<T1> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
-        std::set<T1> temp2;
-        for (auto &temp3 : temp1) {
-            if (temp0.count(temp3)) {
-                temp2.insert(temp3);
-            }
-        }
-        return temp2;
+        temp0.merge(temp1);
+        return temp1;
     }
 
     // testset (x # xs) = {x} \<union> testset(xs)
@@ -129,9 +124,7 @@ std::set<T1> testset(const std::list<T1> &arg1) {
         auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
-        for (auto temp2 : temp1) {
-            temp0.insert(temp2);
-        }
+        temp0.merge(temp1);
         return temp0;
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -157,7 +150,7 @@ std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
         }
         auto temp1 = temp0;
         auto temp2 = testifelse(xs, arg2);
-        temp1.insert(temp1.end(), temp2.begin(), temp2.end());
+        temp1.splice(temp1.end(), temp2);
         return temp1;
     } else { // auto-generated for -Wreturn-type
         std::abort();

@@ -591,7 +591,7 @@ string ConsExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const {
             entity
                 .add_expr("auto $ = $;", temp0, l)
                 .add_expr("auto $ = $;", temp1, r)
-                .add_expr("$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1)
+                .add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
             ;
             return temp0;
         }
@@ -797,25 +797,9 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
             entity
                 .add_expr("auto $ = $;", lv, l)
                 .add_expr("auto $ = $;", rv, r)
+                .add_expr("$.merge($);", lv, rv);
             ;
-
-            auto res = entity.gen_temp();
-            auto term = entity.gen_temp();
-
-            if (typeinfo.empty()) {
-                entity.add_expr("decltype($) $;", lv, res);
-            } else {
-                entity.add_expr("$ $;", typeinfo.to_str(), res);
-            }
-
-            entity
-                .add_expr("for (auto &$ : $) {", term, rv).add_indent()
-                    .add_expr("if ($.count($)) {", lv, term).add_indent()
-                        .add_expr("$.insert($);", res, term).sub_indent()
-                    .add_expr("}").sub_indent()
-                .add_expr("}")
-            ;
-            return res;
+            return rv;
         }
         case Token::Type::Union: {
             auto l = lhs->gen_expr(entity, typeinfo);
@@ -826,13 +810,7 @@ string BinaryOpExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) cons
             entity
                 .add_expr("auto $ = $;", lv, l)
                 .add_expr("auto $ = $;", rv, r)
-            ;
-
-            auto term = entity.gen_temp();
-            entity
-                .add_expr("for (auto $ : $) {", term, rv).add_indent()
-                    .add_expr("$.insert($);", lv, term).sub_indent()
-                .add_expr("}")
+                .add_expr("$.merge($);", lv, rv);
             ;
             return lv;
         }
