@@ -1,3 +1,10 @@
+/**
+ * 参数
+ * 返回值
+ * 局部变量
+ * 返回值
+*/
+
 #include <utility>
 #include <stack>
 #include <tuple>
@@ -17,6 +24,16 @@ std::uint64_t fib(std::uint64_t arg1) {
 
     // fib n = (fib (n - 1)) + (fib (n - 2))
     return fib(arg1 - 1) + fib(arg1 - 2);
+}
+
+std::uint64_t fact(const std::uint64_t &arg1) {
+    // fact 0 = 1
+    if (arg1 == 0) {
+        return 1;
+    }
+
+    // fact n = n * (fact (n - 1))
+    return arg1 * fact(arg1 - 1);
 }
 
 std::uint64_t fib2(std::uint64_t arg1) {

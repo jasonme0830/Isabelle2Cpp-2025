@@ -56,6 +56,16 @@ std::uint64_t fib(const std::uint64_t &arg1) {
     return fib(arg1 - 1) + fib(arg1 - 2);
 }
 
+std::uint64_t fact(const std::uint64_t &arg1) {
+    // fact 0 = 1
+    if (arg1 == 0) {
+        return 1;
+    }
+
+    // fact n = n * (fact (n - 1))
+    return arg1 * fact(arg1 - 1);
+}
+
 bool altrue(const std::uint64_t &arg1) {
     // altrue _ = True
     return true;
