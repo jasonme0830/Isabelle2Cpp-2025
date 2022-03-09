@@ -120,8 +120,8 @@ std::uint64_t factorial_termial2(std::uint64_t arg1, std::uint64_t acc1 = 0, std
     }
 
     if (arg1 % 2 == 1) {
-        return factorial_termial2(arg1 - 2, arg1 + acc1);
+        return factorial_termial2(arg1 - 2, arg1 + acc1, acc2);
     }
 
-    return factorial_termial2(arg1 - 2, arg1 * acc2);
+    return factorial_termial2(arg1 - 2, acc1, arg1 * acc2);
 }
