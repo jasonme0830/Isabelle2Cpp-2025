@@ -12,10 +12,12 @@ You can see some examples in [example/](example/)
 
 ## TODO
 
-- [ ] Reimplement function to support function currying
-- [ ] Provide configurable conversion rules
-- [ ] Do some benchmarks between generated cpp codes and native cpp codes
-- [ ] Do some benchmarks between generated cpp codes and generated sml codes
+- [ ] Support recursive function to loop
+- [ ] Resolve identifier conflicts
+- [ ] Reimplement function conversion to support function currying
+- [ ] Support configurable conversion rules
+- [ ] Design benchmarks between generated cpp codes and native cpp codes
+- [ ] Design benchmarks between generated cpp codes and generated sml codes
 
 ## DONE
 
