@@ -1,4 +1,5 @@
 #include <utility>
+#include <stack>
 
 std::uint64_t factorial(const std::uint64_t &arg1) {
     // factorial 0 = 1
@@ -124,4 +125,22 @@ std::uint64_t factorial_termial2(std::uint64_t arg1, std::uint64_t acc1 = 0, std
     }
 
     return factorial_termial2(arg1 - 2, acc1, arg1 * acc2);
+}
+
+/**
+ * TODO: try to use continuation
+ *
+*/
+std::uint64_t factorial_termial3(std::uint64_t arg1, std::stack<std::uint64_t> continuations) {
+    if (arg1 <= 1) {
+        return 1;
+    } else if (arg1 == 2) {
+        return 2;
+    }
+
+    if (arg1 % 2 == 0) {
+        return arg1 * factorial_termial3(arg1 - 2);
+    }
+
+    return arg1 + factorial_termial3(arg1 - 2);
 }
