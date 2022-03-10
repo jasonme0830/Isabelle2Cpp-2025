@@ -100,6 +100,8 @@ std::uint64_t mult_termial2(std::uint64_t arg1, std::uint64_t acc = 0) {
 // ft 2 = 2
 // ft 3 = 3 + 1 = 4
 // ft 4 = 4 * 2 = 8
+// ft 5 = 5 + 3 + 1 = 9
+// ft 6 = 6 * 4 * 2 = 48
 std::uint64_t factorial_termial(std::uint64_t arg1) {
     if (arg1 <= 1) {
         return 1;
@@ -107,11 +109,11 @@ std::uint64_t factorial_termial(std::uint64_t arg1) {
         return 2;
     }
 
-    if (arg1 % 2 == 0) {
-        return arg1 * factorial_termial(arg1 - 2);
+    if (arg1 % 2 == 1) {
+        return arg1 + factorial_termial(arg1 - 2);
     }
 
-    return arg1 + factorial_termial(arg1 - 2);
+    return arg1 * factorial_termial(arg1 - 2);
 }
 
 std::uint64_t ft2(std::uint64_t arg1, std::uint64_t acc1 = 0, std::uint64_t acc2 = 1) {
@@ -137,9 +139,9 @@ std::uint64_t ft3(std::uint64_t arg1,
         return cont(2);
     }
 
-    if (arg1 % 2 == 0) {
-        return ft3(arg1 - 2, [=] (std::uint64_t ret) { return cont(arg1 * ret); });
+    if (arg1 % 2 == 1) {
+        return ft3(arg1 - 2, [=] (std::uint64_t ret) { return cont(arg1 + ret); });
     }
 
-    return ft3(arg1 - 2, [=](std::uint64_t ret) { return cont(arg1 + ret); });
+    return ft3(arg1 - 2, [=](std::uint64_t ret) { return cont(arg1 * ret); });
 }
