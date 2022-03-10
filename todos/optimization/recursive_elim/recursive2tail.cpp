@@ -113,7 +113,7 @@ std::uint64_t factorial_termial(std::uint64_t arg1) {
     return arg1 + factorial_termial(arg1 - 2);
 }
 
-std::uint64_t factorial_termial2(std::uint64_t arg1, std::uint64_t acc1 = 0, std::uint64_t acc2 = 1) {
+std::uint64_t ft2(std::uint64_t arg1, std::uint64_t acc1 = 0, std::uint64_t acc2 = 1) {
     if (arg1 <= 1) {
         return 1 + acc1; // this requires human reasoning
     } else if (arg1 == 2) {
@@ -121,17 +121,29 @@ std::uint64_t factorial_termial2(std::uint64_t arg1, std::uint64_t acc1 = 0, std
     }
 
     if (arg1 % 2 == 1) {
-        return factorial_termial2(arg1 - 2, arg1 + acc1, acc2);
+        return ft2(arg1 - 2, arg1 + acc1, acc2);
     }
 
-    return factorial_termial2(arg1 - 2, acc1, arg1 * acc2);
+    return ft2(arg1 - 2, acc1, arg1 * acc2);
 }
 
 /**
  * TODO: try to use continuation
- *
+ *  without using lambda-expression
 */
-std::uint64_t factorial_termial3(std::uint64_t arg1, std::stack<std::uint64_t> continuations) {
+struct Continuation {
+    std::uint64_t state;
+
+    std::tuple<> captures;
+
+    std::uint64_t operator()(std::uint64_t) {
+        switch (state) {
+
+        }
+    }
+};
+
+std::uint64_t ft3(std::uint64_t arg1, std::stack<std::uint64_t> continuations) {
     if (arg1 <= 1) {
         return 1;
     } else if (arg1 == 2) {
@@ -139,8 +151,8 @@ std::uint64_t factorial_termial3(std::uint64_t arg1, std::stack<std::uint64_t> c
     }
 
     if (arg1 % 2 == 0) {
-        return arg1 * factorial_termial3(arg1 - 2);
+        return arg1 * ft3(arg1 - 2);
     }
 
-    return arg1 + factorial_termial3(arg1 - 2);
+    return arg1 + ft3(arg1 - 2);
 }
