@@ -1,5 +1,6 @@
 #include <utility>
 #include <stack>
+#include <functional>
 
 std::uint64_t factorial(const std::uint64_t &arg1) {
     // factorial 0 = 1
@@ -127,32 +128,18 @@ std::uint64_t ft2(std::uint64_t arg1, std::uint64_t acc1 = 0, std::uint64_t acc2
     return ft2(arg1 - 2, acc1, arg1 * acc2);
 }
 
-/**
- * TODO: try to use continuation
- *  without using lambda-expression
-*/
-struct Continuation {
-    std::uint64_t state;
-
-    std::tuple<> captures;
-
-    std::uint64_t operator()(std::uint64_t) {
-        switch (state) {
-
-        }
-    }
-};
-
-std::uint64_t ft3(std::uint64_t arg1, std::stack<std::uint64_t> continuations) {
+std::uint64_t ft3(std::uint64_t arg1,
+    std::function<std::uint64_t(std::uint64_t)> cont = [](std::uint64_t ret) { return ret; }
+) {
     if (arg1 <= 1) {
-        return 1;
+        return cont(1);
     } else if (arg1 == 2) {
-        return 2;
+        return cont(2);
     }
 
     if (arg1 % 2 == 0) {
-        return arg1 * ft3(arg1 - 2);
+        return ft3(arg1 - 2, [=] (std::uint64_t ret) { return cont(arg1 * ret); });
     }
 
-    return arg1 + ft3(arg1 - 2);
+    return ft3(arg1 - 2, [=](std::uint64_t ret) { return cont(arg1 + ret); });
 }
