@@ -73,11 +73,14 @@ std::uint64_t fib_loop(std::uint64_t arg1) {
 
     std::stack<std::uint64_t> rets;
     std::stack<std::uint64_t> arg1s;
+    arg1s.push(arg1);
 
     while (!states.empty()) {
         auto state = states.top(); states.pop();
         switch (state) {
-case 0:
+case 0: {
+        auto arg1 = arg1s.top(); arg1s.pop();
+
         if (arg1 == 0) {
             rets.push(1);
             continue;
@@ -93,15 +96,15 @@ case 0:
         arg1s.push(arg1);
         states.push(1);
 
-        std::tie(arg1) = std::forward_as_tuple(arg1 - 1);
+        arg1s.push(arg1 - 1);
         states.push(0);
         continue;
-
+}
 case 1: {
         auto arg1 = arg1s.top(); arg1s.pop();
         states.push(2);
 
-        std::tie(arg1) = std::forward_as_tuple(arg1 - 2);
+        arg1s.push(arg1 - 2);
         states.push(0);
         continue;
 }
