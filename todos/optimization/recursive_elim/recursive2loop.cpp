@@ -113,6 +113,8 @@ case 2: {
 }
         }
     }
+
+    return rets.top();
 }
 
 // the definition of factorial_termial is in recursive2tail.cpp
