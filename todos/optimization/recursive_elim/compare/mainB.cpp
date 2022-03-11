@@ -2,7 +2,7 @@
 #include <stack>
 #include <iostream>
 
-std::uint64_t ft4_loop(std::uint64_t arg1) {
+std::uint64_t ft_loop(std::uint64_t arg1) {
     std::stack<std::uint64_t> states;
     states.push(0);
 
@@ -57,7 +57,7 @@ case 2: {
 
 int main() {
     for (std::uint64_t i = 0; i < 10000000; ++i) {
-        std::cout << ft4_loop(99);
+        std::cout << ft_loop(99);
     }
     std::cout << std::endl;
 }

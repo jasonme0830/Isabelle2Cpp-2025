@@ -118,7 +118,7 @@ case 2: {
 // the definition of factorial_termial is in recursive2tail.cpp
 std::uint64_t factorial_termial(std::uint64_t arg1);
 
-std::uint64_t ft4_loop(std::uint64_t arg1) {
+std::uint64_t ft_loop(std::uint64_t arg1) {
     std::stack<std::uint64_t> states;
     states.push(0);
 
