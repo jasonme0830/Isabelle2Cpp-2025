@@ -8,6 +8,7 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
+- [ ] Reorganize directory structure
 - [ ] Support recursive function to loop.
 - [ ] Resolve identifier conflicts.
 - [ ] Reimplement function conversion to support function currying.
