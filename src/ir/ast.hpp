@@ -9,8 +9,8 @@
 #include <vector>
 #include <functional>
 
-namespace hol2cpp
-{
+namespace hol2cpp {
+
 class Code;
 class DataType;
 class FuncEntity;
@@ -114,7 +114,7 @@ struct FuncType final : Type {
     /**
      * build the binded func entity
     */
-    void build_func_entity(FuncEntity &entity) const;
+    void gen_funcentity(FuncEntity &entity) const;
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
     std::string gen_datatype(DataType &) const override;
@@ -237,7 +237,7 @@ struct Equation final {
     // helper
     std::string raw_str;
 
-    void build_func_entity(FuncEntity &entity) const;
+    void gen_funcentity(FuncEntity &entity) const;
 };
 
 struct LetinExpr final : Expr {

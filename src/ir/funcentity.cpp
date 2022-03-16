@@ -3,8 +3,7 @@
 #include "format.hpp"
 #include "funcentity.hpp"
 
-#undef ERROR
-#define ERROR CodegenError
+#define assert(expr) assert_impl(expr, CodegenError)
 
 using namespace std;
 
@@ -52,7 +51,7 @@ bool TypeInfo::is_function() const {
 }
 
 const TypeInfo &TypeInfo::result_typeinfo() const {
-    assertt(is_function());
+    assert(is_function());
     return arguments.back();
 }
 

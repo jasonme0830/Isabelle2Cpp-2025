@@ -3,8 +3,7 @@
 #include <string>
 #include <exception>
 
-#define ERROR 0
-#define assertt(expr) if (!(expr)) { throw ERROR(info::strong("$:$: "_fs.format(__FILE__, __LINE__)) + "Assertion `" #expr "' failed."); }
+#define assert_impl(expr, E) if (!(expr)) { throw E(info::strong("$:$: "_fs.format(__FILE__, __LINE__)) + "Assertion `" #expr "' failed."); }
 
 namespace hol2cpp {
 namespace info {
