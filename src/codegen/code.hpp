@@ -10,7 +10,7 @@
 
 namespace hol2cpp {
 /**
- * Code contains all function entities
+ * Code contains all function entities and datatypes
  *  provides methods to generate C++ code
 */
 class Code {
