@@ -922,7 +922,7 @@ string LambdaExpr::gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const 
     }
 
     auto temp = entity.gen_temp();
-    entity.add_expr("std::function $ = [&] ($) {", temp, params).add_indent()
+    entity.add_expr("std::function $ = [=] ($) {", temp, params).add_indent()
         .add_expr("return $;", expr->gen_expr(entity, typeinfo[-1])).sub_indent()
         .add_expr("};")
     ;
