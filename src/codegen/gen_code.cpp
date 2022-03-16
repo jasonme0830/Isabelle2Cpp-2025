@@ -65,7 +65,7 @@ Definition::~Definition() = default;
 /**
  * TODO: distinguish ShortDef with others
 */
-void Theory::codegen(Code &code) const {
+void Theory::gen_code(Code &code) const {
     size_t predefined = 0, datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
     vector<string> datatype_gens, function_gens, shortdef_gens;
 
@@ -78,7 +78,7 @@ void Theory::codegen(Code &code) const {
 
         if (!decl->is_error()) try {
             if (decl->is_predefined()) { ++predefined; }
-            else { decl->codegen(code); }
+            else { decl->gen_code(code); }
 
             if (decl->is_datatype_decl()) {
                 datatype_gens.push_back(decl->def_name());
@@ -128,14 +128,14 @@ void Theory::codegen(Code &code) const {
     cout << endl;
 }
 
-void DataTypeDef::codegen(Code &code) const {
+void DataTypeDef::gen_code(Code &code) const {
     code.add_header("variant");
 
     auto name = decl_type->main_name();
     auto &data_type = code.entry_data_type(name);
 
     data_type.name() = name;
-    data_type.self() = decl_type->build_data_type(data_type);
+    data_type.self() = decl_type->gen_datatype(data_type);
 
     vector<vector<Ptr<Type>>> abstracts;
     for (size_t i = 0; i < components.size(); ++i) {
@@ -145,7 +145,7 @@ void DataTypeDef::codegen(Code &code) const {
         code.bind_cons(components[i].constructor, data_type);
 
         for (auto &type : components[i].arguments) {
-            auto field_type = type->build_data_type(data_type);
+            auto field_type = type->gen_datatype(data_type);
             data_type.add_field_type(field_type);
             if (field_type == data_type.self()) {
                 data_type.is_recuisive() = true;
@@ -157,7 +157,7 @@ void DataTypeDef::codegen(Code &code) const {
     data_type.abstracts() = move(abstracts);
 }
 
-void FunctionDef::codegen(Code &code) const {
+void FunctionDef::gen_code(Code &code) const {
     auto &entity = code.entry_func_entity(name);
 
     entity.name() = name;
@@ -178,7 +178,7 @@ void FunctionDef::codegen(Code &code) const {
     }
 }
 
-void ShortDef::codegen(Code &code) const {
+void ShortDef::gen_code(Code &code) const {
     code.add_short_def(name, make_unique<ShortDef>(name, move(parameters), move(expr)));
 }
 
@@ -227,33 +227,33 @@ TypeInfo FuncType::gen_typeinfo(FuncEntity &entity) const {
 }
 
 // --- build data type ---
-string NormalType::build_data_type(DataType &) const {
+string NormalType::gen_datatype(DataType &) const {
     return name;
 }
 
-string ArgumentType::build_data_type(DataType &type) const {
+string ArgumentType::gen_datatype(DataType &type) const {
     return type.add_argument_type(name);
 }
 
-string TemplateType::build_data_type(DataType &type) const {
+string TemplateType::gen_datatype(DataType &type) const {
     auto res = name + '<';
     for (size_t i = 0; i < args.size(); ++i) {
         if (i == 0) {
-            res += args[i]->build_data_type(type);
+            res += args[i]->gen_datatype(type);
         } else {
-            res += ", " + args[i]->build_data_type(type);
+            res += ", " + args[i]->gen_datatype(type);
         }
     }
     return res + '>';
 }
 
-string FuncType::build_data_type(DataType &type) const {
-    string res = "std::function<" + result_type()->build_data_type(type) + '(';
+string FuncType::gen_datatype(DataType &type) const {
+    string res = "std::function<" + result_type()->gen_datatype(type) + '(';
     for (size_t i = 0; i < types.size() - 1; ++i) {
         if (i == 0) {
-            res += types[i]->build_data_type(type);
+            res += types[i]->gen_datatype(type);
         } else {
-            res += ", " + types[i]->build_data_type(type);
+            res += ", " + types[i]->gen_datatype(type);
         }
     }
     return res + ")>";

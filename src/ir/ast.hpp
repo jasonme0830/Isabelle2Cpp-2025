@@ -1,8 +1,8 @@
 #pragma once
 
-#include "token.hpp"
-#include "error.hpp"
 #include "funcentity.hpp"
+#include "../parser/token.hpp"
+#include "../utility/error.hpp"
 
 #include <map>
 #include <memory>
@@ -30,7 +30,7 @@ struct Type {
      * @entity: generate type infomation related with the given entity
     */
     virtual TypeInfo gen_typeinfo(FuncEntity &entity) const = 0;
-    virtual std::string build_data_type(DataType &) const = 0;
+    virtual std::string gen_datatype(DataType &) const = 0;
     virtual std::string main_name() const;
     virtual TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const = 0;
 };
@@ -49,7 +49,7 @@ struct NormalType final : Type {
     NormalType(std::string name) : name(std::move(name)) {}
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
-    std::string build_data_type(DataType &) const override;
+    std::string gen_datatype(DataType &) const override;
     std::string main_name() const override;
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
@@ -68,7 +68,7 @@ struct ArgumentType final : Type {
     ArgumentType(std::string name) : name(std::move(name)) {}
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
-    std::string build_data_type(DataType &) const override;
+    std::string gen_datatype(DataType &) const override;
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
@@ -91,7 +91,7 @@ struct TemplateType final : Type {
     }
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
-    std::string build_data_type(DataType &) const override;
+    std::string gen_datatype(DataType &) const override;
     std::string main_name() const override;
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
@@ -117,7 +117,7 @@ struct FuncType final : Type {
     void build_func_entity(FuncEntity &entity) const;
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
-    std::string build_data_type(DataType &) const override;
+    std::string gen_datatype(DataType &) const override;
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
@@ -277,7 +277,7 @@ struct Definition {
     virtual bool is_datatype_decl() const { return false; }
     virtual bool is_function_decl() const { return false; }
 
-    virtual void codegen(Code &) const { throw; };
+    virtual void gen_code(Code &) const { throw; };
 };
 
 struct ErrorDefinition : Definition {
@@ -312,14 +312,14 @@ struct DataTypeDef : Definition {
     };
 
     Ptr<Type> decl_type;
-    // mutable for codegen
+    // mutable for gen_code
     mutable std::vector<Component> components;
 
     std::string def_name() const override { return decl_type->main_name(); }
 
     bool is_predefined() const override;
     bool is_datatype_decl() const override { return true; }
-    void codegen(Code &) const override;
+    void gen_code(Code &) const override;
 };
 
 struct FunctionDef final : Definition {
@@ -331,7 +331,7 @@ struct FunctionDef final : Definition {
 
     bool is_predefined() const override;
     bool is_function_decl() const override { return true; }
-    void codegen(Code &) const override;
+    void gen_code(Code &) const override;
 };
 
 struct ShortDef final : Definition {
@@ -347,7 +347,7 @@ struct ShortDef final : Definition {
 
     std::string def_name() const override { return name; }
 
-    void codegen(Code &) const override;
+    void gen_code(Code &) const override;
 };
 
 struct Theory final {
@@ -355,6 +355,6 @@ struct Theory final {
     std::vector<std::string> imports;
     std::vector<Ptr<Definition>> definitions;
 
-    void codegen(Code &) const;
+    void gen_code(Code &) const;
 };
 } // namespace hol2cpp

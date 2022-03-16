@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
         }
 
         Code code(output_file.empty() ? theory.name : output_file);
-        theory.codegen(code);
+        theory.gen_code(code);
         code.generate();
 
     } catch(const exception& e) {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ast.hpp"
 #include "token.hpp"
-#include "error.hpp"
 #include "tokenizer.hpp"
+#include "../ir/ast.hpp"
+#include "../utility/error.hpp"
 
 #include <fstream>
 
