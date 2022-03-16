@@ -17,7 +17,6 @@ struct TypeInfo {
     explicit TypeInfo(std::string name);
 
     std::string to_str() const;
-    std::string to_str_with(const std::string &name) const;
     std::string to_str_as_arg() const;
 
     bool empty() const;

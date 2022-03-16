@@ -39,34 +39,6 @@ string TypeInfo::to_str() const {
     }
 }
 
-string TypeInfo::to_str_with(const std::string &name) const {
-    if (arguments.empty()) {
-        return name;
-    }
-
-    if (is_function()) {
-        auto type = name + '<' + arguments.back().to_str() + '(';
-        for (size_t i = 0; i < arguments.size() - 1; ++i) {
-            if (i == 0) {
-                type += arguments[i].to_str_as_arg();
-            } else {
-                type += ", " + arguments[i].to_str_as_arg();
-            }
-        }
-        return type + ")>";
-    } else {
-        auto type = name + '<';
-        for (size_t i = 0; i < arguments.size(); ++i) {
-            if (i == 0) {
-                type += arguments[i].to_str();
-            } else {
-                type += ", " + arguments[i].to_str();
-            }
-        }
-        return type + '>';
-    }
-}
-
 string TypeInfo::to_str_as_arg() const {
     return "const " + to_str() + " &";
 }
