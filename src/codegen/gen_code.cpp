@@ -7,9 +7,6 @@
 using namespace std;
 
 namespace hol2cpp {
-/**
- * TODO: distinguish ShortDef with others
-*/
 Code Theory::gen_code() const {
     Code code;
 
