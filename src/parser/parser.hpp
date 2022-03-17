@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ast.hpp"
 #include "token.hpp"
-#include "error.hpp"
 #include "tokenizer.hpp"
+#include "../ir/ast.hpp"
+#include "../utility/error.hpp"
 
 #include <fstream>
 
@@ -78,8 +78,8 @@ class Parser {
     std::string next_raw_str();
 
     Ptr<Definition> gen_declaration();
-    Ptr<DataTypeDef> gen_datatype_definition();
-        DataTypeDef::Component gen_component();
+    Ptr<DatatypeDef> gen_datatype_definition();
+        DatatypeDef::Component gen_component();
     Ptr<Definition> gen_function_definition();
         Equation gen_equation();
 

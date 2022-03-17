@@ -1,6 +1,5 @@
-#include "error.hpp"
-#include "format.hpp"
 #include "tokenizer.hpp"
+#include "../utility/format.hpp"
 
 #include <set>
 #include <vector>

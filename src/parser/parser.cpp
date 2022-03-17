@@ -1,5 +1,5 @@
-#include "error.hpp"
 #include "parser.hpp"
+#include "../utility/error.hpp"
 
 #include <set>
 #include <map>
@@ -159,7 +159,7 @@ Ptr<Definition> Parser::gen_declaration() {
         try {
             return gen_datatype_definition();
         } catch (const ParseError &e) {
-            throw ParseError(e, PEType::DataType);
+            throw ParseError(e, PEType::Datatype);
         }
     } else {
         try {
@@ -170,8 +170,8 @@ Ptr<Definition> Parser::gen_declaration() {
     }
 }
 
-Ptr<DataTypeDef> Parser::gen_datatype_definition() {
-    auto decl = make_unique<DataTypeDef>();
+Ptr<DatatypeDef> Parser::gen_datatype_definition() {
+    auto decl = make_unique<DatatypeDef>();
 
     eat<Token::Type::Datatype>("expected token Datatype");
     if (meet<Token::Type::Identifier>()) {
@@ -192,8 +192,8 @@ Ptr<DataTypeDef> Parser::gen_datatype_definition() {
     return decl;
 }
 
-DataTypeDef::Component Parser::gen_component() {
-    DataTypeDef::Component componment;
+DatatypeDef::Component Parser::gen_component() {
+    DatatypeDef::Component componment;
 
     check<Token::Type::Identifier>("expected an identifier");
     componment.constructor = current_token_.value;

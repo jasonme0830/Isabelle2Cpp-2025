@@ -1,10 +1,9 @@
 #include "code.hpp"
-#include "error.hpp"
-#include "format.hpp"
 #include "funcentity.hpp"
+#include "../utility/error.hpp"
+#include "../utility/format.hpp"
 
-#undef ERROR
-#define ERROR CodegenError
+#define assert_true(expr) assert_impl(expr, CodegenError)
 
 using namespace std;
 
@@ -52,7 +51,7 @@ bool TypeInfo::is_function() const {
 }
 
 const TypeInfo &TypeInfo::result_typeinfo() const {
-    assertt(is_function());
+    assert_true(is_function());
     return arguments.back();
 }
 
@@ -74,12 +73,12 @@ Code &FuncEntity::code() {
 }
 
 FuncEntity &FuncEntity::add_indent() {
-    indent_ += Code::indent_size();
+    indent_ += theIndentSize;
     return *this;
 }
 
 FuncEntity &FuncEntity::sub_indent() {
-    indent_ -= Code::indent_size();
+    indent_ -= theIndentSize;
     return *this;
 }
 

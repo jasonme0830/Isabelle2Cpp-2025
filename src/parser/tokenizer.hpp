@@ -1,7 +1,7 @@
 #pragma once
 
 #include "token.hpp"
-#include "error.hpp"
+#include "../utility/error.hpp"
 
 #include <vector>
 #include <fstream>
