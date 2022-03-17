@@ -6,16 +6,18 @@
 #include <string>
 
 namespace hol2cpp {
-class DataType {
+class Datatype {
   public:
     bool &is_recuisive();
-    std::string &self();
+    bool is_normal_type() const;
 
-    bool is_normal_type();
+    const std::string &self() const;
+    const std::string &name() const;
 
-    std::string &name();
+    void set_self(std::string self);
+    void set_name(std::string name);
 
-    std::vector<std::string> &template_args();
+    const std::vector<std::string> &template_args() const;
 
     std::size_t find_argument_type(const std::string &name);
     std::string add_argument_type(std::string name);

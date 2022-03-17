@@ -3,15 +3,15 @@
 using namespace std;
 
 namespace hol2cpp {
-string NormalType::gen_datatype(DataType &) const {
+string NormalType::gen_datatype(Datatype &) const {
     return name;
 }
 
-string ArgumentType::gen_datatype(DataType &type) const {
+string ArgumentType::gen_datatype(Datatype &type) const {
     return type.add_argument_type(name);
 }
 
-string TemplateType::gen_datatype(DataType &type) const {
+string TemplateType::gen_datatype(Datatype &type) const {
     auto res = name + '<';
     for (size_t i = 0; i < args.size(); ++i) {
         if (i == 0) {
@@ -23,7 +23,7 @@ string TemplateType::gen_datatype(DataType &type) const {
     return res + '>';
 }
 
-string FuncType::gen_datatype(DataType &type) const {
+string FuncType::gen_datatype(Datatype &type) const {
     string res = "std::function<" + result_type()->gen_datatype(type) + '(';
     for (size_t i = 0; i < types.size() - 1; ++i) {
         if (i == 0) {
@@ -37,7 +37,7 @@ string FuncType::gen_datatype(DataType &type) const {
 
 /**
  * @brief get the main name of the type, which is usually used for datatypes
- * 
+ *
  * @return "list" for 'a list
  */
 string Type::main_name() const {

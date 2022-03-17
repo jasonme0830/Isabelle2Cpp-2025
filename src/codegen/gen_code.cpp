@@ -10,7 +10,9 @@ namespace hol2cpp {
 /**
  * TODO: distinguish ShortDef with others
 */
-void Theory::gen_code(Code &code) const {
+Code Theory::gen_code() const {
+    Code code;
+
     size_t predefined = 0, datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
     vector<string> datatype_gens, function_gens, shortdef_gens;
 
@@ -34,7 +36,7 @@ void Theory::gen_code(Code &code) const {
             }
         } catch (const exception &e) {
             string name;
-            if (auto datatype_decl = dynamic_cast<DataTypeDef *>(decl)) {
+            if (auto datatype_decl = dynamic_cast<DatatypeDef *>(decl)) {
                 name = "datatype " + datatype_decl->decl_type->main_name();
                 code.pop_datatype();
             } else {
@@ -71,54 +73,56 @@ void Theory::gen_code(Code &code) const {
     }
 
     cout << endl;
+
+    return code;
 }
 
-void DataTypeDef::gen_code(Code &code) const {
+void DatatypeDef::gen_code(Code &code) const {
     code.add_header("variant");
 
     auto name = decl_type->main_name();
-    auto &data_type = code.entry_data_type(name);
+    auto &datatype = code.entry_datatype(name);
 
-    data_type.name() = name;
-    data_type.self() = decl_type->gen_datatype(data_type);
+    datatype.set_name(move(name));
+    datatype.set_self(decl_type->gen_datatype(datatype));
 
     vector<vector<Ptr<Type>>> abstracts;
     for (size_t i = 0; i < components.size(); ++i) {
         abstracts.push_back({});
-        data_type.entry_component();
-        data_type.add_constructor(components[i].constructor);
-        code.bind_cons(components[i].constructor, data_type);
+        datatype.entry_component();
+        datatype.add_constructor(components[i].constructor);
+        code.bind_cons(components[i].constructor, datatype);
 
         for (auto &type : components[i].arguments) {
-            auto field_type = type->gen_datatype(data_type);
-            data_type.add_field_type(field_type);
-            if (field_type == data_type.self()) {
-                data_type.is_recuisive() = true;
+            auto field_type = type->gen_datatype(datatype);
+            datatype.add_field_type(field_type);
+            if (field_type == datatype.self()) {
+                datatype.is_recuisive() = true;
                 code.add_header("memory");
             }
             abstracts.back().push_back(move(type));
         }
     }
-    data_type.abstracts() = move(abstracts);
+    datatype.abstracts() = move(abstracts);
 }
 
 void FunctionDef::gen_code(Code &code) const {
-    auto &entity = code.entry_func_entity(name);
+    auto &func = code.entry_func_entity(name);
 
-    entity.name() = name;
-    type->gen_funcentity(entity);
+    func.name() = name;
+    type->gen_funcentity(func);
     for (auto &equation : equations) {
-        entity.entry_equation();
-        entity.add_expr("// $", equation.raw_str);
-        equation.gen_funcentity(entity);
-        entity.close_equation();
+        func.entry_equation();
+        func.add_expr("// $", equation.raw_str);
+        equation.gen_funcentity(func);
+        func.close_equation();
     }
 
-    if (!entity.statements().empty() && !entity.statements().back().empty()) {
-        auto &last_stmt = entity.statements().back().back();
+    if (!func.statements().empty() && !func.statements().back().empty()) {
+        auto &last_stmt = func.statements().back().back();
         if (last_stmt.back() == '}') {
-            entity.app_last_stmt(" else { // auto-generated for -Wreturn-type");
-            entity.add_indent().add_expr("std::abort();").sub_indent().add_expr("}");
+            func.app_last_stmt(" else { // auto-generated for -Wreturn-type");
+            func.add_indent().add_expr("std::abort();").sub_indent().add_expr("}");
         }
     }
 }
@@ -129,11 +133,11 @@ void ShortDef::gen_code(Code &code) const {
 
 /**
  * @brief check the datatype is pre-defined or not
- * 
+ *
  * @return true if the datatype is pre-defined
  * @return false if not
  */
-bool DataTypeDef::is_predefined() const {
+bool DatatypeDef::is_predefined() const {
     return theNormalTypeMapping.count(decl_type->main_name())
         || theTemplateTypeMapping.count(decl_type->main_name())
     ;
@@ -141,7 +145,7 @@ bool DataTypeDef::is_predefined() const {
 
 /**
  * @brief check the function is pre-defined or not
- * 
+ *
  * @return true if the function is pre-defined
  * @return false if not
  */

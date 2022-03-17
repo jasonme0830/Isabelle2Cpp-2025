@@ -78,8 +78,8 @@ class Parser {
     std::string next_raw_str();
 
     Ptr<Definition> gen_declaration();
-    Ptr<DataTypeDef> gen_datatype_definition();
-        DataTypeDef::Component gen_component();
+    Ptr<DatatypeDef> gen_datatype_definition();
+        DatatypeDef::Component gen_component();
     Ptr<Definition> gen_function_definition();
         Equation gen_equation();
 

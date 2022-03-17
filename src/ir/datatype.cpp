@@ -1,64 +1,74 @@
 #include "datatype.hpp"
 
+using namespace std;
+
 namespace hol2cpp {
-bool &DataType::is_recuisive() {
+bool &Datatype::is_recuisive() {
     return is_recuisive_;
 }
 
-std::string &DataType::self() {
-    return self_;
-}
-
-bool DataType::is_normal_type() {
+bool Datatype::is_normal_type() const {
     return template_args_.empty();
 }
 
-std::string &DataType::name() {
+const string &Datatype::self() const {
+    return self_;
+}
+
+const string &Datatype::name() const {
     return name_;
 }
 
-std::vector<std::string> &DataType::template_args() {
+void Datatype::set_self(string self) {
+    self_ = move(self);
+}
+
+void Datatype::set_name(string name) {
+    name_ = move(name);
+}
+
+const vector<string> &Datatype::template_args() const {
     return template_args_;
 }
 
-std::size_t DataType::find_argument_type(const std::string &name) {
+size_t Datatype::find_argument_type(const string &name) {
     return template_mapping_.at(name);
 }
 
-std::string DataType::add_argument_type(std::string name) {
+string Datatype::add_argument_type(string name) {
     if (!template_mapping_.count(name)) {
         template_mapping_[name] = template_args_.size();
-        template_args_.push_back("T" + std::to_string(template_args_.size() + 1));
+        template_args_.push_back("T" + to_string(template_args_.size() + 1));
     }
     return template_args_[template_mapping_[name]];
 }
 
-std::size_t DataType::pos_of_cons(const std::string &cons) {
+size_t Datatype::pos_of_cons(const string &cons) {
     return constructor_mapping_[cons];
 }
 
-void DataType::add_constructor(const std::string &cons) {
+void Datatype::add_constructor(const string &cons) {
     constructor_mapping_[cons] = constructors_.size();
     constructors_.push_back(cons);
 }
 
-const std::vector<std::string> &DataType::constructors() const {
+const vector<string> &Datatype::constructors() const {
     return constructors_;
 }
 
-void DataType::entry_component() {
+void Datatype::entry_component() {
     components_.emplace_back();
 }
 
-void DataType::add_field_type(const std::string &type) {
+void Datatype::add_field_type(const string &type) {
     components_.back().push_back(type);
 }
 
-const std::vector<std::vector<std::string>> &DataType::components() const {
+const vector<vector<string>> &Datatype::components() const {
     return components_;
 }
 
-std::vector<std::vector<Ptr<Type>>> &DataType::abstracts() {
+vector<vector<Ptr<Type>>> &Datatype::abstracts() {
     return abstracts_;
 }
 } // namespace hol2cpp

@@ -15,14 +15,14 @@ const map<string, string> theTemplateTypeMapping {
 };
 
 /**
- * @brief generate the TypeInfo of the Isabelle/HOL type in the given function entity
- * 
- * @param entity the corresponding function entity that records the occurred types
+ * @brief generate the TypeInfo of the Isabelle/HOL type in the given function func
+ *
+ * @param func the corresponding function func that records the occurred types
  * @return std::list<T1> for 'a list in "'a list => 'a list"
  */
-TypeInfo NormalType::gen_typeinfo(FuncEntity &entity) const {
+TypeInfo NormalType::gen_typeinfo(FuncEntity &func) const {
     if (theNormalTypeMapping.count(name)) {
-        entity.code().add_header("cstdint");
+        func.code().add_header("cstdint");
         return TypeInfo(theNormalTypeMapping.at(name));
     } else {
         // e.g. bool
@@ -30,11 +30,11 @@ TypeInfo NormalType::gen_typeinfo(FuncEntity &entity) const {
     }
 }
 
-TypeInfo ArgumentType::gen_typeinfo(FuncEntity &entity) const {
-    return TypeInfo(entity.add_argument_type(name));
+TypeInfo ArgumentType::gen_typeinfo(FuncEntity &func) const {
+    return TypeInfo(func.add_argument_type(name));
 }
 
-TypeInfo TemplateType::gen_typeinfo(FuncEntity &entity) const {
+TypeInfo TemplateType::gen_typeinfo(FuncEntity &func) const {
     static const map<string, string> mapping_header {
         { "set",    "set" },
         { "option", "optional" },
@@ -43,22 +43,22 @@ TypeInfo TemplateType::gen_typeinfo(FuncEntity &entity) const {
     };
 
     if (mapping_header.count(name)) {
-        entity.code().add_header(mapping_header.at(name));
+        func.code().add_header(mapping_header.at(name));
     }
 
     TypeInfo res(theTemplateTypeMapping.count(name) ? theTemplateTypeMapping.at(name) : name);
     for (auto &arg : args) {
-        res.arguments.push_back(arg->gen_typeinfo(entity));
+        res.arguments.push_back(arg->gen_typeinfo(func));
     }
     return res;
 }
 
-TypeInfo FuncType::gen_typeinfo(FuncEntity &entity) const {
-    entity.code().add_header("functional");
+TypeInfo FuncType::gen_typeinfo(FuncEntity &func) const {
+    func.code().add_header("functional");
 
     TypeInfo res("std::function");
     for (auto &arg : types) {
-        res.arguments.push_back(arg->gen_typeinfo(entity));
+        res.arguments.push_back(arg->gen_typeinfo(func));
     }
     return res;
 }

@@ -8,8 +8,7 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
-- [ ] Reorganize directory structure
-- [ ] Support recursive function to loop.
+- [ ] Support recursive function to loop/iteration.
 - [ ] Resolve identifier conflicts.
 - [ ] Reimplement function conversion to support function currying.
 - [ ] Support configurable conversion rules.
@@ -18,6 +17,7 @@ You can see some examples in [example/](example/).
 
 ## ChangeLog
 
+- [x] Reorganize directory structure
 - [x] Use `std::set::merge` instead trivial traversal for `\<inter>` and `\<union>` of `set`.
 - [x] Use `std::list::splice` instead of `std::list::insert` for `xs @ ys`.
 - [x] Function templates are generated in the `.hpp` file.

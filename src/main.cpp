@@ -1,6 +1,6 @@
-#include "code.hpp"
-#include "parser.hpp"
-#include "argparse.hpp"
+#include "parser/parser.hpp"
+#include "utility/argparse.hpp"
+#include "synthesis/synthesizer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -32,13 +32,6 @@ int main(int argc, char* argv[]) {
             throw std::invalid_argument("input file should be .thy file");
         }
 
-        ifstream fin(input_file);
-        if (!fin.good()) {
-            cout << "can't open file " << input_file << endl;
-            return -1;
-        }
-
-        auto theory = Parser(fin, input_file).gen_theory();
         string output_file;
         if (auto same_path = arg_parser.get<bool>("s")) {
             if (!arg_parser.get<string>("output").empty()) {
@@ -50,9 +43,17 @@ int main(int argc, char* argv[]) {
             output_file = arg_parser.get<string>("output");
         }
 
-        Code code(output_file.empty() ? theory.name : output_file);
-        theory.gen_code(code);
-        code.generate();
+        ifstream fin(input_file);
+        if (!fin.good()) {
+            cout << "can't open file " << input_file << endl;
+            return -1;
+        }
+
+        auto theory = Parser(fin, input_file).gen_theory();
+        auto code = theory.gen_code();
+
+        Synthesizer syner(output_file.empty() ? theory.name : output_file);
+        syner.synthesize(code);
 
     } catch(const exception& e) {
         cerr << e.what() << endl;

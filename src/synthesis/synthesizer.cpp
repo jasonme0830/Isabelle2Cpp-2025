@@ -1,0 +1,257 @@
+#include "synthesizer.hpp"
+
+using namespace std;
+
+namespace hol2cpp {
+Synthesizer::Synthesizer(string filename)
+  : filename_(move(filename)), out_(header_out_), indent_(0) {
+    header_out_ = ofstream(filename_ + ".hpp");
+    if (!header_out_.good()) {
+        cout << "can't open file " << filename << ".hpp" << endl;
+        return;
+    }
+    impl_out_ = ofstream(filename_ + ".cpp");
+    if (!impl_out_.good()) {
+        cout << "can't open file " << filename << ".cpp" << endl;
+        return;
+    }
+}
+
+void Synthesizer::synthesize(const Code &code) {
+    syn_header(code);
+    syn_impl(code);
+}
+
+void Synthesizer::syn_header(const Code &code) {
+    out_ = ref(header_out_);
+
+    for (const auto &header : code.headers()) {
+        "#include <$>\n"_fs.outf(out_.get(), header);
+    }
+    out_.get() << endl;
+
+    for (auto &datatype : code.datatypes()) {
+        syn_class(datatype);
+    }
+
+    for (auto &func : code.func_entities()) {
+        if (func.get().template_args().empty()) {
+            syn_func(func, false);
+        } else {
+            syn_func(func, true);
+        }
+    }
+}
+
+void Synthesizer::syn_impl(const Code &code) {
+    out_ = ref(impl_out_);
+
+    "#include \"$\"\n\n"_fs.outf(out_.get(), filename_.substr(filename_.rfind('/') + 1) + ".hpp");
+
+    for (auto &func : code.func_entities()) {
+        if (func.get().template_args().empty()) {
+            syn_func(func);
+        }
+    }
+}
+
+void Synthesizer::syn_class(const Datatype &datatype) {
+    indent_ = 0;
+    if (!datatype.is_normal_type()) {
+        syn_class_template(datatype);
+    }
+    syn_class_definition(datatype);
+}
+
+void Synthesizer::syn_class_template(const Datatype &datatype) {
+    auto &targs = datatype.template_args();
+    "template<"_fs.outf(newline());
+    for (size_t i = 0; i < targs.size(); ++i) {
+        if (i == 0) {
+            "typename $"_fs.outf(out_.get(), targs[i]);
+        } else {
+            ", typename $"_fs.outf(out_.get(), targs[i]);
+        }
+    }
+    ">\n"_fs.outf(out_.get());
+}
+
+void Synthesizer::syn_class_definition(const Datatype &datatype) {
+    auto &name = datatype.name();
+    auto &self = datatype.self();
+    auto &constructors = datatype.constructors();
+
+    TypeInfo variant("std::variant");
+
+    "struct $ {\n"_fs.outf(newline(), name);
+    add_indent();
+    auto &components = datatype.components();
+
+    // generate struct _Ci { ... };
+    for (size_t i = 0; i < components.size(); ++i) {
+        variant.arguments.emplace_back("_$"_fs.format(constructors[i]));
+
+        if (components[i].empty()) {
+            "struct _$ {};\n"_fs.outf(newline(), constructors[i]);
+        } else {
+            "struct _$ {\n"_fs.outf(newline(), constructors[i]);
+            add_indent();
+            // generate members
+            for (size_t j = 0; j < components[i].size(); ++j) {
+                if (components[i][j] == self) {
+                    "std::shared_ptr<$> p$_;\n"_fs.outf(newline(), components[i][j], j + 1);
+                } else {
+                    "$ p$_;\n"_fs.outf(newline(), components[i][j], j + 1);
+                }
+            }
+            out_.get() << endl;
+
+            // generate methods
+            for (size_t j = 0; j < components[i].size(); ++j) {
+                if (components[i][j] == self) {
+                    "$ p$() const { return *p$_; }\n"_fs.outf(newline(), components[i][j], j + 1, j + 1);
+                } else {
+                    "const $ &p$() const { return p$_; }\n"_fs.outf(newline(), components[i][j], j + 1, j + 1);
+                }
+            }
+            sub_indent();
+            "};\n"_fs.outf(newline());
+        }
+    }
+    out_.get() << endl;
+
+    // generate std::variant<_C0, ..., _Ck> value_;
+    "$ value_;\n\n"_fs.outf(newline(), variant.to_str());
+
+    // generate static constructions
+    for (size_t i = 0; i < components.size(); ++i) {
+        "static $ $("_fs.outf(newline(), self, constructors[i]);
+        for (size_t j = 0; j < components[i].size(); ++j) {
+            if (j == 0) {
+                "$ p1"_fs.outf(out_.get(), components[i][j]);;
+            } else {
+                ", $ p$"_fs.outf(out_.get(), components[i][j], j + 1);
+            }
+        }
+        ") {\n"_fs.outf(out_.get());
+        add_indent();
+
+        "return $ { _$ { "_fs.outf(newline(), self, constructors[i]);
+        for (size_t j = 0; j < components[i].size(); ++j) {
+            if (components[i][j] == self) {
+                if (j == 0) {
+                    "std::make_shared<$>(p1)"_fs.outf(out_.get(), self);
+                } else {
+                    ", std::make_shared<$>(p$)"_fs.outf(out_.get(), self, j + 1);
+                }
+            } else {
+                if (j == 0) {
+                    "p1"_fs.outf(out_.get());
+                } else {
+                    ", p$"_fs.outf(out_.get(), j + 1);
+                }
+            }
+        }
+        " } };\n"_fs.outf(out_.get());
+
+        sub_indent();
+        "}\n"_fs.outf(newline());
+    }
+
+    // generate is_Ci()
+    out_.get() << endl;
+    for (auto &constructor : constructors) {
+        "bool is_$() const { return std::holds_alternative<_$>(value_); }\n"_fs.outf(newline(), constructor, constructor);
+    }
+
+    // generate as_Ci()
+    bool need_as_methods = false;
+    for (size_t i = 0; i < components.size(); ++i) {
+        if (!components[i].empty()) {
+            need_as_methods = true;
+            break;
+        }
+    }
+
+    if (need_as_methods) {
+        out_.get() << endl;
+        for (size_t i = 0; i < components.size(); ++i) {
+            if (!components[i].empty()) {
+                "const _$ &as_$() const { return std::get<_$>(value_); }\n"_fs.outf(newline(), constructors[i], constructors[i], constructors[i]);
+            }
+        }
+    }
+
+    sub_indent();
+    "};\n\n"_fs.outf(newline());
+}
+
+void Synthesizer::syn_func(const FuncEntity &func, bool is_impl) {
+    indent_ = 0;
+    if (!func.template_args().empty()) {
+        syn_func_template(func);
+    }
+    syn_func_definition(func, is_impl);
+}
+
+void Synthesizer::syn_func_template(const FuncEntity &func) {
+    auto &template_args = func.template_args();
+    "template<"_fs.outf(newline());
+    for (size_t i = 0; i < template_args.size(); ++i) {
+        if (i == 0) {
+            "typename $"_fs.outf(out_.get(), template_args[i]);
+        } else {
+            ", typename $"_fs.outf(out_.get(), template_args[i]);
+        }
+    }
+    ">\n"_fs.outf(out_.get());
+}
+
+void Synthesizer::syn_func_definition(const FuncEntity &func, bool is_impl) {
+    auto &types = func.typeinfos();
+    "$ $("_fs.outf(newline(), types.back().to_str(), func.name());
+    for (size_t i = 0; i < types.size() - 1; ++i) {
+        if (i == 0) {
+            "$arg$"_fs.outf(out_.get(), types[i].to_str_as_arg(), i + 1);
+        } else {
+            ", $arg$"_fs.outf(out_.get(), types[i].to_str_as_arg(), i + 1);
+        }
+    }
+
+    if (!is_impl) {
+        ");\n\n"_fs.outf(out_.get());
+        return;
+    }
+
+    ") {\n"_fs.outf(out_.get());
+
+    auto &statements = func.statements();
+    add_indent();
+    for (size_t i = 0; i < statements.size(); ++i) {
+        if (i) {
+            "\n"_fs.outf(out_.get());
+        }
+
+        for (auto &statement : statements[i]) {
+            if (!statement.empty()) {
+                newline() << statement << endl;
+            }
+        }
+    }
+    sub_indent();
+    "}\n\n"_fs.outf(newline());
+}
+
+ostream &Synthesizer::newline() {
+    out_.get() << string(indent_, ' ');
+    return out_.get();
+}
+
+void Synthesizer::add_indent() {
+    indent_ += theIndentSize;
+}
+
+void Synthesizer::sub_indent() {
+    indent_ -= theIndentSize;
+}
+} // namespace hol2cpp

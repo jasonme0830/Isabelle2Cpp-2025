@@ -30,7 +30,7 @@ class TokenizeError : public std::exception {
 };
 
 enum class PEType {
-    DataType, Function
+    Datatype, Function
 };
 
 class ParseError : public std::exception {

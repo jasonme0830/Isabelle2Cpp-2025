@@ -1,4 +1,4 @@
-#include "only_funs.hpp"
+#include "funcs.hpp"
 
 std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
     // add 0 n = n

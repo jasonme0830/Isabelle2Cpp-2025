@@ -1,6 +1,6 @@
 #include "ast.hpp"
 
-#define assert(expr) assert_impl(expr, CodegenError)
+#define assert_true(expr) assert_impl(expr, CodegenError)
 
 using namespace std;
 
@@ -106,18 +106,18 @@ bool ErrorDefinition::is_error() const {
 }
 
 bool ErrorDefinition::is_datatype_decl() const {
-    return type == PEType::DataType;
+    return type == PEType::Datatype;
 }
 
 bool ErrorDefinition::is_function_decl() const {
     return type == PEType::Function;
 }
 
-string DataTypeDef::def_name() const {
+string DatatypeDef::def_name() const {
     return decl_type->main_name();
 }
 
-bool DataTypeDef::is_datatype_decl() const {
+bool DatatypeDef::is_datatype_decl() const {
     return true;
 }
 
@@ -141,7 +141,7 @@ string ShortDef::def_name() const {
 }
 
 Type *FuncType::result_type() const {
-    assert(!types.empty());
+    assert_true(!types.empty());
     return types.back().get();
 }
 } // namespace hol2cpp

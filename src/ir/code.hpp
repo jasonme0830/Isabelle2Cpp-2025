@@ -9,75 +9,41 @@
 #include <fstream>
 
 namespace hol2cpp {
+extern std::size_t theIndentSize;
+
 /**
  * Code contains all function entities and datatypes
  *  provides methods to generate C++ code
 */
 class Code {
   public:
-    Code(std::string filename);
+    Code();
 
-    DataType &entry_data_type(const std::string &);
-    DataType *find_data_type(const std::string &);
+    Datatype &entry_datatype(const std::string &);
+    Datatype *find_datatype(const std::string &);
 
-    void bind_cons(const std::string &, DataType &);
-    DataType *find_data_type_by_cons(const std::string &);
+    void bind_cons(const std::string &, Datatype &);
+    Datatype *find_datatype_by_cons(const std::string &);
 
-    /**
-     * entry new function entity ane the return it
-    */
     FuncEntity &entry_func_entity(const std::string &);
     FuncEntity *find_func_entity(const std::string &);
 
     void add_short_def(const std::string &, Ptr<ShortDef> short_def);
     const ShortDef *get_short_def(const std::string &) const;
 
-    void generate();
-    void generate_header();
-    void generate_impl();
-
-    static std::size_t &indent_size();
-
     void add_header(const std::string &header);
 
     void pop_datatype();
     void pop_function();
 
+    const std::set<std::string> &headers() const;
+    std::vector<std::reference_wrapper<const Datatype>> datatypes() const;
+    std::vector<std::reference_wrapper<const FuncEntity>> func_entities() const;
+
   private:
-    void gen_data_type(DataType &data_type);
-    void gen_type_rest(DataType &data_type);
-    void gen_template_type_header(DataType &data_type);
-
-    /**
-     * generate code for each function definition
-    */
-    void gen_single_func(FuncEntity &entity, bool is_impl = true);
-    /**
-     * generate code for type determined function
-    */
-    void gen_normal_func(FuncEntity &entity, bool is_impl);
-    /**
-     * generate code for template function
-     * add the template declaration before function declaration
-     *  such as template<typename T0...>
-     * then call method gen_normal_func to generate the rest code
-    */
-    void gen_template_func(FuncEntity &entity, bool is_impl);
-
-    std::ostream &newline();
-
-    void add_indent();
-    void sub_indent();
-
-    std::string filename_;
-    std::ofstream header_out_;
-    std::ofstream impl_out_;
-    std::reference_wrapper<std::ofstream> out_;
-    int indent_;
-
-    std::vector<std::string> names_of_data_types_;
-    std::map<std::string, DataType> data_types_;
-    std::map<std::string, DataType&> cons_types_;
+    std::vector<std::string> names_of_datatypes_;
+    std::map<std::string, Datatype> datatypes_;
+    std::map<std::string, Datatype&> cons_types_;
 
     std::vector<std::string> names_of_func_entities_;
     std::map<std::string, FuncEntity> func_entities_;

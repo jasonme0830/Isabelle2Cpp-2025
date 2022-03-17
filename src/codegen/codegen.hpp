@@ -12,7 +12,7 @@
 #include "../utility/error.hpp"
 #include "../utility/format.hpp"
 
-#define assert(expr) assert_impl(expr, CodegenError)
+#define assert_true(expr) assert_impl(expr, CodegenError)
 
 namespace hol2cpp {
 extern const std::map<std::string, std::string> theNormalTypeMapping;
