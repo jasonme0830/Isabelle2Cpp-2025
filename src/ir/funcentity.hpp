@@ -5,15 +5,19 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace hol2cpp {
 class Code;
 
 struct TypeInfo {
+    static std::function<std::string(const TypeInfo &)> as_arg;
+
+  public:
     std::string name;
     std::vector<TypeInfo> arguments;
 
-    TypeInfo() = default;
+    TypeInfo();
     explicit TypeInfo(std::string name);
 
     std::string to_str() const;
@@ -39,34 +43,21 @@ class FuncEntity {
     */
     FuncEntity(Code &code);
 
-    /**
-     * return the binded code
-    */
+    // return the binded code
     Code &code();
 
-    /**
-     * add indent by the defined indent size
-    */
+    // add indent by the defined indent size
     FuncEntity &add_indent();
-    /**
-     * sub indent by the defined indent size
-    */
+    // sub indent by the defined indent size
     FuncEntity &sub_indent();
 
-    /**
-     * set or get the name of this function
-    */
+    // set or get the name of this function
     std::string &name();
 
-    /**
-     * get the name of this function
-    */
+    // get the name of this function
     const std::string &name() const;
 
-    /**
-     * add the determined type
-     *  argument type or result type
-    */
+    // add the determined type, argument type or result type
     void add_typeinfo(TypeInfo);
 
     /**

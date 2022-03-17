@@ -8,7 +8,20 @@
 using namespace std;
 
 namespace hol2cpp {
-TypeInfo::TypeInfo(string name) : name(move(name)) {}
+namespace {
+string default_as_arg(const TypeInfo &type) {
+    return "const " + type.to_str() + " &";
+}
+} // namespace
+
+function<string(const TypeInfo &)> TypeInfo::as_arg = default_as_arg;
+
+TypeInfo::TypeInfo() = default;
+
+TypeInfo::TypeInfo(string name)
+  : name(move(name)) {
+    // ...
+}
 
 string TypeInfo::to_str() const {
     if (arguments.empty()) {
@@ -39,7 +52,7 @@ string TypeInfo::to_str() const {
 }
 
 string TypeInfo::to_str_as_arg() const {
-    return "const " + to_str() + " &";
+    return as_arg(*this);
 }
 
 bool TypeInfo::empty() const {

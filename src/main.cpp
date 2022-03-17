@@ -1,5 +1,6 @@
 #include "parser/parser.hpp"
 #include "utility/argparse.hpp"
+#include "optimizer/optimizer.hpp"
 #include "synthesis/synthesizer.hpp"
 
 #include <fstream>
@@ -21,7 +22,8 @@ int main(int argc, char* argv[]) {
     arg_parser.add_argument("-s")
               .help("choose the same path with input file")
               .default_value(false)
-              .implict_value(true);
+              .implict_value(true)
+    ;
 
     try {
         arg_parser.parse(argc, argv);
@@ -48,6 +50,9 @@ int main(int argc, char* argv[]) {
             cout << "can't open file " << input_file << endl;
             return -1;
         }
+
+        // set optimizer options
+        theOptimizer.enable_list_move();
 
         auto theory = Parser(fin, input_file).gen_theory();
         auto code = theory.gen_code();
