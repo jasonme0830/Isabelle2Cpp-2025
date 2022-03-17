@@ -30,9 +30,10 @@ struct Type {
      * @entity: generate type infomation related with the given entity
     */
     virtual TypeInfo gen_typeinfo(FuncEntity &entity) const = 0;
+    virtual TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const = 0;
+
     virtual std::string gen_datatype(DataType &) const = 0;
     virtual std::string main_name() const;
-    virtual TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const = 0;
 };
 
 /**
@@ -46,12 +47,14 @@ struct NormalType final : Type {
     /**
      * @name: name of concrete type
     */
-    NormalType(std::string name) : name(std::move(name)) {}
+    NormalType(std::string name);
 
+public:
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
+    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
+
     std::string gen_datatype(DataType &) const override;
     std::string main_name() const override;
-    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
 /**
@@ -65,11 +68,13 @@ struct ArgumentType final : Type {
      * @name: name of the argument type but without '
      *  for example, t is the name of 't
     */
-    ArgumentType(std::string name) : name(std::move(name)) {}
+    ArgumentType(std::string name);
 
+public:
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
-    std::string gen_datatype(DataType &) const override;
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
+
+    std::string gen_datatype(DataType &) const override;
 };
 
 /**
@@ -85,15 +90,15 @@ struct TemplateType final : Type {
      * @args: type arguments for this template type
      *  such 'a and 'b in ('a * 'b)
     */
-    TemplateType(std::string name) : name(std::move(name)) {}
-    TemplateType(std::string name, Ptr<Type> &&arg) : name(std::move(name)) {
-        args.push_back(std::move(arg));
-    }
+    TemplateType(std::string name);
+    TemplateType(std::string name, Ptr<Type> &&arg);
 
+public:
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
+    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
+
     std::string gen_datatype(DataType &) const override;
     std::string main_name() const override;
-    TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 };
 
 struct ProductType;
@@ -106,19 +111,15 @@ struct ProductType;
 struct FuncType final : Type {
     std::vector<Ptr<Type>> types;
 
-    /**
-     * return the raw pointer of result type
-    */
     Type *result_type() const;
 
-    /**
-     * build the binded func entity
-    */
+public:
     void gen_funcentity(FuncEntity &entity) const;
 
     TypeInfo gen_typeinfo(FuncEntity &entity) const override;
-    std::string gen_datatype(DataType &) const override;
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
+
+    std::string gen_datatype(DataType &) const override;
 };
 
 /**
@@ -143,8 +144,9 @@ struct Expr {
 struct IntegralExpr final : Expr {
     std::string value;
 
-    IntegralExpr(std::string value) : value(std::move(value)) {}
+    IntegralExpr(std::string value);
 
+public:
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -160,8 +162,9 @@ struct VarExpr final : Expr {
      * @name: value of VarExpr
      *  single identifier or numeral literal
     */
-    VarExpr(std::string name) : name(std::move(name)) {}
+    VarExpr(std::string name);
 
+public:
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -179,13 +182,10 @@ struct ConsExpr final : Expr {
      * @constructor: name of constructor
      * @args: arguments for the constructor
     */
-    ConsExpr(std::string constructor) : constructor(std::move(constructor)) {}
-    ConsExpr(std::string constructor, Ptr<Expr> lhs, Ptr<Expr> rhs)
-      : constructor(std::move(constructor)) {
-        args.push_back(move(lhs));
-        args.push_back(move(rhs));
-    }
+    ConsExpr(std::string constructor);
+    ConsExpr(std::string constructor, Ptr<Expr> lhs, Ptr<Expr> rhs);
 
+public:
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -197,6 +197,7 @@ struct ConsExpr final : Expr {
 struct ListExpr final : Expr {
     std::vector<Ptr<Expr>> exprs;
 
+public:
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -211,9 +212,10 @@ struct SetExpr final : Expr {
     /**
      * @exprs: exprs in {}
     */
-    SetExpr() = default;
-    SetExpr(std::vector<Ptr<Expr>> &&exprs) : exprs(std::move(exprs)) {}
+    SetExpr();
+    SetExpr(std::vector<Ptr<Expr>> &&exprs);
 
+public:
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -222,11 +224,9 @@ struct BinaryOpExpr final : Expr {
     Token op;
     mutable Ptr<Expr> lhs, rhs;
 
-    BinaryOpExpr(Token op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs)
-      : op(std::move(op)) , lhs(std::move(lhs)), rhs(std::move(rhs)) {
-        // ...
-    }
+    BinaryOpExpr(Token op, Ptr<Expr> &&lhs, Ptr<Expr> &&rhs);
 
+public:
     void gen_pattern(FuncEntity &entity, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
@@ -234,9 +234,10 @@ struct BinaryOpExpr final : Expr {
 struct Equation final {
     Ptr<Expr> pattern;
     Ptr<Expr> expr;
-    // helper
+    // for helpful comment
     std::string raw_str;
 
+public:
     void gen_funcentity(FuncEntity &entity) const;
 };
 
@@ -244,8 +245,9 @@ struct LetinExpr final : Expr {
     Equation equation;
     Ptr<Expr> expr;
 
-    LetinExpr(Equation &&equation) : equation(std::move(equation)) {}
+    LetinExpr(Equation &&equation);
 
+public:
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
@@ -253,8 +255,9 @@ struct CaseExpr final : Expr {
     Ptr<Expr> expr;
     std::vector<Equation> equations;
 
-    CaseExpr(Ptr<Expr> &&expr) : expr(std::move(expr)) {}
+    CaseExpr(Ptr<Expr> &&expr);
 
+public:
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
@@ -262,32 +265,33 @@ struct LambdaExpr final : Expr {
     std::vector<std::string> parameters;
     Ptr<Expr> expr;
 
+public:
     std::string gen_expr(FuncEntity &entity, const TypeInfo &typeinfo) const override;
 };
 
 struct Definition {
     virtual ~Definition() = 0;
 
-    virtual std::string def_name() const { return ""; }
+    virtual std::string def_name() const;
 
-    virtual bool is_error() const { return false; }
+    virtual bool is_error() const;
 
-    virtual bool is_predefined() const { return false; }
+    virtual bool is_predefined() const;
 
-    virtual bool is_datatype_decl() const { return false; }
-    virtual bool is_function_decl() const { return false; }
+    virtual bool is_datatype_decl() const;
+    virtual bool is_function_decl() const;
 
-    virtual void gen_code(Code &) const { throw; };
+    virtual void gen_code(Code &) const;
 };
 
 struct ErrorDefinition : Definition {
     PEType type;
 
-    ErrorDefinition(PEType type) : type(type) {}
+    ErrorDefinition(PEType type);
 
-    bool is_error() const override { return true; }
-    bool is_datatype_decl() const override { return type == PEType::DataType; }
-    bool is_function_decl() const override { return type == PEType::Function; }
+    bool is_error() const override;
+    bool is_datatype_decl() const override;
+    bool is_function_decl() const override;
 };
 
 /**
@@ -315,10 +319,12 @@ struct DataTypeDef : Definition {
     // mutable for gen_code
     mutable std::vector<Component> components;
 
-    std::string def_name() const override { return decl_type->main_name(); }
+    std::string def_name() const override;
 
     bool is_predefined() const override;
-    bool is_datatype_decl() const override { return true; }
+    bool is_datatype_decl() const override;
+
+public:
     void gen_code(Code &) const override;
 };
 
@@ -327,10 +333,12 @@ struct FunctionDef final : Definition {
     Ptr<FuncType> type;
     std::vector<Equation> equations;
 
-    std::string def_name() const override { return name; }
+    std::string def_name() const override;
 
     bool is_predefined() const override;
-    bool is_function_decl() const override { return true; }
+    bool is_function_decl() const override;
+
+public:
     void gen_code(Code &) const override;
 };
 
@@ -340,13 +348,11 @@ struct ShortDef final : Definition {
     mutable Ptr<Expr> expr;
 
     ShortDef() = default;
-    ShortDef(std::string name, std::vector<std::string> params, Ptr<Expr> expr)
-      : name(std::move(name)), parameters(std::move(params)), expr(std::move(expr)) {
-        // ...
-    }
+    ShortDef(std::string name, std::vector<std::string> params, Ptr<Expr> expr);
 
-    std::string def_name() const override { return name; }
+    std::string def_name() const override;
 
+public:
     void gen_code(Code &) const override;
 };
 
@@ -355,6 +361,7 @@ struct Theory final {
     std::vector<std::string> imports;
     std::vector<Ptr<Definition>> definitions;
 
+public:
     void gen_code(Code &) const;
 };
 } // namespace hol2cpp
