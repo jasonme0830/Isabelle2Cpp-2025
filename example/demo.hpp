@@ -30,9 +30,9 @@ struct slist {
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 };
 
-std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::list<std::uint64_t> &arg2);
+std::list<std::uint64_t> merge(std::list<std::uint64_t> arg1, std::list<std::uint64_t> arg2);
 
-std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1);
+std::list<std::uint64_t> merge_sort(std::list<std::uint64_t> arg1);
 
 template<typename T1>
 std::uint64_t slength(const slist<T1> &arg1) {
