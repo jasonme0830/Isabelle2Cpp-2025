@@ -162,8 +162,8 @@ slist<T1> dblist(const slist<T1> &arg1) {
 
     // dblist (sCons x sNil) = sCons x (sCons x sNil)
     if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
         if (arg1.as_sCons().p2().is_sNil()) {
+            auto x = arg1.as_sCons().p1();
             auto temp0 = slist<T1>::sCons(
                 x, slist<T1>::sNil()
             );

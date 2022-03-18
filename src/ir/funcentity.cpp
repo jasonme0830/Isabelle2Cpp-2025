@@ -149,6 +149,7 @@ void FuncEntity::entry_equation() {
     statements_.emplace_back();
     varrm_mapping_.clear();
     unused_varrm_count_.clear();
+    decl_base_ = 0;
 }
 
 void FuncEntity::close_equation() {
@@ -157,7 +158,7 @@ void FuncEntity::close_equation() {
         statements_.back().push_back(string(indent_, ' ') + "}");
     }
     for (auto &[_, ind] : unused_varrm_count_) {
-        statements_.back()[ind].clear();
+        statements_.back()[decl_base_ + ind].clear();
     }
 }
 
@@ -179,6 +180,18 @@ void FuncEntity::add_pattern_cond(const string &cond) {
     ++condition_count_;
 }
 
+void FuncEntity::add_delay_declaration(const string &pattern) {
+    delay_declarations_.push_back(pattern);
+}
+
+void FuncEntity::close_pattern() {
+    decl_base_ = statements_.back().size();
+    for (auto &decl : delay_declarations_) {
+        statements_.back().push_back(string(indent_, ' ') + decl);
+    }
+    delay_declarations_.clear();
+}
+
 FuncEntity &FuncEntity::add_expr(const string &expr) {
     statements_.back().push_back(std::string(indent_, ' ') + expr);
     return *this;
@@ -194,5 +207,9 @@ void FuncEntity::app_last_stmt(const string &app_stmt) {
 
 const vector<vector<string>> &FuncEntity::statements() const {
     return statements_;
+}
+
+const vector<string> &FuncEntity::delay_declarations() const {
+    return delay_declarations_;
 }
 } // namespace hol2cpp

@@ -121,6 +121,13 @@ class FuncEntity {
         add_pattern_cond(fs.format(std::forward<Args>(args)...));
     }
 
+    void add_delay_declaration(const std::string &decl);
+    template<typename ...Args>
+    void add_delay_declaration(const FormatString &fs, Args &&...args) {
+        add_delay_declaration(fs.format(std::forward<Args>(args)...));
+    }
+    void close_pattern();
+
     /**
      * add a statement for returning expression
      *
@@ -136,6 +143,8 @@ class FuncEntity {
     std::size_t condition_count() const;
     void app_last_stmt(const std::string &app_stmt);
     const std::vector<std::vector<std::string>> &statements() const;
+
+    const std::vector<std::string> &delay_declarations() const;
 
   private:
     Code &code_;
@@ -154,5 +163,8 @@ class FuncEntity {
     std::size_t temp_count_;
     std::size_t condition_count_;
     std::vector<std::vector<std::string>> statements_;
+
+    std::size_t decl_base_;
+    std::vector<std::string> delay_declarations_;
 };
 } // namespace hol2cpp

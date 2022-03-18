@@ -8,35 +8,37 @@
 std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2);
 
 template<typename T1>
-std::list<T1> app(const std::list<T1> &arg1, const std::list<T1> &arg2) {
+std::list<T1> app(std::list<T1> arg1, std::list<T1> arg2) {
     // app Nil ys = ys
     if (arg1.empty()) {
         return arg2;
     }
 
     // app (Cons x xs) ys = Cons x (app xs ys)
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         auto temp0 = app(xs, arg2);
         temp0.push_front(x);
-        return temp0;
+        return std::move(temp0);
     } else { // auto-generated for -Wreturn-type
         std::abort();
     }
 }
 
 template<typename T1>
-std::list<T1> rev(const std::list<T1> &arg1) {
+std::list<T1> rev(std::list<T1> arg1) {
     // rev Nil = Nil
     if (arg1.empty()) {
         return std::list<T1>();
     }
 
     // rev (Cons x xs) = app (rev xs) (Cons x Nil)
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         return app(rev(xs), std::list<decltype(x)>{x});
     } else { // auto-generated for -Wreturn-type
         std::abort();
@@ -44,20 +46,21 @@ std::list<T1> rev(const std::list<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> rev2(const std::list<T1> &arg1) {
+std::list<T1> rev2(std::list<T1> arg1) {
     // rev2 Nil = Nil
     if (arg1.empty()) {
         return std::list<T1>();
     }
 
     // rev2 (x # xs) = (rev2 xs) @ (x # Nil)
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         auto temp0 = std::list<T1>();
         temp0.push_front(x);
         auto temp1 = rev2(xs);
-        auto temp2 = temp0;
+        auto temp2 = std::move(temp0);
         temp1.splice(temp1.end(), temp2);
         return temp1;
     } else { // auto-generated for -Wreturn-type
@@ -66,16 +69,17 @@ std::list<T1> rev2(const std::list<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> rev3(const std::list<T1> &arg1) {
+std::list<T1> rev3(std::list<T1> arg1) {
     // rev3 [] = []
     if (arg1.empty()) {
         return std::list<T1>();
     }
 
     // rev3 (x # xs) = (rev3 xs) @ [x]
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         auto temp0 = rev3(xs);
         auto temp1 = std::list<T1>{x};
         temp0.splice(temp0.end(), temp1);
@@ -102,16 +106,17 @@ std::optional<std::list<T1>> testoption(const std::optional<T1> &arg1) {
 }
 
 template<typename T1>
-std::set<T1> testset(const std::list<T1> &arg1) {
+std::set<T1> testset(std::list<T1> arg1) {
     // testset Nil = {}
     if (arg1.empty()) {
         return std::set<T1>();
     }
 
     // testset (x # xs) = {x} \<inter> testset(xs)
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
         temp0.merge(temp1);
@@ -119,9 +124,10 @@ std::set<T1> testset(const std::list<T1> &arg1) {
     }
 
     // testset (x # xs) = {x} \<union> testset(xs)
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         auto temp0 = std::set<T1>{x};
         auto temp1 = testset(xs);
         temp0.merge(temp1);
@@ -132,16 +138,17 @@ std::set<T1> testset(const std::list<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> testifelse(const std::list<T1> &arg1, const T1 &arg2) {
+std::list<T1> testifelse(std::list<T1> arg1, const T1 &arg2) {
     // testifelse [] n = []
     if (arg1.empty()) {
         return std::list<T1>();
     }
 
     // testifelse (x # xs) n = (if (x < n) then [x] else []) @ (testifelse xs n)
-    if (!arg1.empty()) {
+    if (arg1.size() >= 1) {
         auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
         std::list<T1> temp0;
         if (x < arg2) {
             temp0 = std::list<T1>{x};

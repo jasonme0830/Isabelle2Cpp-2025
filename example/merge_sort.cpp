@@ -1,6 +1,6 @@
 #include "merge_sort.hpp"
 
-std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::list<std::uint64_t> &arg2) {
+std::list<std::uint64_t> merge(std::list<std::uint64_t> arg1, std::list<std::uint64_t> arg2) {
     // merge xs [] = xs
     if (arg2.empty()) {
         return arg1;
@@ -12,25 +12,27 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
     }
 
     // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
-    if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
-        if (!arg2.empty()) {
+    if (arg1.size() >= 1) {
+        if (arg2.size() >= 1) {
+            auto x = arg1.front();
+            arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+            auto xs = std::move(arg1);
             auto y = arg2.front();
-            auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
+            arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
+            auto ys = std::move(arg2);
             std::list<std::uint64_t> temp0;
             if (x <= y) {
                 auto temp1 = ys;
                 temp1.push_front(y);
-                auto temp2 = merge(xs, temp1);
+                auto temp2 = merge(xs, std::move(temp1));
                 temp2.push_front(x);
-                temp0 = temp2;
+                temp0 = std::move(temp2);
             } else {
                 auto temp3 = xs;
                 temp3.push_front(x);
-                auto temp4 = merge(temp3, ys);
+                auto temp4 = merge(std::move(temp3), ys);
                 temp4.push_front(y);
-                temp0 = temp4;
+                temp0 = std::move(temp4);
             }
             return temp0;
         }
@@ -39,7 +41,7 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
     }
 }
 
-std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1) {
+std::list<std::uint64_t> merge_sort(std::list<std::uint64_t> arg1) {
     // merge_sort [] = []
     if (arg1.empty()) {
         return std::list<std::uint64_t>();
@@ -68,9 +70,9 @@ slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::u
 
     // smerge (sCons x xs) (sCons y ys) = If (x \<le> y) (sCons x (smerge xs (sCons y ys))) (sCons y (smerge (sCons x xs) ys))
     if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
-        auto xs = arg1.as_sCons().p2();
         if (arg2.is_sCons()) {
+            auto x = arg1.as_sCons().p1();
+            auto xs = arg1.as_sCons().p2();
             auto y = arg2.as_sCons().p1();
             auto ys = arg2.as_sCons().p2();
             slist<std::uint64_t> temp0;
@@ -106,8 +108,8 @@ slist<std::uint64_t> smerge_sort(const slist<std::uint64_t> &arg1) {
 
     // smerge_sort (sCons x sNil) = sCons x sNil
     if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
         if (arg1.as_sCons().p2().is_sNil()) {
+            auto x = arg1.as_sCons().p1();
             auto temp0 = slist<std::uint64_t>::sCons(
                 x, slist<std::uint64_t>::sNil()
             );

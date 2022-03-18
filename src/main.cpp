@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
         }
 
         // set optimizer options
-        // theOptimizer.enable_list_move();
+        theOptimizer.enable_list_move();
 
         auto theory = Parser(fin, input_file).gen_theory();
         auto code = theory.gen_code();

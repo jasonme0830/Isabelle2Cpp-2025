@@ -1,4 +1,5 @@
 #include "codegen.hpp"
+#include "../optimizer/optimizer.hpp"
 
 #include <regex>
 
@@ -37,9 +38,9 @@ void VarExpr::gen_pattern(FuncEntity &func, const string &prev) const {
         if (std::regex_match(prev, arg_regex)) {
             func.varrm_mapping()[name] = prev;
         } else {
-            func.unused_varrm_count()[name] = func.statements().back().size();
+            func.unused_varrm_count()[name] = func.delay_declarations().size();
             // func.add_pattern("auto &&$ = $;", name, prev);
-            func.add_pattern("auto $ = $;", name, prev);
+            func.add_delay_declaration("auto $ = $;", name, prev);
         }
     }
 }
@@ -64,15 +65,46 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
 
     // for List
     else if (constructor == "Cons") {
-        func.add_pattern_cond("!$.empty()", prev);
-        args[0]->gen_pattern(func, prev + ".front()");
+        if (!theOptimizer.option().enable_list_move) {
+            func.add_pattern_cond("!$.empty()", prev);
+            args[0]->gen_pattern(func, prev + ".front()");
 
-        if (dynamic_cast<VarExpr *>(args[1].get())) {
-            args[1]->gen_pattern(func, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+            if (dynamic_cast<VarExpr *>(args[1].get())) {
+                args[1]->gen_pattern(func, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+            } else {
+                auto temp = func.gen_temp();
+                func.add_pattern("decltype($) $(std::next($).begin(), $.end());", prev, temp, prev, prev);
+                args[1]->gen_pattern(func, temp);
+            }
         } else {
-            auto temp = func.gen_temp();
-            func.add_pattern("decltype($) $(std::next($).begin(), $.end());", prev, temp, prev, prev);
-            args[1]->gen_pattern(func, temp);
+            auto n = 1;
+            auto rhs = args[1].get();
+            while (auto cons_expr = dynamic_cast<ConsExpr *>(rhs)) {
+                n += 1;
+                rhs = cons_expr->args[1].get();
+            }
+
+            // the last rhs can only be Nil or variable
+            auto var_expr = dynamic_cast<VarExpr *>(rhs);
+            if (var_expr->name == "Nil") {
+                func.add_pattern_cond("$.size() == $", prev, n);
+            } else {
+                func.add_pattern_cond("$.size() >= $", prev, n);
+            }
+
+            args[0]->gen_pattern(func, prev + ".front()");
+
+            rhs = args[1].get();
+            for (int i = 1; i < n; ++i) {
+                auto cons_expr = reinterpret_cast<ConsExpr *>(rhs);
+                cons_expr->args[0]->gen_pattern(func, "*std::next($.begin(), $)"_fs.format(prev, i));
+                rhs = cons_expr->args[1].get();
+            }
+
+            if (var_expr->name != "Nil") {
+                func.add_delay_declaration("$.erase($.begin(), std::next($.begin(), $));", prev, prev, prev, n);
+                var_expr->gen_pattern(func, "std::move($)"_fs.format(prev));
+            }
         }
     }
 

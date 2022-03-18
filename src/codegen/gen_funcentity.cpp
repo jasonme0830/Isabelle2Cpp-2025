@@ -11,6 +11,7 @@ void FuncType::gen_funcentity(FuncEntity &func) const {
 
 void Equation::gen_funcentity(FuncEntity &func) const {
     pattern->gen_pattern(func, "");
+    func.close_pattern(); // for delay declarations
     func.add_expr("return $;", expr->gen_expr(func, func.result_typeinfo()));
 }
 } // namespace hol2cpp

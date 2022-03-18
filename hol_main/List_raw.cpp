@@ -1,6 +1,6 @@
 #include "List_raw.hpp"
 
-std::list<std::int64_t> upto_aux(const std::int64_t &arg1, const std::int64_t &arg2, const std::list<std::int64_t> &arg3) {
+std::list<std::int64_t> upto_aux(const std::int64_t &arg1, const std::int64_t &arg2, std::list<std::int64_t> arg3) {
     // upto_aux i j js = [i..j] @ js
     auto temp0 = arg1;
     auto temp1 = arg2;
