@@ -64,8 +64,8 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // stake (Suc m) (sCons x xs) = sCons x (stake m xs)
     if (arg1 != 0) {
-        auto m = arg1 - 1;
         if (arg2.is_sCons()) {
+            auto m = arg1 - 1;
             auto x = arg2.as_sCons().p1();
             auto xs = arg2.as_sCons().p2();
             auto temp0 = slist<T1>::sCons(
@@ -92,8 +92,8 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // sdrop (Suc m) (sCons x xs) = sdrop m xs
     if (arg1 != 0) {
-        auto m = arg1 - 1;
         if (arg2.is_sCons()) {
+            auto m = arg1 - 1;
             auto xs = arg2.as_sCons().p2();
             return sdrop(m, xs);
         }

@@ -13,9 +13,9 @@ std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::
 
     // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
     if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
         if (!arg2.empty()) {
+            auto x = arg1.front();
+            auto xs = decltype(arg1){std::next(arg1.begin()), arg1.end()};
             auto y = arg2.front();
             auto ys = decltype(arg2){std::next(arg2.begin()), arg2.end()};
             std::list<std::uint64_t> temp0;
@@ -68,9 +68,9 @@ slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::u
 
     // smerge (sCons x xs) (sCons y ys) = If (x \<le> y) (sCons x (smerge xs (sCons y ys))) (sCons y (smerge (sCons x xs) ys))
     if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
-        auto xs = arg1.as_sCons().p2();
         if (arg2.is_sCons()) {
+            auto x = arg1.as_sCons().p1();
+            auto xs = arg1.as_sCons().p2();
             auto y = arg2.as_sCons().p1();
             auto ys = arg2.as_sCons().p2();
             slist<std::uint64_t> temp0;
@@ -106,8 +106,8 @@ slist<std::uint64_t> smerge_sort(const slist<std::uint64_t> &arg1) {
 
     // smerge_sort (sCons x sNil) = sCons x sNil
     if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
         if (arg1.as_sCons().p2().is_sNil()) {
+            auto x = arg1.as_sCons().p1();
             auto temp0 = slist<std::uint64_t>::sCons(
                 x, slist<std::uint64_t>::sNil()
             );
