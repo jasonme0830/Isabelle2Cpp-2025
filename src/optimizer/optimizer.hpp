@@ -1,5 +1,6 @@
 #pragma once
 
+namespace hol2cpp {
 extern class Optimizer theOptimizer;
 
 struct OptimizerOption {
@@ -15,3 +16,4 @@ class Optimizer {
   private:
     OptimizerOption option_;
 };
+} // namespace hol2cpp
