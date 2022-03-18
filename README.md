@@ -8,6 +8,7 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
+- [ ] Enable list-move
 - [ ] Support recursive function to loop/iteration.
 - [ ] Resolve identifier conflicts.
 - [ ] Reimplement function conversion to support function currying.
