@@ -122,7 +122,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
                 .add_expr("auto $ = $;", temp, xs)
                 .add_expr("$.push_front($);", temp, x)
             ;
-            return temp;
+            return "std::move($)"_fs.format(temp);
         }
     } else if (constructor == "length") {
         assert_true(args.size() == 1);

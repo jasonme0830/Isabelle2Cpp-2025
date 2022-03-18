@@ -8,7 +8,6 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
-- [ ] Enable list-move
 - [ ] Support recursive function to loop/iteration.
 - [ ] Resolve identifier conflicts.
 - [ ] Reimplement function conversion to support function currying.
@@ -18,7 +17,9 @@ You can see some examples in [example/](example/).
 
 ## ChangeLog
 
-- [x] Reorganize directory structure
+- [x] Enable-list-move is supported and as an optimization option.
+- [x] Declarations are delayed after all conditions.
+- [x] Directory structure is reorganized.
 - [x] Use `std::set::merge` instead trivial traversal for `\<inter>` and `\<union>` of `set`.
 - [x] Use `std::list::splice` instead of `std::list::insert` for `xs @ ys`.
 - [x] Function templates are generated in the `.hpp` file.
