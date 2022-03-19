@@ -8,6 +8,7 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
+- [ ] Remove the last unnecessary condition and the call of `abort`.
 - [ ] Support recursive function to loop/iteration.
 - [ ] Resolve identifier conflicts.
 - [ ] Reimplement function conversion to support function currying.
