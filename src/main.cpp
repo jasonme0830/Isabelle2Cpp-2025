@@ -24,16 +24,23 @@ int main(int argc, char* argv[]) {
               .default_value(false)
               .implict_value(true)
     ;
+    arg_parser.add_argument("--enable-list-move")
+              .help("enable moving list")
+              .default_value(false)
+              .implict_value(true)
+    ;
 
     try {
         arg_parser.parse(argc, argv);
 
+        // check the input theory file
         auto input_file = arg_parser.get<string>("input");
         auto pos = input_file.rfind(".thy");
         if (pos == input_file.npos) {
             throw std::invalid_argument("input file should be .thy file");
         }
 
+        // determine the output file
         string output_file;
         if (auto same_path = arg_parser.get<bool>("s")) {
             if (!arg_parser.get<string>("output").empty()) {
@@ -45,14 +52,16 @@ int main(int argc, char* argv[]) {
             output_file = arg_parser.get<string>("output");
         }
 
+        // set optimizer options
+        if (arg_parser.get<bool>("enable-list-move")) {
+            theOptimizer.enable_list_move();
+        }
+
         ifstream fin(input_file);
         if (!fin.good()) {
             cout << "can't open file " << input_file << endl;
             return -1;
         }
-
-        // set optimizer options
-        theOptimizer.enable_list_move();
 
         auto theory = Parser(fin, input_file).gen_theory();
         auto code = theory.gen_code();
