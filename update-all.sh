@@ -6,4 +6,4 @@ do
     echo ""
 done
 
-bin/hol2cpp hol_main/List_raw.thy -s
+bin/hol2cpp example/hol_main/List_raw.thy -s
