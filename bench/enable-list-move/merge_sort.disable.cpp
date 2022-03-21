@@ -23,15 +23,15 @@ std::list<std::uint64_t> merge1(const std::list<std::uint64_t> &arg1, const std:
             if (x <= y) {
                 auto temp1 = ys;
                 temp1.push_front(y);
-                auto temp2 = merge1(xs, std::move(temp1));
+                auto temp2 = merge1(xs, temp1);
                 temp2.push_front(x);
-                temp0 = std::move(temp2);
+                temp0 = temp2;
             } else {
                 auto temp3 = xs;
                 temp3.push_front(x);
-                auto temp4 = merge1(std::move(temp3), ys);
+                auto temp4 = merge1(temp3, ys);
                 temp4.push_front(y);
-                temp0 = std::move(temp4);
+                temp0 = temp4;
             }
             return temp0;
         }

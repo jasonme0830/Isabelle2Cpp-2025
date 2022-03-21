@@ -14,14 +14,10 @@ static void bench_disable_list_move(benchmark::State &state) {
     sorted_list.sort();
 
     for (auto _ : state) {
-        state.PauseTiming();
-        auto nlist = list;
-        state.ResumeTiming();
-
-        auto sorted_nlist = merge_sort1(nlist);
+        auto nlist = merge_sort1(list);
 
         state.PauseTiming();
-        assert(sorted_list == sorted_nlist);
+        assert(sorted_list == nlist);
         state.ResumeTiming();
     }
 }
@@ -37,14 +33,10 @@ static void bench_enable_list_move(benchmark::State &state) {
     sorted_list.sort();
 
     for (auto _ : state) {
-        state.PauseTiming();
-        auto nlist = list;
-        state.ResumeTiming();
-
-        auto sorted_nlist = merge_sort2(nlist);
+        auto nlist = merge_sort2(list);
 
         state.PauseTiming();
-        assert(sorted_list == sorted_nlist);
+        assert(sorted_list == nlist);
         state.ResumeTiming();
     }
 }

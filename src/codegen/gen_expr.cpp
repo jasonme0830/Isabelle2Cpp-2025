@@ -1,4 +1,5 @@
 #include "codegen.hpp"
+#include "../optimizer/optimizer.hpp"
 
 using namespace std;
 
@@ -122,7 +123,12 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
                 .add_expr("auto $ = $;", temp, xs)
                 .add_expr("$.push_front($);", temp, x)
             ;
-            return "std::move($)"_fs.format(temp);
+
+            if (theOptimizer.option().enable_list_move) {
+                return "std::move($)"_fs.format(temp);
+            } else {
+                return temp;
+            }
         }
     } else if (constructor == "length") {
         assert_true(args.size() == 1);
