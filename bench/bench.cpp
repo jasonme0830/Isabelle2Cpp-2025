@@ -41,6 +41,6 @@ static void bench_enable_list_move(benchmark::State &state) {
     }
 }
 
-BENCHMARK(bench_disable_list_move)->RangeMultiplier(10)->Range(10, 10000);
-BENCHMARK(bench_enable_list_move)->RangeMultiplier(10)->Range(10, 10000);
+BENCHMARK(bench_disable_list_move)->RangeMultiplier(2)->Range(256, 16384);
+BENCHMARK(bench_enable_list_move)->RangeMultiplier(2)->Range(256, 16384);
 BENCHMARK_MAIN();
