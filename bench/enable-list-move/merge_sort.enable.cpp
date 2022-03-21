@@ -1,18 +1,18 @@
 #include "merge_sort.enable.hpp"
 #include <iostream>
 
-std::list<std::uint64_t> merge(std::list<std::uint64_t> arg1, std::list<std::uint64_t> arg2) {
-    // merge xs [] = xs
+std::list<std::uint64_t> merge2(std::list<std::uint64_t> arg1, std::list<std::uint64_t> arg2) {
+    // merge2 xs [] = xs
     if (arg2.empty()) {
         return arg1;
     }
 
-    // merge [] ys = ys
+    // merge2 [] ys = ys
     if (arg1.empty()) {
         return arg2;
     }
 
-    // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
+    // merge2 (x # xs) (y # ys) = If (x \<le> y) (x # (merge2 xs (y # ys))) (y # (merge2 (x # xs) ys))
     if (arg1.size() >= 1) {
         if (arg2.size() >= 1) {
             auto x = arg1.front();
@@ -25,13 +25,13 @@ std::list<std::uint64_t> merge(std::list<std::uint64_t> arg1, std::list<std::uin
             if (x <= y) {
                 auto temp1 = ys;
                 temp1.push_front(y);
-                auto temp2 = merge(xs, std::move(temp1));
+                auto temp2 = merge2(xs, std::move(temp1));
                 temp2.push_front(x);
                 temp0 = std::move(temp2);
             } else {
                 auto temp3 = xs;
                 temp3.push_front(x);
-                auto temp4 = merge(std::move(temp3), ys);
+                auto temp4 = merge2(std::move(temp3), ys);
                 temp4.push_front(y);
                 temp0 = std::move(temp4);
             }
@@ -42,94 +42,18 @@ std::list<std::uint64_t> merge(std::list<std::uint64_t> arg1, std::list<std::uin
     }
 }
 
-std::list<std::uint64_t> merge_sort(std::list<std::uint64_t> arg1) {
-    // merge_sort [] = []
+std::list<std::uint64_t> merge_sort2(std::list<std::uint64_t> arg1) {
+    // merge_sort2 [] = []
     if (arg1.empty()) {
         return std::list<std::uint64_t>();
     }
 
-    // merge_sort [x] = [x]
+    // merge_sort2 [x] = [x]
     if (arg1.size() == 1) {
         auto x = *std::next(arg1.begin(), 0);
         return std::list<std::uint64_t>{x};
     }
 
-    // merge_sort xs = merge (merge_sort (take ((length xs) div 2) xs)) (merge_sort (drop ((length xs) div 2) xs))
-    return merge(merge_sort(decltype(arg1){ arg1.begin(), std::next(arg1.begin(), arg1.size() / 2) }), merge_sort(decltype(arg1){ std::next(arg1.begin(), arg1.size() / 2), arg1.end() }));
-}
-
-slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::uint64_t> &arg2) {
-    // smerge xs sNil = xs
-    if (arg2.is_sNil()) {
-        return arg1;
-    }
-
-    // smerge sNil ys = ys
-    if (arg1.is_sNil()) {
-        return arg2;
-    }
-
-    // smerge (sCons x xs) (sCons y ys) = If (x \<le> y) (sCons x (smerge xs (sCons y ys))) (sCons y (smerge (sCons x xs) ys))
-    if (arg1.is_sCons()) {
-        if (arg2.is_sCons()) {
-            auto x = arg1.as_sCons().p1();
-            auto xs = arg1.as_sCons().p2();
-            auto y = arg2.as_sCons().p1();
-            auto ys = arg2.as_sCons().p2();
-            slist<std::uint64_t> temp0;
-            if (x <= y) {
-                auto temp1 = slist<std::uint64_t>::sCons(
-                    y, ys
-                );
-                auto temp2 = slist<std::uint64_t>::sCons(
-                    x, smerge(xs, temp1)
-                );
-                temp0 = temp2;
-            } else {
-                auto temp3 = slist<std::uint64_t>::sCons(
-                    x, xs
-                );
-                auto temp4 = slist<std::uint64_t>::sCons(
-                    y, smerge(temp3, ys)
-                );
-                temp0 = temp4;
-            }
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
-}
-
-slist<std::uint64_t> smerge_sort(const slist<std::uint64_t> &arg1) {
-    // smerge_sort sNil = sNil
-    if (arg1.is_sNil()) {
-        return slist<std::uint64_t>::sNil();
-    }
-
-    // smerge_sort (sCons x sNil) = sCons x sNil
-    if (arg1.is_sCons()) {
-        if (arg1.as_sCons().p2().is_sNil()) {
-            auto x = arg1.as_sCons().p1();
-            auto temp0 = slist<std::uint64_t>::sCons(
-                x, slist<std::uint64_t>::sNil()
-            );
-            return temp0;
-        }
-    }
-
-    // smerge_sort xs = smerge (smerge_sort (stake ((slength xs) div 2) xs)) (smerge_sort (sdrop ((slength xs) div 2) xs))
-    return smerge(smerge_sort(stake(slength(arg1) / 2, arg1)), smerge_sort(sdrop(slength(arg1) / 2, arg1)));
-}
-
-int main() {
-    std::list<std::uint64_t> list;
-    for (std::uint64_t i = 1000; i > 0; --i) {
-        list.push_back(i);
-    }
-    list = merge_sort(std::move(list));
-    for (auto &num : list) {
-        std::cout << num;
-    }
-    std::cout << std::endl;
+    // merge_sort2 xs = merge2 (merge_sort2 (take ((length xs) div 2) xs)) (merge_sort2 (drop ((length xs) div 2) xs))
+    return merge2(merge_sort2(decltype(arg1){ arg1.begin(), std::next(arg1.begin(), arg1.size() / 2) }), merge_sort2(decltype(arg1){ std::next(arg1.begin(), arg1.size() / 2), arg1.end() }));
 }
