@@ -29,4 +29,12 @@ string enclose_expr(const string &expr) {
         return '(' + expr + ')';
     }
 }
+
+string unmove_expr(string expr) {
+    if (expr.substr(0, 9) == "std::move") {
+        return expr.substr(10, expr.size() - 11);
+    } else {
+        return expr;
+    }
+}
 } // namespace hol2cpp

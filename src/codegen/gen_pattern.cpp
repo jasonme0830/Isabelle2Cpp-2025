@@ -39,7 +39,6 @@ void VarExpr::gen_pattern(FuncEntity &func, const string &prev) const {
             func.varrm_mapping()[name] = prev;
         } else {
             func.unused_varrm_count()[name] = func.delay_declarations().size();
-            // func.add_pattern("auto &&$ = $;", name, prev);
             func.add_delay_declaration("auto $ = $;", name, prev);
         }
     }

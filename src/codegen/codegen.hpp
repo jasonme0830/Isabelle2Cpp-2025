@@ -20,4 +20,5 @@ extern const std::map<std::string, std::string> theTemplateTypeMapping;
 
 bool is_unit(const std::string &expr);
 std::string enclose_expr(const std::string &expr);
+std::string unmove_expr(std::string expr);
 } // namespace hol2cpp

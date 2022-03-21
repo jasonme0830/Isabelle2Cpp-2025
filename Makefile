@@ -15,4 +15,3 @@ bin/:
 
 clean:
 	rm -r bin
-	rm -r obj

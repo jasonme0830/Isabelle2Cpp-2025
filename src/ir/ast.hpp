@@ -4,6 +4,7 @@
 #include "../parser/token.hpp"
 #include "../utility/error.hpp"
 
+#include <set>
 #include <map>
 #include <memory>
 #include <vector>
@@ -139,6 +140,9 @@ struct Expr {
      * return the expression and generate statements when needed
     */
     virtual std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const = 0;
+
+    // for enable-list-move
+    virtual void analyze_var_movable(std::set<std::string> &movables);
 };
 
 struct IntegralExpr final : Expr {
@@ -157,6 +161,8 @@ public:
 */
 struct VarExpr final : Expr {
     std::string name;
+    // for enable-list-move
+    bool movable;
 
     /**
      * @name: value of VarExpr
@@ -167,6 +173,7 @@ struct VarExpr final : Expr {
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 /**
@@ -188,6 +195,7 @@ struct ConsExpr final : Expr {
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 /**
@@ -200,6 +208,7 @@ struct ListExpr final : Expr {
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 /**
@@ -218,6 +227,7 @@ struct SetExpr final : Expr {
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 struct BinaryOpExpr final : Expr {
@@ -229,6 +239,7 @@ struct BinaryOpExpr final : Expr {
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 struct Equation final {
@@ -249,6 +260,7 @@ struct LetinExpr final : Expr {
 
 public:
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 struct CaseExpr final : Expr {
@@ -259,6 +271,7 @@ struct CaseExpr final : Expr {
 
 public:
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    void analyze_var_movable(std::set<std::string> &movables) override;
 };
 
 struct LambdaExpr final : Expr {

@@ -33,19 +33,26 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     // for variables
     else {
+        string var;
         auto &varrm_mapping = func.varrm_mapping();
         auto it = varrm_mapping.find(name);
         if (it != varrm_mapping.end()) {
-            return it->second;
+            var = it->second;
         } else {
             func.unused_varrm_count().erase(name);
-            return name;
+            var = name;
+        }
+
+        if (theOptimizer.option().enable_list_move && movable && typeinfo.name == "std::list") {
+            return "std::move($)"_fs.format(var);
+        } else {
+            return var;
         }
     }
 }
 
 string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
-    // for tail calls
+    // for recursive calls
     if (constructor == func.name()) {
         string expr = constructor + '(';
         assert_true(func.args_size() == args.size());
@@ -65,11 +72,9 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         assert_true(other_func->args_size() == args.size());
         for (size_t i = 0; i < args.size(); ++i) {
             if (i == 0) {
-                // expr += args[i]->gen_expr(func, func->typeinfos()[i]);
-                expr += args[i]->gen_expr(func, TypeInfo());
+                expr += args[i]->gen_expr(func, other_func->typeinfos()[i]);
             } else {
-                // expr += ", " + args[i]->gen_expr(func, func->typeinfos()[i]);
-                expr += ", " + args[i]->gen_expr(func, TypeInfo());
+                expr += ", " + args[i]->gen_expr(func, other_func->typeinfos()[i]);
             }
         }
         return expr + ')';
@@ -109,7 +114,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     // for list
     else if (constructor == "Cons") {
         assert_true(args.size() == 2);
-        auto x = args[0]->gen_expr(func, typeinfo.arguments.front());
+        auto x = args[0]->gen_expr(func, typeinfo[0]);
         auto xs = args[1]->gen_expr(func, typeinfo);
         if (xs == "{}") {
             if (typeinfo.empty()) {
@@ -141,12 +146,12 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     } else if (constructor == "take") {
         assert_true(args.size() == 2);
         auto n = args[0]->gen_expr(func, TypeInfo("nat"));
-        auto xs = args[1]->gen_expr(func, TypeInfo());
+        auto xs = unmove_expr(args[1]->gen_expr(func, typeinfo));
         return "decltype($){ $.begin(), std::next($.begin(), $) }"_fs.format(xs, xs, xs, n);
     } else if (constructor == "drop") {
         assert_true(args.size() == 2);
         auto n = args[0]->gen_expr(func, TypeInfo("nat"));
-        auto xs = args[1]->gen_expr(func, TypeInfo());
+        auto xs = unmove_expr(args[1]->gen_expr(func, typeinfo));
         return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
     } else if (constructor == "append") {
         assert_true(args.size() == 2);
@@ -311,9 +316,9 @@ string ListExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     for (size_t i = 0; i < exprs.size(); ++i) {
         if (i == 0) {
-            res += exprs[i]->gen_expr(func, typeinfo);
+            res += exprs[i]->gen_expr(func, typeinfo[0]);
         } else {
-            res += ", " + exprs[i]->gen_expr(func, typeinfo);
+            res += ", " + exprs[i]->gen_expr(func, typeinfo[0]);
         }
     }
     return res + '}';
