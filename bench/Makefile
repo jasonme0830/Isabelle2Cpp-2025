@@ -1,5 +1,12 @@
-bench: bench.cpp enable-list-move/*.cpp
+bench: bench.cpp enable-list-move/merge_sort.enable.cpp \
+				 enable-list-move/merge_sort.disable.cpp
 	g++ -o bench -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
+
+enable-list-move/merge_sort.disable.cpp: enable-list-move/merge_sort.disable.thy ../bin/hol2cpp
+	../bin/hol2cpp $< -s
+
+enable-list-move/merge_sort.enable.cpp: enable-list-move/merge_sort.enable.thy ../bin/hol2cpp
+	../bin/hol2cpp $< -s --enable-list-move
 
 .PHONY: clean bm
 
@@ -8,3 +15,4 @@ bm: bench
 
 clean: ./bench
 	rm bench
+	rm enable-list-move/*.hpp enable-list-move/*.cpp
