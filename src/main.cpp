@@ -19,18 +19,18 @@ Config parse_config(int, char *[]);
 
 int main(int argc, char* argv[]) {
     try {
-        auto config = parse_config(argc, argv);
+        auto [input_file, output_file] = parse_config(argc, argv);
 
-        ifstream fin(config.input_file);
+        ifstream fin(input_file);
         if (!fin.good()) {
-            cout << "can't open file " << config.input_file << endl;
+            cout << "can't open file " << input_file << endl;
             return -1;
         }
 
-        auto theory = Parser(fin, config.input_file).gen_theory();
+        auto theory = Parser(fin, input_file).gen_theory();
         auto code = theory.gen_code();
 
-        Synthesizer syner(config.output_file.empty() ? theory.name : config.output_file);
+        Synthesizer syner(output_file.empty() ? theory.name : output_file);
         syner.synthesize(code);
 
     } catch(const exception& e) {
