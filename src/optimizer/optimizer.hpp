@@ -3,6 +3,7 @@
 namespace hol2cpp {
 extern class Optimizer theOptimizer;
 
+// the option is also used for some experimental options currently
 struct OptimizerOption {
     bool move_list;
     bool reduce_cond;
