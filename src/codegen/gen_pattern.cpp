@@ -17,13 +17,19 @@ void IntegralExpr::gen_pattern(FuncEntity &func, const string &prev) const {
 void VarExpr::gen_pattern(FuncEntity &func, const string &prev) const {
     if (name == func.name()) {
         assert_true(func.args_size() == 0);
-    } else if (name == "True") {
+    }
+
+    else if (name == "True") {
         func.add_pattern_cond("$ == true", prev);
     } else if (name == "False") {
         func.add_pattern_cond("$ == false", prev);
-    } else if (name == "Nil") {
+    }
+
+    else if (name == "Nil") {
         func.add_pattern_cond("$.empty()", prev);
-    } else if (name == "None") {
+    }
+
+    else if (name == "None") {
         func.add_pattern_cond("!$.has_value()", prev);
     }
 
@@ -50,13 +56,19 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
         for (size_t i = 0; i < args.size(); ++i) {
             args[i]->gen_pattern(func, "arg" + to_string(i + 1));
         }
-    } else if (constructor == "Suc") {
+    }
+
+    else if (constructor == "Suc") {
         func.add_pattern_cond("$ != 0", prev);
         args[0]->gen_pattern(func, enclose_expr(prev) + " - 1");
-    } else if (constructor == "Some") {
+    }
+
+    else if (constructor == "Some") {
         func.add_pattern_cond("$.has_value()", prev);
         args[0]->gen_pattern(func, prev + ".value()");
-    } else if (constructor == "Pair") {
+    }
+
+    else if (constructor == "Pair") {
         assert_true(args.size() == 2);
         args[0]->gen_pattern(func, prev + ".first");
         args[1]->gen_pattern(func, prev + ".second");
