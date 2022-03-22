@@ -146,6 +146,9 @@ class FuncEntity {
 
     const std::vector<std::string> &delay_declarations() const;
 
+    void is_last_equation(bool is_last);
+    bool is_last_equation() const;
+
   private:
     Code &code_;
     std::size_t indent_;
@@ -166,5 +169,7 @@ class FuncEntity {
 
     std::size_t decl_base_;
     std::vector<std::string> delay_declarations_;
+
+    bool is_last_equation_; // for reduce-condition
 };
 } // namespace hol2cpp

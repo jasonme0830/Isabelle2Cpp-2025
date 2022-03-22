@@ -10,10 +10,10 @@ struct OptimizerOption {
 
 class Optimizer {
   public:
+    const OptimizerOption &option() const;
+
     void enable_move_list();
     void enable_reduce_cond();
-
-    const OptimizerOption &option() const;
 
   private:
     OptimizerOption option_;
