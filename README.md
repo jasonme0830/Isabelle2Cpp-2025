@@ -8,9 +8,9 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
-- [ ] Support recursive function to loop/iteration.
+- [ ] Support function currying.
 - [ ] Resolve identifier conflicts.
-- [ ] Reimplement function conversion to support function currying.
+- [ ] Support recursive function to loop/iteration.
 - [ ] Support configurable conversion rules.
 - [ ] Design benchmarks between generated cpp codes and native cpp codes.
 - [ ] Design benchmarks between generated cpp codes and generated sml codes.
