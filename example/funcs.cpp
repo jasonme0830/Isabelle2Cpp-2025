@@ -7,12 +7,8 @@ std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
     }
 
     // add (Suc m) n = Suc (add m n)
-    if (arg1 != 0) {
-        auto m = arg1 - 1;
-        return (add(m, arg2)) + 1;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto m = arg1 - 1;
+    return (add(m, arg2)) + 1;
 }
 
 bool evn(const std::uint64_t &arg1) {
@@ -29,14 +25,8 @@ bool evn(const std::uint64_t &arg1) {
     }
 
     // evn (Suc (Suc n)) = evn n
-    if (arg1 != 0) {
-        if (arg1 - 1 != 0) {
-            auto n = (arg1 - 1) - 1;
-            return evn(n);
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = (arg1 - 1) - 1;
+    return evn(n);
 }
 
 std::uint64_t fib(const std::uint64_t &arg1) {

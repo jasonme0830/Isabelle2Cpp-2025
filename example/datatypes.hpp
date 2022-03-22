@@ -85,16 +85,12 @@ slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
     }
 
     // app (sCons x xs) ys = sCons x (app xs ys)
-    if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
-        auto xs = arg1.as_sCons().p2();
-        auto temp0 = slist<T1>::sCons(
-            x, app(xs, arg2)
-        );
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = arg1.as_sCons().p1();
+    auto xs = arg1.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x, app(xs, arg2)
+    );
+    return temp0;
 }
 
 template<typename T1>
@@ -105,16 +101,12 @@ slist<T1> rev(const slist<T1> &arg1) {
     }
 
     // rev (sCons x xs) = app (rev xs) (sCons x sNil)
-    if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
-        auto xs = arg1.as_sCons().p2();
-        auto temp0 = slist<T1>::sCons(
-            x, slist<T1>::sNil()
-        );
-        return app(rev(xs), temp0);
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = arg1.as_sCons().p1();
+    auto xs = arg1.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x, slist<T1>::sNil()
+    );
+    return app(rev(xs), temp0);
 }
 
 slist<snat> snat2slist(const snat &arg1);
@@ -127,15 +119,11 @@ snat len(const slist<T1> &arg1) {
     }
 
     // len (sCons x xs) = sSucc (len xs)
-    if (arg1.is_sCons()) {
-        auto xs = arg1.as_sCons().p2();
-        auto temp0 = snat::sSucc(
-            len(xs)
-        );
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto xs = arg1.as_sCons().p2();
+    auto temp0 = snat::sSucc(
+        len(xs)
+    );
+    return temp0;
 }
 
 slist<std::uint64_t> listwithlen(const std::uint64_t &arg1);
@@ -148,12 +136,8 @@ std::uint64_t leninnat(const slist<T1> &arg1) {
     }
 
     // leninnat (sCons x xs) = (leninnat xs) + 1
-    if (arg1.is_sCons()) {
-        auto xs = arg1.as_sCons().p2();
-        return leninnat(xs) + 1;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto xs = arg1.as_sCons().p2();
+    return leninnat(xs) + 1;
 }
 
 template<typename T1>
@@ -178,16 +162,12 @@ slist<T1> dblist(const slist<T1> &arg1) {
     }
 
     // dblist (sCons x xs) = app (dblist (sCons x sNil)) (dblist xs)
-    if (arg1.is_sCons()) {
-        auto x = arg1.as_sCons().p1();
-        auto xs = arg1.as_sCons().p2();
-        auto temp0 = slist<T1>::sCons(
-            x, slist<T1>::sNil()
-        );
-        return app(dblist(temp0), dblist(xs));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = arg1.as_sCons().p1();
+    auto xs = arg1.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x, slist<T1>::sNil()
+    );
+    return app(dblist(temp0), dblist(xs));
 }
 
 sbool snot(const sbool &arg1);
