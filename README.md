@@ -8,7 +8,6 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
-- [ ] Remove the last unnecessary condition and the call of `abort`.
 - [ ] Support recursive function to loop/iteration.
 - [ ] Resolve identifier conflicts.
 - [ ] Reimplement function conversion to support function currying.
@@ -18,6 +17,7 @@ You can see some examples in [example/](example/).
 
 ## ChangeLog
 
+- [x] `reduce-cond` is added as an optimization option which removes last unnecessary conditions and the call of `abort`.
 - [x] Variables are checked if movable or not and unexpected move operations are fixed.
 - [x] `move-list` is supported and as an optimization option by the flag `--move-list`.
 - [x] Declarations are delayed after all conditions.

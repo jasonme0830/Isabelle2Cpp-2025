@@ -42,12 +42,8 @@ std::uint64_t slength(const slist<T1> &arg1) {
     }
 
     // slength (sCons x xs) = Suc (slength xs)
-    if (arg1.is_sCons()) {
-        auto xs = arg1.as_sCons().p2();
-        return (slength(xs)) + 1;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto xs = arg1.as_sCons().p2();
+    return (slength(xs)) + 1;
 }
 
 template<typename T1>
@@ -63,19 +59,13 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
     }
 
     // stake (Suc m) (sCons x xs) = sCons x (stake m xs)
-    if (arg1 != 0) {
-        if (arg2.is_sCons()) {
-            auto m = arg1 - 1;
-            auto x = arg2.as_sCons().p1();
-            auto xs = arg2.as_sCons().p2();
-            auto temp0 = slist<T1>::sCons(
-                x, stake(m, xs)
-            );
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto m = arg1 - 1;
+    auto x = arg2.as_sCons().p1();
+    auto xs = arg2.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x, stake(m, xs)
+    );
+    return temp0;
 }
 
 template<typename T1>
@@ -91,15 +81,9 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
     }
 
     // sdrop (Suc m) (sCons x xs) = sdrop m xs
-    if (arg1 != 0) {
-        if (arg2.is_sCons()) {
-            auto m = arg1 - 1;
-            auto xs = arg2.as_sCons().p2();
-            return sdrop(m, xs);
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto m = arg1 - 1;
+    auto xs = arg2.as_sCons().p2();
+    return sdrop(m, xs);
 }
 
 slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::uint64_t> &arg2);

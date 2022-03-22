@@ -141,8 +141,7 @@ struct Expr {
     */
     virtual std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const = 0;
 
-    // for move-list
-    virtual void analyze_var_movable(std::set<std::string> &movables);
+    virtual void analyze_var_movable(std::set<std::string> &movables); // for move-list
 };
 
 struct IntegralExpr final : Expr {
@@ -161,8 +160,7 @@ public:
 */
 struct VarExpr final : Expr {
     std::string name;
-    // for move-list
-    bool movable;
+    bool movable; // for move-list
 
     /**
      * @name: value of VarExpr

@@ -5,13 +5,15 @@ extern class Optimizer theOptimizer;
 
 struct OptimizerOption {
     bool move_list;
+    bool reduce_cond;
 };
 
 class Optimizer {
   public:
-    void enable_move_list();
-
     const OptimizerOption &option() const;
+
+    void enable_move_list();
+    void enable_reduce_cond();
 
   private:
     OptimizerOption option_;

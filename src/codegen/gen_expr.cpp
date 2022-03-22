@@ -43,8 +43,9 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             var = name;
         }
 
-        if (theOptimizer.option().move_list && movable && typeinfo.name == "std::list") {
-            return "std::move($)"_fs.format(var);
+        if (movable && typeinfo.name == "std::list") {
+            // movable is true only when move-list is enable
+            return "std::move($)"_fs.format(var); // for move-list
         } else {
             return var;
         }
@@ -452,17 +453,20 @@ string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     auto temp1 = func.gen_temp();
     func.add_expr("auto $ = $;\n", temp1, e);
 
+    auto is_last_equation = func.is_last_equation(); // for reduce-cond
     for (size_t i = 0; i < equations.size(); ++i) {
+        func.is_last_equation(i == equations.size() - 1); // for reduce-cond
+
         if (i) {
             func.app_last_stmt("\n");
         }
-
         auto condition_cnt = func.condition_count();
         func.add_expr("// $", equations[i].raw_str);
         equations[i].pattern->gen_pattern(func, temp1);
         func.add_expr("return $;", equations[i].expr->gen_expr(func, typeinfo));
         func.close_sub_equation(condition_cnt);
     }
+    func.is_last_equation(is_last_equation); // for reduce-cond
 
     if (func.statements().back().back().back() == '}') {
         func.app_last_stmt(" else { // auto-generated for -Wreturn-type");

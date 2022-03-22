@@ -7,15 +7,11 @@ snat add(const snat &arg1, const snat &arg2) {
     }
 
     // add (sSucc m) n = sSucc (add m n)
-    if (arg1.is_sSucc()) {
-        auto m = arg1.as_sSucc().p1();
-        auto temp0 = snat::sSucc(
-            add(m, arg2)
-        );
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto m = arg1.as_sSucc().p1();
+    auto temp0 = snat::sSucc(
+        add(m, arg2)
+    );
+    return temp0;
 }
 
 snat fib(const snat &arg1) {
@@ -38,17 +34,11 @@ snat fib(const snat &arg1) {
     }
 
     // fib (sSucc (sSucc m)) = add (fib (sSucc m)) (fib m)
-    if (arg1.is_sSucc()) {
-        if (arg1.as_sSucc().p1().is_sSucc()) {
-            auto m = arg1.as_sSucc().p1().as_sSucc().p1();
-            auto temp0 = snat::sSucc(
-                m
-            );
-            return add(fib(temp0), fib(m));
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto m = arg1.as_sSucc().p1().as_sSucc().p1();
+    auto temp0 = snat::sSucc(
+        m
+    );
+    return add(fib(temp0), fib(m));
 }
 
 std::uint64_t natofsnat(const snat &arg1) {
@@ -58,12 +48,8 @@ std::uint64_t natofsnat(const snat &arg1) {
     }
 
     // natofsnat (sSucc n) = (natofsnat n) + 1
-    if (arg1.is_sSucc()) {
-        auto n = arg1.as_sSucc().p1();
-        return natofsnat(n) + 1;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = arg1.as_sSucc().p1();
+    return natofsnat(n) + 1;
 }
 
 snat snatofnat(const std::uint64_t &arg1) {
@@ -73,15 +59,11 @@ snat snatofnat(const std::uint64_t &arg1) {
     }
 
     // snatofnat (Suc n) = sSucc (snatofnat n)
-    if (arg1 != 0) {
-        auto n = arg1 - 1;
-        auto temp0 = snat::sSucc(
-            snatofnat(n)
-        );
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = arg1 - 1;
+    auto temp0 = snat::sSucc(
+        snatofnat(n)
+    );
+    return temp0;
 }
 
 slist<snat> snat2slist(const snat &arg1) {
@@ -99,15 +81,11 @@ slist<std::uint64_t> listwithlen(const std::uint64_t &arg1) {
     }
 
     // listwithlen (Suc n) = sCons 1 (listwithlen n)
-    if (arg1 != 0) {
-        auto n = arg1 - 1;
-        auto temp0 = slist<std::uint64_t>::sCons(
-            1, listwithlen(n)
-        );
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = arg1 - 1;
+    auto temp0 = slist<std::uint64_t>::sCons(
+        1, listwithlen(n)
+    );
+    return temp0;
 }
 
 sbool snot(const sbool &arg1) {

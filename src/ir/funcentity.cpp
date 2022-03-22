@@ -2,6 +2,7 @@
 #include "funcentity.hpp"
 #include "../utility/error.hpp"
 #include "../utility/format.hpp"
+#include "../optimizer/optimizer.hpp"
 
 #define assert_true(expr) assert_impl(expr, CodegenError)
 
@@ -175,9 +176,13 @@ void FuncEntity::add_pattern(const string &pattern) {
 }
 
 void FuncEntity::add_pattern_cond(const string &cond) {
-    statements_.back().push_back(string(indent_, ' ') + "if ($) {"_fs.format(cond));
-    add_indent();
-    ++condition_count_;
+    if (!theOptimizer.option().reduce_cond || !is_last_equation_) {
+        statements_.back()
+            .push_back(string(indent_, ' ') + "if ($) {"_fs.format(cond))
+        ;
+        add_indent();
+        ++condition_count_;
+    }
 }
 
 void FuncEntity::add_delay_declaration(const string &pattern) {
@@ -211,5 +216,13 @@ const vector<vector<string>> &FuncEntity::statements() const {
 
 const vector<string> &FuncEntity::delay_declarations() const {
     return delay_declarations_;
+}
+
+void FuncEntity::is_last_equation(bool is_last) {
+    is_last_equation_ = is_last;
+}
+
+bool FuncEntity::is_last_equation() const {
+    return is_last_equation_;
 }
 } // namespace hol2cpp

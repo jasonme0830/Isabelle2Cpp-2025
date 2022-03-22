@@ -1,4 +1,5 @@
 #include "codegen.hpp"
+#include "../optimizer/optimizer.hpp"
 
 #include <cctype>
 #include <iostream>
@@ -108,10 +109,13 @@ void FunctionDef::gen_code(Code &code) const {
 
     func.name() = name;
     type->gen_funcentity(func);
-    for (auto &equation : equations) {
+
+    for (size_t i = 0; i < equations.size(); ++i) {
+        func.is_last_equation(i == equations.size() - 1); // for reduce-cond
+
         func.entry_equation();
-        func.add_expr("// $", equation.raw_str);
-        equation.gen_funcentity(func);
+        func.add_expr("// $", equations[i].raw_str);
+        equations[i].gen_funcentity(func);
         func.close_equation();
     }
 
