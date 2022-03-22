@@ -1,9 +1,9 @@
 #include <benchmark/benchmark.h>
 #include <cassert>
-#include "list-move/merge_sort.enable.hpp"
-#include "list-move/merge_sort.disable.hpp"
+#include "move-list/merge_sort.enable.hpp"
+#include "move-list/merge_sort.disable.hpp"
 
-static void bench_disable_list_move(benchmark::State &state) {
+static void bench_disable_move_list(benchmark::State &state) {
     auto length = state.range(0);
 
     std::list<std::uint64_t> list;
@@ -22,7 +22,7 @@ static void bench_disable_list_move(benchmark::State &state) {
     }
 }
 
-static void bench_enable_list_move(benchmark::State &state) {
+static void bench_enable_move_list(benchmark::State &state) {
     auto length = state.range(0);
 
     std::list<std::uint64_t> list;
@@ -41,6 +41,6 @@ static void bench_enable_list_move(benchmark::State &state) {
     }
 }
 
-BENCHMARK(bench_disable_list_move)->RangeMultiplier(2)->Range(256, 16384);
-BENCHMARK(bench_enable_list_move)->RangeMultiplier(2)->Range(256, 16384);
+BENCHMARK(bench_disable_move_list)->RangeMultiplier(2)->Range(256, 16384);
+BENCHMARK(bench_enable_move_list)->RangeMultiplier(2)->Range(256, 16384);
 BENCHMARK_MAIN();
