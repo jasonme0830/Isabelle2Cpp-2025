@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 #include <cassert>
-#include "enable-list-move/merge_sort.enable.hpp"
-#include "enable-list-move/merge_sort.disable.hpp"
+#include "list-move/merge_sort.enable.hpp"
+#include "list-move/merge_sort.disable.hpp"
 
 static void bench_disable_list_move(benchmark::State &state) {
     auto length = state.range(0);

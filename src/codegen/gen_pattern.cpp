@@ -64,7 +64,7 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
 
     // for List
     else if (constructor == "Cons") {
-        if (!theOptimizer.option().enable_list_move) {
+        if (!theOptimizer.option().list_move) {
             func.add_pattern_cond("!$.empty()", prev);
             args[0]->gen_pattern(func, prev + ".front()");
 

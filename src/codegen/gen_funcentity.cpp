@@ -1,4 +1,5 @@
 #include "codegen.hpp"
+#include "../optimizer/optimizer.hpp"
 
 using namespace std;
 
@@ -13,9 +14,12 @@ void Equation::gen_funcentity(FuncEntity &func) const {
     pattern->gen_pattern(func, "");
     func.close_pattern(); // for delay declarations
 
-    set<string> movables;
-    expr->analyze_var_movable(movables);
-
-    func.add_expr("return $;", unmove_expr(expr->gen_expr(func, func.result_typeinfo())));
+    if (theOptimizer.option().list_move) {
+        set<string> movables;
+        expr->analyze_var_movable(movables);
+        func.add_expr("return $;", unmove_expr(expr->gen_expr(func, func.result_typeinfo())));
+    } else {
+        func.add_expr("return $;", expr->gen_expr(func, func.result_typeinfo()));
+    }
 }
 } // namespace hol2cpp

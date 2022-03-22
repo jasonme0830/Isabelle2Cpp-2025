@@ -19,7 +19,7 @@ You can see some examples in [example/](example/).
 ## ChangeLog
 
 - [x] Variables are checked if movable or not and unexpected move operations are fixed.
-- [x] Enable-list-move is supported and as an optimization option by the flag `--enable-list-move`.
+- [x] `list-move` is supported and as an optimization option by the flag `--list-move`.
 - [x] Declarations are delayed after all conditions.
 - [x] Directory structure is reorganized.
 - [x] Use `std::set::merge` instead trivial traversal for `\<inter>` and `\<union>` of `set`.

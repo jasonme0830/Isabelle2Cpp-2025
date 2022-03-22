@@ -43,7 +43,7 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             var = name;
         }
 
-        if (theOptimizer.option().enable_list_move && movable && typeinfo.name == "std::list") {
+        if (theOptimizer.option().list_move && movable && typeinfo.name == "std::list") {
             return "std::move($)"_fs.format(var);
         } else {
             return var;
@@ -129,7 +129,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
                 .add_expr("$.push_front($);", temp, x)
             ;
 
-            if (theOptimizer.option().enable_list_move) {
+            if (theOptimizer.option().list_move) {
                 return "std::move($)"_fs.format(temp);
             } else {
                 return temp;

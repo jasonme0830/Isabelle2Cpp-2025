@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
               .default_value(false)
               .implict_value(true)
     ;
-    arg_parser.add_argument("--enable-list-move")
-              .help("enable moving list")
+    arg_parser.add_argument("--list-move")
+              .help("enable list-move")
               .default_value(false)
               .implict_value(true)
     ;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         }
 
         // set optimizer options
-        if (arg_parser.get<bool>("enable-list-move")) {
+        if (arg_parser.get<bool>("list-move")) {
             theOptimizer.enable_list_move();
         }
 
