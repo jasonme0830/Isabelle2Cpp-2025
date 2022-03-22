@@ -5,8 +5,8 @@
 using namespace std;
 
 namespace hol2cpp {
-void Optimizer::enable_list_move() {
-    option_.list_move = true;
+void Optimizer::enable_move_list() {
+    option_.move_list = true;
 
     auto origin_as_arg = TypeInfo::as_arg;
     TypeInfo::as_arg = [=](const TypeInfo &type) {

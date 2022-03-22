@@ -4,12 +4,12 @@ namespace hol2cpp {
 extern class Optimizer theOptimizer;
 
 struct OptimizerOption {
-    bool list_move;
+    bool move_list;
 };
 
 class Optimizer {
   public:
-    void enable_list_move();
+    void enable_move_list();
 
     const OptimizerOption &option() const;
 

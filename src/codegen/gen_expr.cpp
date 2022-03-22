@@ -43,7 +43,7 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             var = name;
         }
 
-        if (theOptimizer.option().list_move && movable && typeinfo.name == "std::list") {
+        if (theOptimizer.option().move_list && movable && typeinfo.name == "std::list") {
             return "std::move($)"_fs.format(var);
         } else {
             return var;
@@ -129,7 +129,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
                 .add_expr("$.push_front($);", temp, x)
             ;
 
-            if (theOptimizer.option().list_move) {
+            if (theOptimizer.option().move_list) {
                 return "std::move($)"_fs.format(temp);
             } else {
                 return temp;
@@ -402,11 +402,11 @@ string BinaryOpExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const 
             break;
         case Token::Type::In:
             return "$.count($)"_fs.format(
-                rhs->gen_expr(func, typeinfo), lhs->gen_expr(func, typeinfo.arguments.front())
+                rhs->gen_expr(func, TypeInfo()), lhs->gen_expr(func, TypeInfo())
             );
         case Token::Type::NotIn:
             return "!$.count($)"_fs.format(
-                rhs->gen_expr(func, typeinfo), lhs->gen_expr(func, typeinfo.arguments.front())
+                rhs->gen_expr(func, TypeInfo()), lhs->gen_expr(func, TypeInfo())
             );
 
         case Token::Type::Pow:

@@ -14,7 +14,7 @@ void Equation::gen_funcentity(FuncEntity &func) const {
     pattern->gen_pattern(func, "");
     func.close_pattern(); // for delay declarations
 
-    if (theOptimizer.option().list_move) {
+    if (theOptimizer.option().move_list) {
         set<string> movables;
         expr->analyze_var_movable(movables);
         func.add_expr("return $;", unmove_expr(expr->gen_expr(func, func.result_typeinfo())));

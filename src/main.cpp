@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
               .default_value(false)
               .implict_value(true)
     ;
-    arg_parser.add_argument("--list-move")
-              .help("enable list-move")
+    arg_parser.add_argument("--move-list")
+              .help("enable move-list")
               .default_value(false)
               .implict_value(true)
     ;
@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
         }
 
         // set optimizer options
-        if (arg_parser.get<bool>("list-move")) {
-            theOptimizer.enable_list_move();
+        if (arg_parser.get<bool>("move-list")) {
+            theOptimizer.enable_move_list();
         }
 
         ifstream fin(input_file);
