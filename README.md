@@ -8,6 +8,7 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
+- [ ] Support generating classes optionally instead of structs for the user-defined datatypes.
 - [ ] Support function currying.
 - [ ] Resolve identifier conflicts.
 - [ ] Support recursive function to loop/iteration.

@@ -17,11 +17,11 @@ class slist {
 
   public:
     static slist<T1> sNil() {
-        return slist<T1> { _sNil {} };
+        return slist<T1> {_sNil {}};
     }
 
     static slist<T1> sCons(T1 p1, slist<T1> p2) {
-        return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
+        return slist<T1> {_sCons { std::move(p1), std::make_shared<slist<T1>>(std::move(p2)) }};
     }
 
     bool is_sNil() const { return std::holds_alternative<_sNil>(value); }
@@ -30,7 +30,4 @@ class slist {
     const _sCons &as_sCons() const {
         return std::get<_sCons>(value);
     }
-
-    slist(const slist &other) : value(other.value) {}
-    slist(slist &&other) : value(std::move(other.value)) {}
 };
