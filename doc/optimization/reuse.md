@@ -18,9 +18,9 @@
 
 > 记录后者比前者提升多少
 
-只开启 `enable-list-move` 时，使用 `merge_sort` 排序 `[1000..1]` 的运行时间对比：
+只开启 `move-list` 时，使用 `merge_sort` 排序 `[1000..1]` 的运行时间对比：
 
-| `enable-list-move` | -O0 | -O2 |
+| `move-list` | -O0 | -O2 |
 | --- | --- | --- |
-| no | 0.210s | 0.059s |
-| yes | 0.082s | 0.025s |
+| disable | 0.210s | 0.059s |
+| enable | 0.082s | 0.025s |
