@@ -5,7 +5,7 @@
 #include <variant>
 
 template<typename T1>
-struct slist {
+class slist {
     struct _sNil {};
     struct _sCons {
         T1 p1_;
@@ -16,11 +16,13 @@ struct slist {
     };
 
     std::variant<_sNil, _sCons> value_;
+    slist(const std::variant<_sNil, _sCons> &value) : value_(value) {}
 
+  public:
     static slist<T1> sNil() {
         return slist<T1> { _sNil {  } };
     }
-    static slist<T1> sCons(T1 p1, slist<T1> p2) {
+    static slist<T1> sCons(const T1 &p1, const slist<T1> &p2) {
         return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
     }
 

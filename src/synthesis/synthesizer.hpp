@@ -21,7 +21,7 @@ class Synthesizer {
     void syn_func_template(const FuncEntity &func);
     void syn_func_definition(const FuncEntity &func, bool is_impl);
 
-    std::ostream &newline();
+    std::ostream &newline(int more_indent = 0);
 
     void add_indent();
     void sub_indent();

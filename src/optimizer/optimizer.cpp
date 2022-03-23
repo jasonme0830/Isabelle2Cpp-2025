@@ -13,4 +13,8 @@ const OptimizerOption &Optimizer::option() const {
 void Optimizer::enable_reduce_cond() {
     option_.reduce_cond = true;
 }
+
+void Optimizer::enable_use_class() {
+    option_.use_class = true;
+}
 } // namespace hol2cpp
