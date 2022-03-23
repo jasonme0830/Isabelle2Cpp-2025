@@ -38,4 +38,6 @@ fun smerge_sort :: "nat slist \<Rightarrow> nat slist" where
   "smerge_sort (sCons x sNil) = sCons x sNil" |
   "smerge_sort xs = smerge (smerge_sort (stake ((slength xs) div 2) xs)) (smerge_sort (sdrop ((slength xs) div 2) xs))"
 
+export_code merge_sort in SML module_name merge_sort
+
 end

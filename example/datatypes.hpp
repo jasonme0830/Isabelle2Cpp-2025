@@ -3,7 +3,7 @@
 #include <memory>
 #include <variant>
 
-struct snat {
+class snat {
     struct _sZero {};
     struct _sSucc {
         std::shared_ptr<snat> p1_;
@@ -12,11 +12,13 @@ struct snat {
     };
 
     std::variant<_sZero, _sSucc> value_;
+    snat(const std::variant<_sZero, _sSucc> &value) : value_(value) {}
 
+  public:
     static snat sZero() {
         return snat { _sZero {  } };
     }
-    static snat sSucc(snat p1) {
+    static snat sSucc(const snat &p1) {
         return snat { _sSucc { std::make_shared<snat>(p1) } };
     }
 
@@ -27,7 +29,7 @@ struct snat {
 };
 
 template<typename T1>
-struct slist {
+class slist {
     struct _sNil {};
     struct _sCons {
         T1 p1_;
@@ -38,11 +40,13 @@ struct slist {
     };
 
     std::variant<_sNil, _sCons> value_;
+    slist(const std::variant<_sNil, _sCons> &value) : value_(value) {}
 
+  public:
     static slist<T1> sNil() {
         return slist<T1> { _sNil {  } };
     }
-    static slist<T1> sCons(T1 p1, slist<T1> p2) {
+    static slist<T1> sCons(const T1 &p1, const slist<T1> &p2) {
         return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
     }
 
@@ -52,12 +56,14 @@ struct slist {
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 };
 
-struct sbool {
+class sbool {
     struct _sTrue {};
     struct _sFalse {};
 
     std::variant<_sTrue, _sFalse> value_;
+    sbool(const std::variant<_sTrue, _sFalse> &value) : value_(value) {}
 
+  public:
     static sbool sTrue() {
         return sbool { _sTrue {  } };
     }
