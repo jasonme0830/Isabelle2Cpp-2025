@@ -8,7 +8,7 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
-- [ ] Support generating classes optionally instead of structs for the user-defined datatypes.
+- [ ]
 - [ ] Support function currying.
 - [ ] Resolve identifier conflicts.
 - [ ] Support recursive function to loop/iteration.
@@ -18,6 +18,7 @@ You can see some examples in [example/](example/).
 
 ## ChangeLog
 
+- [x] Support generating classes optionally (by using the flag `--use-class`) instead of structs for the user-defined datatypes.
 - [x] `reduce-cond` is added as an optimization option which removes last unnecessary conditions and the call of `abort`.
 - [x] Variables are checked if movable or not and unexpected move operations are fixed.
 - [x] `move-list` is supported and as an optimization option by the flag `--move-list`.

@@ -1,4 +1,5 @@
 #include "synthesizer.hpp"
+#include "../optimizer/optimizer.hpp"
 
 using namespace std;
 
@@ -80,13 +81,20 @@ void Synthesizer::syn_class_template(const Datatype &datatype) {
 }
 
 void Synthesizer::syn_class_definition(const Datatype &datatype) {
+    auto use_class = theOptimizer.option().use_class;
+
     auto &name = datatype.name();
     auto &self = datatype.self();
     auto &constructors = datatype.constructors();
 
     TypeInfo variant("std::variant");
 
-    "struct $ {\n"_fs.outf(newline(), name);
+    if (use_class) {
+        "class $ {\n"_fs.outf(newline(), name);
+    } else {
+        "struct $ {\n"_fs.outf(newline(), name);
+    }
+
     add_indent();
     auto &components = datatype.components();
 
@@ -124,16 +132,22 @@ void Synthesizer::syn_class_definition(const Datatype &datatype) {
     out_.get() << endl;
 
     // generate std::variant<_C0, ..., _Ck> value_;
-    "$ value_;\n\n"_fs.outf(newline(), variant.to_str());
+    if (use_class) {
+        "$ value_;\n"_fs.outf(newline(), variant.to_str());
+        "$($value) : value_(value) {}\n\n"_fs.outf(newline(), name, variant.to_str_as_arg());
+        "public:\n"_fs.outf(newline(-2));
+    } else {
+        "$ value_;\n\n"_fs.outf(newline(), variant.to_str());
+    }
 
     // generate static constructions
     for (size_t i = 0; i < components.size(); ++i) {
         "static $ $("_fs.outf(newline(), self, constructors[i]);
         for (size_t j = 0; j < components[i].size(); ++j) {
             if (j == 0) {
-                "$ p1"_fs.outf(out_.get(), components[i][j]);;
+                "const $ &p1"_fs.outf(out_.get(), components[i][j]);;
             } else {
-                ", $ p$"_fs.outf(out_.get(), components[i][j], j + 1);
+                ", const $ &p$"_fs.outf(out_.get(), components[i][j], j + 1);
             }
         }
         ") {\n"_fs.outf(out_.get());
@@ -245,8 +259,8 @@ void Synthesizer::syn_func_definition(const FuncEntity &func, bool is_impl) {
     "}\n\n"_fs.outf(newline());
 }
 
-ostream &Synthesizer::newline() {
-    out_.get() << string(indent_, ' ');
+ostream &Synthesizer::newline(int more_indent) {
+    out_.get() << string(indent_ + more_indent, ' ');
     return out_.get();
 }
 

@@ -15,6 +15,7 @@ struct Config {
     string output_file;
 };
 
+ArgumentParser build_parser();
 Config parse_config(int, char *[]);
 
 int main(int argc, char* argv[]) {
@@ -41,32 +42,7 @@ int main(int argc, char* argv[]) {
 }
 
 Config parse_config(int argc, char *argv[]) {
-    ArgumentParser arg_parser("hol2cpp");
-
-    arg_parser.add_argument("input")
-              .help("source hol file")
-    ;
-    arg_parser.add_argument("output")
-              .help("output hpp/cpp file")
-              .default_value(""s)
-    ;
-    arg_parser.add_argument("-s")
-              .help("choose the same path with input file")
-              .default_value(false)
-              .implict_value(true)
-    ;
-
-    arg_parser.add_argument("--move-list")
-              .help("enable move-list")
-              .default_value(false)
-              .implict_value(true)
-    ;
-    arg_parser.add_argument("--reduce-cond")
-              .help("enable reduce-cond")
-              .default_value(false)
-              .implict_value(true)
-    ;
-
+    auto arg_parser = build_parser();
     arg_parser.parse(argc, argv);
 
     Config config;
@@ -97,5 +73,46 @@ Config parse_config(int argc, char *argv[]) {
         theOptimizer.enable_reduce_cond();
     }
 
+    // set experimental options
+    if (arg_parser.get<bool>("use-class")) {
+        theOptimizer.enable_use_class();
+    }
+
     return config;
+}
+
+ArgumentParser build_parser() {
+    ArgumentParser arg_parser("hol2cpp");
+
+    arg_parser.add_argument("input")
+              .help("source hol file")
+    ;
+    arg_parser.add_argument("output")
+              .help("output hpp/cpp file")
+              .default_value(""s)
+    ;
+    arg_parser.add_argument("-s")
+              .help("choose the same path with input file")
+              .default_value(false)
+              .implict_value(true)
+    ;
+
+    arg_parser.add_argument("--move-list")
+              .help("enable move-list")
+              .default_value(false)
+              .implict_value(true)
+    ;
+    arg_parser.add_argument("--reduce-cond")
+              .help("enable reduce-cond")
+              .default_value(false)
+              .implict_value(true)
+    ;
+
+    arg_parser.add_argument("--use-class")
+              .help("generating class instead struct for a datatype")
+              .default_value(false)
+              .implict_value(true)
+    ;
+
+    return arg_parser;
 }
