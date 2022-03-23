@@ -8,7 +8,6 @@ You can see some examples in [example/](example/).
 
 ## TODO
 
-- [ ]
 - [ ] Support function currying.
 - [ ] Resolve identifier conflicts.
 - [ ] Support recursive function to loop/iteration.
