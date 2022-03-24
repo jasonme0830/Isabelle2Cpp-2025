@@ -59,6 +59,7 @@ class FuncEntity {
 
     // add the determined type, argument type or result type
     void add_typeinfo(TypeInfo);
+    void adjust_args(std::size_t n); // for uncurry
 
     /**
      * mapping the given name to the argument type in C++

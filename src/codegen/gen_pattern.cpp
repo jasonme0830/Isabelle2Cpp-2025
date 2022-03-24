@@ -52,9 +52,17 @@ void VarExpr::gen_pattern(FuncEntity &func, const string &prev) const {
 
 void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
     if (constructor == func.name()) {
-        assert_true(args.size() == func.args_size());
-        for (size_t i = 0; i < args.size(); ++i) {
-            args[i]->gen_pattern(func, "arg" + to_string(i + 1));
+        assert_true(func.statements().back().empty());
+
+        if (args.size() == func.args_size()) {
+            for (size_t i = 0; i < args.size(); ++i) {
+                args[i]->gen_pattern(func, "arg" + to_string(i + 1));
+            }
+        } else { // for uncurry and will only be called once at the first pattern
+            assert_true(theOptimizer.option().uncurry);
+            assert_true(args.size() < func.args_size());
+
+
         }
     }
 
