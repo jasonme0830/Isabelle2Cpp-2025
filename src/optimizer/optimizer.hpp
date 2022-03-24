@@ -6,11 +6,11 @@ extern class Optimizer theOptimizer;
 // the option is also used for some experimental options currently
 struct OptimizerOption {
     // optimization options
-    bool move_list;
-    bool reduce_cond;
+    bool move_list; // move std::list as much as possible
+    bool reduce_cond; // removes the conditions for the last pattern
 
     // experimental options
-    bool use_class;
+    bool use_class; // generates classes instead of structs for datatypes
 };
 
 class Optimizer {
