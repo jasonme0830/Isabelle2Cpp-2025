@@ -77,6 +77,9 @@ Config parse_config(int argc, char *argv[]) {
     if (arg_parser.get<bool>("use-class")) {
         theOptimizer.enable_use_class();
     }
+    if (arg_parser.get<bool>("uncurry")) {
+        theOptimizer.enable_uncurry();
+    }
 
     return config;
 }

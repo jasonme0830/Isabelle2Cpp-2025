@@ -17,4 +17,8 @@ void Optimizer::enable_reduce_cond() {
 void Optimizer::enable_use_class() {
     option_.use_class = true;
 }
+
+void Optimizer::enable_uncurry() {
+    option_.uncurry = true;
+}
 } // namespace hol2cpp
