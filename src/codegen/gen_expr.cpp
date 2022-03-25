@@ -216,11 +216,11 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         assert_true(args.size() == 1);
         func.code().add_header("set");
 
-        auto set_type = typeinfo.replace_with("std::set");
-        auto list = args[0]->gen_expr(func, set_type);
-
         auto temp = func.gen_temp();
+        auto list = args[0]->gen_expr(func, typeinfo.replace_with("std::list"));
         func.add_expr("auto $ = $;", temp, list);
+
+        auto set_type = typeinfo.replace_with("std::set");
         return "$($.begin(), $.end())"_fs.format(set_type.to_str(), temp, temp);
     }
 

@@ -236,7 +236,7 @@ std::list<std::pair<T1, T2>> zip(std::list<T1> arg1, std::list<T2> arg2) {
 template<typename T1>
 std::list<T1> insert(const T1 &arg1, std::list<T1> arg2) {
     // insert x xs = (if x \<in> set xs then xs else x # xs)
-    auto temp0 = arg2;
+    auto temp0 = std::move(arg2);
     std::list<T1> temp1;
     if (std::set(temp0.begin(), temp0.end()).count(arg1)) {
         temp1 = std::move(arg2);
@@ -358,7 +358,7 @@ std::list<T1> remdups(std::list<T1> arg1) {
     auto x = arg1.front();
     arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
     auto xs = std::move(arg1);
-    auto temp0 = xs;
+    auto temp0 = std::move(xs);
     std::list<T1> temp1;
     if (std::set(temp0.begin(), temp0.end()).count(x)) {
         temp1 = remdups(std::move(xs));
@@ -619,14 +619,14 @@ std::list<T2> map_tailrec(const std::function<T2(const T1 &)> &arg1, std::list<T
 template<typename T1>
 bool member(std::list<T1> arg1, const T1 &arg2) {
     // member xs x \<longleftrightarrow> x \<in> set xs
-    auto temp0 = arg1;
+    auto temp0 = std::move(arg1);
     return std::set(temp0.begin(), temp0.end()).count(arg2);
 }
 
 template<typename T1>
 bool list_ex(const std::function<bool(const T1 &)> &arg1, std::list<T1> arg2) {
     // list_ex P xs \<longleftrightarrow> Bex (set xs) P
-    auto temp0 = arg2;
+    auto temp0 = std::move(arg2);
     return Bex(std::set(temp0.begin(), temp0.end()), arg1);
 }
 
