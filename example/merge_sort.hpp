@@ -19,6 +19,8 @@ class slist {
     slist(const std::variant<_sNil, _sCons> &value) : value_(value) {}
 
   public:
+    slist() = default;
+
     static slist<T1> sNil() {
         return slist<T1> { _sNil {  } };
     }
