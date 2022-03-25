@@ -291,6 +291,8 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     // else as the common call without determined function
     else {
+        warning("the function $ is undefined in the definition of function $"_fs.format(func.name()));
+
         string expr = constructor + '(';
         for (size_t i = 0; i < args.size(); ++i) {
             if (i == 0) {
