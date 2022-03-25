@@ -72,7 +72,7 @@ std::list<T1> filter(const std::function<bool(const T1 &)> &arg1, std::list<T1> 
     arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
     auto xs = std::move(arg2);
     std::list<T1> temp0;
-    if (P(x)) {
+    if (arg1(x)) {
         auto temp1 = filter(arg1, std::move(xs));
         temp1.push_front(x);
         temp0 = std::move(temp1);
@@ -93,7 +93,7 @@ T1 foldl(const std::function<T1(const T1 &, const T2 &)> &arg1, const T1 &arg2, 
     auto x = arg3.front();
     arg3.erase(arg3.begin(), std::next(arg3.begin(), 1));
     auto xs = std::move(arg3);
-    return foldl(arg1, f(arg2, x), std::move(xs));
+    return foldl(arg1, arg1(arg2, x), std::move(xs));
 }
 
 template<typename T1>
@@ -174,7 +174,7 @@ std::list<T1> takeWhile(const std::function<bool(const T1 &)> &arg1, std::list<T
     arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
     auto xs = std::move(arg2);
     std::list<T1> temp0;
-    if (P(x)) {
+    if (arg1(x)) {
         auto temp1 = takeWhile(arg1, std::move(xs));
         temp1.push_front(x);
         temp0 = std::move(temp1);
@@ -196,7 +196,7 @@ std::list<T1> dropWhile(const std::function<bool(const T1 &)> &arg1, std::list<T
     arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
     auto xs = std::move(arg2);
     std::list<T1> temp0;
-    if (P(x)) {
+    if (arg1(x)) {
         temp0 = dropWhile(arg1, std::move(xs));
     } else {
         auto temp1 = std::move(xs);
@@ -236,15 +236,16 @@ std::list<std::pair<T1, T2>> zip(std::list<T1> arg1, std::list<T2> arg2) {
 template<typename T1>
 std::list<T1> insert(const T1 &arg1, std::list<T1> arg2) {
     // insert x xs = (if x \<in> set xs then xs else x # xs)
-    std::list<T1> temp0;
-    if (set(arg2).count(arg1)) {
-        temp0 = std::move(arg2);
+    auto temp0 = std::move(arg2);
+    std::list<T1> temp1;
+    if (std::set(temp0.begin(), temp0.end()).count(arg1)) {
+        temp1 = std::move(arg2);
     } else {
-        auto temp1 = std::move(arg2);
-        temp1.push_front(arg1);
-        temp0 = std::move(temp1);
+        auto temp2 = std::move(arg2);
+        temp2.push_front(arg1);
+        temp1 = std::move(temp2);
     }
-    return temp0;
+    return temp1;
 }
 
 template<typename T1>
@@ -259,7 +260,7 @@ std::optional<T1> find(const std::function<bool(const T1 &)> &arg1, std::list<T1
     arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
     auto xs = std::move(arg2);
     std::optional<T1> temp0;
-    if (P(x)) {
+    if (arg1(x)) {
         temp0 = std::make_optional<T1>(x);
     } else {
         temp0 = find(arg1, std::move(xs));
@@ -342,7 +343,8 @@ bool distinct(std::list<T1> arg1) {
     auto x = arg1.front();
     arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
     auto xs = std::move(arg1);
-    return !set(xs).count(x) && distinct(std::move(xs));
+    auto temp0 = xs;
+    return !std::set(temp0.begin(), temp0.end()).count(x) && distinct(std::move(xs));
 }
 
 template<typename T1>
@@ -356,15 +358,16 @@ std::list<T1> remdups(std::list<T1> arg1) {
     auto x = arg1.front();
     arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
     auto xs = std::move(arg1);
-    std::list<T1> temp0;
-    if (set(xs).count(x)) {
-        temp0 = remdups(std::move(xs));
+    auto temp0 = std::move(xs);
+    std::list<T1> temp1;
+    if (std::set(temp0.begin(), temp0.end()).count(x)) {
+        temp1 = remdups(std::move(xs));
     } else {
-        auto temp1 = remdups(std::move(xs));
-        temp1.push_front(x);
-        temp0 = std::move(temp1);
+        auto temp2 = remdups(std::move(xs));
+        temp2.push_front(x);
+        temp1 = std::move(temp2);
     }
-    return temp0;
+    return temp1;
 }
 
 template<typename T1>
@@ -447,7 +450,7 @@ template<typename T1>
 std::list<T1> nths(std::list<T1> arg1, const std::set<std::uint64_t> &arg2) {
     // nths xs A = map fst (filter (\<lambda>p. snd p \<in> A) (zip xs [0..<size xs]))
     std::function temp0 = [=] (const T1 &p) {
-        return arg2.count(snd(p));
+        return arg2.count(p.second);
     };
     auto temp1 = 0;
     auto temp2 = size(arg1);
@@ -510,7 +513,7 @@ T1 arg_min_list(const std::function<T2(const T1 &)> &arg1, std::list<T1> arg2) {
     temp1.push_front(y);
     auto temp0 = arg_min_list(arg1, std::move(temp1));
     T1 temp2;
-    if (f(x) <= f(m)) {
+    if (arg1(x) <= arg1(m)) {
         temp2 = x;
     } else {
         temp2 = m;
@@ -530,7 +533,7 @@ std::list<T1> insort_key(const std::function<T2(const T1 &)> &arg1, const T1 &ar
     arg3.erase(arg3.begin(), std::next(arg3.begin(), 1));
     auto ys = std::move(arg3);
     std::list<T1> temp0;
-    if (f(arg2) <= f(y)) {
+    if (arg1(arg2) <= arg1(y)) {
         auto temp1 = std::move(ys);
         temp1.push_front(y);
         auto temp2 = std::move(temp1);
@@ -557,7 +560,7 @@ std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(const
     auto xs = std::move(arg2);
     auto temp0 = partition(arg1, std::move(xs));
     std::pair<std::list<T1>, std::list<T1>> temp1;
-    if (P(x)) {
+    if (arg1(x)) {
         auto temp2 = std::move(yes);
         temp2.push_front(x);
         temp1 = std::make_pair(std::move(temp2), std::move(no));
@@ -603,7 +606,7 @@ std::list<T2> map_tailrec_rev(const std::function<T2(const T1 &)> &arg1, std::li
     arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
     auto as = std::move(arg2);
     auto temp0 = std::move(arg3);
-    temp0.push_front(f(a));
+    temp0.push_front(arg1(a));
     return map_tailrec_rev(arg1, std::move(as), std::move(temp0));
 }
 
@@ -616,13 +619,15 @@ std::list<T2> map_tailrec(const std::function<T2(const T1 &)> &arg1, std::list<T
 template<typename T1>
 bool member(std::list<T1> arg1, const T1 &arg2) {
     // member xs x \<longleftrightarrow> x \<in> set xs
-    return set(arg1).count(arg2);
+    auto temp0 = std::move(arg1);
+    return std::set(temp0.begin(), temp0.end()).count(arg2);
 }
 
 template<typename T1>
 bool list_ex(const std::function<bool(const T1 &)> &arg1, std::list<T1> arg2) {
     // list_ex P xs \<longleftrightarrow> Bex (set xs) P
-    return Bex(set(arg2), arg1);
+    auto temp0 = std::move(arg2);
+    return Bex(std::set(temp0.begin(), temp0.end()), arg1);
 }
 
 template<typename T1>

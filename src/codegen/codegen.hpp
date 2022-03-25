@@ -18,6 +18,7 @@ namespace hol2cpp {
 extern const std::map<std::string, std::string> theNormalTypeMapping;
 extern const std::map<std::string, std::string> theTemplateTypeMapping;
 
+void warning(const std::string &msg);
 bool is_unit(const std::string &expr);
 std::string enclose_expr(const std::string &expr);
 std::string unmove_expr(std::string expr);

@@ -1,8 +1,6 @@
 #include "codegen.hpp"
 #include "../optimizer/optimizer.hpp"
 
-#include <regex>
-
 using namespace std;
 
 namespace hol2cpp {
@@ -40,21 +38,20 @@ void VarExpr::gen_pattern(FuncEntity &func, const string &prev) const {
 
     // for variables
     else {
-        static std::regex arg_regex(R"(arg[1-9][0-9]*)");
-        if (std::regex_match(prev, arg_regex)) {
-            func.varrm_mapping()[name] = prev;
-        } else {
-            func.unused_varrm_count()[name] = func.delay_declarations().size();
-            func.add_delay_declaration("auto $ = $;", name, prev);
-        }
+        func.decl_variable(name, prev);
     }
 }
 
 void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
     if (constructor == func.name()) {
-        assert_true(args.size() == func.args_size());
-        for (size_t i = 0; i < args.size(); ++i) {
-            args[i]->gen_pattern(func, "arg" + to_string(i + 1));
+        if (args.size() == func.args_size()) {
+            for (size_t i = 0; i < args.size(); ++i) {
+                args[i]->gen_pattern(func, "arg" + to_string(i + 1));
+            }
+        } else { // for uncurry and will only be called once at the first pattern
+            assert_true(theOptimizer.option().uncurry);
+            assert_true(args.size() < func.args_size());
+            assert_true(func.statements().back().empty());
         }
     }
 
@@ -113,7 +110,7 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
             }
 
             if (var_expr->name != "Nil") {
-                func.add_delay_declaration("$.erase($.begin(), std::next($.begin(), $));", prev, prev, prev, n);
+                func.add_delay_statement("$.erase($.begin(), std::next($.begin(), $));", prev, prev, prev, n);
                 var_expr->gen_pattern(func, "std::move($)"_fs.format(prev));
             }
         }

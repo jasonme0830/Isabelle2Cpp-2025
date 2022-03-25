@@ -3,6 +3,10 @@
 using namespace std;
 
 namespace hol2cpp {
+void warning(const string &msg) {
+    cerr << "$: $"_fs.format(info::light_red("warning"), msg) << endl;
+}
+
 bool is_unit(const string &expr) {
     if (expr.find(' ') == expr.npos) {
         return true;

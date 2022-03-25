@@ -12,6 +12,7 @@ You can see some examples in [example/](example/).
 - [ ] Resolve identifier conflicts.
 - [ ] Support recursive function to loop/iteration.
 - [ ] Support configurable conversion rules.
+- [ ] Add type system and support type inference.
 - [ ] Design benchmarks between generated cpp codes and native cpp codes.
 - [ ] Design benchmarks between generated cpp codes and generated sml codes.
 

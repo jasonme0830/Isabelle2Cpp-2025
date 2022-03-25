@@ -11,6 +11,7 @@ struct OptimizerOption {
 
     // experimental options
     bool use_class; // generates classes instead of structs for datatypes
+    bool uncurry; // returns lambda-expression if the arguments are less than parameters of the callee
 };
 
 class Optimizer {
@@ -21,6 +22,7 @@ class Optimizer {
     void enable_reduce_cond();
 
     void enable_use_class();
+    void enable_uncurry();
 
   private:
     OptimizerOption option_;

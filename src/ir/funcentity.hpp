@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <optional>
 #include <functional>
 
 namespace hol2cpp {
@@ -19,6 +20,9 @@ struct TypeInfo {
 
     TypeInfo();
     explicit TypeInfo(std::string name);
+    explicit TypeInfo(std::string name, TypeInfo argument);
+
+    TypeInfo replace_with(std::string name) const;
 
     std::string to_str() const;
     std::string to_str_as_arg() const;
@@ -59,6 +63,7 @@ class FuncEntity {
 
     // add the determined type, argument type or result type
     void add_typeinfo(TypeInfo);
+    void adjust_args(std::size_t n); // for uncurry
 
     /**
      * mapping the given name to the argument type in C++
@@ -86,8 +91,9 @@ class FuncEntity {
     */
     const std::vector<std::string> &template_args() const;
 
-    std::map<std::string, std::string> &varrm_mapping();
-    std::map<std::string, std::size_t> &unused_varrm_count();
+    void decl_variable(const std::string &var, const std::string &expr);
+    std::string get_variable(const std::string &var);
+    TypeInfo get_var_typeinfo(const std::string &var);
 
     /**
      * generate a temporary variable name
@@ -121,10 +127,10 @@ class FuncEntity {
         add_pattern_cond(fs.format(std::forward<Args>(args)...));
     }
 
-    void add_delay_declaration(const std::string &decl);
+    void add_delay_statement(const std::string &decl);
     template<typename ...Args>
-    void add_delay_declaration(const FormatString &fs, Args &&...args) {
-        add_delay_declaration(fs.format(std::forward<Args>(args)...));
+    void add_delay_statement(const FormatString &fs, Args &&...args) {
+        add_delay_statement(fs.format(std::forward<Args>(args)...));
     }
     void close_pattern();
 
@@ -160,16 +166,18 @@ class FuncEntity {
     std::vector<TypeInfo> typeinfos_;
     std::map<std::string, std::size_t> template_mapping_;
     std::vector<std::string> template_args_;
-    std::map<std::string, std::string> varrm_mapping_;
-    std::map<std::string, std::size_t> unused_varrm_count_;
+    std::map<std::string, std::string> var_mapping_;
+    std::map<std::string, std::size_t> unused_var_count_;
 
     std::size_t temp_count_;
     std::size_t condition_count_;
     std::vector<std::vector<std::string>> statements_;
 
     std::size_t decl_base_;
-    std::vector<std::string> delay_declarations_;
+    std::vector<std::string> delay_statements_;
 
     bool is_last_equation_; // for reduce-condition
+
+    std::map<std::string, TypeInfo> var_typeinfos_;
 };
 } // namespace hol2cpp

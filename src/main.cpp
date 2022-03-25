@@ -77,6 +77,9 @@ Config parse_config(int argc, char *argv[]) {
     if (arg_parser.get<bool>("use-class")) {
         theOptimizer.enable_use_class();
     }
+    if (arg_parser.get<bool>("uncurry")) {
+        theOptimizer.enable_uncurry();
+    }
 
     return config;
 }
@@ -110,6 +113,11 @@ ArgumentParser build_parser() {
 
     arg_parser.add_argument("--use-class")
               .help("generating class instead struct for a datatype")
+              .default_value(false)
+              .implict_value(true)
+    ;
+    arg_parser.add_argument("--uncurry")
+              .help("enable uncurrying")
               .default_value(false)
               .implict_value(true)
     ;

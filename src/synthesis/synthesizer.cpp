@@ -136,6 +136,7 @@ void Synthesizer::syn_class_definition(const Datatype &datatype) {
         "$ value_;\n"_fs.outf(newline(), variant.to_str());
         "$($value) : value_(value) {}\n\n"_fs.outf(newline(), name, variant.to_str_as_arg());
         "public:\n"_fs.outf(newline(-2));
+        "$() = default;\n\n"_fs.outf(newline(), name);
     } else {
         "$ value_;\n\n"_fs.outf(newline(), variant.to_str());
     }
