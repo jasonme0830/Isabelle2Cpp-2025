@@ -116,6 +116,11 @@ ArgumentParser build_parser() {
               .default_value(false)
               .implict_value(true)
     ;
+    arg_parser.add_argument("--uncurry")
+              .help("enable uncurrying")
+              .default_value(false)
+              .implict_value(true)
+    ;
 
     return arg_parser;
 }

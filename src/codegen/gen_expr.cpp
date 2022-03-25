@@ -33,16 +33,7 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     // for variables
     else {
-        string var;
-        auto &varrm_mapping = func.varrm_mapping();
-        auto it = varrm_mapping.find(name);
-        if (it != varrm_mapping.end()) {
-            var = it->second;
-        } else {
-            func.unused_varrm_count().erase(name);
-            var = name;
-        }
-
+        auto var = func.get_variable(name);
         if (movable && typeinfo.name == "std::list") {
             // movable is true only when move-list is enable
             return "std::move($)"_fs.format(var); // for move-list
@@ -69,8 +60,9 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     // for common calls
     else if (auto other_func = func.code().find_func_entity(constructor)) {
-        string expr = constructor + '(';
         assert_true(other_func->args_size() == args.size());
+
+        string expr = constructor + '(';
         for (size_t i = 0; i < args.size(); ++i) {
             if (i == 0) {
                 expr += args[i]->gen_expr(func, other_func->typeinfos()[i]);
@@ -220,6 +212,16 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         ;
 
         return res;
+    } else if (constructor == "set") {
+        assert_true(args.size() == 1);
+        func.code().add_header("set");
+
+        auto set_type = typeinfo.replace_with("std::set");
+        auto list = args[0]->gen_expr(func, set_type);
+
+        auto temp = func.gen_temp();
+        func.add_expr("auto $ = $;", temp, list);
+        return "$($.begin(), $.end())"_fs.format(set_type.to_str(), temp, temp);
     }
 
     // for If-expression
@@ -251,6 +253,12 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         return "std::make_pair(" + args[0]->gen_expr(func, typeinfo.arguments.front())
             + ", " + args[1]->gen_expr(func, typeinfo[1]) + ")"
         ;
+    } else if (constructor == "fst") {
+        assert_true(args.size() == 1);
+        return "$.first"_fs.format(args[0]->gen_expr(func, TypeInfo("std::pair", typeinfo)));
+    }else if (constructor == "snd") {
+        assert_true(args.size() == 1);
+        return "$.second"_fs.format(args[0]->gen_expr(func, TypeInfo("std::pair", typeinfo)));
     }
 
     // for user-defined datatypes
@@ -291,17 +299,36 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     // else as the common call without determined function
     else {
-        warning("the function $ is undefined in the definition of function $"_fs.format(func.name()));
+        auto foo = func.get_variable(constructor);
+        auto typeinfo = func.get_var_typeinfo(foo);
 
-        string expr = constructor + '(';
-        for (size_t i = 0; i < args.size(); ++i) {
-            if (i == 0) {
-                expr += args[i]->gen_expr(func, TypeInfo());
-            } else {
-                expr += ", " + args[i]->gen_expr(func, TypeInfo());
-            }
+        if (typeinfo.empty()) {
+            warning("the function $ lacks of type information in the definition of function $"_fs.format(
+                info::strong(constructor), info::strong(func.name()))
+            );
         }
-        return expr + ')';
+
+        if (typeinfo.empty() || args.size() == typeinfo.args_size()) {
+            string expr = foo + '(';
+            for (size_t i = 0; i < args.size(); ++i) {
+                if (i == 0) {
+                    expr += args[i]->gen_expr(func, TypeInfo());
+                } else {
+                    expr += ", " + args[i]->gen_expr(func, TypeInfo());
+                }
+            }
+            return expr + ')';
+        } else { // experimental
+            assert_true(theOptimizer.option().uncurry);
+
+            if (args.size() < typeinfo.args_size()) {
+                // curry and generate lambdas
+            } else {
+                // call and then call each rest arguments one by one
+            }
+
+            return "";
+        }
     }
 }
 

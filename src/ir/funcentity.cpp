@@ -4,6 +4,8 @@
 #include "../utility/format.hpp"
 #include "../optimizer/optimizer.hpp"
 
+#include <regex>
+
 #define assert_true(expr) assert_impl(expr, CodegenError)
 
 using namespace std;
@@ -22,6 +24,21 @@ TypeInfo::TypeInfo() = default;
 TypeInfo::TypeInfo(string name)
   : name(move(name)) {
     // ...
+}
+
+TypeInfo::TypeInfo(string name, TypeInfo argument)
+  : name(move(name)) {
+    if (argument.empty()) {
+        name.clear();
+    } else {
+        arguments.push_back(move(argument));
+    }
+}
+
+TypeInfo TypeInfo::replace_with(string name) const {
+    auto type = *this;
+    type.name = move(name);
+    return type;
 }
 
 string TypeInfo::to_str() const {
@@ -74,6 +91,12 @@ size_t TypeInfo::args_size() const {
 }
 
 const TypeInfo &TypeInfo::operator[](int i) const {
+    static TypeInfo theNullTypeInfo;
+
+    if (empty()) {
+        return theNullTypeInfo;
+    }
+
     return (i == -1) ? result_typeinfo() : arguments[i];
 }
 
@@ -132,12 +155,39 @@ const vector<string> &FuncEntity::template_args() const {
     return template_args_;
 }
 
-map<string, string> &FuncEntity::varrm_mapping() {
-    return varrm_mapping_;
+void FuncEntity::decl_variable(const string &var, const string &expr) {
+    static regex arg_regex(R"(arg[1-9][0-9]*)");
+
+    if (regex_match(expr, arg_regex)) {
+        var_mapping_[var] = expr;
+
+        // experimental
+        auto n = stoull(expr.substr(3));
+        var_typeinfos_[expr] = typeinfos_[n - 1];
+    } else {
+        unused_var_count_[var] = delay_statements_.size();
+        add_delay_statement("auto $ = $;", var, expr);
+    }
 }
 
-map<string, size_t> &FuncEntity::unused_varrm_count() {
-    return unused_varrm_count_;
+string FuncEntity::get_variable(const string &var) {
+    auto it = var_mapping_.find(var);
+    if (it != var_mapping_.end()) {
+        return it->second;
+    } else {
+        unused_var_count_.erase(var);
+        return var;
+    }
+}
+
+// experimental
+TypeInfo FuncEntity::get_var_typeinfo(const string &var) {
+    auto it = var_typeinfos_.find(var);
+    if (it != var_typeinfos_.end()) {
+        return it->second;
+    } else {
+        return TypeInfo();
+    }
 }
 
 string FuncEntity::gen_temp() {
@@ -148,8 +198,8 @@ void FuncEntity::entry_equation() {
     temp_count_ = 0;
     condition_count_ = 0;
     statements_.emplace_back();
-    varrm_mapping_.clear();
-    unused_varrm_count_.clear();
+    var_mapping_.clear();
+    unused_var_count_.clear();
     decl_base_ = 0;
 }
 
@@ -158,7 +208,7 @@ void FuncEntity::close_equation() {
         sub_indent();
         statements_.back().push_back(string(indent_, ' ') + "}");
     }
-    for (auto &[_, ind] : unused_varrm_count_) {
+    for (auto &[_, ind] : unused_var_count_) {
         statements_.back()[decl_base_ + ind].clear();
     }
 }
@@ -185,16 +235,16 @@ void FuncEntity::add_pattern_cond(const string &cond) {
     }
 }
 
-void FuncEntity::add_delay_declaration(const string &pattern) {
-    delay_declarations_.push_back(pattern);
+void FuncEntity::add_delay_statement(const string &pattern) {
+    delay_statements_.push_back(pattern);
 }
 
 void FuncEntity::close_pattern() {
     decl_base_ = statements_.back().size();
-    for (auto &decl : delay_declarations_) {
+    for (auto &decl : delay_statements_) {
         statements_.back().push_back(string(indent_, ' ') + decl);
     }
-    delay_declarations_.clear();
+    delay_statements_.clear();
 }
 
 FuncEntity &FuncEntity::add_expr(const string &expr) {
@@ -215,7 +265,7 @@ const vector<vector<string>> &FuncEntity::statements() const {
 }
 
 const vector<string> &FuncEntity::delay_declarations() const {
-    return delay_declarations_;
+    return delay_statements_;
 }
 
 void FuncEntity::is_last_equation(bool is_last) {
