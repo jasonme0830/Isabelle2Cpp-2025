@@ -114,26 +114,6 @@ std::list<T1> concat(std::list<std::list<T1>> arg1) {
 }
 
 template<typename T1>
-T1 nth(std::list<T1> arg1, const std::uint64_t &arg2) {
-    // (x # xs) ! n = (case n of 0 \<Rightarrow> x | Suc k \<Rightarrow> xs ! k)
-    auto x = arg1.front();
-    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
-    auto xs = std::move(arg1);
-    auto temp0 = ([&] {
-        auto temp1 = arg2;
-
-        // 0 \<Rightarrow> x
-        if (temp1 == 0) {
-            return x;
-        }
-
-        // Suc k \<Rightarrow> xs ! k
-        return nth(std::move(xs), k);
-    })();
-    return temp0;
-}
-
-template<typename T1>
 std::list<T1> list_update(std::list<T1> arg1, const std::uint64_t &arg2, const T1 &arg3) {
     // list_update [] i v = []
     if (arg1.empty()) {
@@ -512,6 +492,7 @@ T1 arg_min_list(const std::function<T2(const T1 &)> &arg1, std::list<T1> arg2) {
     auto temp1 = std::move(zs);
     temp1.push_front(y);
     auto temp0 = arg_min_list(arg1, std::move(temp1));
+    auto m = temp0;
     T1 temp2;
     if (arg1(x) <= arg1(m)) {
         temp2 = x;
@@ -559,6 +540,8 @@ std::pair<std::list<T1>, std::list<T1>> partition(const std::function<bool(const
     arg2.erase(arg2.begin(), std::next(arg2.begin(), 1));
     auto xs = std::move(arg2);
     auto temp0 = partition(arg1, std::move(xs));
+    auto yes = temp0.first;
+    auto no = temp0.second;
     std::pair<std::list<T1>, std::list<T1>> temp1;
     if (arg1(x)) {
         auto temp2 = std::move(yes);
