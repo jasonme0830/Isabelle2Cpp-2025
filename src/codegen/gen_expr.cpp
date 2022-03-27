@@ -166,6 +166,14 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             ;
             return temp0;
         }
+    } else if (constructor == "nth") {
+        assert_true(args.size() == 2);
+        auto l = args[0]->gen_expr(func, TypeInfo("std::list"));
+        auto r = args[1]->gen_expr(func, TypeInfo("std::uint64_t"));
+
+        auto temp0 = func.gen_temp();
+        func.add_expr("auto $ = $;", temp0, l);
+        return "*std::next($.begin(), $)"_fs.format(temp0, r);
     } else if (constructor == "upto") {
         auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
 
@@ -513,6 +521,7 @@ string LetinExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     auto temp = func.gen_temp();
     func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func, TypeInfo()));
     equation.pattern->gen_pattern(func, temp);
+    func.close_pattern();
     return expr->gen_expr(func, typeinfo);
 }
 

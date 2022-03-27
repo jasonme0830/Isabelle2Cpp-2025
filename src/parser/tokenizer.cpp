@@ -21,7 +21,7 @@ static set<string> localSymbolSet {
     ":", "::", ":=", "=", R"(\<longleftrightarrow>)", R"(\<equiv>)", "|", "\"", "(", ")",
     R"(\<Rightarrow>)", "=>", "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
     R"(\<le>)", R"(<)", R"(\<ge>)", R"(>)", R"(\<subseteq>)", R"(\<subset>)",
-    R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)",
+    R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)", R"(!)",
     R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(\<times>)", R"(/)", R"(div)", R"(mod)", R"(^)",
 };
 

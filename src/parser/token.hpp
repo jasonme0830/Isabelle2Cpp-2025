@@ -78,6 +78,7 @@ struct Token {
         NotIn,          // \<notin>
         Sharp,          // #
         At,             // @
+        Excl,           // !
         Union,          // \<union>
         Inter,          // \<inter>
         Add,            // +

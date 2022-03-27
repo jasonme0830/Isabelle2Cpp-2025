@@ -116,6 +116,7 @@ static map<string, Token::Type> localTokenMapping {
     { R"(\<notin>)", Token::Type::NotIn },
     { R"(#)", Token::Type::Sharp },
     { R"(@)", Token::Type::At },
+    { R"(!)", Token::Type::Excl },
     { R"(\<union>)", Token::Type::Union },
     { R"(\<inter>)", Token::Type::Inter },
     { R"(+)", Token::Type::Add },

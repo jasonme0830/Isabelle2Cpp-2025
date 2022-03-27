@@ -152,7 +152,7 @@ bool DatatypeDef::is_predefined() const {
  */
 bool FunctionDef::is_predefined() const {
     static set<string> predefineds {
-        "length", "take", "drop", "append", "upto", "upt"
+        "length", "take", "drop", "append", "upto", "upt", "nth"
     };
     return predefineds.count(name);
 }

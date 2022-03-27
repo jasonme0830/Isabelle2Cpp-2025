@@ -18,6 +18,8 @@ You can see some examples in [example/](example/).
 
 ## ChangeLog
 
+- [x] Fix the bug of the generation for let-in expressions, which discards declarations unexpectedly.
+- [x] Operator `!` and `nth` is supported.
 - [x] Support generating classes optionally (by using the flag `--use-class`) instead of structs for the user-defined datatypes.
 - [x] `reduce-cond` is added as an optimization option which removes last unnecessary conditions and the call of `abort`.
 - [x] Variables are checked if movable or not and unexpected move operations are fixed.

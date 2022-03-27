@@ -46,6 +46,11 @@ vector<pair<size_t, set<Token::Type>>> bop_precedences {
         80, {
             Token::Type::Pow
         }
+    },
+    {
+        100, {
+            Token::Type::Excl
+        }
     }
 };
 
@@ -58,6 +63,7 @@ set<Token::Type> bop_right_associativity {
 map<Token::Type, string> bop_func_mapping {
     { Token::Type::Sharp, "Cons" },
     { Token::Type::At, "append" },
+    { Token::Type::Excl, "nth" },
 };
 
 set<Token::Type> temp_ignored_ops;
