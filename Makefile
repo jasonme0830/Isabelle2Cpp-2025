@@ -22,6 +22,10 @@ cpp = $(patsubst %.thy, %.cpp, $(thy))
 clean:
 	rm -rf $(target)
 	rm -rf $(obj)
+
+cleanall:
+	rm -rf $(target)
+	rm -rf $(obj)
 	rm -rf $(hpp)
 	rm -rf $(cpp)
 	cd bench && make clean
