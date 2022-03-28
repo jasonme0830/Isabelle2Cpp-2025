@@ -139,6 +139,7 @@ std::list<T1> list_update(std::list<T1> arg1, const std::uint64_t &arg2, const T
         }
 
         // Suc j \<Rightarrow> x # list_update xs j v
+        auto j = temp1 - 1;
         auto temp3 = list_update(std::move(xs), j, arg3);
         temp3.push_front(x);
         return std::move(temp3);
@@ -210,6 +211,9 @@ std::list<std::pair<T1, T2>> zip(std::list<T1> arg1, std::list<T2> arg2) {
         }
 
         // z # zs \<Rightarrow> (z, y) # zip zs ys
+        auto z = temp1.front();
+        temp1.erase(temp1.begin(), std::next(temp1.begin(), 1));
+        auto zs = std::move(temp1);
         auto temp2 = zip(std::move(zs), std::move(ys));
         temp2.push_front(std::make_pair(z, y));
         return std::move(temp2);
@@ -464,6 +468,7 @@ std::list<T1> splice(std::list<T1> arg1, std::list<T1> arg2) {
 template<typename T1>
 T1 min_list(std::list<T1> arg1) {
     // min_list (x # xs) = (case xs of [] \<Rightarrow> x | _ \<Rightarrow> min x (min_list xs))
+    auto x = arg1.front();
     arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
     auto xs = std::move(arg1);
     auto temp0 = ([&] {
