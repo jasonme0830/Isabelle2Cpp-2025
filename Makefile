@@ -11,7 +11,7 @@ bin/hol2cpp: src/codegen/*.cpp \
 bin/:
 	mkdir bin
 
-.PHONY: clean example
+.PHONY: clean example bench
 
 clean:
 	rm -r bin
@@ -24,3 +24,6 @@ example: bin/hol2cpp
 		echo ""; \
 	done; \
 	bin/hol2cpp example/hol_main/List_raw.thy -s --move-list --reduce-cond --use-class
+
+bench: bin/hol2cpp
+	cd bench && make bm
