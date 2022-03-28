@@ -9,16 +9,20 @@
 template<typename T1>
 T1 last(std::list<T1> arg1) {
     // last (x # xs) = (if xs = [] then x else last xs)
-    auto x = arg1.front();
-    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
-    auto xs = std::move(arg1);
-    T1 temp0;
-    if (xs.empty()) {
-        temp0 = x;
-    } else {
-        temp0 = last(std::move(xs));
+    if (arg1.size() >= 1) {
+        auto x = arg1.front();
+        arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+        auto xs = std::move(arg1);
+        T1 temp0;
+        if (xs.empty()) {
+            temp0 = x;
+        } else {
+            temp0 = last(std::move(xs));
+        }
+        return temp0;
+    } else { // auto-generated for -Wreturn-type
+        std::abort();
     }
-    return temp0;
 }
 
 template<typename T1>

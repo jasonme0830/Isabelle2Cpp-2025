@@ -1,5 +1,19 @@
 ## ChangeLog for HOL2Cpp
 
+### Unreleased
+
+#### Changed
+
+- `--reduce-cond` does not reduce conditions and the `std::abort` if the function defined by `primrec` is followed by the option `nonexhaustive`. Furthermore, `--reduce-cond` assumes functions are total by default.
+
+#### Detail
+
+##### `-reduce-cond`
+
+The behavior of the option is changed according to the [the nonexhaustive option](https://isabelle.in.tum.de/dist/doc/datatypes.pdf) in `primrec`:
+
+> The nonexhaustive option indicates that the functions are not necessarily specified for all constructors. It can be used to suppress the warning that is normally emitted when some constructors are missing.
+
 ### 0.0.0 - 2022/03/27
 
 #### Happened

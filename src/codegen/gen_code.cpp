@@ -106,6 +106,7 @@ void DatatypeDef::gen_code(Code &code) const {
 
 void FunctionDef::gen_code(Code &code) const {
     auto &func = code.entry_func_entity(name);
+    func.nonexhaustive(nonexhaustive);
 
     func.name() = name;
     type->gen_funcentity(func);
