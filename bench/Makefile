@@ -18,22 +18,25 @@ $(target): $(cpp) bench.cpp
 %.cpp: %.thy $(hol2cpp)
 	$(hol2cpp) $< -s
 
-.PHONY: clean bm b1 b2
+.PHONY: clean bm cmp cmp1 cmp2
 
 compare = /Users/mu00/Repos/others/benchmark/tools/compare.py
 
-bm_msml = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
-bm_msrc = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
+bm_cmp1 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
+bm_cmp2 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
 
 bm: bench
-	$(bm_msml)
-	$(bm_msrc)
+	./bench
 
-b1: bench
-	$(bm_msml)
+cmp: bench
+	$(bm_cmp1)
+	$(bm_cmp2)
 
-b2: bench
-	$(bm_msrc)
+cmp1: bench
+	$(bm_cmp1)
+
+cmp2: bench
+	$(bm_cmp2)
 
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
