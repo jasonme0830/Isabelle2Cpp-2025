@@ -33,7 +33,7 @@ cleanall:
 bench: $(target)
 	cd bench && make bm
 
-example: $(target) $(cpp)
+example: $(cpp)
 
-example/%.cpp: example/%.thy
+example/%.cpp: example/%.thy $(target)
 	$(target) $< -s --move-list --reduce-cond --use-class

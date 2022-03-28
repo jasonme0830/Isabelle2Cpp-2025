@@ -1,6 +1,6 @@
 target = bench
 
-thy = $(wildcard merge_sort/*.thy)
+thy = $(wildcard merge_sort/*.thy) $(wildcard binary_search/*.thy)
 hpp = $(patsubst %.thy, %.hpp, $(thy))
 cpp = $(patsubst %.thy, %.cpp, $(thy))
 
@@ -9,13 +9,13 @@ hol2cpp = ../bin/hol2cpp
 $(target): $(cpp) bench.cpp
 	g++ -o $@ -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
 
-%.ml.rc.cpp: %.ml.rc.thy
+%.ml.rc.cpp: %.ml.rc.thy $(hol2cpp)
 	$(hol2cpp) $< -s --move-list --reduce-cond
 
-%.ml.cpp: %.ml.thy
+%.ml.cpp: %.ml.thy $(hol2cpp)
 	$(hol2cpp) $< -s --move-list
 
-%.cpp: %.thy
+%.cpp: %.thy $(hol2cpp)
 	$(hol2cpp) $< -s
 
 .PHONY: clean bm b1 b2
