@@ -218,7 +218,11 @@ Ptr<Definition> Parser::gen_function_definition() {
     eat<Token::Type::Function>("expected token Function");
 
     if (try_eat<Token::Type::LParen>()) {
-        eat<Token::Type::Identifier>("expected token Identifier");
+        auto option = gen_ident_str();
+        if (option == "nonexhaustive") {
+            decl->nonexhaustive = true;
+        }
+
         eat<Token::Type::RParen>("expected token RParen");
     }
 
@@ -238,9 +242,7 @@ Ptr<Definition> Parser::gen_function_definition() {
             return short_def;
         }
     } else {
-        check<Token::Type::Identifier>("expected token Identifier");
-        decl->name = current_token_.value;
-        get_next_token();
+        decl->name = gen_ident_str();
     }
 
     if (decl->is_predefined()) {

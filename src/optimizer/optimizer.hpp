@@ -7,7 +7,7 @@ extern class Optimizer theOptimizer;
 struct OptimizerOption {
     // optimization options
     bool move_list; // move std::list as much as possible
-    bool reduce_cond; // removes the conditions for the last pattern
+    bool reduce_cond; // removes the conditions for the last pattern for total functions (not use option `nonexhaustive`)
 
     // experimental options
     bool use_class; // generates classes instead of structs for datatypes

@@ -344,6 +344,8 @@ struct FunctionDef final : Definition {
     Ptr<FuncType> type;
     std::vector<Equation> equations;
 
+    bool nonexhaustive;
+
     std::string def_name() const override;
 
     bool is_predefined() const override;
