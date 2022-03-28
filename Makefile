@@ -1,29 +1,35 @@
-bin/hol2cpp: src/codegen/*.cpp \
-			 src/ir/*.cpp \
-			 src/parser/*.cpp \
-			 src/synthesis/*.cpp \
-			 src/utility/*.cpp \
-			 src/optimizer/*.cpp \
-			 src/main.cpp \
-			 | bin/
-	g++ -o bin/hol2cpp -W -Wno-implicit-fallthrough -g -std=c++17 $^
+target = bin/hol2cpp
+
+src = src/main.cpp $(wildcard src/*/*.cpp)
+obj = $(patsubst src/%.cpp, obj/%.o, $(src))
+
+$(target): $(obj) | bin/
+	g++ -o $@ -W -g -std=c++17 $^
+
+obj/%.o: src/%.cpp
+	mkdir -p $(@D)
+	g++ -W -Wno-implicit-fallthrough -g -std=c++17 -c $^ -o $@
 
 bin/:
 	mkdir bin
 
-.PHONY: clean example bench
+thy = $(wildcard example/*.thy) $(wildcard example/*/*.thy)
+hpp = $(patsubst %.thy, %.hpp, $(thy))
+cpp = $(patsubst %.thy, %.cpp, $(thy))
+
+.PHONY: clean bench example
 
 clean:
-	rm -r bin
+	rm -rf $(target)
+	rm -rf $(obj)
+	rm -rf $(hpp)
+	rm -rf $(cpp)
+	cd bench && make clean
 
-example: bin/hol2cpp
-	for file in `find example/*.thy`; \
-	do \
-		echo "<CONVERT> $$file"; \
-		bin/hol2cpp $$file -s --move-list --reduce-cond --use-class; \
-		echo ""; \
-	done; \
-	bin/hol2cpp example/hol_main/List_raw.thy -s --move-list --reduce-cond --use-class
-
-bench: bin/hol2cpp
+bench: $(target)
 	cd bench && make bm
+
+example: $(target) $(cpp)
+
+example/%.cpp: example/%.thy
+	$(target) $< -s --move-list --reduce-cond --use-class

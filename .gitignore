@@ -39,3 +39,4 @@ bin/
 *.out
 test/
 *.dSYM
+obj/
