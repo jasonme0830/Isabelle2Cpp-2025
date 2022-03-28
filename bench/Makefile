@@ -1,29 +1,39 @@
-bench: bench.cpp merge_sort/merge_sort.cpp \
-				 merge_sort/merge_sort.ml.cpp \
-				 merge_sort/merge_sort.ml.rc.cpp
-	g++ -o bench -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
+target = bench
 
-merge_sort/merge_sort.cpp: merge_sort/merge_sort.thy ../bin/hol2cpp
-	../bin/hol2cpp $< -s
+thy = $(wildcard merge_sort/*.thy)
+hpp = $(patsubst %.thy, %.hpp, $(thy))
+cpp = $(patsubst %.thy, %.cpp, $(thy))
 
-merge_sort/merge_sort.ml.cpp: merge_sort/merge_sort.ml.thy ../bin/hol2cpp
-	../bin/hol2cpp $< -s --move-list
+hol2cpp = ../bin/hol2cpp
 
-merge_sort/merge_sort.ml.rc.cpp: merge_sort/merge_sort.ml.rc.thy ../bin/hol2cpp
-	../bin/hol2cpp $< -s --move-list --reduce-cond
+$(target): $(cpp) bench.cpp
+	g++ -o $@ -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
+
+%.ml.rc.cpp: %.ml.rc.thy
+	$(hol2cpp) $< -s --move-list --reduce-cond
+
+%.ml.cpp: %.ml.thy
+	$(hol2cpp) $< -s --move-list
+
+%.cpp: %.thy
+	$(hol2cpp) $< -s
 
 .PHONY: clean bm b1 b2
 
+compare = /Users/mu00/Repos/others/benchmark/tools/compare.py
+
+bm_msml = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
+bm_msrc = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
+
 bm: bench
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
+	$(bm_msml)
+	$(bm_msrc)
 
 b1: bench
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
+	$(bm_msml)
 
 b2: bench
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
+	$(bm_msrc)
 
 clean:
-	rm bench
-	rm merge_sort/*.hpp merge_sort/*.cpp
+	rm -rf $(target) $(hpp) $(cpp)
