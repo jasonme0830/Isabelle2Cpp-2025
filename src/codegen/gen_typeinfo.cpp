@@ -3,15 +3,21 @@
 using namespace std;
 
 namespace hol2cpp {
-const map<string, string> theNormalTypeMapping {
+map<string, string> theNormalTypeMapping {
     { "nat", "std::uint64_t" },
     { "int", "std::int64_t" }
 };
-const map<string, string> theTemplateTypeMapping {
+map<string, string> theTemplateTypeMapping {
     { "set",    "std::set" },
     { "option", "std::optional" },
     { "list",   "std::list" },
     { "pair",   "std::pair" }
+};
+map<string, string> theHeaderMapping {
+    { "set",    "set" },
+    { "option", "optional" },
+    { "list",   "list" },
+    { "pair",   "utility" }
 };
 
 /**
@@ -35,15 +41,8 @@ TypeInfo ArgumentType::gen_typeinfo(FuncEntity &func) const {
 }
 
 TypeInfo TemplateType::gen_typeinfo(FuncEntity &func) const {
-    static const map<string, string> mapping_header {
-        { "set",    "set" },
-        { "option", "optional" },
-        { "list",   "list" },
-        { "pair",   "utility" }
-    };
-
-    if (mapping_header.count(name)) {
-        func.code().add_header(mapping_header.at(name));
+    if (theHeaderMapping.count(name)) {
+        func.code().add_header(theHeaderMapping.at(name));
     }
 
     TypeInfo res(theTemplateTypeMapping.count(name) ? theTemplateTypeMapping.at(name) : name);
@@ -77,13 +76,6 @@ TypeInfo ArgumentType::apply(function<TypeInfo(const string &)> &trans) const {
 }
 
 TypeInfo TemplateType::apply(function<TypeInfo(const string &)> &trans) const {
-    static const map<string, string> mapping_header {
-        { "set",    "set" },
-        { "option", "optional" },
-        { "list",   "list" },
-        { "pair",   "utility" }
-    };
-
     auto it = theTemplateTypeMapping.find(name);
     TypeInfo res(it == theTemplateTypeMapping.end() ? name : it->second);
     for (auto &arg : args) {

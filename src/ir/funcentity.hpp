@@ -32,6 +32,8 @@ struct TypeInfo {
     const TypeInfo &result_typeinfo() const;
     std::size_t args_size() const;
 
+    bool movable() const;
+
     const TypeInfo &operator[](int i) const;
 };
 
