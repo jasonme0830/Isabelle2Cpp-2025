@@ -1,6 +1,7 @@
 #include "optimizer.hpp"
 #include "../ir/ast.hpp"
 #include "../ir/funcentity.hpp"
+#include "../codegen/codegen.hpp"
 
 using namespace std;
 
@@ -10,7 +11,7 @@ void Optimizer::enable_move_list() {
 
     auto origin_as_arg = TypeInfo::as_arg;
     TypeInfo::as_arg = [=](const TypeInfo &type) {
-        if (type.name == "std::list") {
+        if (type.name == theTemplateTypeMapping["list"]) {
             return type.to_str() + " ";
         } else {
             return origin_as_arg(type);

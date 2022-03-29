@@ -78,10 +78,20 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
             args[0]->gen_pattern(func, prev + ".front()");
 
             if (dynamic_cast<VarExpr *>(args[1].get())) {
-                args[1]->gen_pattern(func, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+                if (theOptimizer.option().use_deque) {
+                    args[1]->gen_pattern(func, "decltype(" + prev + "){" + prev + ".begin() + 1, " + prev + ".end()}");
+                } else {
+                    args[1]->gen_pattern(func, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+                }
             } else {
                 auto temp = func.gen_temp();
-                func.add_pattern("decltype($) $(std::next($).begin(), $.end());", prev, temp, prev, prev);
+
+                if (theOptimizer.option().use_deque) {
+                    func.add_pattern("decltype($) $($.begin() + 1, $.end());", prev, temp, prev, prev);
+                } else {
+                    func.add_pattern("decltype($) $(std::next($.begin()), $.end());", prev, temp, prev, prev);
+                }
+
                 args[1]->gen_pattern(func, temp);
             }
         } else {
@@ -105,12 +115,23 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
             rhs = args[1].get();
             for (int i = 1; i < n; ++i) {
                 auto cons_expr = reinterpret_cast<ConsExpr *>(rhs);
-                cons_expr->args[0]->gen_pattern(func, "*std::next($.begin(), $)"_fs.format(prev, i));
+
+                if (theOptimizer.option().use_deque) {
+                    cons_expr->args[0]->gen_pattern(func, "$[$]"_fs.format(prev, i));
+                } else {
+                    cons_expr->args[0]->gen_pattern(func, "*std::next($.begin(), $)"_fs.format(prev, i));
+                }
+
                 rhs = cons_expr->args[1].get();
             }
 
             if (var_expr->name != "Nil") {
-                func.add_delay_statement("$.erase($.begin(), std::next($.begin(), $));", prev, prev, prev, n);
+                if (theOptimizer.option().use_deque) {
+                    func.add_delay_statement("$.erase($.begin(), $.begin() + $);", prev, prev, prev, n);
+                } else {
+                    func.add_delay_statement("$.erase($.begin(), std::next($.begin(), $));", prev, prev, prev, n);
+                }
+
                 var_expr->gen_pattern(func, "std::move($)"_fs.format(prev));
             }
         }
@@ -134,7 +155,11 @@ void ListExpr::gen_pattern(FuncEntity &func, const string &prev) const {
     } else {
         func.add_pattern_cond("$.size() == $", prev, exprs.size());
         for (std::size_t i = 0; i < exprs.size(); ++i) {
-            exprs[i]->gen_pattern(func, "*std::next($.begin(), $)"_fs.format(prev, i));
+            if (theOptimizer.option().use_deque) {
+                exprs[i]->gen_pattern(func, "$[$]"_fs.format(prev, i));
+            } else {
+                exprs[i]->gen_pattern(func, "*std::next($.begin(), $)"_fs.format(prev, i));
+            }
         }
     }
 }

@@ -36,4 +36,4 @@ bench: $(target)
 example: $(cpp)
 
 example/%.cpp: example/%.thy $(target)
-	$(target) $< -s --move-list --reduce-cond --use-class
+	$(target) $< -s --move-list --reduce-cond --use-class --use-deque

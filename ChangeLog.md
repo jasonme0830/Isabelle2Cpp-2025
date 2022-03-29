@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+#### Added
+
+- New option `--use-deque` is supported, which enables generating `std::deque` instead of `std::list` for the datatype `list` and improves the performance most of the time.
+
 #### Fixed
 
 - Fix the bug of the conversion for case-expressions, which discards declarations unexpectedly.

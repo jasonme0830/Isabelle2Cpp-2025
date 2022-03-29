@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
-#include <list>
+#include <deque>
 #include <memory>
 #include <variant>
 
@@ -34,9 +34,9 @@ class slist {
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 };
 
-std::list<std::uint64_t> merge(std::list<std::uint64_t> arg1, std::list<std::uint64_t> arg2);
+std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::uint64_t> arg2);
 
-std::list<std::uint64_t> merge_sort(std::list<std::uint64_t> arg1);
+std::deque<std::uint64_t> merge_sort(std::deque<std::uint64_t> arg1);
 
 template<typename T1>
 std::uint64_t slength(const slist<T1> &arg1) {

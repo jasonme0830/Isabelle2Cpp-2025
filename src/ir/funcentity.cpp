@@ -3,6 +3,7 @@
 #include "../utility/error.hpp"
 #include "../utility/format.hpp"
 #include "../optimizer/optimizer.hpp"
+#include "../codegen/codegen.hpp"
 
 #include <regex>
 
@@ -88,6 +89,10 @@ const TypeInfo &TypeInfo::result_typeinfo() const {
 
 size_t TypeInfo::args_size() const {
     return arguments.size() - 1;
+}
+
+bool TypeInfo::movable() const {
+    return theOptimizer.option().move_list && name == theTemplateTypeMapping["list"];
 }
 
 const TypeInfo &TypeInfo::operator[](int i) const {
