@@ -6,3 +6,7 @@ nth_Cons: "(x # xs) ! n = (case n of 0 \<Rightarrow> x | Suc k \<Rightarrow> xs 
 ```
 
 非全函数似乎进行了标注。
+
+`use-deque`
+
+使用 `deque` 替换 `list`

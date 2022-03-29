@@ -1,38 +1,50 @@
 #include "binary_search.hpp"
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64_t> arg2) {
+std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
     }
 
-    // bs x [y] = If (x = y) (Some x) None
+    // bs x [y] = If (x = y) (Some 0) None
     if (arg2.size() == 1) {
-        auto y = *std::next(arg2.begin(), 0);
+        auto y = arg2[0];
         std::optional<std::uint64_t> temp0;
         if (arg1 == y) {
-            temp0 = std::make_optional<std::uint64_t>(arg1);
+            temp0 = std::make_optional<std::uint64_t>(0);
         } else {
             temp0 = std::optional<std::uint64_t>();
         }
         return temp0;
     }
 
-    // bs x ys = (let m = (length ys) div 2 in let y = ys ! m in If (y = x) (Some x) (If (y < x) (bs x (drop (m + 1) ys)) (bs x (take m ys))))
+    // bs x ys = (let m = (length ys) div 2 in ...
     auto temp0 = arg2.size() / 2;
     auto m = temp0;
     auto temp2 = arg2;
-    auto temp1 = *std::next(temp2.begin(), m);
+    auto temp1 = temp2[m];
     auto y = temp1;
     std::optional<std::uint64_t> temp3;
     if (y == arg1) {
-        temp3 = std::make_optional<std::uint64_t>(arg1);
+        temp3 = std::make_optional<std::uint64_t>(m);
     } else {
         std::optional<std::uint64_t> temp4;
         if (y < arg1) {
-            temp4 = bs(arg1, decltype(arg2){ std::next(arg2.begin(), m + 1), arg2.end() });
+            auto temp5 = ([&] {
+                auto temp6 = bs(arg1, decltype(arg2){ arg2.begin() + m + 1, arg2.end() });
+
+                // Some n \<Rightarrow> Some (m + n + 1)
+                if (temp6.has_value()) {
+                    auto n = temp6.value();
+                    return std::make_optional<std::uint64_t>((m + n) + 1);
+                }
+
+                // None \<Rightarrow> None
+                return std::optional<std::uint64_t>();
+            })();
+            temp4 = temp5;
         } else {
-            temp4 = bs(arg1, decltype(arg2){ arg2.begin(), std::next(arg2.begin(), m) });
+            temp4 = bs(arg1, decltype(arg2){ arg2.begin(), arg2.begin() + m });
         }
         temp3 = temp4;
     }

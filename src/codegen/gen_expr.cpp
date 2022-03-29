@@ -34,7 +34,7 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     // for variables
     else {
         auto var = func.get_variable(name);
-        if (movable && typeinfo.name == "std::list") {
+        if (movable && typeinfo.movable()) {
             // movable is true only when move-list is enable
             return "std::move($)"_fs.format(var); // for move-list
         } else {
@@ -111,7 +111,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         auto xs = args[1]->gen_expr(func, typeinfo);
         if (xs == "{}") {
             if (typeinfo.empty()) {
-                return "std::list<decltype($)>{$}"_fs.format(x, x);
+                return "$<decltype($)>{$}"_fs.format(theTemplateTypeMapping["list"], x, x);
             } else {
                 return "${$};"_fs.format(typeinfo.to_str(), x);
             }
@@ -140,12 +140,22 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         assert_true(args.size() == 2);
         auto n = args[0]->gen_expr(func, TypeInfo("nat"));
         auto xs = unmove_expr(args[1]->gen_expr(func, typeinfo));
-        return "decltype($){ $.begin(), std::next($.begin(), $) }"_fs.format(xs, xs, xs, n);
+
+        if (theOptimizer.option().use_deque) {
+            return "decltype($){ $.begin(), $.begin() + $ }"_fs.format(xs, xs, xs, n);
+        } else {
+            return "decltype($){ $.begin(), std::next($.begin(), $) }"_fs.format(xs, xs, xs, n);
+        }
     } else if (constructor == "drop") {
         assert_true(args.size() == 2);
         auto n = args[0]->gen_expr(func, TypeInfo("nat"));
         auto xs = unmove_expr(args[1]->gen_expr(func, typeinfo));
-        return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
+
+        if (theOptimizer.option().use_deque) {
+            return "decltype($){ $.begin() + $, $.end() }"_fs.format(xs, xs, n, xs);
+        } else {
+            return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
+        }
     } else if (constructor == "append") {
         assert_true(args.size() == 2);
         auto l = args[0]->gen_expr(func, typeinfo);
@@ -162,18 +172,28 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             func
                 .add_expr("auto $ = $;", temp0, l)
                 .add_expr("auto $ = $;", temp1, r)
-                .add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
             ;
+
+            if (theOptimizer.option().use_deque) {
+                func.add_expr("$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1);
+            } else {
+                func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
+            }
             return temp0;
         }
     } else if (constructor == "nth") {
         assert_true(args.size() == 2);
-        auto l = args[0]->gen_expr(func, TypeInfo("std::list"));
+        auto l = args[0]->gen_expr(func, TypeInfo(theTemplateTypeMapping["list"]));
         auto r = args[1]->gen_expr(func, TypeInfo("std::uint64_t"));
 
         auto temp0 = func.gen_temp();
         func.add_expr("auto $ = $;", temp0, l);
-        return "*std::next($.begin(), $)"_fs.format(temp0, r);
+
+        if (theOptimizer.option().use_deque) {
+            return "$[$]"_fs.format(temp0, r);
+        } else {
+            return "*std::next($.begin(), $)"_fs.format(temp0, r);
+        }
     } else if (constructor == "upto") {
         auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
 
@@ -185,7 +205,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
         auto res = func.gen_temp();
         if (typeinfo.empty()) {
-            func.add_expr("std::list<decltype($)> $;", start, res);
+            func.add_expr("$<decltype($)> $;", theTemplateTypeMapping["list"], start, res);
         } else {
             func.add_expr("$ $;", typeinfo.to_str(), res);
         }
@@ -208,7 +228,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
         auto res = func.gen_temp();
         if (typeinfo.empty()) {
-            func.add_expr("std::list<decltype($)> $;", start, res);
+            func.add_expr("$<decltype($)> $;", theTemplateTypeMapping["list"], start, res);
         } else {
             func.add_expr("$ $;", typeinfo.to_str(), res);
         }
@@ -225,7 +245,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         func.code().add_header("set");
 
         auto temp = func.gen_temp();
-        auto list = args[0]->gen_expr(func, typeinfo.replace_with("std::list"));
+        auto list = args[0]->gen_expr(func, typeinfo.replace_with(theTemplateTypeMapping["list"]));
         func.add_expr("auto $ = $;", temp, list);
 
         auto set_type = typeinfo.replace_with("std::set");
@@ -347,7 +367,7 @@ string ListExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     string res;
     if (typeinfo.empty()) {
-        res = "std::list<decltype($)>{"_fs.format(exprs.front()->gen_expr(func, typeinfo));
+        res = "$<decltype($)>{"_fs.format(theTemplateTypeMapping["list"], exprs.front()->gen_expr(func, typeinfo));
     } else {
         res = typeinfo.to_str() + '{';
     }
@@ -499,7 +519,10 @@ string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         }
         auto condition_cnt = func.condition_count();
         func.add_expr("// $", equations[i].raw_str);
+
         equations[i].pattern->gen_pattern(func, temp1);
+        func.close_pattern(); // for reduce-cond
+
         func.add_expr("return $;", equations[i].expr->gen_expr(func, typeinfo));
         func.close_sub_equation(condition_cnt);
     }
@@ -521,7 +544,7 @@ string LetinExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     auto temp = func.gen_temp();
     func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func, TypeInfo()));
     equation.pattern->gen_pattern(func, temp);
-    func.close_pattern();
+    func.close_pattern(); // for reduce-cond
     return expr->gen_expr(func, typeinfo);
 }
 

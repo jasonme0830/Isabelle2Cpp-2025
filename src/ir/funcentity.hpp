@@ -32,6 +32,8 @@ struct TypeInfo {
     const TypeInfo &result_typeinfo() const;
     std::size_t args_size() const;
 
+    bool movable() const;
+
     const TypeInfo &operator[](int i) const;
 };
 
@@ -152,8 +154,11 @@ class FuncEntity {
 
     const std::vector<std::string> &delay_declarations() const;
 
-    void is_last_equation(bool is_last);
-    bool is_last_equation() const;
+    void nonexhaustive(bool is_nonexhaustive); // for reduce-cond
+    bool nonexhaustive() const; // for reduce-cond
+
+    void is_last_equation(bool is_last); // for reduce-cond
+    bool is_last_equation() const; // for reduce-cond
 
   private:
     Code &code_;
@@ -176,7 +181,8 @@ class FuncEntity {
     std::size_t decl_base_;
     std::vector<std::string> delay_statements_;
 
-    bool is_last_equation_; // for reduce-condition
+    bool nonexhaustive_; // for reduce-cond
+    bool is_last_equation_; // for reduce-cond
 
     std::map<std::string, TypeInfo> var_typeinfos_;
 };

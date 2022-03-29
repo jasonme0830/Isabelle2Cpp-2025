@@ -3,6 +3,7 @@
 #include "../utility/error.hpp"
 #include "../utility/format.hpp"
 #include "../optimizer/optimizer.hpp"
+#include "../codegen/codegen.hpp"
 
 #include <regex>
 
@@ -88,6 +89,10 @@ const TypeInfo &TypeInfo::result_typeinfo() const {
 
 size_t TypeInfo::args_size() const {
     return arguments.size() - 1;
+}
+
+bool TypeInfo::movable() const {
+    return theOptimizer.option().move_list && name == theTemplateTypeMapping["list"];
 }
 
 const TypeInfo &TypeInfo::operator[](int i) const {
@@ -226,7 +231,10 @@ void FuncEntity::add_pattern(const string &pattern) {
 }
 
 void FuncEntity::add_pattern_cond(const string &cond) {
-    if (!theOptimizer.option().reduce_cond || !is_last_equation_) {
+    // remove only if the option is used and the function is total
+    auto remove_last_cond = theOptimizer.option().reduce_cond && !nonexhaustive_;
+
+    if (!is_last_equation_ || !remove_last_cond) {
         statements_.back()
             .push_back(string(indent_, ' ') + "if ($) {"_fs.format(cond))
         ;
@@ -266,6 +274,14 @@ const vector<vector<string>> &FuncEntity::statements() const {
 
 const vector<string> &FuncEntity::delay_declarations() const {
     return delay_statements_;
+}
+
+void FuncEntity::nonexhaustive(bool is_nonexhaustive) {
+    nonexhaustive_ = is_nonexhaustive;
+}
+
+bool FuncEntity::nonexhaustive() const {
+    return nonexhaustive_;
 }
 
 void FuncEntity::is_last_equation(bool is_last) {

@@ -15,8 +15,9 @@
 #define assert_true(expr) assert_impl(expr, CodegenError)
 
 namespace hol2cpp {
-extern const std::map<std::string, std::string> theNormalTypeMapping;
-extern const std::map<std::string, std::string> theTemplateTypeMapping;
+extern std::map<std::string, std::string> theNormalTypeMapping;
+extern std::map<std::string, std::string> theTemplateTypeMapping;
+extern std::map<std::string, std::string> theHeaderMapping;
 
 void warning(const std::string &msg);
 bool is_unit(const std::string &expr);

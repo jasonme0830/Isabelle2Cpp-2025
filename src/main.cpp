@@ -72,6 +72,9 @@ Config parse_config(int argc, char *argv[]) {
     if (arg_parser.get<bool>("reduce-cond")) {
         theOptimizer.enable_reduce_cond();
     }
+    if (arg_parser.get<bool>("use-deque")) {
+        theOptimizer.enable_use_deque();
+    }
 
     // set experimental options
     if (arg_parser.get<bool>("use-class")) {
@@ -107,6 +110,11 @@ ArgumentParser build_parser() {
     ;
     arg_parser.add_argument("--reduce-cond")
               .help("enable reduce-cond")
+              .default_value(false)
+              .implict_value(true)
+    ;
+    arg_parser.add_argument("--use-deque")
+              .help("enable use-deque")
               .default_value(false)
               .implict_value(true)
     ;
