@@ -1,4 +1,8 @@
 bench
 
-merge_sort/*.hpp
-merge_sort/*.cpp
+*.hpp
+*.cpp
+
+!*bench.hpp
+
+!*handwrite.hpp

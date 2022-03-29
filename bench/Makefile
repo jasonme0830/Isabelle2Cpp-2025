@@ -1,29 +1,42 @@
-bench: bench.cpp merge_sort/merge_sort.cpp \
-				 merge_sort/merge_sort.ml.cpp \
-				 merge_sort/merge_sort.ml.rc.cpp
-	g++ -o bench -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
+target = bench
 
-merge_sort/merge_sort.cpp: merge_sort/merge_sort.thy ../bin/hol2cpp
-	../bin/hol2cpp $< -s
+thy = $(wildcard merge_sort/*.thy) $(wildcard binary_search/*.thy)
+hpp = $(patsubst %.thy, %.hpp, $(thy))
+cpp = $(patsubst %.thy, %.cpp, $(thy))
 
-merge_sort/merge_sort.ml.cpp: merge_sort/merge_sort.ml.thy ../bin/hol2cpp
-	../bin/hol2cpp $< -s --move-list
+hol2cpp = ../bin/hol2cpp
 
-merge_sort/merge_sort.ml.rc.cpp: merge_sort/merge_sort.ml.rc.thy ../bin/hol2cpp
-	../bin/hol2cpp $< -s --move-list --reduce-cond
+$(target): $(cpp) bench.cpp
+	g++ -o $@ -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
 
-.PHONY: clean bm b1 b2
+%.ml.rc.cpp: %.ml.rc.thy $(hol2cpp)
+	$(hol2cpp) $< -s --move-list --reduce-cond
+
+%.ml.cpp: %.ml.thy $(hol2cpp)
+	$(hol2cpp) $< -s --move-list
+
+%.cpp: %.thy $(hol2cpp)
+	$(hol2cpp) $< -s
+
+.PHONY: clean bm cmp cmp1 cmp2
+
+compare = /Users/mu00/Repos/others/benchmark/tools/compare.py
+
+bm_cmp1 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
+bm_cmp2 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
 
 bm: bench
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
+	./bench
 
-b1: bench
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
+cmp: bench
+	$(bm_cmp1)
+	$(bm_cmp2)
 
-b2: bench
-	python3 /Users/mu00/Repos/others/benchmark/tools/compare.py filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
+cmp1: bench
+	$(bm_cmp1)
+
+cmp2: bench
+	$(bm_cmp2)
 
 clean:
-	rm bench
-	rm merge_sort/*.hpp merge_sort/*.cpp
+	rm -rf $(target) $(hpp) $(cpp)

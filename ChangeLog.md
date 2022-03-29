@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+#### Fixed
+
+- Fix the bug of the conversion for case-expressions, which discards declarations unexpectedly.
+
 #### Changed
 
 - `--reduce-cond` does not reduce conditions and the `std::abort` if the function defined by `primrec` is followed by the option `nonexhaustive`. Furthermore, `--reduce-cond` assumes functions are total by default.

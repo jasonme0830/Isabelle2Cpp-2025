@@ -499,7 +499,10 @@ string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         }
         auto condition_cnt = func.condition_count();
         func.add_expr("// $", equations[i].raw_str);
+
         equations[i].pattern->gen_pattern(func, temp1);
+        func.close_pattern(); // for reduce-cond
+
         func.add_expr("return $;", equations[i].expr->gen_expr(func, typeinfo));
         func.close_sub_equation(condition_cnt);
     }
@@ -521,7 +524,7 @@ string LetinExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     auto temp = func.gen_temp();
     func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func, TypeInfo()));
     equation.pattern->gen_pattern(func, temp);
-    func.close_pattern();
+    func.close_pattern(); // for reduce-cond
     return expr->gen_expr(func, typeinfo);
 }
 
