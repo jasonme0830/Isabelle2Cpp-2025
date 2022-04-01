@@ -32,6 +32,7 @@ bm_cmp1 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_
 bm_cmp2 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
 bm_cmp3 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ud/ --benchmark_format=console
 bm_cmp4 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_ud/ --benchmark_format=console
+bm_cmp5 = python3 $(compare) filters ./bench bench_binary_search/ bench_binary_search_ud/ --benchmark_format=console
 
 bm: bench
 	./bench
@@ -41,6 +42,7 @@ cmp: bench
 	$(bm_cmp2)
 	$(bm_cmp3)
 	$(bm_cmp4)
+	$(bm_cmp5)
 
 cmp1: bench
 	$(bm_cmp1)
@@ -53,6 +55,9 @@ cmp3: bench
 
 cmp4: bench
 	$(bm_cmp4)
+
+cmp5: bench
+	$(bm_cmp5)
 
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
