@@ -43,6 +43,10 @@ TypeInfo TypeInfo::replace_with(string name) const {
 }
 
 string TypeInfo::to_str() const {
+    if (name.empty()) {
+        return "UNKNOWN_TYPE";
+    }
+
     if (arguments.empty()) {
         return name;
     }

@@ -259,7 +259,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             auto texpr = args[1]->gen_expr(func, typeinfo);
             auto fexpr = args[2]->gen_expr(func, typeinfo);
             auto ce = args[0]->gen_expr(func, TypeInfo("bool"));
-            return "$ ? $ : $"_fs.format(ce, texpr, fexpr);
+            return "($ ? $ : $)"_fs.format(ce, texpr, fexpr);
         } else {
             auto ce = args[0]->gen_expr(func, TypeInfo("bool"));
             auto res = func.gen_temp();
