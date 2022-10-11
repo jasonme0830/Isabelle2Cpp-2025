@@ -1,38 +1,3 @@
-- 效率上应该偏向流程上的优化（通用），编译角度和技术，从结构上做
-- 论文，减少拷贝；针对已有类型的转换
-- 拟合运算时间和算法规模，几十个样本
-
-## 添加了一个新的选项 `--use-deque`
-
-**功能**
-
-使用 `std::deque` 作为 `list` 的目标类型。
-
-**inspiration**
-
-参考 [`std::deque`](https://zh.cppreference.com/w/cpp/container/deque) 上的描述：
-
-> deque 上常见操作的复杂度（效率）如下：
-> - 随机访问——常数 O(1)
-> - 在结尾或起始插入或移除元素——常数 O(1)
-> - 插入或移除元素——线性 O(n)
-
-而 `std::list` 的实现通常为双向链表，支持常数时间从容器任何位置插入和移除元素。
-
-对于 Isabelle/HOL 中的 `list` 而言，常见的操作为从起始移除元素，这点两者的效率是近似的，而拷贝时，`std::deque` 的实现通常为固定数组长度数组的序列，要优于完全不连续的 `std::list`。同时因为 `std::deque` 支持常数时间的随机访问，因此对于 `nth` 等运算，使用 `std::deque` 时的效率也应该是更高的。
-
-## 更新了 `--reduce-cond`
-
-Isabelle/HOL 中由 `fun` 和 `function` 定义的函数要求是 total 的，但是 `primrec` 定义的函数可以不是 total 函数，但是会报警告，Isabelle/HOL 中可以通过选项 `nonexhaustive` 声明函数非 total 避免警告。因此，现在 `--reduce-cond` 开启的时候，会假设没有标记 `nonexhaustive` 的函数是 total 的。就可以移除掉最后一个 pattern 的条件。
-
-## 加了一个二分查找的样例
-
-二分查找的时候，二分的一次拷贝目前是无法消除的，而除此之外没有其它的拷贝。因此，`move-list` 不会改变生成的代码。
-
-这里的拷贝是由于操作 `take` 和 `drop` 产生的，可以通过判断 `take` 的变量后边时候会被使用，生成删除元素的操作。
-
-因此目前二分查找只有在应用 `--use-deque` 时生成的代码才有区别。
-
 ## Benchmark
 
 > 结果似乎与环境相关
