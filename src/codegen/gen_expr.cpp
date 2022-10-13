@@ -45,6 +45,7 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
 string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     // for recursive calls
+    //auto typeinfo = this->expr_type->gen_typeinfo(func);
     if (constructor == func.name()) {
         string expr = constructor + '(';
         assert_true(func.args_size() == args.size());

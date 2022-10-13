@@ -89,7 +89,7 @@ void Parser::add_infix_op(Token::Type type, size_t precedence, const string &fun
 }
 
 Parser::Parser(ifstream &input, string name) noexcept
-  : tokenizer_(input, move(name)), current_token_(tokenizer_.next_token()) {
+  : tokenizer_(input, move(name)), current_token_(tokenizer_.next_token()), is_multi_type_var(false) {
     // ...
 }
 
@@ -157,7 +157,7 @@ Theory Parser::gen_theory() {
 }
 
 Ptr<Definition> Parser::gen_declaration() {
-    eat_until<Token::Type::Datatype, Token::Type::Function>();
+    eat_until<Token::Type::Datatype, Token::Type::Function, Token::Type::PreDefined>();
 
     if (meet<Token::Type::EndOfFile>()) {
         return nullptr;
@@ -166,6 +166,13 @@ Ptr<Definition> Parser::gen_declaration() {
             return gen_datatype_definition();
         } catch (const ParseError &e) {
             throw ParseError(e, PEType::Datatype);
+        }
+    } else if (meet<Token::Type::PreDefined>()) {
+        try {
+            get_next_token();
+            return gen_predef_function_definition();
+        } catch (const ParseError &e) {
+            throw ParseError(e, PEType::PreDefined);
         }
     } else {
         try {
@@ -210,6 +217,25 @@ DatatypeDef::Component Parser::gen_component() {
     }
 
     return componment;
+}
+
+Ptr<Definition> Parser::gen_predef_function_definition() {
+    auto decl = make_unique<PreFunctionDef>();
+    eat<Token::Type::Function>("expected token Function");
+    
+    decl->name = gen_ident_str();
+
+    // if (decl->is_predefined()) {
+    //     return decl;
+    // }
+
+    eat<Token::Type::Colonn>("expected ::");
+
+    eat<Token::Type::Quotation>("expected token Quotation");
+    decl->type = gen_func_type();
+    eat<Token::Type::Quotation>("expected token Quotation");
+
+    return decl;
 }
 
 Ptr<Definition> Parser::gen_function_definition() {
@@ -324,9 +350,23 @@ Ptr<Type> Parser::gen_type() {
 
 Ptr<FuncType> Parser::gen_func_type() {
     auto type = make_unique<FuncType>();
-    do {
-        type->types.push_back(gen_pair_type());
-    } while (try_eat<Token::Type::Rightarrow>());
+    // do {
+    //     type->types.push_back(gen_pair_type());
+    // } while (try_eat<Token::Type::Rightarrow>());
+
+    type->types.push_back(gen_pair_type());
+    if (try_eat<Token::Type::Rightarrow>()) {
+        do {
+            type->types.push_back(gen_pair_type());
+        } while (try_eat<Token::Type::Rightarrow>());
+    }
+
+    if (try_eat<Token::Type::Comma>()) {
+        is_multi_type_var = true;
+        do {
+            type->types.push_back(gen_pair_type());
+        } while (try_eat<Token::Type::Comma>());
+    }
     return type;
 }
 
@@ -351,7 +391,21 @@ Ptr<Type> Parser::gen_pair_type() {
 Ptr<Type> Parser::gen_template_type() {
     auto type = gen_type_term();
     while (meet<Token::Type::Identifier>()) {
-        type = make_unique<TemplateType>(current_token_.value, move(type));
+        if (!is_multi_type_var) {
+            type = make_unique<TemplateType>(current_token_.value, move(type));
+        }
+        else {
+            try {
+                auto& trans = dynamic_cast<FuncType&>(*type);
+                type = make_unique<TemplateType>(current_token_.value, move(trans.types));
+                is_multi_type_var = false;
+            }
+            catch (bad_cast&) {
+                cout << "bad cast gen_template_type().\n";
+            }
+            
+        }
+        //type = make_unique<TemplateType>(current_token_.value, move(type));
         get_next_token();
     }
 

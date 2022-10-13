@@ -12,7 +12,7 @@ namespace hol2cpp {
 static set<string> localSymbolSet {
     ";", "\\", "`", "?",
 
-    R"(\<comment>)", R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
+    R"(\<comment>)", R"((*)", R"(*))", R"(\<open>)", R"(\<close>)", R"(\<pre-def>)", 
 
     R"(\<lambda>)", "%", ".",
 

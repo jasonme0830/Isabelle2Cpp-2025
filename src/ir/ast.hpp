@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <cassert>
 
 namespace hol2cpp {
 
@@ -17,7 +18,7 @@ class Datatype;
 class FuncEntity;
 
 template<typename T>
-using Ptr = std::unique_ptr<T>;
+using Ptr = std::shared_ptr<T>;
 
 /**
  * base class for all types
@@ -25,7 +26,6 @@ using Ptr = std::unique_ptr<T>;
 */
 struct Type {
     virtual ~Type() = 0;
-
     /**
      * receive the related function func and return the type infomation
      * @func: generate type infomation related with the given func
@@ -35,6 +35,9 @@ struct Type {
 
     virtual std::string gen_datatype(Datatype &) const = 0;
     virtual std::string main_name() const;
+
+    virtual Ptr<Type> clone() const;
+    virtual void print_type() const = 0;
 };
 
 /**
@@ -56,6 +59,9 @@ public:
 
     std::string gen_datatype(Datatype &) const override;
     std::string main_name() const override;
+
+    Ptr<Type> clone() const override;
+    void print_type() const override;
 };
 
 /**
@@ -76,6 +82,9 @@ public:
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 
     std::string gen_datatype(Datatype &) const override;
+
+    Ptr<Type> clone() const override;
+    void print_type() const override;
 };
 
 /**
@@ -86,6 +95,7 @@ struct TemplateType final : Type {
     std::string name;
     std::vector<Ptr<Type>> args;
 
+    TemplateType() = default;
     /**
      * @name: name of template type
      * @args: type arguments for this template type
@@ -93,6 +103,7 @@ struct TemplateType final : Type {
     */
     TemplateType(std::string name);
     TemplateType(std::string name, Ptr<Type> &&arg);
+    TemplateType(std::string name, std::vector<Ptr<Type>> &&args);
 
 public:
     TypeInfo gen_typeinfo(FuncEntity &func) const override;
@@ -100,6 +111,9 @@ public:
 
     std::string gen_datatype(Datatype &) const override;
     std::string main_name() const override;
+
+    Ptr<Type> clone() const override;
+    void print_type() const override;
 };
 
 struct ProductType;
@@ -113,6 +127,7 @@ struct FuncType final : Type {
     std::vector<Ptr<Type>> types;
 
     Type *result_type() const;
+    FuncType() = default;
 
 public:
     void gen_funcentity(FuncEntity &func) const;
@@ -121,6 +136,9 @@ public:
     TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const override;
 
     std::string gen_datatype(Datatype &) const override;
+
+    Ptr<Type> clone() const override;
+    void print_type() const override;
 };
 
 /**
@@ -128,7 +146,7 @@ public:
 */
 struct Expr {
     virtual ~Expr() = 0;
-
+    Ptr<Type> expr_type;
     /**
      * method to generate code when expr occurs as pattern
      * not return value, just generate statements in func
@@ -142,6 +160,9 @@ struct Expr {
     virtual std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const = 0;
 
     virtual void analyze_var_movable(std::set<std::string> &movables); // for move-list
+
+    virtual void print_expr() const = 0;
+    virtual void print_expr_type() const;
 };
 
 struct IntegralExpr final : Expr {
@@ -152,6 +173,8 @@ struct IntegralExpr final : Expr {
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+
+    void print_expr() const override;
 };
 
 /**
@@ -172,6 +195,8 @@ public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 /**
@@ -194,6 +219,8 @@ public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 /**
@@ -207,6 +234,8 @@ public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 /**
@@ -226,6 +255,8 @@ public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 struct BinaryOpExpr final : Expr {
@@ -238,6 +269,8 @@ public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 struct Equation final {
@@ -259,6 +292,8 @@ struct LetinExpr final : Expr {
 public:
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 struct CaseExpr final : Expr {
@@ -270,14 +305,19 @@ struct CaseExpr final : Expr {
 public:
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
+
+    void print_expr() const override;
 };
 
 struct LambdaExpr final : Expr {
     std::vector<std::string> parameters;
+    std::map<std::string, std::size_t> param_types;
     Ptr<Expr> expr;
 
 public:
     std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+
+    void print_expr() const override;
 };
 
 struct Definition {
@@ -353,6 +393,11 @@ struct FunctionDef final : Definition {
 
 public:
     void gen_code(Code &) const override;
+};
+
+struct PreFunctionDef final : Definition {
+    std::string name;
+    Ptr<FuncType> type;
 };
 
 struct ShortDef final : Definition {

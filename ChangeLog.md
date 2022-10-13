@@ -1,5 +1,20 @@
 ## ChangeLog for HOL2Cpp
 
+### Unreleased
+#### Added
+- Support type inference for function definitions, now every expression and its sub-expressions of the function definition has its expression type.
+- Support virtual clone for class `Type`.
+- Add new token `\<pre-def>` and its type `PreDefined`.
+- New class `PreFunctionDef` is added, in order to support the resolution of pre-defined functions.
+- Support the resolution of pre-defined functions, which have the type only.
+- New option `--print-type` is supported, which enables type print after the type inference.
+- Support the resolution of multiple types of variables.
+- The parameters' type of the lambda expressions are now instantiated with a function call or type construction.
+
+#### Changed
+
+- `Ptr` is `std::shared_ptr<T>` now.
+
 ### 0.0.1 - 2022/10/10
 
 #### Added

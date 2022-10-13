@@ -82,6 +82,7 @@ class Parser {
         DatatypeDef::Component gen_component();
     Ptr<Definition> gen_function_definition();
         Equation gen_equation();
+    Ptr<Definition> gen_predef_function_definition();
 
     Ptr<Type> gen_type();
     Ptr<FuncType> gen_func_type();
@@ -113,5 +114,7 @@ class Parser {
   private:
     Tokenizer tokenizer_;
     Token current_token_;
+
+    bool is_multi_type_var;
 };
 } // namespace hol2cpp

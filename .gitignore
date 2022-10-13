@@ -40,3 +40,5 @@ bin/
 test/
 *.dSYM
 obj/
+
+.vs/

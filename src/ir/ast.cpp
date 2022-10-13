@@ -29,6 +29,11 @@ TemplateType::TemplateType(string name, Ptr<Type> &&arg)
     args.push_back(move(arg));
 }
 
+TemplateType::TemplateType(string name, vector<Ptr<Type>> &&args)
+  : name(move(name)), args(move(args)) {
+    // ...
+}
+
 IntegralExpr::IntegralExpr(string value)
   : value(move(value)) {
     // ...

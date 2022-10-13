@@ -48,6 +48,7 @@ static map<string, Token::Type> localTokenMapping {
     { R"(\<comment>)", Token::Type::Comment },
     { "(*", Token::Type::CommentStart },
     { "*)", Token::Type::CommentEnd },
+    { R"(\<pre-def>)", Token::Type::PreDefined },
     { R"(\<open>)", Token::Type::Open },
     { R"(\<close>)", Token::Type::Close },
 

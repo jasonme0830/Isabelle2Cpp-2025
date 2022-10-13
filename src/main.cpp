@@ -2,6 +2,7 @@
 #include "utility/argparse.hpp"
 #include "optimizer/optimizer.hpp"
 #include "synthesis/synthesizer.hpp"
+#include "inference/inference.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -13,6 +14,7 @@ using namespace hol2cpp;
 struct Config {
     string input_file;
     string output_file;
+    bool print_type = false;
 };
 
 ArgumentParser build_parser();
@@ -20,7 +22,7 @@ Config parse_config(int, char *[]);
 
 int main(int argc, char* argv[]) {
     try {
-        auto [input_file, output_file] = parse_config(argc, argv);
+        auto [input_file, output_file, print_type] = parse_config(argc, argv);
 
         ifstream fin(input_file);
         if (!fin.good()) {
@@ -29,6 +31,13 @@ int main(int argc, char* argv[]) {
         }
 
         auto theory = Parser(fin, input_file).gen_theory();
+        auto inf = TypeInference(theory);
+        inf.theory_infer();
+
+        if (print_type) {
+            inf.print_theory();
+        }
+        
         auto code = theory.gen_code();
 
         Synthesizer syner(output_file.empty() ? theory.name : output_file);
@@ -84,6 +93,11 @@ Config parse_config(int argc, char *argv[]) {
         theOptimizer.enable_uncurry();
     }
 
+    //print type
+    if (arg_parser.get<bool>("print-type")) {
+        config.print_type = true;
+    }
+
     return config;
 }
 
@@ -126,6 +140,12 @@ ArgumentParser build_parser() {
     ;
     arg_parser.add_argument("--uncurry")
               .help("enable uncurrying")
+              .default_value(false)
+              .implict_value(true)
+    ;
+
+    arg_parser.add_argument("--print-type")
+              .help("enable type print for function definitions")
               .default_value(false)
               .implict_value(true)
     ;
