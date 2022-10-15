@@ -116,6 +116,7 @@ public:
     void print_type() const override;
 };
 
+// unused now
 struct ProductType;
 
 /**

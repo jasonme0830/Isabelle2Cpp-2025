@@ -86,6 +86,7 @@ class Parser {
 
     Ptr<Type> gen_type();
     Ptr<FuncType> gen_func_type();
+    Ptr<Type> gen_complex_type();
     Ptr<Type> gen_pair_type();
     Ptr<Type> gen_template_type();
     Ptr<Type> gen_type_term();
@@ -114,7 +115,5 @@ class Parser {
   private:
     Tokenizer tokenizer_;
     Token current_token_;
-
-    bool is_multi_type_var;
 };
 } // namespace hol2cpp

@@ -89,7 +89,7 @@ void Parser::add_infix_op(Token::Type type, size_t precedence, const string &fun
 }
 
 Parser::Parser(ifstream &input, string name) noexcept
-  : tokenizer_(input, move(name)), current_token_(tokenizer_.next_token()), is_multi_type_var(false) {
+  : tokenizer_(input, move(name)), current_token_(tokenizer_.next_token()) {
     // ...
 }
 
@@ -222,7 +222,7 @@ DatatypeDef::Component Parser::gen_component() {
 Ptr<Definition> Parser::gen_predef_function_definition() {
     auto decl = make_unique<PreFunctionDef>();
     eat<Token::Type::Function>("expected token Function");
-    
+
     decl->name = gen_ident_str();
 
     // if (decl->is_predefined()) {
@@ -350,24 +350,41 @@ Ptr<Type> Parser::gen_type() {
 
 Ptr<FuncType> Parser::gen_func_type() {
     auto type = make_unique<FuncType>();
-    // do {
-    //     type->types.push_back(gen_pair_type());
-    // } while (try_eat<Token::Type::Rightarrow>());
-
-    type->types.push_back(gen_pair_type());
-    if (try_eat<Token::Type::Rightarrow>()) {
-        do {
-            type->types.push_back(gen_pair_type());
-        } while (try_eat<Token::Type::Rightarrow>());
-    }
-
-    if (try_eat<Token::Type::Comma>()) {
-        is_multi_type_var = true;
-        do {
-            type->types.push_back(gen_pair_type());
-        } while (try_eat<Token::Type::Comma>());
-    }
+    do {
+        type->types.push_back(gen_pair_type());
+    } while (try_eat<Token::Type::Rightarrow>());
     return type;
+}
+
+/**
+ * parse type terms begin with '('
+ * 1. ('a, ..., 'b) type
+ * 2. (type)
+ *
+ * !note: ('a, ..., 'b) is not a valid type
+*/
+Ptr<Type> Parser::gen_complex_type() {
+    eat<Token::Type::LParen>("expected token LParen");
+
+    auto type = gen_type();
+    if (try_eat<Token::Type::Comma>()) {
+        auto template_type = std::make_shared<TemplateType>();
+
+        template_type->args.push_back(move(type));
+        do {
+            template_type->args.push_back(gen_type());
+        } while (try_eat<Token::Type::Comma>());
+        eat<Token::Type::RParen>("expected token RParen");
+
+        check<Token::Type::Identifier>("expected token Identifier");
+        template_type->name = current_token_.value;
+        get_next_token();
+
+        return template_type;
+    } else {
+        eat<Token::Type::RParen>("expected token RParen");
+        return type;
+    }
 }
 
 Ptr<Type> Parser::gen_pair_type() {
@@ -383,36 +400,14 @@ Ptr<Type> Parser::gen_pair_type() {
 }
 
 /**
- * TODO: support multi type variables
- *  e.g. ('a, 'b, 'c) Triple
- *  !note, (x, y, z) is not a valid type
- *  and (,,) is not equivalent to (**)
+ * parse simple (template) type with optional one type variable
 */
 Ptr<Type> Parser::gen_template_type() {
     auto type = gen_type_term();
     while (meet<Token::Type::Identifier>()) {
-        if (!is_multi_type_var) {
-            type = make_unique<TemplateType>(current_token_.value, move(type));
-        }
-        else {
-            try {
-                auto& trans = dynamic_cast<FuncType&>(*type);
-                type = make_unique<TemplateType>(current_token_.value, move(trans.types));
-                is_multi_type_var = false;
-            }
-            catch (bad_cast&) {
-                cout << "bad cast gen_template_type().\n";
-            }
-            
-        }
-        //type = make_unique<TemplateType>(current_token_.value, move(type));
+        type = make_unique<TemplateType>(current_token_.value, move(type));
         get_next_token();
     }
-
-    /**
-     * TODO: check the type is types or not
-    */
-
     return type;
 }
 
@@ -423,10 +418,7 @@ Ptr<Type> Parser::gen_type_term() {
         case Token::Type::Identifier:
             return gen_normal_type();
         case Token::Type::LParen: {
-            get_next_token();
-            auto type = gen_type();
-            eat<Token::Type::RParen>("expected token RParen");
-            return type;
+            return gen_complex_type();
         }
         case Token::Type::Quotation: {
             get_next_token();

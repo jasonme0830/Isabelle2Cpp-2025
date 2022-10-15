@@ -11,7 +11,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
         IntegralExpr &trans = reinterpret_cast<IntegralExpr &>(expr);
         trans.expr_type = normal_nat_type;
-    } 
+    }
     else if (typeid(expr) == typeid(VarExpr)) {
         if (expr.expr_type != nullptr) {
             return;
@@ -31,17 +31,17 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         }
 
         // lambda param
-        auto lambda_elem = find_if(theLambdaInsMapping.begin(), theLambdaInsMapping.end(), 
+        auto lambda_elem = find_if(theLambdaInsMapping.begin(), theLambdaInsMapping.end(),
                             [name = trans.name]
                             (auto &iter) {
                                 return name == iter.first;
-                            });  
+                            });
 
         if (lambda_elem != theLambdaInsMapping.end()) {
             auto lambda_index = lambda_elem->second;
             expr.expr_type = theLambdaStorge[lambda_index];  // shallow copy
             temp_vec.push_back(make_pair(
-                                            ref(expr.expr_type), 
+                                            ref(expr.expr_type),
                                             ref(theLambdaStorge[lambda_index])
                                         ));
             return;
@@ -61,7 +61,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         else {
             expr.expr_type = normal_unknown_type;
         }
-        
+
     }
     else if (typeid(expr) == typeid(ConsExpr)) {
         ConsExpr &trans = reinterpret_cast<ConsExpr &>(expr);
@@ -76,7 +76,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
             // it's a function apply
             auto funcdef_iter = theFuncTypeMapping.find(trans.constructor);
             auto prefuncdef_iter = thePreDefFuncTypeMapping.find(trans.constructor);
-            
+
             if (funcdef_iter != theFuncTypeMapping.end()) {
                 // call functions which are from the FunctionDef
                 FunctionDef &funcdef = funcdef_iter->second.get();
@@ -94,7 +94,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
             else {
                 // call functions which are from the pattern's args
                 auto elem = find_if(theArgTypeMapping.begin(), theArgTypeMapping.end(),
-                            [name = trans.constructor]  
+                            [name = trans.constructor]
                             (auto &iter) {
                                 return name == iter.first;
                             }); // e.g. trans.constructor := f
@@ -108,7 +108,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         else {
             // it's a datatype's constructor
             DatatypeDef &dtypedef = theConsTypeMapping.find(trans.constructor)->second.get();
-            auto component = find_if(dtypedef.components.begin(), dtypedef.components.end(), 
+            auto component = find_if(dtypedef.components.begin(), dtypedef.components.end(),
                                     [cons = trans.constructor]
                                     (auto &com) {
                                         return com.constructor == cons;
@@ -116,14 +116,14 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
             if(typeid(*dtypedef.decl_type) == typeid(NormalType)) {
                 trans.expr_type = dtypedef.decl_type->clone();
-            } 
+            }
             else {
                 //datatype's decl_type is TemplateType
                 if (ins_map_clear_flag) {
                     theArgumentTypeInsMapping.clear();
                 }
 
-                // map all type variables 
+                // map all type variables
                 for (size_t i = 0; i < component->arguments.size(); ++i) {
                     // get current VarExpr (lambda args)
                     if (typeid(*trans.args[i]) == typeid(VarExpr)) {
@@ -134,7 +134,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
                     template_type_map(component->arguments[i], trans.args[i]->expr_type);
                 }
                 ins_map_clear_flag = false;
-                
+
                 trans.expr_type = dtypedef.decl_type->clone();
                 TemplateType &trans_decl_type = reinterpret_cast<TemplateType &>(*trans.expr_type);
 
@@ -204,7 +204,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         //temp
         VarExpr &pattern_trans = reinterpret_cast<VarExpr &>(*trans.equation.pattern);
         theArgTypeMapping.emplace(
-                                    pattern_trans.name, 
+                                    pattern_trans.name,
                                     ref(trans.equation.expr->expr_type)
                                 );
 
@@ -229,10 +229,10 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         for (auto &param: trans.parameters) {
             gen_new_lambda_arg();
             theLambdaInsMapping.emplace(
-                                            param, 
+                                            param,
                                             lambda_counter - 1
                                         );
-            
+
             trans.param_types.emplace(param, lambda_counter - 1);
         }
 
@@ -252,7 +252,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         --lambda_depth;
         if(lambda_depth == 0) {
             theLambdaInsMapping.clear();
-        } 
+        }
     }
     else {
         cerr << "analy_from_bottom(): bad match.\n";
@@ -262,7 +262,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 void TypeInference::analy_lambda_expr(Expr &expr, const string &funcname) {
     if (typeid(expr) == typeid(IntegralExpr)) {
         return;
-    } 
+    }
     else if (typeid(expr) == typeid(VarExpr)) {
         return;
     }
@@ -279,7 +279,7 @@ void TypeInference::analy_lambda_expr(Expr &expr, const string &funcname) {
 
         analy_lambda_expr(*trans.lhs, funcname);
         analy_lambda_expr(*trans.rhs, funcname);
-        
+
     }
     else if (typeid(expr) == typeid(ListExpr)) {
         ListExpr &trans = reinterpret_cast<ListExpr &>(expr);
