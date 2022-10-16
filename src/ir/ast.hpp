@@ -324,14 +324,17 @@ public:
 struct Definition {
     virtual ~Definition() = 0;
 
-    virtual std::string def_name() const;
+    virtual std::string def_name() const { return ""; }
 
-    virtual bool is_error() const;
+    virtual bool is_error() const { return false; }
 
-    virtual bool is_predefined() const;
+    // check the definition is pre-def of not
+    virtual bool is_predef() const { return false; }
+    /// check the def has been pre-defined or not
+    virtual bool is_predefined() const { return false; }
 
-    virtual bool is_datatype_decl() const;
-    virtual bool is_function_decl() const;
+    virtual bool is_datatype_decl() const { return false; }
+    virtual bool is_function_decl() const { return false; }
 
     virtual void gen_code(Code &) const;
 };
@@ -380,7 +383,7 @@ public:
     void gen_code(Code &) const override;
 };
 
-struct FunctionDef final : Definition {
+struct FunctionDef : Definition {
     std::string name;
     Ptr<FuncType> type;
     std::vector<Equation> equations;
@@ -396,9 +399,16 @@ public:
     void gen_code(Code &) const override;
 };
 
-struct PreFunctionDef final : Definition {
-    std::string name;
-    Ptr<FuncType> type;
+// as a special DatatypeDef
+struct PreDatatypeDef final : DatatypeDef {
+    virtual bool is_predef() const override { return true; }
+    virtual bool is_predefined() const override { return false; }
+};
+
+// as a special FunctionDef
+struct PreFunctionDef final : FunctionDef {
+    virtual bool is_predef() const override { return true; }
+    virtual bool is_predefined() const override { return false; }
 };
 
 struct ShortDef final : Definition {

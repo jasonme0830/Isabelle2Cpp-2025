@@ -117,9 +117,78 @@ std::string Parser::next_raw_str() {
     return res;
 }
 
-Theory Parser::gen_theory() {
+Theory Parser::gen_predef() {
     Theory theory;
 
+    while (!meet<Token::Type::EndOfFile>()) {
+        try {
+            if (auto decl = gen_predef_definition()) {
+                theory.definitions.push_back(move(decl));
+            }
+        } catch (const exception &e) {
+            "$: $\n"_fs.outf(cerr,
+                info::red("predef error"), e.what()
+            );
+            exit(-1);
+        }
+    }
+
+    return theory;
+}
+
+Ptr<Definition> Parser::gen_predef_definition() {
+    eat_until<Token::Type::Datatype, Token::Type::Function>();
+
+    if (meet<Token::Type::EndOfFile>()) {
+        return nullptr;
+    } else if (meet<Token::Type::Datatype>()) {
+        try {
+            return gen_predef_datatype_definition();
+        } catch (const ParseError &e) {
+            throw ParseError(e, PEType::Datatype);
+        }
+    } else {
+        try {
+            return gen_predef_function_definition();
+        } catch (const ParseError &e) {
+            throw ParseError(e, PEType::Function);
+        }
+    }
+}
+
+Ptr<Definition> Parser::gen_predef_datatype_definition() {
+    auto decl = make_unique<PreDatatypeDef>();
+
+    eat<Token::Type::Datatype>("expected token Datatype");
+    if (meet<Token::Type::Identifier>()) {
+        decl->decl_type = gen_normal_type();
+    } else {
+        decl->decl_type = gen_template_type();
+    }
+
+    eat<Token::Type::Equiv>("expected token Equiv");
+    do {
+        decl->components.push_back(gen_component());
+    } while (try_eat<Token::Type::Pipe>());
+
+    return decl;
+}
+
+Ptr<Definition> Parser::gen_predef_function_definition() {
+    auto decl = make_unique<PreFunctionDef>();
+    eat<Token::Type::Function>("expected token Function");
+
+    decl->name = gen_ident_str();
+    eat<Token::Type::Colonn>("expected ::");
+
+    eat<Token::Type::Quotation>("expected token Quotation");
+    decl->type = gen_func_type();
+    eat<Token::Type::Quotation>("expected token Quotation");
+
+    return decl;
+}
+
+Theory Parser::gen_theory(Theory theory) {
     eat_until<Token::Type::Theory>();
     get_next_token();
 
@@ -135,6 +204,7 @@ Theory Parser::gen_theory() {
     }
     get_next_token(); // eat begin
 
+    auto predefs = theory.definitions.size();
     while (!meet<Token::Type::EndOfFile>()) {
         try {
             if (auto decl = gen_declaration()) {
@@ -142,13 +212,13 @@ Theory Parser::gen_theory() {
             }
         } catch (const TokenizeError &e) {
             "$ after No.$ definition:\n$\n"_fs.outf(cerr,
-                info::light_blue("tokenize error"), theory.definitions.size(), e.what()
+                info::light_blue("tokenize error"), theory.definitions.size() - predefs, e.what()
             );
             tokenizer_.get_next_input();
         } catch (const ParseError &e) {
             theory.definitions.push_back(make_unique<ErrorDefinition>(e.error_type()));
             "$ in No.$ definition:\n$\n"_fs.outf(cerr,
-                info::light_blue("parse error"), theory.definitions.size(), e.what()
+                info::light_blue("parse error"), theory.definitions.size() - predefs, e.what()
             );
         }
     }
@@ -157,7 +227,7 @@ Theory Parser::gen_theory() {
 }
 
 Ptr<Definition> Parser::gen_declaration() {
-    eat_until<Token::Type::Datatype, Token::Type::Function, Token::Type::PreDefined>();
+    eat_until<Token::Type::Datatype, Token::Type::Function>();
 
     if (meet<Token::Type::EndOfFile>()) {
         return nullptr;
@@ -166,13 +236,6 @@ Ptr<Definition> Parser::gen_declaration() {
             return gen_datatype_definition();
         } catch (const ParseError &e) {
             throw ParseError(e, PEType::Datatype);
-        }
-    } else if (meet<Token::Type::PreDefined>()) {
-        try {
-            get_next_token();
-            return gen_predef_function_definition();
-        } catch (const ParseError &e) {
-            throw ParseError(e, PEType::PreDefined);
         }
     } else {
         try {
@@ -217,25 +280,6 @@ DatatypeDef::Component Parser::gen_component() {
     }
 
     return componment;
-}
-
-Ptr<Definition> Parser::gen_predef_function_definition() {
-    auto decl = make_unique<PreFunctionDef>();
-    eat<Token::Type::Function>("expected token Function");
-
-    decl->name = gen_ident_str();
-
-    // if (decl->is_predefined()) {
-    //     return decl;
-    // }
-
-    eat<Token::Type::Colonn>("expected ::");
-
-    eat<Token::Type::Quotation>("expected token Quotation");
-    decl->type = gen_func_type();
-    eat<Token::Type::Quotation>("expected token Quotation");
-
-    return decl;
 }
 
 Ptr<Definition> Parser::gen_function_definition() {

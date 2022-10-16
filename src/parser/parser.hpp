@@ -17,7 +17,8 @@ class Parser {
   public:
     Parser(std::ifstream &input, std::string name) noexcept;
 
-    Theory gen_theory();
+    Theory gen_predef();
+    Theory gen_theory(Theory predef);
 
   private:
     ParseError error(const std::string &message) const;
@@ -77,12 +78,15 @@ class Parser {
     Token &next_token();
     std::string next_raw_str();
 
+    Ptr<Definition> gen_predef_definition();
+    Ptr<Definition> gen_predef_datatype_definition();
+    Ptr<Definition> gen_predef_function_definition();
+
     Ptr<Definition> gen_declaration();
     Ptr<DatatypeDef> gen_datatype_definition();
         DatatypeDef::Component gen_component();
     Ptr<Definition> gen_function_definition();
         Equation gen_equation();
-    Ptr<Definition> gen_predef_function_definition();
 
     Ptr<Type> gen_type();
     Ptr<FuncType> gen_func_type();

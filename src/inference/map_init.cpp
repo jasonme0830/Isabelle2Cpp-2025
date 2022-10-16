@@ -11,17 +11,10 @@ namespace hol2cpp {
 void TypeInference::map_init() {
     for(auto &def_ptr : thy.definitions) {
         auto &def = *def_ptr;
-        if (typeid(def) == typeid(DatatypeDef)) {
-            DatatypeDef &trans = reinterpret_cast<DatatypeDef &>(def);
-            map_dtypedef_cons(trans);
-        }
-        else if (typeid(def) == typeid(FunctionDef)) {
-            FunctionDef &trans = reinterpret_cast<FunctionDef &>(def);
-            map_funcdef_type(trans);
-        }
-        else if (typeid(def) == typeid(PreFunctionDef)) {
-            PreFunctionDef &trans = reinterpret_cast<PreFunctionDef &>(def);
-            map_prefuncdef_type(trans);
+        if (auto def = dynamic_cast<DatatypeDef *>(def_ptr.get())) {
+            map_dtypedef_cons(*def);
+        } else if (auto def = dynamic_cast<FunctionDef *>(def_ptr.get())) {
+            map_funcdef_type(*def);
         }
         else continue;
     }

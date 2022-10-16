@@ -1,10 +1,14 @@
-target = bin/hol2cpp
+BIN = bin
+target = $(BIN)/hol2cpp
 
 src = src/main.cpp $(wildcard src/*/*.cpp)
 obj = $(patsubst src/%.cpp, obj/%.o, $(src))
 
-$(target): $(obj) | bin/
+def = src/defs.pre
+
+$(target): $(obj) | $(BIN)/
 	g++ -o $@ -W -g -std=c++17 $^
+	cp $(def) $(BIN)/
 
 obj/%.o: src/%.cpp
 	mkdir -p $(@D)

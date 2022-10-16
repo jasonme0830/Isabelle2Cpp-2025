@@ -11,11 +11,17 @@ namespace hol2cpp {
 Code Theory::gen_code() const {
     Code code;
 
-    size_t predefined = 0, datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
+    size_t predefs = 0, predefined = 0, datatype_defs = 0, function_defs = 0, shortdef_defs = 0;
     vector<string> datatype_gens, function_gens, shortdef_gens;
 
     for (size_t i = 0; i < definitions.size(); ++i) {
         auto decl = definitions[i].get();
+
+        // pass all pre-defs
+        if (decl->is_predef()) {
+            ++predefs;
+            continue;
+        }
 
         if      (decl->is_datatype_decl()) { ++datatype_defs; }
         else if (decl->is_function_decl()) { ++function_defs; }
@@ -48,7 +54,7 @@ Code Theory::gen_code() const {
         }
     }
 
-    auto defs = definitions.size() - shortdef_defs;
+    auto defs = definitions.size() - shortdef_defs - predefs;
     auto gens = datatype_gens.size() + function_gens.size();
     "$\n`scanned $ definitions, contain $ datatypes and $ functions;\n"_fs.outf(
         cout, info::light_green("Result:"), defs, datatype_defs, function_defs

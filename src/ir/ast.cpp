@@ -77,26 +77,6 @@ CaseExpr::CaseExpr(Ptr<Expr> &&expr)
     // ...
 }
 
-string Definition::def_name() const {
-    return "";
-}
-
-bool Definition::is_error() const {
-    return false;
-}
-
-bool Definition::is_predefined() const {
-    return false;
-}
-
-bool Definition::is_datatype_decl() const {
-    return false;
-}
-
-bool Definition::is_function_decl() const {
-    return false;
-}
-
 void Definition::gen_code(Code &) const {
     throw;
 }

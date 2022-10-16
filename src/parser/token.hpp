@@ -13,8 +13,7 @@ struct Token {
         Comment,        // \<comment>
         CommentStart,   // (*
         CommentEnd,     // *)
-        PreDefined,     // \<pre-def>
-        
+
         // pass now
         Open,           // \<open>
         Close,          // \<close>
