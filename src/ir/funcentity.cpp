@@ -295,4 +295,12 @@ void FuncEntity::is_last_equation(bool is_last) {
 bool FuncEntity::is_last_equation() const {
     return is_last_equation_;
 }
+
+void FuncEntity::is_predef(bool value) {
+    is_predef_ = value;
+}
+
+bool FuncEntity::is_predef() const {
+    return is_predef_;
+}
 } // namespace hol2cpp

@@ -32,10 +32,20 @@ void Synthesizer::syn_header(const Code &code) {
     out_.get() << endl;
 
     for (auto &datatype : code.datatypes()) {
+        // pass predefs
+        if (datatype.get().is_predef()) {
+            continue;
+        }
+
         syn_class(datatype);
     }
 
     for (auto &func : code.func_entities()) {
+        // pass predefs
+        if (func.get().is_predef()) {
+            continue;
+        }
+
         if (func.get().template_args().empty()) {
             syn_func(func, false);
         } else {
@@ -51,6 +61,11 @@ void Synthesizer::syn_impl(const Code &code) {
     "#include \"$\"\n\n"_fs.outf(out_.get(), filename_.substr(filename_.rfind('/') + 1) + ".hpp");
 
     for (auto &func : code.func_entities()) {
+        // pass predefs
+        if (func.get().is_predef()) {
+            continue;
+        }
+
         if (func.get().template_args().empty()) {
             syn_func(func);
         }

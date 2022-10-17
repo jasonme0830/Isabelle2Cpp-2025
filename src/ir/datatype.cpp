@@ -3,7 +3,19 @@
 using namespace std;
 
 namespace hol2cpp {
-bool &Datatype::is_recuisive() {
+void Datatype::is_predef(bool value) {
+    is_predef_ = value;
+}
+
+bool Datatype::is_predef() const {
+  return is_predef_;
+}
+
+void Datatype::is_recuisive(bool value) {
+    is_recuisive_ = value;
+}
+
+bool Datatype::is_recuisive() const {
     return is_recuisive_;
 }
 

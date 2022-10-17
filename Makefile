@@ -4,11 +4,11 @@ target = $(BIN)/hol2cpp
 src = src/main.cpp $(wildcard src/*/*.cpp)
 obj = $(patsubst src/%.cpp, obj/%.o, $(src))
 
-def = src/defs.pre
+def = defs.pre
 
 $(target): $(obj) | $(BIN)/
 	g++ -o $@ -W -g -std=c++17 $^
-	cp $(def) $(BIN)/
+	cp src/$(def) $(BIN)/
 
 obj/%.o: src/%.cpp
 	mkdir -p $(@D)
@@ -40,4 +40,4 @@ bench: $(target)
 example: $(cpp)
 
 example/%.cpp: example/%.thy $(target)
-	$(target) $< -s --move-list --reduce-cond --use-class --use-deque
+	$(target) $< -s --move-list --reduce-cond --use-class --use-deque --predef $(BIN)/$(def)

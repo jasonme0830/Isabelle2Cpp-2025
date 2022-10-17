@@ -160,6 +160,9 @@ class FuncEntity {
     void is_last_equation(bool is_last); // for reduce-cond
     bool is_last_equation() const; // for reduce-cond
 
+    void is_predef(bool value);
+    bool is_predef() const;
+
   private:
     Code &code_;
     std::size_t indent_;
@@ -183,6 +186,7 @@ class FuncEntity {
 
     bool nonexhaustive_; // for reduce-cond
     bool is_last_equation_; // for reduce-cond
+    bool is_predef_;
 
     std::map<std::string, TypeInfo> var_typeinfos_;
 };

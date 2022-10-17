@@ -8,7 +8,12 @@
 namespace hol2cpp {
 class Datatype {
   public:
-    bool &is_recuisive();
+    void is_predef(bool value);
+    bool is_predef() const;
+
+    void is_recuisive(bool value);
+    bool is_recuisive() const;
+
     bool is_normal_type() const;
 
     const std::string &self() const;
@@ -33,9 +38,10 @@ class Datatype {
     std::vector<std::vector<Ptr<Type>>> &abstracts();
 
   private:
+    bool is_predef_;
     bool is_recuisive_;
-    std::string self_;
 
+    std::string self_;
     std::string name_;
 
     std::vector<std::string> types_;

@@ -18,12 +18,8 @@ Code Theory::gen_code() const {
         auto decl = definitions[i].get();
 
         // pass all pre-defs
-        if (decl->is_predef()) {
-            ++predefs;
-            continue;
-        }
-
-        if      (decl->is_datatype_decl()) { ++datatype_defs; }
+        if      (decl->is_predef())        { ++predefs; }
+        else if (decl->is_datatype_decl()) { ++datatype_defs; }
         else if (decl->is_function_decl()) { ++function_defs; }
         else                               { ++shortdef_defs; }
 
@@ -87,6 +83,7 @@ void DatatypeDef::gen_code(Code &code) const {
     auto name = decl_type->main_name();
     auto &datatype = code.entry_datatype(name);
 
+    datatype.is_predef(is_predef());
     datatype.set_name(move(name));
     datatype.set_self(decl_type->gen_datatype(datatype));
 
@@ -101,7 +98,7 @@ void DatatypeDef::gen_code(Code &code) const {
             auto field_type = type->gen_datatype(datatype);
             datatype.add_field_type(field_type);
             if (field_type == datatype.self()) {
-                datatype.is_recuisive() = true;
+                datatype.is_recuisive(true);
                 code.add_header("memory");
             }
             abstracts.back().push_back(move(type));
@@ -112,9 +109,11 @@ void DatatypeDef::gen_code(Code &code) const {
 
 void FunctionDef::gen_code(Code &code) const {
     auto &func = code.entry_func_entity(name);
-    func.nonexhaustive(nonexhaustive);
 
+    func.is_predef(is_predef());
+    func.nonexhaustive(nonexhaustive);
     func.name() = name;
+
     type->gen_funcentity(func);
 
     for (size_t i = 0; i < equations.size(); ++i) {
