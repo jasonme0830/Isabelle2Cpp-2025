@@ -78,7 +78,9 @@ Code Theory::gen_code() const {
 }
 
 void DatatypeDef::gen_code(Code &code) const {
-    code.add_header("variant");
+    if (!is_predef()) {
+        code.add_header("variant");
+    }
 
     auto name = decl_type->main_name();
     auto &datatype = code.entry_datatype(name);
@@ -99,7 +101,9 @@ void DatatypeDef::gen_code(Code &code) const {
             datatype.add_field_type(field_type);
             if (field_type == datatype.self()) {
                 datatype.is_recuisive(true);
-                code.add_header("memory");
+                if (!datatype.is_predef()) {
+                    code.add_header("memory");
+                }
             }
             abstracts.back().push_back(move(type));
         }

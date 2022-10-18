@@ -59,21 +59,6 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         return expr + ')';
     }
 
-    // for common calls
-    else if (auto other_func = func.code().find_func_entity(constructor)) {
-        assert_true(other_func->args_size() == args.size());
-
-        string expr = constructor + '(';
-        for (size_t i = 0; i < args.size(); ++i) {
-            if (i == 0) {
-                expr += args[i]->gen_expr(func, other_func->typeinfos()[i]);
-            } else {
-                expr += ", " + args[i]->gen_expr(func, other_func->typeinfos()[i]);
-            }
-        }
-        return expr + ')';
-    }
-
     // for nat
     else if (constructor == "Suc") {
         assert_true(args.size() == 1);
@@ -291,7 +276,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     }
 
     // for user-defined datatypes
-    else if (auto datatype = func.code().find_datatype(typeinfo.name)) {
+    else if (auto datatype = func.code().find_datatype_by_cons(constructor)) {
         std::string res = "$::$("_fs.format(typeinfo.to_str(), constructor);
 
         function trans = [&](const string &arg_type) {
@@ -315,6 +300,21 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         }
         func.sub_indent().add_expr(");");
         return temp;
+    }
+
+    // for common calls
+    else if (auto other_func = func.code().find_func_entity(constructor)) {
+        assert_true(other_func->args_size() == args.size());
+
+        string expr = constructor + '(';
+        for (size_t i = 0; i < args.size(); ++i) {
+            if (i == 0) {
+                expr += args[i]->gen_expr(func, other_func->typeinfos()[i]);
+            } else {
+                expr += ", " + args[i]->gen_expr(func, other_func->typeinfos()[i]);
+            }
+        }
+        return expr + ')';
     }
 
     // for ShortDef
