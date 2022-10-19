@@ -25,7 +25,23 @@ TypeInference::~TypeInference() = default;
 void TypeInference::theory_infer() {
     map_init();
     for(auto &elem: thy.definitions) {
-        definition_infer(*elem);
+        try {
+            definition_infer(*elem);
+        }
+        catch(const string &msg) {
+            cerr << msg;
+            temp_vec.clear();
+            ins_map_clear_flag = true;
+            the_argument_type_ins_mapping.clear();
+            the_arg_type_mapping.clear();
+            the_lambda_ins_mapping.clear();
+            continue;
+        }
+        catch(const std::exception& e)
+        {
+            cerr << e.what() << '\n';
+        }
+        
     }
 }
 
@@ -63,7 +79,7 @@ void TypeInference::functiondef_infer(FunctionDef &funcdef) {
 
         function_pattern_infer(*equation.pattern, funcdef);
         function_expr_infer(*equation.expr, funcdef.name);
-        theArgTypeMapping.clear();
+        the_arg_type_mapping.clear();
     }
 }
 
@@ -81,6 +97,7 @@ void TypeInference::function_pattern_infer(Expr& pattern, FunctionDef& funcdef) 
         }
     }
     catch (bad_cast &) {
+        cerr << funcdef.name << endl;
         cerr << "pattern_infer(): bad cast ConsExpr.\n";
     }
 }

@@ -15,7 +15,6 @@ public:
     void map_init(); 
     void map_dtypedef_cons(DatatypeDef &dtypedef);
     void map_funcdef_type(FunctionDef &funcdef);
-    void map_prefuncdef_type(PreFunctionDef &prefuncdef);
     void map_srtdef_type(ShortDef &srtdef);
 
     void definition_infer(Definition &def);
@@ -68,14 +67,13 @@ private:
      * map constructor's name to its Datatypedef:
      * e.g. <Cons, slist>, <Nil, slist>...
     */
-    std::map<std::string, std::reference_wrapper<DatatypeDef>> theConsTypeMapping;
+    std::map<std::string, std::reference_wrapper<DatatypeDef>> the_cons_type_mapping;
 
     /**
      * map function's name to its Functiondef:
      * e.g. <func1, func1::ref<FunctionDef>>
     */
-    std::map<std::string, std::reference_wrapper<FunctionDef>> theFuncTypeMapping;
-    std::map<std::string, std::reference_wrapper<PreFunctionDef>> thePreDefFuncTypeMapping;
+    std::map<std::string, std::reference_wrapper<FunctionDef>> the_func_type_mapping;
 
     /**
      * map function's arguments to its Type:
@@ -86,7 +84,7 @@ private:
      * map:
      * <test, <x, Ptr<ArgumentType>>>, <test, <xs, Ptr<TemplateType>>>
     */
-    std::map<std::string, std::reference_wrapper<Ptr<Type>>> theArgTypeMapping;
+    std::map<std::string, std::reference_wrapper<Ptr<Type>>> the_arg_type_mapping;
 
     /**
      * map type araguments to its institution type:
@@ -95,11 +93,11 @@ private:
      * map:
      * <'a, nat>
     */
-    std::map<std::string, std::reference_wrapper<Ptr<Type>>> theArgumentTypeInsMapping;
+    std::map<std::string, std::reference_wrapper<Ptr<Type>>> the_argument_type_ins_mapping;
 
-    std::map<std::string, std::size_t> theLambdaInsMapping;
+    std::map<std::string, std::size_t> the_lambda_ins_mapping;
     
-    std::vector<Ptr<Type>> theLambdaStorge;
+    std::vector<Ptr<Type>> the_lambda_storge;
 };
 
 } // namespace hol2cpp

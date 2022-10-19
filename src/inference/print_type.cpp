@@ -32,6 +32,7 @@ void FuncType::print_type() const {
 }
 
 void Expr::print_expr_type() const {
+    if (expr_type == nullptr) return;
     expr_type->print_type();
 }
 

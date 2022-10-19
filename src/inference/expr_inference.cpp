@@ -19,42 +19,42 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
         // variables
         VarExpr &trans = reinterpret_cast<VarExpr &>(expr);
-        auto var_elem = find_if(theArgTypeMapping.begin(), theArgTypeMapping.end(),
-                    [name = trans.name]
-                    (auto &iter) {
-                        return name == iter.first;
-                    });
+        auto var_elem = find_if(the_arg_type_mapping.begin(), the_arg_type_mapping.end(),
+                        [name = trans.name]
+                        (auto &iter) {
+                            return name == iter.first;
+                        });
 
-        if(var_elem != theArgTypeMapping.end()) {
+        if(var_elem != the_arg_type_mapping.end()) {
             expr.expr_type = var_elem->second.get()->clone();
             return;
         }
 
         // lambda param
-        auto lambda_elem = find_if(theLambdaInsMapping.begin(), theLambdaInsMapping.end(),
+        auto lambda_elem = find_if(the_lambda_ins_mapping.begin(), the_lambda_ins_mapping.end(),
                             [name = trans.name]
                             (auto &iter) {
                                 return name == iter.first;
                             });
 
-        if (lambda_elem != theLambdaInsMapping.end()) {
+        if (lambda_elem != the_lambda_ins_mapping.end()) {
             auto lambda_index = lambda_elem->second;
-            expr.expr_type = theLambdaStorge[lambda_index];  // shallow copy
+            expr.expr_type = the_lambda_storge[lambda_index];  // shallow copy
             temp_vec.push_back(make_pair(
                                             ref(expr.expr_type),
-                                            ref(theLambdaStorge[lambda_index])
+                                            ref(the_lambda_storge[lambda_index])
                                         ));
             return;
         }
 
         //constructor like Nil that only appears in expr
-        auto cons_elem = find_if(theConsTypeMapping.begin(), theConsTypeMapping.end(),
+        auto cons_elem = find_if(the_cons_type_mapping.begin(), the_cons_type_mapping.end(),
                             [name = trans.name]
                             (auto& iter) {
                                 return name == iter.first;
                             });
 
-        if (cons_elem != theConsTypeMapping.end()) {
+        if (cons_elem != the_cons_type_mapping.end()) {
             expr.expr_type = cons_elem->second.get().decl_type->clone();
             return;
         }
@@ -72,32 +72,29 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         }
 
         // infer expr
-        if (theConsTypeMapping.find(trans.constructor) == theConsTypeMapping.end()) {
+        if (the_cons_type_mapping.find(trans.constructor) == the_cons_type_mapping.end()) {
             // it's a function apply
-            auto funcdef_iter = theFuncTypeMapping.find(trans.constructor);
-            auto prefuncdef_iter = thePreDefFuncTypeMapping.find(trans.constructor);
+            auto funcdef_iter = the_func_type_mapping.find(trans.constructor); 
 
-            if (funcdef_iter != theFuncTypeMapping.end()) {
+            if (funcdef_iter != the_func_type_mapping.end()) {
                 // call functions which are from the FunctionDef
                 FunctionDef &funcdef = funcdef_iter->second.get();
                 trans.expr_type = funcdef.type->clone();
 
                 function_apply(trans.expr_type, trans.args);
             }
-            else if (prefuncdef_iter != thePreDefFuncTypeMapping.end()) {
-                // call functions which are from the PreFunctionDef
-                PreFunctionDef &prefuncdef = prefuncdef_iter->second.get();
-                trans.expr_type = prefuncdef.type->clone();
-
-                function_apply(trans.expr_type, trans.args);
-            }
             else {
                 // call functions which are from the pattern's args
-                auto elem = find_if(theArgTypeMapping.begin(), theArgTypeMapping.end(),
+                auto elem = find_if(the_arg_type_mapping.begin(), the_arg_type_mapping.end(),
                             [name = trans.constructor]
                             (auto &iter) {
                                 return name == iter.first;
                             }); // e.g. trans.constructor := f
+
+                if (elem == the_arg_type_mapping.end()) {
+                    string info = funcname + ": cannot find the definition of <" +  trans.constructor + ">\n";
+                    throw info;
+                }
 
                 auto &functype = elem->second.get();
                 trans.expr_type = functype->clone();
@@ -107,7 +104,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         }
         else {
             // it's a datatype's constructor
-            DatatypeDef &dtypedef = theConsTypeMapping.find(trans.constructor)->second.get();
+            DatatypeDef &dtypedef = the_cons_type_mapping.find(trans.constructor)->second.get();
             auto component = find_if(dtypedef.components.begin(), dtypedef.components.end(),
                                     [cons = trans.constructor]
                                     (auto &com) {
@@ -120,9 +117,14 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
             else {
                 //datatype's decl_type is TemplateType
                 if (ins_map_clear_flag) {
-                    theArgumentTypeInsMapping.clear();
+                    the_argument_type_ins_mapping.clear();
                 }
 
+                if (component->arguments.size() != trans.args.size()) {
+                    string info = trans.constructor + ": need curring of datatype.\n";
+                    throw info;
+                }
+                
                 // map all type variables
                 for (size_t i = 0; i < component->arguments.size(); ++i) {
                     // get current VarExpr (lambda args)
@@ -174,9 +176,14 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         for (auto &arg: trans.exprs) {
             analy_from_bottom(*arg, funcname);
         }
-        //infer expr
-        //'a list
-        DatatypeDef &dtypedef = theConsTypeMapping.find("sCons")->second.get();
+        //infer expr type for 'a list
+        auto iter = the_cons_type_mapping.find("Cons");
+
+        if (iter == the_cons_type_mapping.end()) {
+            throw string("cannot find the definition of <Cons>\n");
+        }
+        DatatypeDef &dtypedef = iter->second.get();
+
         trans.expr_type = dtypedef.decl_type->clone();
         TemplateType &tmpltype = reinterpret_cast<TemplateType &>(*trans.expr_type);
         if (trans.exprs.size() > 0) {
@@ -189,9 +196,14 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         for (auto &arg: trans.exprs) {
             analy_from_bottom(*arg, funcname);
         }
-        //infer expr
-        //'a set
-        DatatypeDef &dtypedef = theConsTypeMapping.find("sset")->second.get();
+        //infer expr type for 'a set
+        auto iter = the_cons_type_mapping.find("setCons");
+
+        if (iter == the_cons_type_mapping.end()) {
+            throw string("cannot find the definition of <setCons>\n");
+        }
+        DatatypeDef &dtypedef = iter->second.get();
+
         trans.expr_type = dtypedef.decl_type->clone();
         TemplateType &tmpltype = reinterpret_cast<TemplateType &>(*trans.expr_type);
         if (trans.exprs.size() > 0) {
@@ -201,12 +213,13 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
     else if (typeid(expr) == typeid(LetinExpr)) {
         LetinExpr &trans = reinterpret_cast<LetinExpr &>(expr);
         analy_from_bottom(*trans.equation.expr, funcname);
-        //temp
-        VarExpr &pattern_trans = reinterpret_cast<VarExpr &>(*trans.equation.pattern);
-        theArgTypeMapping.emplace(
-                                    pattern_trans.name,
-                                    ref(trans.equation.expr->expr_type)
-                                );
+        trans.equation.pattern->expr_type = trans.equation.expr->expr_type->clone();
+        pattern_infer(trans.equation.pattern, funcname); 
+        // VarExpr &pattern_trans = reinterpret_cast<VarExpr &>(*trans.equation.pattern);
+        // the_arg_type_mapping.emplace(
+        //                             pattern_trans.name,
+        //                             ref(trans.equation.expr->expr_type)
+        //                         );
 
         analy_from_bottom(*trans.expr, funcname);
         trans.expr_type = trans.expr->expr_type->clone();
@@ -214,10 +227,11 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
     else if (typeid(expr) == typeid(CaseExpr)) {
         CaseExpr &trans = reinterpret_cast<CaseExpr &>(expr);
         analy_from_bottom(*trans.expr, funcname);
+
         for (auto &equation: trans.equations) {
-            equation.pattern->expr_type = trans.expr_type->clone();
+            equation.pattern->expr_type = trans.expr->expr_type->clone();
+
             pattern_infer(equation.pattern, funcname);
-            //analy_from_bottom(*equation.pattern, funcname);
             analy_from_bottom(*equation.expr, funcname);
         }
         trans.expr_type = trans.equations[0].expr->expr_type->clone();
@@ -228,7 +242,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         ++lambda_depth;
         for (auto &param: trans.parameters) {
             gen_new_lambda_arg();
-            theLambdaInsMapping.emplace(
+            the_lambda_ins_mapping.emplace(
                                             param,
                                             lambda_counter - 1
                                         );
@@ -240,8 +254,8 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
         Ptr<FuncType> lambda_type(new FuncType);
         for (size_t i = 0; i < trans.parameters.size(); ++i) {
-            auto lambda_index = theLambdaInsMapping.find(trans.parameters[i])->second;
-            auto &type = theLambdaStorge[lambda_index];
+            auto lambda_index = the_lambda_ins_mapping.find(trans.parameters[i])->second;
+            auto &type = the_lambda_storge[lambda_index];
             lambda_type->types.push_back(type);
         }
         auto &type = trans.expr->expr_type;
@@ -251,7 +265,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
         --lambda_depth;
         if(lambda_depth == 0) {
-            theLambdaInsMapping.clear();
+            the_lambda_ins_mapping.clear();
         }
     }
     else {
@@ -314,7 +328,7 @@ void TypeInference::analy_lambda_expr(Expr &expr, const string &funcname) {
         Ptr<FuncType> lambda_type(new FuncType);
         for (size_t i = 0; i < trans.parameters.size(); ++i) {
             auto lambda_index = trans.param_types.find(trans.parameters[i])->second;
-            auto &type = theLambdaStorge[lambda_index];
+            auto &type = the_lambda_storge[lambda_index];
             lambda_type->types.push_back(type);
         }
         auto &type = trans.expr->expr_type;

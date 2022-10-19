@@ -11,6 +11,11 @@
 - Support the resolution of multiple types of variables.
 - The parameters' type of the lambda expressions are now instantiated with a function call or type construction.
 
+#### Fixed
+
+- Fix the bug of the type inference for case-expressions, which lacks the type of `expr` unexpectedly.
+- Function definitions and datatype definitions that do not currently support curring will throw an exception and skip the resolution of the current definition.
+
 #### Changed
 
 - `Ptr` is `std::shared_ptr<T>` now.

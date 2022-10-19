@@ -3,6 +3,8 @@ datatype 'a option = None | Some 'a
 datatype 'a list = Nil | Cons 'a "'a list"
 datatype ('a, 'b) pair = Pair 'a 'b
 
+datatype 'a set = setNil | setCons 'a "'a set"
+
 fun length :: "'a list => nat"
 fun take :: "nat => 'a list => 'a list"
 fun drop :: "nat => 'a list => 'a list"
@@ -11,7 +13,9 @@ fun upto :: "int => int => int list"
 fun upt :: "nat => nat => nat list"
 fun nth :: "'a list => nat => 'a"
 
-fun concat :: "'a list list \<Rightarrow> 'a list"
-fun map :: "('d \<Rightarrow> 'e) \<Rightarrow> 'd list \<Rightarrow> 'e list"
+fun set :: "'a list => 'a set"
+
+fun concat :: "'a list list => 'a list"
+fun map :: "('d => 'e) => 'd list => 'e list"
 
 fun If :: "bool => 'a => 'a => 'a"
