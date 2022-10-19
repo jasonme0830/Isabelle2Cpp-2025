@@ -11,4 +11,7 @@ fun upto :: "int => int => int list"
 fun upt :: "nat => nat => nat list"
 fun nth :: "'a list => nat => 'a"
 
+fun concat :: "'a list list \<Rightarrow> 'a list"
+fun map :: "('d \<Rightarrow> 'e) \<Rightarrow> 'd list \<Rightarrow> 'e list"
+
 fun If :: "bool => 'a => 'a => 'a"

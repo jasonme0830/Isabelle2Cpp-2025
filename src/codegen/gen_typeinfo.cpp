@@ -28,7 +28,10 @@ map<string, string> theHeaderMapping {
  */
 TypeInfo NormalType::gen_typeinfo(FuncEntity &func) const {
     if (theNormalTypeMapping.count(name)) {
-        func.code().add_header("cstdint");
+        if (!func.is_predef()) {
+            func.code().add_header("cstdint");
+        }
+
         return TypeInfo(theNormalTypeMapping.at(name));
     } else {
         // e.g. bool
@@ -41,7 +44,7 @@ TypeInfo ArgumentType::gen_typeinfo(FuncEntity &func) const {
 }
 
 TypeInfo TemplateType::gen_typeinfo(FuncEntity &func) const {
-    if (theHeaderMapping.count(name)) {
+    if (!func.is_predef() && theHeaderMapping.count(name)) {
         func.code().add_header(theHeaderMapping.at(name));
     }
 
@@ -53,8 +56,10 @@ TypeInfo TemplateType::gen_typeinfo(FuncEntity &func) const {
 }
 
 TypeInfo FuncType::gen_typeinfo(FuncEntity &func) const {
-    func.code().add_header("functional");
-
+    if (!func.is_predef()) {
+        func.code().add_header("functional");
+    }
+    
     TypeInfo res("std::function");
     for (auto &arg : types) {
         res.arguments.push_back(arg->gen_typeinfo(func));
