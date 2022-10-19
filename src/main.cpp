@@ -22,48 +22,43 @@ ArgumentParser build_parser();
 Config parse_config(int, char *[]);
 
 int main(int argc, char* argv[]) {
-    try {
-        auto [
-            input_file,
-            output_file,
-            predef_file,
-            print_type
-        ] = parse_config(argc, argv);
+    auto [
+        input_file,
+        output_file,
+        predef_file,
+        print_type
+    ] = parse_config(argc, argv);
 
-        ifstream fin(input_file);
+    ifstream fin(input_file);
+    if (!fin.good()) {
+        cout << "can't open file " << input_file << endl;
+        return -1;
+    }
+
+    Theory predef;
+    if (!predef_file.empty()) {
+        ifstream fin(predef_file);
         if (!fin.good()) {
-            cout << "can't open file " << input_file << endl;
+            cout << "can't open file " << predef_file << endl;
             return -1;
         }
 
-        Theory predef;
-        if (!predef_file.empty()) {
-            ifstream fin(predef_file);
-            if (!fin.good()) {
-                cout << "can't open file " << predef_file << endl;
-                return -1;
-            }
-
-            Parser parser(fin, predef_file);
-            predef = parser.gen_predef();
-        }
-
-        auto theory = Parser(fin, input_file).gen_theory(move(predef));
-
-        auto inf = TypeInference(theory);
-        inf.theory_infer();
-        if (print_type) {
-            inf.print_theory();
-        }
-
-        auto code = theory.gen_code();
-
-        Synthesizer syner(output_file.empty() ? theory.name : output_file);
-        syner.synthesize(code);
-
-    } catch(const exception& e) {
-        cerr << e.what() << endl;
+        Parser parser(fin, predef_file);
+        predef = parser.gen_predef();
     }
+
+    auto theory = Parser(fin, input_file).gen_theory(move(predef));
+
+    auto inf = TypeInference(theory);
+    inf.theory_infer();
+    if (print_type) {
+        inf.print_theory();
+    }
+
+    auto code = theory.gen_code();
+
+    Synthesizer syner(output_file.empty() ? theory.name : output_file);
+    syner.synthesize(code);
 
     return 0;
 }

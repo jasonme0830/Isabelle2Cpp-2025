@@ -104,9 +104,13 @@ const TypeInfo &TypeInfo::operator[](int i) const {
 
     if (empty()) {
         return theNullTypeInfo;
+    } else if (i == -1) {
+        return result_typeinfo();
+    } else {
+        auto index = (size_t)i;
+        assert_true((size_t)index < arguments.size());
+        return arguments[i];
     }
-
-    return (i == -1) ? result_typeinfo() : arguments[i];
 }
 
 FuncEntity::FuncEntity(Code &code)

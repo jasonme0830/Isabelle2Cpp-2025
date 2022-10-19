@@ -15,6 +15,9 @@
 #define assert_true(expr) assert_impl(expr, CodegenError)
 
 namespace hol2cpp {
+inline std::set<std::string> thePredefinedDatatypes;
+inline std::set<std::string> thePredefinedFunctions;
+
 extern std::map<std::string, std::string> theNormalTypeMapping;
 extern std::map<std::string, std::string> theTemplateTypeMapping;
 extern std::map<std::string, std::string> theHeaderMapping;

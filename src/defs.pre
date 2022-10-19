@@ -5,6 +5,7 @@ datatype ('a, 'b) pair = Pair 'a 'b
 
 datatype 'a set = setNil | setCons 'a "'a set"
 
+fun size :: "'a list => nat"
 fun length :: "'a list => nat"
 fun take :: "nat => 'a list => 'a list"
 fun drop :: "nat => 'a list => 'a list"

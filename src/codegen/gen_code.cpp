@@ -27,6 +27,11 @@ Code Theory::gen_code() const {
             if (decl->is_predefined()) { ++predefined; }
             else { decl->gen_code(code); }
 
+            // pass pre-defs
+            if (decl->is_predef()) {
+                continue;
+            }
+
             if (decl->is_datatype_decl()) {
                 datatype_gens.push_back(decl->def_name());
             } else if (decl->is_function_decl()) {
@@ -50,11 +55,12 @@ Code Theory::gen_code() const {
         }
     }
 
-    auto defs = definitions.size() - shortdef_defs - predefs;
-    auto gens = datatype_gens.size() + function_gens.size();
+    auto defs = datatype_defs + function_defs;
     "$\n`scanned $ definitions, contain $ datatypes and $ functions;\n"_fs.outf(
         cout, info::light_green("Result:"), defs, datatype_defs, function_defs
     );
+
+    auto gens = datatype_gens.size() + function_gens.size();
     "`generated $ definitions, contain $ predefined:\n"_fs.outf(
         cout, gens, predefined
     );
@@ -149,9 +155,7 @@ void ShortDef::gen_code(Code &code) const {
  * @return false if not
  */
 bool DatatypeDef::is_predefined() const {
-    return theNormalTypeMapping.count(decl_type->main_name())
-        || theTemplateTypeMapping.count(decl_type->main_name())
-    ;
+    return thePredefinedDatatypes.count(decl_type->main_name());
 }
 
 /**
@@ -161,9 +165,6 @@ bool DatatypeDef::is_predefined() const {
  * @return false if not
  */
 bool FunctionDef::is_predefined() const {
-    static set<string> predefineds {
-        "length", "take", "drop", "append", "upto", "upt", "nth"
-    };
-    return predefineds.count(name);
+    return thePredefinedFunctions.count(name);
 }
 } // namespace hol2cpp

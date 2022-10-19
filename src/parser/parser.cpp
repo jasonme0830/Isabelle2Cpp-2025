@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "../utility/error.hpp"
+#include "../codegen/codegen.hpp"
 
 #include <set>
 #include <map>
@@ -171,6 +172,8 @@ Ptr<Definition> Parser::gen_predef_datatype_definition() {
         decl->components.push_back(gen_component());
     } while (try_eat<Token::Type::Pipe>());
 
+    thePredefinedDatatypes.insert(decl->decl_type->main_name());
+
     return decl;
 }
 
@@ -184,6 +187,8 @@ Ptr<Definition> Parser::gen_predef_function_definition() {
     eat<Token::Type::Quotation>("expected token Quotation");
     decl->type = gen_func_type();
     eat<Token::Type::Quotation>("expected token Quotation");
+
+    thePredefinedFunctions.insert(decl->name);
 
     return decl;
 }

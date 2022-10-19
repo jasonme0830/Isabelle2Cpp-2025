@@ -101,23 +101,6 @@ T1 foldl(const std::function<T1(const T1 &, const T2 &)> &arg1, const T1 &arg2, 
 }
 
 template<typename T1>
-std::deque<T1> concat(std::deque<std::deque<T1>> arg1) {
-    // concat [] = []
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    }
-
-    // concat (x # xs) = x @ concat xs
-    auto x = arg1.front();
-    arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(arg1);
-    auto temp0 = std::move(x);
-    auto temp1 = concat(std::move(xs));
-    temp0.insert(temp0.end(), temp1.begin(), temp1.end());
-    return temp0;
-}
-
-template<typename T1>
 std::deque<T1> list_update(std::deque<T1> arg1, const std::uint64_t &arg2, const T1 &arg3) {
     // list_update [] i v = []
     if (arg1.empty()) {
@@ -441,7 +424,7 @@ std::deque<T1> nths(std::deque<T1> arg1, const std::set<std::uint64_t> &arg2) {
         return arg2.count(p.second);
     };
     auto temp1 = 0;
-    auto temp2 = size(arg1);
+    auto temp2 = size(std::move(arg1));
     std::deque<T2> temp3;
     for (auto temp4 = temp1; temp4 < temp2; ++temp4) {
         temp3.push_back(temp4);
@@ -583,7 +566,7 @@ std::set<std::deque<T1>> listset(std::deque<std::set<T1>> arg1) {
 template<typename T1, typename T2>
 std::deque<T2> bind(std::deque<T1> arg1, const std::function<std::deque<T2>(const T1 &)> &arg2) {
     // bind xs f = concat (map f xs)
-    return concat(map(arg2, arg1));
+    return concat(map(arg2, std::move(arg1)));
 }
 
 template<typename T1, typename T2>
@@ -631,7 +614,7 @@ bool null(std::deque<T1> arg1) {
 template<typename T1, typename T2>
 std::deque<T2> maps(const std::function<std::deque<T2>(const T1 &)> &arg1, std::deque<T1> arg2) {
     // maps f xs = concat (map f xs)
-    return concat(map(arg1, arg2));
+    return concat(map(arg1, std::move(arg2)));
 }
 
 template<typename T1>
