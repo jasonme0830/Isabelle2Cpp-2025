@@ -58,7 +58,7 @@ string ConsExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const
     else if (constructor == "Suc") {
         assert_true(args.size() == 1);
         auto expr = args[0]->gen_expr(func);
-        return enclose_if_needed(expr) + "+ 1";
+        return enclose_if_needed(expr) + " + 1";
     }
 
     // for option

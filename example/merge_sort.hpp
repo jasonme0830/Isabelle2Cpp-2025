@@ -47,7 +47,7 @@ std::uint64_t slength(const slist<T1> &arg1) {
 
     // slength (sCons x xs) = Suc (slength xs)
     auto xs = arg1.as_sCons().p2();
-    return slength(xs)+ 1;
+    return slength(xs) + 1;
 }
 
 template<typename T1>

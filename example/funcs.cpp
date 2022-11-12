@@ -8,7 +8,7 @@ std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
 
     // add (Suc m) n = Suc (add m n)
     auto m = arg1 - 1;
-    return add(m, arg2)+ 1;
+    return add(m, arg2) + 1;
 }
 
 bool evn(const std::uint64_t &arg1) {
