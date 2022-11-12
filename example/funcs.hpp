@@ -91,7 +91,7 @@ template<typename T1>
 std::set<T1> testset(std::deque<T1> arg1) {
     // testset Nil = {}
     if (arg1.empty()) {
-        return std::set<T1>();
+        return std::set<T1>{};
     }
 
     // testset (x # xs) = {x} \<inter> testset(xs)

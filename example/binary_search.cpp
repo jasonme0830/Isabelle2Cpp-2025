@@ -31,7 +31,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint6
         std::optional<std::uint64_t> temp4;
         if (y < arg1) {
             auto temp5 = ([&] {
-                auto temp6 = bs(arg1, decltype(arg2){ arg2.begin() + m + 1, arg2.end() });
+                auto temp6 = bs(arg1, std::deque<std::uint64_t>(arg2.begin() + m + 1, arg2.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp6.has_value()) {
@@ -44,7 +44,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint6
             })();
             temp4 = temp5;
         } else {
-            temp4 = bs(arg1, decltype(arg2){ arg2.begin(), arg2.begin() + m });
+            temp4 = bs(arg1, std::deque<std::uint64_t>(arg2.begin(), arg2.begin() + m));
         }
         temp3 = temp4;
     }

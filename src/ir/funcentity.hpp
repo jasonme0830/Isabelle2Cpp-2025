@@ -10,7 +10,11 @@
 
 namespace hol2cpp {
 class Code;
+class FuncEntity;
 
+/**
+ * The type info in C++
+*/
 struct TypeInfo {
     static std::function<std::string(const TypeInfo &)> as_arg;
 
@@ -27,7 +31,10 @@ struct TypeInfo {
     std::string to_str() const;
     std::string to_str_as_arg() const;
 
-    bool empty() const;
+    // the parameters are used to print helpful error message
+    void avoid_lack(FuncEntity &func, const std::string &constructor) const;
+
+    bool lack() const;
     bool is_function() const;
     const TypeInfo &result_typeinfo() const;
     std::size_t args_size() const;

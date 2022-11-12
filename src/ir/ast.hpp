@@ -10,6 +10,7 @@
 #include <vector>
 #include <functional>
 #include <cassert>
+#include <optional>
 
 namespace hol2cpp {
 
@@ -31,6 +32,7 @@ struct Type {
      * @func: generate type infomation related with the given func
     */
     virtual TypeInfo gen_typeinfo(FuncEntity &func) const = 0;
+    // todo @xubo removes this method, not required after supporting type inference
     virtual TypeInfo apply(std::function<TypeInfo(const std::string &)> &trans) const = 0;
 
     virtual std::string gen_datatype(Datatype &) const = 0;
@@ -146,19 +148,29 @@ public:
  * base class for all exprs
 */
 struct Expr {
-    virtual ~Expr() = 0;
     Ptr<Type> expr_type;
+
+    virtual ~Expr() = 0;
+
     /**
      * method to generate code when expr occurs as pattern
      * not return value, just generate statements in func
     */
     virtual void gen_pattern(FuncEntity &func, const std::string &prev) const;
 
+    // todo @xubo records the typeinfo of the expr
+    std::string gen_expr(FuncEntity &func) const {
+        if (expr_type == nullptr) {
+            return gen_expr_impl(func, TypeInfo());
+        } else {
+            return gen_expr_impl(func, expr_type->gen_typeinfo(func));
+        }
+    }
     /**
      * method to generate code when expr occurs as the expression to return
      * return the expression and generate statements when needed
     */
-    virtual std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const = 0;
+    virtual std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const = 0;
 
     virtual void analyze_var_movable(std::set<std::string> &movables); // for move-list
 
@@ -173,7 +185,7 @@ struct IntegralExpr final : Expr {
 
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
 
     void print_expr() const override;
 };
@@ -194,7 +206,7 @@ struct VarExpr final : Expr {
 
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -218,7 +230,7 @@ struct ConsExpr final : Expr {
 
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -233,7 +245,7 @@ struct ListExpr final : Expr {
 
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -254,7 +266,7 @@ struct SetExpr final : Expr {
 
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -268,7 +280,7 @@ struct BinaryOpExpr final : Expr {
 
 public:
     void gen_pattern(FuncEntity &func, const std::string &prev) const override;
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -291,7 +303,7 @@ struct LetinExpr final : Expr {
     LetinExpr(Equation &&equation);
 
 public:
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -304,7 +316,7 @@ struct CaseExpr final : Expr {
     CaseExpr(Ptr<Expr> &&expr);
 
 public:
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
     void analyze_var_movable(std::set<std::string> &movables) override;
 
     void print_expr() const override;
@@ -312,11 +324,13 @@ public:
 
 struct LambdaExpr final : Expr {
     std::vector<std::string> parameters;
-    std::map<std::string, std::size_t> param_types;
     Ptr<Expr> expr;
 
+    std::vector<Ptr<Type>> lambda_storage;
+    std::multimap<std::string, std::reference_wrapper<Ptr<Type>>> lambda_types_map;
+
 public:
-    std::string gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const override;
+    std::string gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const override;
 
     void print_expr() const override;
 };
@@ -368,6 +382,7 @@ struct DatatypeDef : Definition {
     struct Component {
         std::string constructor;
         std::vector<Ptr<Type>> arguments;
+        Component clone() const;
     };
 
     Ptr<Type> decl_type;
@@ -378,6 +393,8 @@ struct DatatypeDef : Definition {
 
     bool is_predefined() const override;
     bool is_datatype_decl() const override;
+
+    DatatypeDef clone() const;
 
 public:
     void gen_code(Code &) const override;

@@ -4,30 +4,28 @@
 using namespace std;
 
 namespace hol2cpp {
-string IntegralExpr::gen_expr(FuncEntity &, const TypeInfo &) const {
+string IntegralExpr::gen_expr_impl(FuncEntity &, const TypeInfo &) const {
     return value;
 }
 
-string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
-    // for bool
+string VarExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
+    // for `bool`
     if (name == "True") {
         return "true";
     } else if (name == "False") {
         return "false";
     }
 
-    // for list
-    else if (name == "Nil") {
-        return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-    }
-
-    // for option
-    else if (name == "None") {
-        return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
+    // for `list` and `option`
+    else if (name == "Nil" || name == "None") {
+        return typeinfo.to_str() + "()";
     }
 
     // for user-defined datatypes
     else if (func.code().find_datatype_by_cons(name)) {
+        typeinfo.avoid_lack(func, name);
+
+        // assume the typeinfo exits
         return "$::$()"_fs.format(typeinfo.to_str(), name);
     }
 
@@ -43,134 +41,104 @@ string VarExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     }
 }
 
-string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
+string ConsExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
     // for recursive calls
-    //auto typeinfo = this->expr_type->gen_typeinfo(func);
     if (constructor == func.name()) {
-        string expr = constructor + '(';
+        typeinfo.avoid_lack(func, constructor);
         assert_true(func.args_size() == args.size());
-        for (size_t i = 0; i < args.size(); ++i) {
-            if (i == 0) {
-                expr += args[i]->gen_expr(func, func.typeinfos()[i]);
-            } else {
-                expr += ", " + args[i]->gen_expr(func, func.typeinfos()[i]);
+
+        return constructor + enclose(join(
+            args, [&](const auto &arg) {
+                return arg->gen_expr(func);
             }
-        }
-        return expr + ')';
+        ));
     }
 
     // for nat
     else if (constructor == "Suc") {
         assert_true(args.size() == 1);
-        auto expr = args[0]->gen_expr(func, typeinfo);
-        return "(" + expr + ") + 1";
+        auto expr = args[0]->gen_expr(func);
+        return enclose_if_needed(expr) + "+ 1";
     }
 
     // for option
     else if (constructor == "Some") {
         assert_true(args.size() == 1);
-        if (typeinfo.empty()) {
-            auto expr = args.front()->gen_expr(func, typeinfo);
-            if (expr == "{}") {
-                // if receive Some Nil or Some None,
-                // it will return wrong result
-                // becasue it has not enough typeinfo
-                return expr;
-            } else {
-                return "std::make_optional<decltype($)>($)"_fs.format(
-                    expr, expr
-                );
-            }
-        } else {
-            auto arg_type = typeinfo.arguments.front();
-            auto expr = args.front()->gen_expr(func, arg_type);
-            return "std::make_optional<$>($)"_fs.format(
-                arg_type.to_str(), expr
-            );
-        }
+        return "std::make_optional<$>($)"_fs.format(
+            typeinfo[0].to_str(), args[0]->gen_expr(func)
+        );
     }
 
     // for list
     else if (constructor == "Cons") {
         assert_true(args.size() == 2);
-        auto x = args[0]->gen_expr(func, typeinfo[0]);
-        auto xs = args[1]->gen_expr(func, typeinfo);
-        if (xs == "{}") {
-            if (typeinfo.empty()) {
-                return "$<decltype($)>{$}"_fs.format(theTemplateTypeMapping["list"], x, x);
-            } else {
-                return "${$};"_fs.format(typeinfo.to_str(), x);
-            }
-        } else {
-            auto temp = func.gen_temp();
-            func
-                .add_expr("auto $ = $;", temp, xs)
-                .add_expr("$.push_front($);", temp, x)
-            ;
+        auto x = args[0]->gen_expr(func);
+        auto xs = args[1]->gen_expr(func);
 
-            if (theOptimizer.option().move_list) {
-                return "std::move($)"_fs.format(temp);
-            } else {
-                return temp;
-            }
+        auto temp = func.gen_temp();
+        func
+            .add_expr("auto $ = $;", temp, xs)
+            .add_expr("$.push_front($);", temp, x)
+        ;
+
+        if (theOptimizer.option().move_list) {
+            return "std::move($)"_fs.format(temp);
+        } else {
+            return temp;
         }
     } else if (constructor == "length") {
         assert_true(args.size() == 1);
-        auto xs = args[0]->gen_expr(func, typeinfo);
-        if (xs == "{}") {
-            return "0";
-        } else {
-            return xs + ".size()";
-        }
+        return unmove_expr(args[0]->gen_expr(func)) + ".size()";
     } else if (constructor == "take") {
         assert_true(args.size() == 2);
-        auto n = args[0]->gen_expr(func, TypeInfo("nat"));
-        auto xs = unmove_expr(args[1]->gen_expr(func, typeinfo));
+
+        auto n = args[0]->gen_expr(func);
+        auto xs = unmove_expr(args[1]->gen_expr(func));
 
         if (theOptimizer.option().use_deque) {
-            return "decltype($){ $.begin(), $.begin() + $ }"_fs.format(xs, xs, xs, n);
+            return "$($.begin(), $.begin() + $)"_fs.format(
+                typeinfo.to_str(), xs, xs, n
+            );
         } else {
-            return "decltype($){ $.begin(), std::next($.begin(), $) }"_fs.format(xs, xs, xs, n);
+            return "$($.begin(), std::next($.begin(), $))"_fs.format(
+                typeinfo.to_str(), xs, xs, n
+            );
         }
     } else if (constructor == "drop") {
         assert_true(args.size() == 2);
-        auto n = args[0]->gen_expr(func, TypeInfo("nat"));
-        auto xs = unmove_expr(args[1]->gen_expr(func, typeinfo));
+
+        auto n = args[0]->gen_expr(func);
+        auto xs = unmove_expr(args[1]->gen_expr(func));
 
         if (theOptimizer.option().use_deque) {
-            return "decltype($){ $.begin() + $, $.end() }"_fs.format(xs, xs, n, xs);
+            return "$($.begin() + $, $.end())"_fs.format(typeinfo.to_str(), xs, n, xs);
         } else {
-            return "decltype($){ std::next($.begin(), $), $.end() }"_fs.format(xs, xs, n, xs);
+            return "$(std::next($.begin(), $), $.end())"_fs.format(typeinfo.to_str(), xs, n, xs);
         }
     } else if (constructor == "append") {
         assert_true(args.size() == 2);
-        auto l = args[0]->gen_expr(func, typeinfo);
-        auto r = args[1]->gen_expr(func, typeinfo);
-        if (l == "{}" && r == "{}") {
-            return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-        } else if (l == "{}") {
-            return r;
-        } else if (r == "{}") {
-            return l;
-        } else {
-            auto temp0 = func.gen_temp();
-            auto temp1 = func.gen_temp();
-            func
-                .add_expr("auto $ = $;", temp0, l)
-                .add_expr("auto $ = $;", temp1, r)
-            ;
 
-            if (theOptimizer.option().use_deque) {
-                func.add_expr("$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1);
-            } else {
-                func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
-            }
-            return temp0;
+        auto l = args[0]->gen_expr(func);
+        auto r = args[1]->gen_expr(func);
+
+        auto temp0 = func.gen_temp();
+        auto temp1 = func.gen_temp();
+        func
+            .add_expr("auto $ = $;", temp0, l)
+            .add_expr("auto $ = $;", temp1, r)
+        ;
+
+        if (theOptimizer.option().use_deque) {
+            func.add_expr("$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1);
+        } else {
+            func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
         }
+        return temp0;
     } else if (constructor == "nth") {
         assert_true(args.size() == 2);
-        auto l = args[0]->gen_expr(func, TypeInfo(theTemplateTypeMapping["list"]));
-        auto r = args[1]->gen_expr(func, TypeInfo("std::uint64_t"));
+
+        auto l = args[0]->gen_expr(func);
+        auto r = args[1]->gen_expr(func);
 
         auto temp0 = func.gen_temp();
         func.add_expr("auto $ = $;", temp0, l);
@@ -181,20 +149,14 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
             return "*std::next($.begin(), $)"_fs.format(temp0, r);
         }
     } else if (constructor == "upto") {
-        auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
-
         auto start = func.gen_temp();
-        func.add_expr("auto $ = $;", start, args[0]->gen_expr(func, elem_typeinfo));
+        func.add_expr("auto $ = $;", start, args[0]->gen_expr(func));
 
         auto end = func.gen_temp();
-        func.add_expr("auto $ = $;", end, args[1]->gen_expr(func, elem_typeinfo));
+        func.add_expr("auto $ = $;", end, args[1]->gen_expr(func));
 
         auto res = func.gen_temp();
-        if (typeinfo.empty()) {
-            func.add_expr("$<decltype($)> $;", theTemplateTypeMapping["list"], start, res);
-        } else {
-            func.add_expr("$ $;", typeinfo.to_str(), res);
-        }
+        func.add_expr("$ $;", typeinfo.to_str(), res);
 
         auto i = func.gen_temp();
         func.add_expr("for (auto $ = $; $ <= $; ++$) {", i, start, i, end, i).add_indent()
@@ -204,20 +166,14 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
         return res;
     } else if (constructor == "upt") {
-        auto elem_typeinfo = typeinfo.empty() ? TypeInfo() : typeinfo[0];
-
         auto start = func.gen_temp();
-        func.add_expr("auto $ = $;", start, args[0]->gen_expr(func, elem_typeinfo));
+        func.add_expr("auto $ = $;", start, args[0]->gen_expr(func));
 
         auto end = func.gen_temp();
-        func.add_expr("auto $ = $;", end, args[1]->gen_expr(func, elem_typeinfo));
+        func.add_expr("auto $ = $;", end, args[1]->gen_expr(func));
 
         auto res = func.gen_temp();
-        if (typeinfo.empty()) {
-            func.add_expr("$<decltype($)> $;", theTemplateTypeMapping["list"], start, res);
-        } else {
-            func.add_expr("$ $;", typeinfo.to_str(), res);
-        }
+        func.add_expr("$ $;", typeinfo.to_str(), res);
 
         auto i = func.gen_temp();
         func.add_expr("for (auto $ = $; $ < $; ++$) {", i, start, i, end, i).add_indent()
@@ -231,7 +187,7 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         func.code().add_header("set");
 
         auto temp = func.gen_temp();
-        auto list = args[0]->gen_expr(func, typeinfo.replace_with(theTemplateTypeMapping["list"]));
+        auto list = args[0]->gen_expr(func);
         func.add_expr("auto $ = $;", temp, list);
 
         auto set_type = typeinfo.replace_with("std::set");
@@ -241,52 +197,43 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     // for If-expression
     else if (constructor == "If") {
         assert_true(args.size() == 3);
-        if (typeinfo.empty()) {
-            auto texpr = args[1]->gen_expr(func, typeinfo);
-            auto fexpr = args[2]->gen_expr(func, typeinfo);
-            auto ce = args[0]->gen_expr(func, TypeInfo("bool"));
-            return "($ ? $ : $)"_fs.format(ce, texpr, fexpr);
-        } else {
-            auto ce = args[0]->gen_expr(func, TypeInfo("bool"));
-            auto res = func.gen_temp();
-            func
-                .add_expr("$ $;", typeinfo.to_str(), res)
-                .add_expr("if ($) {", ce).add_indent()
-                    .add_expr("$ = $;", res, args[1]->gen_expr(func, typeinfo)).sub_indent()
-                .add_expr("} else {").add_indent()
-                    .add_expr("$ = $;", res, args[2]->gen_expr(func, typeinfo)).sub_indent()
-                .add_expr("}")
-            ;
-            return res;
-        }
+
+        auto cond = args[0]->gen_expr(func);
+        auto res = func.gen_temp();
+
+        func
+            .add_expr("$ $;", typeinfo.to_str(), res)
+            .add_expr("if ($) {", cond).add_indent()
+                .add_expr("$ = $;", res, args[1]->gen_expr(func)).sub_indent()
+            .add_expr("} else {").add_indent()
+                .add_expr("$ = $;", res, args[2]->gen_expr(func)).sub_indent()
+            .add_expr("}")
+        ;
+
+        return res;
     }
 
     // for pairs
     else if (constructor == "Pair") {
         assert_true(args.size() == 2);
-        return "std::make_pair(" + args[0]->gen_expr(func, typeinfo.arguments.front())
-            + ", " + args[1]->gen_expr(func, typeinfo[1]) + ")"
+        return "std::make_pair(" + args[0]->gen_expr(func)
+            + ", " + args[1]->gen_expr(func) + ")"
         ;
     } else if (constructor == "fst") {
         assert_true(args.size() == 1);
-        return "$.first"_fs.format(args[0]->gen_expr(func, TypeInfo("std::pair", typeinfo)));
+        return "$.first"_fs.format(args[0]->gen_expr(func));
     }else if (constructor == "snd") {
         assert_true(args.size() == 1);
-        return "$.second"_fs.format(args[0]->gen_expr(func, TypeInfo("std::pair", typeinfo)));
+        return "$.second"_fs.format(args[0]->gen_expr(func));
     }
 
     // for user-defined datatypes
     else if (auto datatype = func.code().find_datatype_by_cons(constructor)) {
-        std::string res = "$::$("_fs.format(typeinfo.to_str(), constructor);
-
-        function trans = [&](const string &arg_type) {
-            return typeinfo[datatype->find_argument_type(arg_type)];
-        };
+        typeinfo.avoid_lack(func, constructor);
 
         vector<string> arguments;
-        auto &abstracts = datatype->abstracts()[datatype->pos_of_cons(constructor)];
-        for (size_t i = 0; i < abstracts.size(); ++i) {
-            arguments.push_back(args[i]->gen_expr(func, abstracts[i]->apply(trans)));
+        for (auto &arg : args) {
+            arguments.push_back(arg->gen_expr(func));
         }
 
         auto temp = func.gen_temp();
@@ -304,108 +251,55 @@ string ConsExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
 
     // for common calls
     else if (auto other_func = func.code().find_func_entity(constructor)) {
+        typeinfo.avoid_lack(func, constructor);
         assert_true(other_func->args_size() == args.size());
 
-        string expr = constructor + '(';
-        for (size_t i = 0; i < args.size(); ++i) {
-            if (i == 0) {
-                expr += args[i]->gen_expr(func, other_func->typeinfos()[i]);
-            } else {
-                expr += ", " + args[i]->gen_expr(func, other_func->typeinfos()[i]);
-            }
-        }
-        return expr + ')';
+        return constructor + enclose(
+            join(args, [&](auto &arg) {
+                return arg->gen_expr(func);
+            })
+        );
     }
 
     // for ShortDef
     else if (auto short_def = func.code().get_short_def(constructor)) {
         assert_true(short_def->parameters.size() == args.size());
         for (size_t i = 0; i < args.size(); ++i) {
-            func.add_expr("auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func, TypeInfo()));
+            func.add_expr("auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func));
         }
-        return short_def->expr->gen_expr(func, typeinfo);
+        return short_def->expr->gen_expr(func);
     }
 
     // else as the common call without determined function
     else {
+        // todo @xubo support currying
         auto foo = func.get_variable(constructor);
-        auto typeinfo = func.get_var_typeinfo(foo);
-
-        if (typeinfo.empty()) {
-            warning("the function $ lacks of type information in the definition of function $"_fs.format(
-                info::strong(constructor), info::strong(func.name()))
-            );
-        }
-
-        if (typeinfo.empty() || args.size() == typeinfo.args_size()) {
-            string expr = foo + '(';
-            for (size_t i = 0; i < args.size(); ++i) {
-                if (i == 0) {
-                    expr += args[i]->gen_expr(func, TypeInfo());
-                } else {
-                    expr += ", " + args[i]->gen_expr(func, TypeInfo());
-                }
+        return foo + enclose(join(
+            args,
+            [&](auto &expr) {
+                return expr->gen_expr(func);
             }
-            return expr + ')';
-        } else { // experimental
-            assert_true(theOptimizer.option().uncurry);
-
-            if (args.size() < typeinfo.args_size()) {
-                // curry and generate lambdas
-            } else {
-                // call and then call each rest arguments one by one
-            }
-
-            return "";
-        }
+        ));
     }
 }
 
-string ListExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
-    if (exprs.empty()) {
-        return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-    }
-
-    string res;
-    if (typeinfo.empty()) {
-        res = "$<decltype($)>{"_fs.format(theTemplateTypeMapping["list"], exprs.front()->gen_expr(func, typeinfo));
-    } else {
-        res = typeinfo.to_str() + '{';
-    }
-
-    for (size_t i = 0; i < exprs.size(); ++i) {
-        if (i == 0) {
-            res += exprs[i]->gen_expr(func, typeinfo[0]);
-        } else {
-            res += ", " + exprs[i]->gen_expr(func, typeinfo[0]);
+string ListExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
+    return typeinfo.to_str() + enclose<'{', '}'>(join(
+        exprs, [&](const auto &expr) {
+            return expr->gen_expr(func);
         }
-    }
-    return res + '}';
+    ));
 }
 
-string SetExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
-    if (exprs.empty()) {
-        return typeinfo.empty() ? "{}"s : (typeinfo.to_str() + "()");
-    }
-
-    string res;
-    if (typeinfo.empty()) {
-        res = "std::set<decltype($)>{"_fs.format(exprs.front()->gen_expr(func, typeinfo));
-    } else {
-        res = typeinfo.to_str() + '{';
-    }
-
-    for (size_t i = 0; i < exprs.size(); ++i) {
-        if (i == 0) {
-            res += exprs[i]->gen_expr(func, typeinfo);
-        } else {
-            res += ", " + exprs[i]->gen_expr(func, typeinfo);
+string SetExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
+    return typeinfo.to_str() + enclose<'{', '}'>(join(
+        exprs, [&](const auto &expr) {
+            return expr->gen_expr(func);
         }
-    }
-    return res + '}';
+    ));
 }
 
-string BinaryOpExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
+string BinaryOpExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
     static const map<Token::Type, string> bop_mapping {
         { Token::Type::And, "&&" },
         { Token::Type::Or, "||" },
@@ -426,8 +320,8 @@ string BinaryOpExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const 
 
     switch (op.type) {
         case Token::Type::Inter: {
-            auto l = lhs->gen_expr(func, typeinfo);
-            auto r = rhs->gen_expr(func, typeinfo);
+            auto l = lhs->gen_expr(func);
+            auto r = rhs->gen_expr(func);
 
             auto lv = func.gen_temp();
             auto rv = func.gen_temp();
@@ -439,8 +333,8 @@ string BinaryOpExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const 
             return rv;
         }
         case Token::Type::Union: {
-            auto l = lhs->gen_expr(func, typeinfo);
-            auto r = rhs->gen_expr(func, typeinfo);
+            auto l = lhs->gen_expr(func);
+            auto r = rhs->gen_expr(func);
 
             auto lv = func.gen_temp();
             auto rv = func.gen_temp();
@@ -461,32 +355,33 @@ string BinaryOpExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const 
             break;
         case Token::Type::In:
             return "$.count($)"_fs.format(
-                rhs->gen_expr(func, TypeInfo()), lhs->gen_expr(func, TypeInfo())
+                rhs->gen_expr(func), lhs->gen_expr(func)
             );
         case Token::Type::NotIn:
             return "!$.count($)"_fs.format(
-                rhs->gen_expr(func, TypeInfo()), lhs->gen_expr(func, TypeInfo())
+                rhs->gen_expr(func), lhs->gen_expr(func)
             );
 
         case Token::Type::Pow:
             func.code().add_header("cmath");
             return "std::pow($, $)"_fs.format(
-                lhs->gen_expr(func, typeinfo), rhs->gen_expr(func, typeinfo)
+                lhs->gen_expr(func), rhs->gen_expr(func)
             );
 
         /**
          * WARN: BE CAREFUL HERE!
+         * `== Nil` is special
         */
         case Token::Type::Equiv:
             if (auto val_expr = dynamic_cast<VarExpr *>(lhs.get())) {
                 if (val_expr->name == "Nil") {
-                    return "$.empty()"_fs.format(rhs->gen_expr(func, TypeInfo()));
+                    return "$.empty()"_fs.format(unmove_expr(rhs->gen_expr(func)));
                 }
             }
 
             if (auto val_expr = dynamic_cast<VarExpr *>(rhs.get())) {
                 if (val_expr->name == "Nil") {
-                    return "$.empty()"_fs.format(lhs->gen_expr(func, TypeInfo()));
+                    return "$.empty()"_fs.format(unmove_expr(lhs->gen_expr(func)));
                 }
             }
 
@@ -494,20 +389,20 @@ string BinaryOpExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const 
             assert_true(bop_mapping.count(op.type));
 
             return "$ $ $"_fs.format(
-                enclose_expr(lhs->gen_expr(func, TypeInfo())),
+                enclose_if_needed(lhs->gen_expr(func)),
                 bop_mapping.at(op.type),
-                enclose_expr(rhs->gen_expr(func, TypeInfo()))
+                enclose_if_needed(rhs->gen_expr(func))
             );
         }
     }
     throw CodegenError("failed call BinaryOpExpr::gen_expr(...): unsupported binary operator " + op.value);
 }
 
-string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
+string CaseExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
     auto temp0 = func.gen_temp();
     func.add_expr("auto $ = ([&] {", temp0).add_indent();
 
-    auto e = expr->gen_expr(func, TypeInfo());
+    auto e = expr->gen_expr(func);
     auto temp1 = func.gen_temp();
     func.add_expr("auto $ = $;\n", temp1, e);
 
@@ -515,7 +410,7 @@ string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     for (size_t i = 0; i < equations.size(); ++i) {
         func.is_last_equation(i == equations.size() - 1); // for reduce-cond
 
-        if (i) {
+        if (i != 0) {
             func.app_last_stmt("\n");
         }
         auto condition_cnt = func.condition_count();
@@ -524,7 +419,7 @@ string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
         equations[i].pattern->gen_pattern(func, temp1);
         func.close_pattern(); // for reduce-cond
 
-        func.add_expr("return $;", equations[i].expr->gen_expr(func, typeinfo));
+        func.add_expr("return $;", equations[i].expr->gen_expr(func));
         func.close_sub_equation(condition_cnt);
     }
     func.is_last_equation(is_last_equation); // for reduce-cond
@@ -541,33 +436,34 @@ string CaseExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
     return temp0;
 }
 
-string LetinExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
+string LetinExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
     auto temp = func.gen_temp();
-    func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func, TypeInfo()));
+    func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func));
     equation.pattern->gen_pattern(func, temp);
     func.close_pattern(); // for reduce-cond
-    return expr->gen_expr(func, typeinfo);
+    return expr->gen_expr(func);
 }
 
-string LambdaExpr::gen_expr(FuncEntity &func, const TypeInfo &typeinfo) const {
-    assert_true(!typeinfo.empty());
+string LambdaExpr::gen_expr_impl(FuncEntity &func, const TypeInfo &typeinfo) const {
+    assert_true(!typeinfo.lack());
     assert_true(typeinfo.is_function());
+
+    // todo @xubo support currying
     assert_true(typeinfo.args_size() == parameters.size());
 
     func.code().add_header("functional");
 
     string params;
     for (size_t i = 0; i < parameters.size(); ++i) {
-        if (i == 0) {
-            params += typeinfo[i].to_str_as_arg() + parameters[i];
-        } else {
-            params += ", " + typeinfo[i].to_str_as_arg() + parameters[i];
+        if (i != 0) {
+            params += ", ";
         }
+        params += typeinfo[i].to_str_as_arg() + parameters[i];
     }
 
     auto temp = func.gen_temp();
     func.add_expr("std::function $ = [=] ($) {", temp, params).add_indent()
-        .add_expr("return $;", expr->gen_expr(func, typeinfo[-1])).sub_indent()
+        .add_expr("return $;", expr->gen_expr(func)).sub_indent()
         .add_expr("};")
     ;
 

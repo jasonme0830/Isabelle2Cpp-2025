@@ -2,15 +2,15 @@ datatype nat = Zero | Suc nat
 datatype 'a option = None | Some 'a
 datatype 'a list = Nil | Cons 'a "'a list"
 datatype ('a, 'b) pair = Pair 'a 'b
-
+datatype bool = True | False
 datatype 'a set = setNil | setCons 'a "'a set"
 
 fun size :: "'a list => nat"
 fun length :: "'a list => nat"
 fun take :: "nat => 'a list => 'a list"
 fun drop :: "nat => 'a list => 'a list"
-fun append :: "'a list => 'a list => 'a list"
 fun upto :: "int => int => int list"
+fun append :: "'a list => 'a list => 'a list"
 fun upt :: "nat => nat => nat list"
 fun nth :: "'a list => nat => 'a"
 

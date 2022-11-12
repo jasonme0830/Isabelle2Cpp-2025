@@ -3,7 +3,7 @@
 using namespace std;
 
 namespace hol2cpp {
-void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
+void TypeInference::analy_from_bottom(Expr &expr, const string &funcname, LambdaMap &lambda_types_map, LambdaMap &return_lambda_types_map) {
     if (typeid(expr) == typeid(IntegralExpr)) {
         if(expr.expr_type != nullptr) {
             return;
@@ -31,48 +31,56 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         }
 
         // lambda param
-        auto lambda_elem = find_if(the_lambda_ins_mapping.begin(), the_lambda_ins_mapping.end(),
+        auto lambda_elem = find_if(lambda_types_map.begin(), lambda_types_map.end(),
                             [name = trans.name]
                             (auto &iter) {
                                 return name == iter.first;
                             });
 
-        if (lambda_elem != the_lambda_ins_mapping.end()) {
-            auto lambda_index = lambda_elem->second;
-            expr.expr_type = the_lambda_storge[lambda_index];  // shallow copy
-            temp_vec.push_back(make_pair(
-                                            ref(expr.expr_type),
-                                            ref(the_lambda_storge[lambda_index])
-                                        ));
+        if (lambda_elem != lambda_types_map.end()) {
+            expr.expr_type = gen_new_lambda_arg();  // gen lambda arg here
+            lambda_elem->second = ref(expr.expr_type);
             return;
-        }
+        }    
 
         //constructor like Nil that only appears in expr
-        auto cons_elem = find_if(the_cons_type_mapping.begin(), the_cons_type_mapping.end(),
+        auto cons_elem = find_if(the_dtypedef_mapping.begin(), the_dtypedef_mapping.end(),
                             [name = trans.name]
                             (auto& iter) {
                                 return name == iter.first;
                             });
 
-        if (cons_elem != the_cons_type_mapping.end()) {
+        //functions like id in fold that only appears in expr
+        auto func_elem = find_if(the_func_type_mapping.begin(), the_func_type_mapping.end(),
+                            [name = trans.name]
+                            (auto& iter) {
+                                return name == iter.first;
+                            });
+
+        if (cons_elem != the_dtypedef_mapping.end()) {
             expr.expr_type = cons_elem->second.get().decl_type->clone();
+            type_mangling(expr.expr_type);
+            return;
+        }
+        else if (func_elem != the_func_type_mapping.end()) {
+            expr.expr_type = func_elem->second.get().type->clone();
+            //?
             return;
         }
         else {
             expr.expr_type = normal_unknown_type;
         }
-
     }
     else if (typeid(expr) == typeid(ConsExpr)) {
         ConsExpr &trans = reinterpret_cast<ConsExpr &>(expr);
 
         // mark the type of sub-exprs
         for (size_t i = 0; i < trans.args.size(); ++i) {
-            analy_from_bottom(*trans.args[i], funcname);
+            analy_from_bottom(*trans.args[i], funcname, lambda_types_map, return_lambda_types_map);
         }
 
-        // infer expr
-        if (the_cons_type_mapping.find(trans.constructor) == the_cons_type_mapping.end()) {
+        // infer expr's type
+        if (the_dtypedef_mapping.find(trans.constructor) == the_dtypedef_mapping.end()) {
             // it's a function apply
             auto funcdef_iter = the_func_type_mapping.find(trans.constructor); 
 
@@ -80,8 +88,9 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
                 // call functions which are from the FunctionDef
                 FunctionDef &funcdef = funcdef_iter->second.get();
                 trans.expr_type = funcdef.type->clone();
+                type_mangling(trans.expr_type);
 
-                function_apply(trans.expr_type, trans.args);
+                trans.expr_type = function_apply(trans.expr_type, trans.args);
             }
             else {
                 // call functions which are from the pattern's args
@@ -98,13 +107,17 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
                 auto &functype = elem->second.get();
                 trans.expr_type = functype->clone();
+                //type_mangling(trans.expr_type);
 
-                function_apply(trans.expr_type, trans.args);
+                trans.expr_type = function_apply(trans.expr_type, trans.args);
             }
         }
         else {
             // it's a datatype's constructor
-            DatatypeDef &dtypedef = the_cons_type_mapping.find(trans.constructor)->second.get();
+            DatatypeDef dtypedef = the_dtypedef_mapping.find(trans.constructor)->second.get().clone();
+            dtypedef_mangling(dtypedef);
+            
+            // components has been mangled
             auto component = find_if(dtypedef.components.begin(), dtypedef.components.end(),
                                     [cons = trans.constructor]
                                     (auto &com) {
@@ -116,53 +129,40 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
             }
             else {
                 //datatype's decl_type is TemplateType
-                if (ins_map_clear_flag) {
-                    the_argument_type_ins_mapping.clear();
-                }
+                auto cons_iter = the_cons_type_mapping.find(trans.constructor);
+                trans.expr_type = cons_iter->second->clone();
+                type_mangling(trans.expr_type);
 
-                if (component->arguments.size() != trans.args.size()) {
-                    string info = trans.constructor + ": need curring of datatype.\n";
-                    throw info;
-                }
-                
-                // map all type variables
-                for (size_t i = 0; i < component->arguments.size(); ++i) {
-                    // get current VarExpr (lambda args)
-                    if (typeid(*trans.args[i]) == typeid(VarExpr)) {
-                        VarExpr& arg = reinterpret_cast<VarExpr&>(*trans.args[i]);
-                        current_lambda_argname = arg.name;
-                    }
-
-                    template_type_map(component->arguments[i], trans.args[i]->expr_type);
-                }
-                ins_map_clear_flag = false;
-
-                trans.expr_type = dtypedef.decl_type->clone();
-                TemplateType &trans_decl_type = reinterpret_cast<TemplateType &>(*trans.expr_type);
-
-                for (size_t i = 0; i < trans_decl_type.args.size(); ++i) {
-                    template_type_ins(trans_decl_type.args[i]);
-                }
-
-                // ins the lambda arg in datatype (y :: lambda_a # ys :: nat)
-                for (size_t i = 0; i < trans.args.size(); ++i) {
-                    if (typeid(*trans.args[i]) == typeid(VarExpr)) {
-                        VarExpr &lambda_trans = reinterpret_cast<VarExpr &>(*trans.args[i]);
-                        if (is_lambda_arg(lambda_trans.name)) {
-                            template_type_ins(trans.args[i]->expr_type);
-                        }
-                    }
-                }
-                ins_map_clear_flag = true;
+                trans.expr_type = function_apply(trans.expr_type, trans.args);
             }
         }
     }
     else if (typeid(expr) == typeid(BinaryOpExpr)) {
         BinaryOpExpr &trans = reinterpret_cast<BinaryOpExpr &>(expr);
-        // mark type
-        analy_from_bottom(*trans.lhs, funcname);
-        analy_from_bottom(*trans.rhs, funcname);
-        // infer expr
+        
+        analy_from_bottom(*trans.lhs, funcname, lambda_types_map, return_lambda_types_map);
+        analy_from_bottom(*trans.rhs, funcname, lambda_types_map, return_lambda_types_map);
+        
+        if (typeid(*trans.lhs) == typeid(VarExpr) && typeid(*trans.rhs) == typeid(VarExpr)) {
+            VarExpr &trans_lhs = dynamic_cast<VarExpr &>(*trans.lhs);
+            VarExpr &trans_rhs = dynamic_cast<VarExpr &>(*trans.rhs);
+
+            if (the_dtypedef_mapping.find(trans_lhs.name) != the_dtypedef_mapping.end() ||
+                the_dtypedef_mapping.find(trans_rhs.name) != the_dtypedef_mapping.end()) {
+                if (!is_mangled(trans_lhs.expr_type) && is_mangled(trans_rhs.expr_type)) {
+                    template_type_map(trans_rhs.expr_type, trans_lhs.expr_type);
+                    template_type_ins(trans_rhs.expr_type);
+                }
+                else if (is_mangled(trans_lhs.expr_type) && !is_mangled(trans_rhs.expr_type)) {
+                    template_type_map(trans_lhs.expr_type, trans_rhs.expr_type);
+                    template_type_ins(trans_lhs.expr_type);
+                }
+                else {
+                    // do nothing
+                }
+            }
+        }
+
         if (trans.op.value == "=") {
             trans.expr_type = normal_bool_type;
         }
@@ -174,12 +174,12 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         ListExpr &trans = reinterpret_cast<ListExpr &>(expr);
         // mark type
         for (auto &arg: trans.exprs) {
-            analy_from_bottom(*arg, funcname);
+            analy_from_bottom(*arg, funcname, lambda_types_map, return_lambda_types_map);
         }
         //infer expr type for 'a list
-        auto iter = the_cons_type_mapping.find("Cons");
+        auto iter = the_dtypedef_mapping.find("Cons");
 
-        if (iter == the_cons_type_mapping.end()) {
+        if (iter == the_dtypedef_mapping.end()) {
             throw string("cannot find the definition of <Cons>\n");
         }
         DatatypeDef &dtypedef = iter->second.get();
@@ -194,12 +194,12 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         SetExpr &trans = reinterpret_cast<SetExpr &>(expr);
         //mark type
         for (auto &arg: trans.exprs) {
-            analy_from_bottom(*arg, funcname);
+            analy_from_bottom(*arg, funcname, lambda_types_map, return_lambda_types_map);
         }
         //infer expr type for 'a set
-        auto iter = the_cons_type_mapping.find("setCons");
+        auto iter = the_dtypedef_mapping.find("setCons");
 
-        if (iter == the_cons_type_mapping.end()) {
+        if (iter == the_dtypedef_mapping.end()) {
             throw string("cannot find the definition of <setCons>\n");
         }
         DatatypeDef &dtypedef = iter->second.get();
@@ -212,7 +212,7 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
     }
     else if (typeid(expr) == typeid(LetinExpr)) {
         LetinExpr &trans = reinterpret_cast<LetinExpr &>(expr);
-        analy_from_bottom(*trans.equation.expr, funcname);
+        analy_from_bottom(*trans.equation.expr, funcname, lambda_types_map, return_lambda_types_map);
         trans.equation.pattern->expr_type = trans.equation.expr->expr_type->clone();
         pattern_infer(trans.equation.pattern, funcname); 
         // VarExpr &pattern_trans = reinterpret_cast<VarExpr &>(*trans.equation.pattern);
@@ -221,41 +221,45 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
         //                             ref(trans.equation.expr->expr_type)
         //                         );
 
-        analy_from_bottom(*trans.expr, funcname);
+        analy_from_bottom(*trans.expr, funcname, lambda_types_map, return_lambda_types_map);
         trans.expr_type = trans.expr->expr_type->clone();
     }
     else if (typeid(expr) == typeid(CaseExpr)) {
         CaseExpr &trans = reinterpret_cast<CaseExpr &>(expr);
-        analy_from_bottom(*trans.expr, funcname);
+        analy_from_bottom(*trans.expr, funcname, lambda_types_map, return_lambda_types_map);
 
         for (auto &equation: trans.equations) {
             equation.pattern->expr_type = trans.expr->expr_type->clone();
 
             pattern_infer(equation.pattern, funcname);
-            analy_from_bottom(*equation.expr, funcname);
+            analy_from_bottom(*equation.expr, funcname, lambda_types_map, return_lambda_types_map);
         }
         trans.expr_type = trans.equations[0].expr->expr_type->clone();
     }
     else if (typeid(expr) == typeid(LambdaExpr)) {
         LambdaExpr &trans = reinterpret_cast<LambdaExpr &>(expr);
 
-        ++lambda_depth;
-        for (auto &param: trans.parameters) {
-            gen_new_lambda_arg();
-            the_lambda_ins_mapping.emplace(
-                                            param,
-                                            lambda_counter - 1
-                                        );
-
-            trans.param_types.emplace(param, lambda_counter - 1);
+        for (auto &elem: lambda_types_map) { trans.lambda_types_map.insert(elem); }
+        for (auto &param: trans.parameters) { 
+            trans.lambda_storage.push_back(gen_new_lambda_arg());
+            trans.lambda_types_map.emplace(param, ref(trans.lambda_storage.back())); 
         }
 
-        analy_from_bottom(*trans.expr, funcname);
+        LambdaMap return_map {};
+        analy_from_bottom(*trans.expr, funcname, trans.lambda_types_map, return_map);
+
+        LambdaMap temp_map = return_map;
+        for (auto &elem : trans.lambda_types_map) {
+            auto iter = return_map.find(elem.first);
+            if (iter == return_map.end()) {
+                temp_map.insert(elem);
+            }
+        }
+        trans.lambda_types_map = temp_map;
 
         Ptr<FuncType> lambda_type(new FuncType);
         for (size_t i = 0; i < trans.parameters.size(); ++i) {
-            auto lambda_index = the_lambda_ins_mapping.find(trans.parameters[i])->second;
-            auto &type = the_lambda_storge[lambda_index];
+            auto &type = trans.lambda_types_map.find(trans.parameters[i])->second.get();
             lambda_type->types.push_back(type);
         }
         auto &type = trans.expr->expr_type;
@@ -263,9 +267,9 @@ void TypeInference::analy_from_bottom(Expr &expr, const string &funcname) {
 
         expr.expr_type = lambda_type;
 
-        --lambda_depth;
-        if(lambda_depth == 0) {
-            the_lambda_ins_mapping.clear();
+        //return_lambda_types_map = trans.lambda_types_map;
+        for (auto &elem : trans.lambda_types_map) {
+            return_lambda_types_map.insert(elem);
         }
     }
     else {
@@ -321,25 +325,169 @@ void TypeInference::analy_lambda_expr(Expr &expr, const string &funcname) {
     else if (typeid(expr) == typeid(LambdaExpr)) {
         LambdaExpr &trans = reinterpret_cast<LambdaExpr &>(expr);
 
-        ++lambda_depth;
-
         analy_lambda_expr(*trans.expr, funcname);
 
         Ptr<FuncType> lambda_type(new FuncType);
         for (size_t i = 0; i < trans.parameters.size(); ++i) {
-            auto lambda_index = trans.param_types.find(trans.parameters[i])->second;
-            auto &type = the_lambda_storge[lambda_index];
+            auto &type = trans.lambda_types_map.find(trans.parameters[i])->second.get();
             lambda_type->types.push_back(type);
         }
         auto &type = trans.expr->expr_type;
         lambda_type->types.push_back(type);
 
         expr.expr_type = lambda_type;
-
-        --lambda_depth;
     }
     else {
         cerr << "analy_lambda_expr(): bad match.\n";
+    }
+}
+
+void TypeInference::analy_from_top(Expr &expr) {
+    if (typeid(expr) == typeid(IntegralExpr)) {
+        return;
+    }
+    else if (typeid(expr) == typeid(VarExpr)) {
+        return;
+    }
+    else if (typeid(expr) == typeid(ConsExpr)) {
+        ConsExpr &trans = reinterpret_cast<ConsExpr &>(expr);
+
+        if (the_dtypedef_mapping.find(trans.constructor) == the_dtypedef_mapping.end()) {
+            // it's a function apply
+            Ptr<Type> type;
+            if (the_arg_type_mapping.find(trans.constructor) != the_arg_type_mapping.end()) {
+                type = the_arg_type_mapping.find(trans.constructor)->second.get()->clone();
+            }
+            else {
+                type = the_func_type_mapping.find(trans.constructor)->second.get().type->clone();
+                type_mangling(type);
+            }
+
+            
+
+            auto &functype = dynamic_cast<FuncType &>(*type);
+            if (typeid(*trans.expr_type) == typeid(FuncType)) {
+                auto &trans_functype = dynamic_cast<FuncType &>(*trans.expr_type);
+
+                for (size_t i = 0; i < trans_functype.types.size(); ++i) {
+                    template_type_map(functype.types[i], trans_functype.types[i]);
+                    template_type_ins(type);
+                }
+
+                for (size_t i = 0; i < trans.args.size(); ++i) {
+                    if (is_mangled(functype.types[i])) { break; }
+                    if (typeid(*trans.args[i]) == typeid(IntegralExpr) ||
+                        typeid(*trans.args[i]) == typeid(VarExpr)      ||
+                        typeid(*trans.args[i]) == typeid(LambdaExpr)) {
+                        if (is_mangled(trans.args[i]->expr_type)) {
+                            trans.args[i]->expr_type = functype.types[i]->clone();
+                            analy_from_top(*trans.args[i]);
+                        }
+                    }
+                    else {
+                        trans.args[i]->expr_type = functype.types[i]->clone();
+                        analy_from_top(*trans.args[i]);
+                    }
+                }
+            }
+            else {
+                template_type_map(functype.types[functype.types.size() - 1], trans.expr_type);
+                template_type_ins(type);
+
+                for (size_t i = 0; i < trans.args.size(); ++i) {
+                    if (is_mangled(functype.types[i])) { break; }
+                    if (typeid(*trans.args[i]) == typeid(IntegralExpr) ||
+                        typeid(*trans.args[i]) == typeid(VarExpr)      ||
+                        typeid(*trans.args[i]) == typeid(LambdaExpr)) {
+                        if (is_mangled(trans.args[i]->expr_type)) {
+                            trans.args[i]->expr_type = functype.types[i]->clone();
+                            analy_from_top(*trans.args[i]);
+                        }
+                    }
+                    else {
+                        trans.args[i]->expr_type = functype.types[i]->clone();
+                        analy_from_top(*trans.args[i]);
+                    }
+                }
+            }
+        }
+        else {
+            // it's a datatype's constructor
+            auto type = the_cons_type_mapping.find(trans.constructor)->second->clone();
+            type_mangling(type);
+            auto &dtype_funcform = dynamic_cast<FuncType &>(*type);
+
+            if(typeid(*dtype_funcform.types[dtype_funcform.types.size() - 1]) == typeid(NormalType)) {
+                return;
+            }
+            else {
+                template_type_map(dtype_funcform.types[dtype_funcform.types.size() - 1], trans.expr_type);
+                template_type_ins(type);
+                
+
+                for (size_t i = 0; i < trans.args.size(); ++i) {
+                    if (is_mangled(trans.args[i]->expr_type)) {
+                        trans.args[i]->expr_type = dtype_funcform.types[i]->clone();
+                        analy_from_top(*trans.args[i]);
+                    }
+                }
+            }
+        }
+    }
+    else if (typeid(expr) == typeid(BinaryOpExpr)) {
+        BinaryOpExpr &trans = reinterpret_cast<BinaryOpExpr &>(expr);
+
+        if (trans.op.value == "=") {
+            return;
+        }
+
+        if (is_mangled(trans.lhs->expr_type)) { 
+            trans.lhs->expr_type = trans.expr_type; 
+            analy_from_top(*trans.lhs);
+        }
+        if (is_mangled(trans.rhs->expr_type)) { 
+            trans.rhs->expr_type = trans.expr_type; 
+            analy_from_top(*trans.lhs);
+        }
+    }
+    else if (typeid(expr) == typeid(ListExpr)) {
+        ListExpr &trans = reinterpret_cast<ListExpr &>(expr);
+        TemplateType &tmpltype = reinterpret_cast<TemplateType &>(*trans.expr_type);
+
+        // mark type
+        for (auto &arg: trans.exprs) {
+            if (is_mangled(arg->expr_type)) { arg->expr_type = tmpltype.args[0]; }
+            analy_from_top(*arg);
+        }
+    }
+    else if (typeid(expr) == typeid(SetExpr)) {
+        SetExpr &trans = reinterpret_cast<SetExpr &>(expr);
+        TemplateType &tmpltype = reinterpret_cast<TemplateType &>(*trans.expr_type);
+
+        // mark type
+        for (auto &arg: trans.exprs) {
+            if (is_mangled(arg->expr_type)) { arg->expr_type = tmpltype.args[0]; }
+            analy_from_top(*arg);
+        }
+    }
+    else if (typeid(expr) == typeid(LetinExpr)) {
+        LetinExpr &trans = reinterpret_cast<LetinExpr &>(expr);
+
+        trans.expr->expr_type = trans.expr_type;
+        analy_from_top(*trans.expr);
+    }
+    else if (typeid(expr) == typeid(CaseExpr)) {
+        CaseExpr &trans = reinterpret_cast<CaseExpr &>(expr);
+        for (auto &equation: trans.equations) {
+            equation.expr->expr_type = trans.expr_type;
+            analy_from_top(*equation.expr);
+        }
+    }
+    else if (typeid(expr) == typeid(LambdaExpr)) {
+        return;
+    }
+    else {
+        cerr << "analy_from_top(): bad match.\n";
     }
 }
 } // namespace hol2cpp

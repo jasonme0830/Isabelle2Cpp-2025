@@ -186,7 +186,7 @@ std::deque<std::pair<T1, T2>> zip(std::deque<T1> arg1, std::deque<T2> arg2) {
     arg2.erase(arg2.begin(), arg2.begin() + 1);
     auto ys = std::move(arg2);
     auto temp0 = ([&] {
-        auto temp1 = arg1;
+        auto temp1 = std::move(arg1);
 
         // [] \<Rightarrow> []
         if (temp1.empty()) {
@@ -204,12 +204,21 @@ std::deque<std::pair<T1, T2>> zip(std::deque<T1> arg1, std::deque<T2> arg2) {
     return temp0;
 }
 
+template<typename T1, typename T2, typename T3>
+std::deque<T3> map2(const std::function<T3(const T1 &, const T2 &)> &arg1, std::deque<T1> arg2, std::deque<T2> arg3) {
+    // map2 f xs ys \<equiv> map (\<lambda>(x,y). f x y) (zip xs ys)
+    std::function temp0 = [=] (const std::pair<T1, T2> &x, const T2 &y) {
+        return arg1(x, y);
+    };
+    return map(temp0, zip(std::move(arg2), std::move(arg3)));
+}
+
 template<typename T1>
 std::deque<T1> insert(const T1 &arg1, std::deque<T1> arg2) {
     // insert x xs = (if x \<in> set xs then xs else x # xs)
     auto temp0 = std::move(arg2);
     std::deque<T1> temp1;
-    if (std::set(temp0.begin(), temp0.end()).count(arg1)) {
+    if (std::set<T1>(temp0.begin(), temp0.end()).count(arg1)) {
         temp1 = std::move(arg2);
     } else {
         auto temp2 = std::move(arg2);
@@ -315,7 +324,7 @@ bool distinct(std::deque<T1> arg1) {
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto xs = std::move(arg1);
     auto temp0 = xs;
-    return !std::set(temp0.begin(), temp0.end()).count(x) && distinct(std::move(xs));
+    return !std::set<T1>(temp0.begin(), temp0.end()).count(x) && distinct(std::move(xs));
 }
 
 template<typename T1>
@@ -331,7 +340,7 @@ std::deque<T1> remdups(std::deque<T1> arg1) {
     auto xs = std::move(arg1);
     auto temp0 = std::move(xs);
     std::deque<T1> temp1;
-    if (std::set(temp0.begin(), temp0.end()).count(x)) {
+    if (std::set<T1>(temp0.begin(), temp0.end()).count(x)) {
         temp1 = remdups(std::move(xs));
     } else {
         auto temp2 = remdups(std::move(xs));
@@ -393,7 +402,7 @@ std::deque<std::pair<std::uint64_t, T1>> enumerate(const std::uint64_t &arg1, st
     // enumerate n xs = zip [n..<n + length xs] xs
     auto temp0 = arg1;
     auto temp1 = arg1 + arg2.size();
-    std::deque<T1> temp2;
+    std::deque<std::uint64_t> temp2;
     for (auto temp3 = temp0; temp3 < temp1; ++temp3) {
         temp2.push_back(temp3);
     }
@@ -418,18 +427,23 @@ std::deque<T1> rotate1(std::deque<T1> arg1) {
 }
 
 template<typename T1>
-std::deque<T1> nths(std::deque<T1> arg1, const std::set<std::uint64_t> &arg2) {
-    // nths xs A = map fst (filter (\<lambda>p. snd p \<in> A) (zip xs [0..<size xs]))
-    std::function temp0 = [=] (const T1 &p) {
-        return arg2.count(p.second);
-    };
-    auto temp1 = 0;
-    auto temp2 = size(std::move(arg1));
-    std::deque<T2> temp3;
-    for (auto temp4 = temp1; temp4 < temp2; ++temp4) {
-        temp3.push_back(temp4);
+std::deque<std::deque<T1>> n_lists(const std::uint64_t &arg1, std::deque<T1> arg2) {
+    // n_lists 0 xs = [[]]
+    if (arg1 == 0) {
+        return std::deque<std::deque<T1>>{std::deque<T1>()};
     }
-    return map(fst, filter(temp0, zip(arg1, temp3)));
+
+    // n_lists (Suc n) xs = concat (map (\<lambda>ys. map (\<lambda>y. y # ys) xs) (n_lists n xs))
+    auto n = arg1 - 1;
+    std::function temp0 = [=] (std::deque<T1> ys) {
+        std::function temp1 = [=] (const T1 &y) {
+            auto temp2 = std::move(ys);
+            temp2.push_front(y);
+            return std::move(temp2);
+        };
+        return map(temp1, arg2);
+    };
+    return concat(map(temp0, n_lists(n, std::move(arg2))));
 }
 
 template<typename T1>
@@ -455,7 +469,7 @@ T1 min_list(std::deque<T1> arg1) {
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto xs = std::move(arg1);
     auto temp0 = ([&] {
-        auto temp1 = xs;
+        auto temp1 = std::move(xs);
 
         // [] \<Rightarrow> x
         if (temp1.empty()) {
@@ -553,7 +567,7 @@ template<typename T1>
 std::set<std::deque<T1>> listset(std::deque<std::set<T1>> arg1) {
     // listset [] = {[]}
     if (arg1.empty()) {
-        return std::set<std::deque<T1>>{std::set<std::deque<T1>>()};
+        return std::set<std::deque<T1>>{std::deque<T1>()};
     }
 
     // listset (A # As) = set_Cons A (listset As)
@@ -595,14 +609,14 @@ template<typename T1>
 bool member(std::deque<T1> arg1, const T1 &arg2) {
     // member xs x \<longleftrightarrow> x \<in> set xs
     auto temp0 = std::move(arg1);
-    return std::set(temp0.begin(), temp0.end()).count(arg2);
+    return std::set<T1>(temp0.begin(), temp0.end()).count(arg2);
 }
 
 template<typename T1>
 bool list_ex(const std::function<bool(const T1 &)> &arg1, std::deque<T1> arg2) {
     // list_ex P xs \<longleftrightarrow> Bex (set xs) P
     auto temp0 = std::move(arg2);
-    return Bex(std::set(temp0.begin(), temp0.end()), arg1);
+    return Bex(std::set<T1>(temp0.begin(), temp0.end()), arg1);
 }
 
 template<typename T1>

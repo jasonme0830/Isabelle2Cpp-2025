@@ -6,6 +6,9 @@ namespace hol2cpp {
 void TypeInference::pattern_infer(Ptr<Expr> &expr, const string &funcname) {
     if (typeid(*expr) == typeid(VarExpr)) {
         VarExpr &arg_trans = reinterpret_cast<VarExpr &>(*expr);
+        if (the_cons_type_mapping.find(arg_trans.name) != the_cons_type_mapping.end())
+            return;
+            
         the_arg_type_mapping.emplace(
                                     arg_trans.name, 
                                     ref(arg_trans.expr_type)
@@ -34,7 +37,7 @@ void TypeInference::pattern_infer(Ptr<Expr> &expr, const string &funcname) {
 
 void TypeInference::pattern_consexpr_infer(ConsExpr &consexpr, const string &funcname) {
     // all ConsExpr in pattern is datatype's constructor (Cons x xs) :: nat list
-    DatatypeDef &dtypedef = (the_cons_type_mapping.find(consexpr.constructor))->second.get();
+    DatatypeDef &dtypedef = (the_dtypedef_mapping.find(consexpr.constructor))->second.get();
     auto component = find_if(dtypedef.components.begin(), dtypedef.components.end(), 
                             [cons = consexpr.constructor]
                             (auto &com) {
@@ -73,7 +76,7 @@ void TypeInference::pattern_consexpr_infer(ConsExpr &consexpr, const string &fun
                 ArgumentType &argument_type_trans = dynamic_cast<ArgumentType &>(*trans_decl_type.args[i]);
                 the_argument_type_ins_mapping.emplace(
                                                     argument_type_trans.name, 
-                                                    ref(trans_expr_type.args[i])
+                                                    trans_expr_type.args[i]->clone()
                                                 );
             }
             catch (bad_cast &) {
@@ -87,7 +90,7 @@ void TypeInference::pattern_consexpr_infer(ConsExpr &consexpr, const string &fun
                 if (typeid(*component->arguments[i]) == typeid(ArgumentType)) {  
                     //institution and map the_arg_type_mapping
                     ArgumentType &com_arg_trans = reinterpret_cast<ArgumentType &>(*component->arguments[i]);
-                    auto &ins_type = the_argument_type_ins_mapping.find(com_arg_trans.name)->second.get();
+                    auto &ins_type = the_argument_type_ins_mapping.find(com_arg_trans.name)->second;
                     consexpr.args[i]->expr_type = ins_type->clone();
 
                     try {
@@ -133,7 +136,7 @@ void TypeInference::pattern_consexpr_infer(ConsExpr &consexpr, const string &fun
                 if (typeid(*component->arguments[i]) == typeid(ArgumentType)) {
                     //institution and map the_arg_type_mapping
                     ArgumentType &com_arg_trans = reinterpret_cast<ArgumentType &>(*component->arguments[i]);
-                    auto &ins_type = the_argument_type_ins_mapping.find(com_arg_trans.name)->second.get();
+                    auto &ins_type = the_argument_type_ins_mapping.find(com_arg_trans.name)->second;
                     consexpr.args[i]->expr_type = ins_type->clone();
                 }
                 else if (typeid(*component->arguments[i]) == typeid(TemplateType)) {

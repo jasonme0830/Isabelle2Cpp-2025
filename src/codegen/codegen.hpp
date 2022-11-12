@@ -12,6 +12,10 @@
 #include "../utility/error.hpp"
 #include "../utility/format.hpp"
 
+#include <vector>
+#include <string>
+#include <functional>
+
 #define assert_true(expr) assert_impl(expr, CodegenError)
 
 namespace hol2cpp {
@@ -24,6 +28,35 @@ extern std::map<std::string, std::string> theHeaderMapping;
 
 void warning(const std::string &msg);
 bool is_unit(const std::string &expr);
-std::string enclose_expr(const std::string &expr);
+
+template<char LParen = '(', char RParen = ')'>
+inline std::string enclose(const std::string &expr) {
+    return LParen + expr + RParen;
+}
+template<char LParen = '(', char RParen = ')'>
+std::string enclose_if_needed(const std::string &expr) {
+    if (is_unit(expr)) {
+        return expr;
+    } else {
+        return enclose<LParen, RParen>(expr);
+    }
+}
+
 std::string unmove_expr(std::string expr);
+
+template<typename T, typename ToStr = std::function<std::string(const T &)>>
+inline std::string join(
+    const std::vector<T> &vec,
+    const ToStr &to_str,
+    const std::string &sep = ", "
+) {
+    std::string res;
+    for (const auto &item : vec) {
+        if (!res.empty()) {
+            res += sep;
+        }
+        res += to_str(item);
+    }
+    return res;
+}
 } // namespace hol2cpp

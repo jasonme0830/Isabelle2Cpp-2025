@@ -29,7 +29,7 @@ TypeInfo::TypeInfo(string name)
 
 TypeInfo::TypeInfo(string name, TypeInfo argument)
   : name(move(name)) {
-    if (argument.empty()) {
+    if (argument.lack()) {
         name.clear();
     } else {
         arguments.push_back(move(argument));
@@ -43,7 +43,7 @@ TypeInfo TypeInfo::replace_with(string name) const {
 }
 
 string TypeInfo::to_str() const {
-    if (name.empty()) {
+    if (lack()) {
         return "UNKNOWN_TYPE";
     }
 
@@ -78,7 +78,18 @@ string TypeInfo::to_str_as_arg() const {
     return as_arg(*this);
 }
 
-bool TypeInfo::empty() const {
+void TypeInfo::avoid_lack(FuncEntity &func, const string &constructor) const {
+    if (lack()) {
+        throw CodegenError(
+            "Shit! Here is a bug!\n  The constructor $ lacks of type information in the definition of function $"_fs.format(
+                info::strong(constructor),
+                info::strong(func.name())
+            )
+        );
+    }
+}
+
+bool TypeInfo::lack() const {
     return name.empty();
 }
 
@@ -102,7 +113,7 @@ bool TypeInfo::movable() const {
 const TypeInfo &TypeInfo::operator[](int i) const {
     static TypeInfo theNullTypeInfo;
 
-    if (empty()) {
+    if (lack()) {
         return theNullTypeInfo;
     } else if (i == -1) {
         return result_typeinfo();

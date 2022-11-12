@@ -33,4 +33,22 @@ Ptr<Type> FuncType::clone() const {
     }
     return functype;
 }
+
+DatatypeDef::Component DatatypeDef::Component::clone() const {
+    Component result;
+    result.constructor = this->constructor;
+    for (auto &argument: arguments) {
+        result.arguments.push_back(argument->clone());
+    }
+    return result;
+}
+
+DatatypeDef DatatypeDef::clone() const {
+    DatatypeDef result;
+    result.decl_type = this->decl_type->clone();
+    for (auto &component: this->components) {
+        result.components.push_back(component.clone());
+    }
+    return result;
+}
 } // namespace hol2cpp

@@ -26,14 +26,6 @@ bool is_unit(const string &expr) {
     return true;
 }
 
-string enclose_expr(const string &expr) {
-    if (is_unit(expr)) {
-        return expr;
-    } else {
-        return '(' + expr + ')';
-    }
-}
-
 string unmove_expr(string expr) {
     if (expr.substr(0, 9) == "std::move") {
         return expr.substr(10, expr.size() - 11);

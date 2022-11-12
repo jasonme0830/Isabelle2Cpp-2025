@@ -48,7 +48,7 @@ std::deque<std::uint64_t> merge_sort(std::deque<std::uint64_t> arg1) {
     }
 
     // merge_sort xs = merge (merge_sort (take ((length xs) div 2) xs)) (merge_sort (drop ((length xs) div 2) xs))
-    return merge(merge_sort(decltype(arg1){ arg1.begin(), arg1.begin() + arg1.size() / 2 }), merge_sort(decltype(arg1){ arg1.begin() + arg1.size() / 2, arg1.end() }));
+    return merge(merge_sort(std::deque<std::uint64_t>(arg1.begin(), arg1.begin() + arg1.size() / 2)), merge_sort(std::deque<std::uint64_t>(arg1.begin() + arg1.size() / 2, arg1.end())));
 }
 
 slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::uint64_t> &arg2) {

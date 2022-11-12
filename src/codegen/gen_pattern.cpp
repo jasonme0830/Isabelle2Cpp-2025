@@ -57,7 +57,7 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
 
     else if (constructor == "Suc") {
         func.add_pattern_cond("$ != 0", prev);
-        args[0]->gen_pattern(func, enclose_expr(prev) + " - 1");
+        args[0]->gen_pattern(func, enclose_if_needed(prev) + " - 1");
     }
 
     else if (constructor == "Some") {
@@ -77,19 +77,26 @@ void ConsExpr::gen_pattern(FuncEntity &func, const string &prev) const {
             func.add_pattern_cond("!$.empty()", prev);
             args[0]->gen_pattern(func, prev + ".front()");
 
+            auto type = expr_type->gen_typeinfo(func).to_str();
             if (dynamic_cast<VarExpr *>(args[1].get())) {
                 if (theOptimizer.option().use_deque) {
-                    args[1]->gen_pattern(func, "decltype(" + prev + "){" + prev + ".begin() + 1, " + prev + ".end()}");
+                    args[1]->gen_pattern(
+                        func,
+                        "$($.begin() + 1, $.end())"_fs.format(type, prev, prev)
+                    );
                 } else {
-                    args[1]->gen_pattern(func, "decltype(" + prev + "){std::next(" + prev + ".begin()), " + prev + ".end()}");
+                    args[1]->gen_pattern(
+                        func,
+                        "$(std::next($.begin()), $.end())"_fs.format(type, prev, prev)
+                    );
                 }
             } else {
                 auto temp = func.gen_temp();
 
                 if (theOptimizer.option().use_deque) {
-                    func.add_pattern("decltype($) $($.begin() + 1, $.end());", prev, temp, prev, prev);
+                    func.add_pattern("$ $($.begin() + 1, $.end());", type, temp, prev, prev);
                 } else {
-                    func.add_pattern("decltype($) $(std::next($.begin()), $.end());", prev, temp, prev, prev);
+                    func.add_pattern("$ $(std::next($.begin()), $.end());", type, temp, prev, prev);
                 }
 
                 args[1]->gen_pattern(func, temp);

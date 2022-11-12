@@ -4,37 +4,50 @@ using namespace std;
 
 namespace hol2cpp {
 void TypeInference::template_type_ins(Ptr<Type> &type) {
-    if (typeid(*type) == typeid(TemplateType)) {
+    if (typeid(*type) == typeid(ArgumentType)) {
+        ArgumentType &argmttype = reinterpret_cast<ArgumentType &>(*type);
+
+        auto ins_type_iter = the_argument_type_ins_mapping.find(argmttype.name);
+        
+        if (ins_type_iter != the_argument_type_ins_mapping.end()) {
+            auto ins_type = ins_type_iter->second.get()->clone();
+            type = ins_type;
+        }
+    }
+    else if (typeid(*type) == typeid(TemplateType)) {
         TemplateType &tmpltype = reinterpret_cast<TemplateType &>(*type);
 
         for(size_t i = 0; i < tmpltype.args.size(); ++i) {
             template_type_ins(tmpltype.args[i]);
         }
     }
-    else if (typeid(*type) == typeid(ArgumentType)) {
-        ArgumentType &argmttype = reinterpret_cast<ArgumentType &>(*type);
+    else if (typeid(*type) == typeid(FuncType)) {
+        FuncType &functype = reinterpret_cast<FuncType &>(*type);
 
-        auto ins_type_iter = the_argument_type_ins_mapping.find(argmttype.name);
-        
-        if (ins_type_iter != the_argument_type_ins_mapping.end()) {
-            auto ins_type = ins_type_iter->second.get();
-            type = ins_type;
+        for (size_t i = 0; i < functype.types.size(); ++i) {
+            template_type_ins(functype.types[i]);
         }
     }
     else return;
 }
 
-void TypeInference::template_type_map(Ptr<Type> &com_type, Ptr<Type> &ins_type) {
-    if (is_lambda_arg(current_lambda_argname)) {
-        ins_type = com_type->clone();
-        auto iter = the_lambda_ins_mapping.find(current_lambda_argname);
-        the_lambda_storge[iter->second] = ins_type;
-        return;
+void TypeInference::template_type_ins_lambda(Ptr<Expr> &lambda_expr) {
+    LambdaExpr &lambda_trans = reinterpret_cast<LambdaExpr &>(*lambda_expr);
+
+    for (auto &elem : lambda_trans.lambda_types_map) {
+        template_type_ins(elem.second.get());
     }
-    
+
+    template_type_ins(lambda_trans.expr->expr_type);
+}
+
+void TypeInference::template_type_map(Ptr<Type> &com_type, Ptr<Type> &ins_type) {
     if (typeid(*com_type) == typeid(ArgumentType)) {
         ArgumentType &com_type_trans = reinterpret_cast<ArgumentType &>(*com_type);
-        the_argument_type_ins_mapping.emplace(com_type_trans.name, ref(ins_type));
+        the_argument_type_ins_mapping.emplace(
+                                                com_type_trans.name, 
+                                                ins_type->clone()
+                                            );
     }
     else if (typeid(*com_type) == typeid(TemplateType)) {
         TemplateType &com_type_trans = reinterpret_cast<TemplateType &>(*com_type);
@@ -44,33 +57,46 @@ void TypeInference::template_type_map(Ptr<Type> &com_type, Ptr<Type> &ins_type) 
             template_type_map(com_type_trans.args[i], ins_type_trans.args[i]);
         }
     }
+    else if (typeid(*com_type) == typeid(FuncType)) {
+        FuncType &com_type_trans = reinterpret_cast<FuncType &>(*com_type);
+        FuncType &ins_type_trans = reinterpret_cast<FuncType &>(*ins_type);
+
+        for (size_t i = 0; i < com_type_trans.types.size(); ++i) {
+            template_type_map(com_type_trans.types[i], ins_type_trans.types[i]);
+        }
+    }
     else return;
 }
 
-void TypeInference::function_apply(Ptr<Type> &functype, std::vector<Ptr<Expr>> &params) {  
-    FuncType &functype_trans = reinterpret_cast<FuncType &>(*functype);
-    auto argnum = functype_trans.types.size();
+void TypeInference::template_type_map_lambda(Ptr<Type> &com_type, Ptr<Type> &ins_type) {
+    ins_type = com_type->clone();
+}
 
-    if (argnum - 1 != params.size()) {
-        throw string("need curring of function.\n");
-    }
+Ptr<Type> TypeInference::function_apply(Ptr<Type> &functype, std::vector<Ptr<Expr>> &params) {  
+    Ptr<Type> return_type = functype->clone();
+    auto return_type_trans = reinterpret_cast<FuncType *>(return_type.get());
 
-    for (size_t i = 0; i < argnum - 1; ++i) {
-        function_apply_aux(functype_trans.types[0], params[i]->expr_type);
-        function_update(functype_trans.types);
+    for (size_t i = 0; i < params.size(); ++i) {
+        if ((!is_mangled(return_type_trans->types[0]) && is_mangled(params[i]->expr_type)) || 
+            (is_lambda(params[i]->expr_type))) { function_apply_aux(params[i]->expr_type, return_type_trans->types[0]); }
+        else                                   { function_apply_aux(return_type_trans->types[0], params[i]->expr_type); }
 
-        for (auto &elem : the_lambda_ins_mapping) {
-            template_type_ins(the_lambda_storge[elem.second]);
+        function_update(return_type_trans->types);
+
+        for (size_t j = 0; j < params.size(); ++j) { 
+            if (typeid(*params[j]) == typeid(LambdaExpr)) { template_type_ins_lambda(params[j]); }
+            else                                          { template_type_ins(params[j]->expr_type); }
         }
 
         ins_map_clear_flag = true;
     }
-
-    for (auto& elem : temp_vec) {
-        elem.first.get() = elem.second.get();
-    }
     
-    functype = functype_trans.types[0];
+    if (return_type_trans->types.size() == 1) { 
+        return return_type_trans->types[0];
+    }
+    else {
+        return return_type;
+    }
 }
 
 void TypeInference::function_apply_aux(Ptr<Type> &func_param_type, Ptr<Type> &ins_param_type) {
@@ -84,77 +110,148 @@ void TypeInference::function_apply_aux(Ptr<Type> &func_param_type, Ptr<Type> &in
     else if (typeid(*func_param_type) == typeid(ArgumentType)) {
         ArgumentType &func_param_type_trans = reinterpret_cast<ArgumentType &>(*func_param_type);
         the_argument_type_ins_mapping.emplace(
-                                            func_param_type_trans.name, 
-                                            ref(ins_param_type)
-                                        );
+                                                func_param_type_trans.name, 
+                                                ins_param_type->clone()
+                                            );
     }
     else if (typeid(*func_param_type) == typeid(TemplateType)) {
         TemplateType &func_param_type_trans = reinterpret_cast<TemplateType &>(*func_param_type);
         TemplateType &ins_param_type_trans = reinterpret_cast<TemplateType &>(*ins_param_type);
+
         for (size_t i = 0; i < func_param_type_trans.args.size(); ++i) {
             function_apply_aux(func_param_type_trans.args[i], ins_param_type_trans.args[i]);
         }
     }
     else { 
-        //FunctionType(ProductType?)
+        //FunctionType, ProductType is TemplateType of ('a, 'b)Pair now
         FuncType &func_param_type_trans = reinterpret_cast<FuncType &>(*func_param_type);
         FuncType &ins_param_type_trans = reinterpret_cast<FuncType &>(*ins_param_type);
+
         for (size_t i = 0; i < func_param_type_trans.types.size(); ++i) {
             function_apply_aux(func_param_type_trans.types[i], ins_param_type_trans.types[i]);
         }
     }            
+    
     ins_map_clear_flag = false;
 }
 
 void TypeInference::function_update(vector<Ptr<Type>> &args) {
     if (args.size() == 1) return;
 
-    vector<reference_wrapper<Ptr<Type>>> tem_vec;
-    for (size_t i = 1; i < args.size(); ++i) {
-        tem_vec.push_back(ref(args[i]));
-    }
+    vector<Ptr<Type>> temp;
 
-    for (size_t i = 0; i < tem_vec.size(); ++i) {
-        template_type_ins(tem_vec[i]);
-    }
+    for (size_t i = 1; i < args.size(); ++i) { temp.push_back(args[i]); }
+    for (size_t i = 0; i < temp.size(); ++i) { template_type_ins(temp[i]); }
 
-    for (size_t i = 0; i < tem_vec.size(); ++i) {
-        args[i] = tem_vec[i].get();
-    }
+    args = temp; 
 }
 
-void TypeInference::gen_new_lambda_arg() {
-    string lambda("lambda_");
+Ptr<Type> TypeInference::gen_new_lambda_arg() {
+    string lambda("lambda@");
     lambda += (static_cast<char>('a' + lambda_counter));
     ++lambda_counter;
 
     Ptr<Type> ptr = make_unique<ArgumentType>(lambda);
-    the_lambda_storge.push_back(move(ptr));
+    return ptr;
 }
 
-bool TypeInference::is_lambda_arg(const std::string &argname) {
-    return the_lambda_ins_mapping.find(argname) == the_lambda_ins_mapping.end() ? false : true;
+void TypeInference::type_mangling(Ptr<Type> &type) {
+    type_mangling_aux(type);
+
+    ++argument_counter;
 }
 
-Ptr<Type> TypeInference::analy_if_expr(Expr &ifexpr, const string &funcname) {
-    ConsExpr &ifexpr_trans = reinterpret_cast<ConsExpr &>(ifexpr);
-    for (size_t i = 1; i < ifexpr_trans.args.size(); ++i) {
-        if (typeid(*ifexpr_trans.args[i]) != typeid(ConsExpr)) {
-            return ifexpr_trans.args[i]->expr_type;
-        }
-        else {
-            ConsExpr &arg_trans = reinterpret_cast<ConsExpr &>(*ifexpr_trans.args[i]);
-            if (arg_trans.constructor == "If") {
-                for (size_t j = 1; j < arg_trans.args.size(); ++j) {
-                    analy_if_expr(*arg_trans.args[j], funcname);
-                }
-            }
-            else {
-                return arg_trans.expr_type;
-            }
+void TypeInference::type_mangling_aux(Ptr<Type> &type) {
+    if (typeid(*type) == typeid(NormalType)) {
+        return;
+    }
+    else if (typeid(*type) == typeid(ArgumentType)) {
+        ArgumentType &trans = dynamic_cast<ArgumentType &>(*type);
+
+        string suffix = string("#") + to_string(argument_counter);
+        trans.name += suffix;
+    }
+    else if (typeid(*type) == typeid(TemplateType)) {
+        TemplateType &trans = dynamic_cast<TemplateType &>(*type);
+        for (auto &elem: trans.args) {
+            type_mangling_aux(elem);
         }
     }
-    return nullptr;
+    else {
+        // FuncType
+        FuncType &trans = dynamic_cast<FuncType &>(*type);
+        for (auto &elem: trans.types) {
+            type_mangling_aux(elem);
+        }
+    }
+}
+
+void TypeInference::dtypedef_mangling(DatatypeDef &dtypedef) {
+    type_mangling_aux(dtypedef.decl_type);
+
+    for (auto &component: dtypedef.components) {
+        for (auto &argument: component.arguments) {
+            type_mangling_aux(argument);
+        }
+    }
+    
+    ++argument_counter;
+}
+
+bool TypeInference::is_mangled(Ptr<Type> &type) {
+    if (typeid(*type) == typeid(NormalType)) {
+        return false;
+    }
+    else if (typeid(*type) == typeid(ArgumentType)) {
+        ArgumentType &trans = dynamic_cast<ArgumentType &>(*type);
+
+        return (trans.name.find('#') != string::npos) ? true : false;
+    }
+    else if (typeid(*type) == typeid(TemplateType)) {
+        TemplateType &trans = dynamic_cast<TemplateType &>(*type);
+        for (auto &elem: trans.args) {
+            if (is_mangled(elem)) 
+                return true;
+        }
+        return false;
+    }
+    else {
+        // FuncType
+        FuncType &trans = dynamic_cast<FuncType &>(*type);
+        for (auto &elem: trans.types) {
+            if (is_mangled(elem)) 
+                return true;
+        }
+        return false;
+    }
+}
+
+bool TypeInference::is_lambda(Ptr<Type> &type) {
+    if (typeid(*type) == typeid(NormalType)) {
+        return false;
+    }
+    else if (typeid(*type) == typeid(ArgumentType)) {
+        ArgumentType &trans = dynamic_cast<ArgumentType &>(*type);
+
+        return (trans.name.find('@') != string::npos) ? true : false;
+    }
+    else if (typeid(*type) == typeid(TemplateType)) {
+        TemplateType &trans = dynamic_cast<TemplateType &>(*type);
+        for (auto &elem: trans.args) {
+            if (is_lambda(elem)) 
+                return true;
+        }
+        return false;
+    }
+    else {
+        // FuncType
+        FuncType &trans = dynamic_cast<FuncType &>(*type);
+        for (auto &elem: trans.types) {
+            if (is_lambda(elem)) 
+                return true;
+        }
+        return false;
+    }
 }
 
 void TypeInference::print_theory() {

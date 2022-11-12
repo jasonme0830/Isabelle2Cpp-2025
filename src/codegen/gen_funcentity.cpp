@@ -17,9 +17,9 @@ void Equation::gen_funcentity(FuncEntity &func) const {
     if (theOptimizer.option().move_list) {
         set<string> movables;
         expr->analyze_var_movable(movables);
-        func.add_expr("return $;", unmove_expr(expr->gen_expr(func, func.result_typeinfo())));
+        func.add_expr("return $;", unmove_expr(expr->gen_expr(func)));
     } else {
-        func.add_expr("return $;", expr->gen_expr(func, func.result_typeinfo()));
+        func.add_expr("return $;", expr->gen_expr(func));
     }
 }
 } // namespace hol2cpp
