@@ -1,281 +1,358 @@
 #include "tokenizer.hpp"
 #include "../utility/format.hpp"
 
+#include <algorithm>
+#include <optional>
 #include <set>
 #include <vector>
-#include <optional>
-#include <algorithm>
 
 using namespace std;
 
 namespace hol2cpp {
-static set<string> localSymbolSet {
-    ";", "\\", "`", "?",
+static set<string> localSymbolSet{
+  ";",
+  "\\",
+  "`",
+  "?",
 
-    R"(\<comment>)", R"((*)", R"(*))", R"(\<open>)", R"(\<close>)",
+  R"(\<comment>)",
+  R"((*)",
+  R"(*))",
+  R"(\<open>)",
+  R"(\<close>)",
 
-    R"(\<lambda>)", "%", ".",
+  R"(\<lambda>)",
+  "%",
+  ".",
 
-    "..", "..<",
+  "..",
+  "..<",
 
-    ":", "::", ":=", "=", R"(\<longleftrightarrow>)", R"(\<equiv>)", "|", "\"", "(", ")",
-    R"(\<Rightarrow>)", "=>", "[", "]", "{", "}", ",", R"(\<or>)", R"(\<and>)", R"(\<noteq>)",
-    R"(\<le>)", R"(<)", R"(\<ge>)", R"(>)", R"(\<subseteq>)", R"(\<subset>)",
-    R"(\<supseteq>)", R"(\<supset>)", R"(\<in>)", R"(\<notin>)", R"(#)", R"(@)", R"(!)",
-    R"(\<union>)", R"(\<inter>)", R"(+)", R"(-)", R"(*)", R"(\<times>)", R"(/)", R"(div)", R"(mod)", R"(^)",
+  ":",
+  "::",
+  ":=",
+  "=",
+  R"(\<longleftrightarrow>)",
+  R"(\<equiv>)",
+  "|",
+  "\"",
+  "(",
+  ")",
+  R"(\<Rightarrow>)",
+  "=>",
+  "[",
+  "]",
+  "{",
+  "}",
+  ",",
+  R"(\<or>)",
+  R"(\<and>)",
+  R"(\<noteq>)",
+  R"(\<le>)",
+  R"(<)",
+  R"(\<ge>)",
+  R"(>)",
+  R"(\<subseteq>)",
+  R"(\<subset>)",
+  R"(\<supseteq>)",
+  R"(\<supset>)",
+  R"(\<in>)",
+  R"(\<notin>)",
+  R"(#)",
+  R"(@)",
+  R"(!)",
+  R"(\<union>)",
+  R"(\<inter>)",
+  R"(+)",
+  R"(-)",
+  R"(*)",
+  R"(\<times>)",
+  R"(/)",
+  R"(div)",
+  R"(mod)",
+  R"(^)",
 };
 
-optional<Token::Type> Tokenizer::add_token(const string &literal) {
-    if (localSymbolSet.count(literal)) {
-        return {};
-    }
+optional<Token::Type>
+Tokenizer::add_token(const string& literal)
+{
+  if (localSymbolSet.count(literal)) {
+    return {};
+  }
 
-    auto type = Token::add_token(literal);
-    if (type.has_value()) {
-        localSymbolSet.insert(literal);
-    }
-    return type;
+  auto type = Token::add_token(literal);
+  if (type.has_value()) {
+    localSymbolSet.insert(literal);
+  }
+  return type;
 }
 
-Tokenizer::Tokenizer(ifstream &input, std::string name) noexcept
-  : input_(input), name_of_input_(move(name)), last_input_(' ')
-  , cur_location_(1, 0), last_location_(1, 0) {
-      string cur_line;
-      while (!input_.eof()) {
-          auto chr = input_.get();
-          if (chr == '\n') {
-              file_content_.push_back(cur_line);
-              cur_line.clear();
-          } else {
-              cur_line.push_back(chr);
-          }
-      }
-      if (!cur_line.empty()) {
-          file_content_.push_back(move(cur_line));
-      }
+Tokenizer::Tokenizer(ifstream& input, std::string name) noexcept
+  : input_(input)
+  , name_of_input_(move(name))
+  , last_input_(' ')
+  , cur_location_(1, 0)
+  , last_location_(1, 0)
+{
+  string cur_line;
+  while (!input_.eof()) {
+    auto chr = input_.get();
+    if (chr == '\n') {
+      file_content_.push_back(cur_line);
+      cur_line.clear();
+    } else {
+      cur_line.push_back(chr);
+    }
+  }
+  if (!cur_line.empty()) {
+    file_content_.push_back(move(cur_line));
+  }
 
-      input_.clear();
-      input_.seekg(ios::beg);
+  input_.clear();
+  input_.seekg(ios::beg);
 }
 
-void Tokenizer::get_next_input() {
+void
+Tokenizer::get_next_input()
+{
+  last_input_ = input_.get();
+  if (last_input_ == EOF) {
+    return;
+  }
+
+  if (last_input_ == '\n') {
+    ++cur_location_.first;
+    cur_location_.second = 0;
+  } else {
+    ++cur_location_.second;
+  }
+}
+
+std::string
+Tokenizer::next_raw_str()
+{
+  string value;
+  while (last_input_ != '"') {
+    value.push_back(last_input_);
+    get_next_input();
+  }
+  return value;
+}
+
+optional<Token>
+Tokenizer::try_get_symbol()
+{
+  auto tellg = input_.tellg();
+  auto backup = last_input_;
+
+  auto cmp = [](const string& lhs, const string& rhs) {
+    return lhs.size() < rhs.size();
+  };
+  auto longest_len =
+    max_element(localSymbolSet.begin(), localSymbolSet.end(), cmp)->size();
+
+  auto alts = localSymbolSet;
+  size_t i = 0;
+  for (; i < longest_len; ++i) {
+    bool increasable = false;
+
+    set<string> temp;
+    for (const auto& symbol : alts) {
+      if (symbol.size() <= i) {
+        temp.insert(symbol);
+      } else if (symbol[i] == last_input_) {
+        temp.insert(symbol);
+        increasable = true;
+      }
+    }
+
+    swap(alts, temp);
+    if (!increasable) {
+      break;
+    }
+
     last_input_ = input_.get();
     if (last_input_ == EOF) {
-        return;
+      break;
     }
+  }
 
-    if (last_input_ == '\n') {
-        ++cur_location_.first;
-        cur_location_.second = 0;
-    } else {
-        ++cur_location_.second;
+  input_.clear();
+  input_.seekg(tellg);
+  last_input_ = backup;
+  if (alts.empty()) {
+    return {};
+  } else {
+    auto symbol = *max_element(alts.begin(), alts.end(), cmp);
+    for (size_t i = 0; i < symbol.size(); ++i) {
+      get_next_input();
     }
+    return Token(symbol);
+  }
 }
 
-std::string Tokenizer::next_raw_str() {
-    string value;
-    while (last_input_ != '"') {
-        value.push_back(last_input_);
-        get_next_input();
-    }
-    return value;
-}
+Token
+Tokenizer::next_token()
+{
+  enum class State
+  {
+    Begin,
 
-optional<Token> Tokenizer::try_get_symbol() {
-    auto tellg = input_.tellg();
-    auto backup = last_input_;
+    InInteger,
+    InIdentifier,
+    InTypeVariable,
+  };
 
-    auto cmp = [] (const string &lhs, const string &rhs) { return lhs.size() < rhs.size(); };
-    auto longest_len = max_element(localSymbolSet.begin(), localSymbolSet.end(), cmp)->size();
+  while (std::isspace(last_input_)) {
+    get_next_input();
+  }
 
-    auto alts = localSymbolSet;
-    size_t i = 0;
-    for (; i < longest_len; ++i) {
-        bool increasable = false;
+  if (last_input_ == EOF) {
+    return Token(Token::Type::EndOfFile);
+  }
 
-        set<string> temp;
-        for (const auto &symbol : alts) {
-            if (symbol.size() <= i) {
-                temp.insert(symbol);
-            } else if (symbol[i] == last_input_) {
-                temp.insert(symbol);
-                increasable = true;
+  last_location_ = cur_location_;
+  auto state = State::Begin;
+
+  std::optional<Token> token;
+  string value;
+
+  while (!token) {
+    switch (state) {
+      case State::Begin:
+        if (auto token = try_get_symbol()) {
+          if (token->type == Token::Type::CommentStart) {
+            while (!token.has_value() ||
+                   token->type != Token::Type::CommentEnd) {
+              while (last_input_ != '*' && last_input_ != EOF) {
+                get_next_input();
+              }
+              token = try_get_symbol();
+              if (!token.has_value()) {
+                get_next_input();
+              }
             }
+            return next_token();
+          } else if (token->type == Token::Type::Open) {
+            size_t cnt = 1;
+            while (cnt) {
+              while (last_input_ != '\\' && last_input_ != EOF) {
+                get_next_input();
+              }
+              token = try_get_symbol();
+              if (!token.has_value()) {
+                get_next_input();
+              } else if (token->type == Token::Type::Open) {
+                ++cnt;
+              } else if (token->type == Token::Type::Close) {
+                --cnt;
+              }
+            }
+            return next_token();
+          } else if (token->type == Token::Type::Comment) {
+            return next_token();
+          } else {
+            return *token;
+          }
         }
 
-        swap(alts, temp);
-        if (!increasable) {
-            break;
+        if (isdigit(last_input_)) {
+          state = State::InInteger;
+          value.push_back(last_input_);
+        } else if (isalpha(last_input_) || last_input_ == '_') {
+          state = State::InIdentifier;
+          value.push_back(last_input_);
+        } else if (last_input_ == '\'') {
+          state = State::InTypeVariable;
+        } else {
+          throw error("meet unexpected char "s + last_input_);
         }
+        break;
 
-        last_input_ = input_.get();
-        if (last_input_ == EOF) {
-            break;
+      case State::InInteger:
+        if (isdigit(last_input_)) {
+          value.push_back(last_input_);
+        } else {
+          return Token(Token::Type::Integer, value);
         }
-    }
+        break;
 
-    input_.clear();
-    input_.seekg(tellg);
-    last_input_ = backup;
-    if (alts.empty()) {
-        return {};
-    } else {
-        auto symbol = *max_element(alts.begin(), alts.end(), cmp);
-        for (size_t i = 0; i < symbol.size(); ++i) {
-            get_next_input();
+      case State::InIdentifier:
+        if (isalpha(last_input_) || last_input_ == '_' ||
+            isdigit(last_input_)) {
+          value.push_back(last_input_);
+        } else {
+          return Token(value);
         }
-        return Token(symbol);
-    }
-}
+        break;
 
-Token Tokenizer::next_token() {
-    enum class State {
-        Begin,
-
-        InInteger,
-        InIdentifier,
-        InTypeVariable,
-    };
-
-    while (std::isspace(last_input_)) {
-        get_next_input();
+      case State::InTypeVariable:
+        if (isalpha(last_input_) || last_input_ == '_') {
+          value.push_back(last_input_);
+        } else {
+          return Token(Token::Type::TypeVariable, value);
+        }
+        break;
     }
 
     if (last_input_ == EOF) {
-        return Token(Token::Type::EndOfFile);
-    }
-
-    last_location_ = cur_location_;
-    auto state = State::Begin;
-
-    std::optional<Token> token;
-    string value;
-
-    while (!token) {
-        switch (state) {
-            case State::Begin:
-                if (auto token = try_get_symbol()) {
-                    if (token->type == Token::Type::CommentStart) {
-                        while (!token.has_value() || token->type != Token::Type::CommentEnd) {
-                            while (last_input_ != '*' && last_input_ != EOF) {
-                                get_next_input();
-                            }
-                            token = try_get_symbol();
-                            if (!token.has_value()) {
-                                get_next_input();
-                            }
-                        }
-                        return next_token();
-                    } else if (token->type == Token::Type::Open) {
-                        size_t cnt = 1;
-                        while (cnt) {
-                            while (last_input_ != '\\' && last_input_ != EOF) {
-                                get_next_input();
-                            }
-                            token = try_get_symbol();
-                            if (!token.has_value()) {
-                                get_next_input();
-                            } else if (token->type == Token::Type::Open) {
-                                ++cnt;
-                            } else if (token->type == Token::Type::Close) {
-                                --cnt;
-                            }
-                        }
-                        return next_token();
-                    } else if (token->type == Token::Type::Comment) {
-                        return next_token();
-                    } else {
-                        return *token;
-                    }
-                }
-
-                if (isdigit(last_input_)) {
-                    state = State::InInteger;
-                    value.push_back(last_input_);
-                } else if (isalpha(last_input_) || last_input_ == '_') {
-                    state = State::InIdentifier;
-                    value.push_back(last_input_);
-                } else if (last_input_ == '\'') {
-                    state = State::InTypeVariable;
-                } else {
-                    throw error("meet unexpected char "s + last_input_);
-                }
-                break;
-
-            case State::InInteger:
-                if (isdigit(last_input_)) {
-                    value.push_back(last_input_);
-                } else {
-                    return Token(Token::Type::Integer, value);
-                }
-                break;
-
-            case State::InIdentifier:
-                if (isalpha(last_input_) || last_input_ == '_' || isdigit(last_input_)) {
-                    value.push_back(last_input_);
-                } else {
-                    return Token(value);
-                }
-                break;
-
-            case State::InTypeVariable:
-                if (isalpha(last_input_) || last_input_ == '_') {
-                    value.push_back(last_input_);
-                } else {
-                    return Token(Token::Type::TypeVariable, value);
-                }
-                break;
-        }
-
-        if (last_input_ == EOF) {
-            break;
-        } else {
-            get_next_input();
-        }
-    }
-
-    if (!token) {
-        return Token(Token::Type::EndOfFile);
+      break;
     } else {
-        return *token;
+      get_next_input();
     }
+  }
+
+  if (!token) {
+    return Token(Token::Type::EndOfFile);
+  } else {
+    return *token;
+  }
 }
 
-string Tokenizer::get_err_info(const string &message) const {
-    const auto &line_num = last_location_.first,
-        &char_at_line = last_location_.second
-    ;
+string
+Tokenizer::get_err_info(const string& message) const
+{
+  const auto &line_num = last_location_.first,
+             &char_at_line = last_location_.second;
 
-    return "`$$$\n`$\n`$$"_fs.format(
-        info::strong("$:$:$: "_fs.format(name_of_input_, line_num, char_at_line)),
-        info::light_red("error: "), message, file_content_[line_num - 1],
-        string(char_at_line == 0 ? 0 : char_at_line - 1, ' '), info::light_red("^")
-    );
+  return "`$$$\n`$\n`$$"_fs.format(
+    info::strong("$:$:$: "_fs.format(name_of_input_, line_num, char_at_line)),
+    info::light_red("error: "),
+    message,
+    file_content_[line_num - 1],
+    string(char_at_line == 0 ? 0 : char_at_line - 1, ' '),
+    info::light_red("^"));
 }
 
-TokenizeError Tokenizer::error(const string &message) {
-    return TokenizeError(get_err_info(message));
+TokenizeError
+Tokenizer::error(const string& message)
+{
+  return TokenizeError(get_err_info(message));
 }
 
-Location Tokenizer::last_location() const {
-    return last_location_;
+Location
+Tokenizer::last_location() const
+{
+  return last_location_;
 }
 
-string Tokenizer::file_content(const Location &start, const Location &end) const {
-    string res;
+string
+Tokenizer::file_content(const Location& start, const Location& end) const
+{
+  string res;
 
-    if (start.first == end.first) {
-        auto line = file_content_[start.first - 1];
-        res = line.substr(start.second - 1, end.second - start.second);
-    } else {
-        auto line = file_content_[start.first - 1];
-        res = line.substr(start.second - 1) + " ...";
-    }
+  if (start.first == end.first) {
+    auto line = file_content_[start.first - 1];
+    res = line.substr(start.second - 1, end.second - start.second);
+  } else {
+    auto line = file_content_[start.first - 1];
+    res = line.substr(start.second - 1) + " ...";
+  }
 
-    while (!res.empty() && res.back() == ' ') {
-        res.pop_back();
-    }
+  while (!res.empty() && res.back() == ' ') {
+    res.pop_back();
+  }
 
-    return res;
+  return res;
 }
 } // namespace hol2cpp

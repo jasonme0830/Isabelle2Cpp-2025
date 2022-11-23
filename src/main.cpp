@@ -1,174 +1,168 @@
-#include "parser/parser.hpp"
-#include "utility/argparse.hpp"
-#include "optimizer/optimizer.hpp"
-#include "synthesis/synthesizer.hpp"
 #include "inference/inference.hpp"
+#include "optimizer/optimizer.hpp"
+#include "parser/parser.hpp"
+#include "synthesis/synthesizer.hpp"
+#include "utility/argparse.hpp"
 
+#include <exception>
 #include <fstream>
 #include <iostream>
-#include <exception>
 
 using namespace std;
 using namespace hol2cpp;
 
-struct Config {
-    string input_file;
-    string output_file;
-    string predef_file;
-    bool print_type = false;
+struct Config
+{
+  string input_file;
+  string output_file;
+  string predef_file;
+  bool print_type = false;
 };
 
-ArgumentParser build_parser();
-Config parse_config(int, char *[]);
+ArgumentParser
+build_parser();
+Config
+parse_config(int, char*[]);
 
-int main(int argc, char* argv[]) {
-    auto [
-        input_file,
-        output_file,
-        predef_file,
-        print_type
-    ] = parse_config(argc, argv);
+int
+main(int argc, char* argv[])
+{
+  auto [input_file, output_file, predef_file, print_type] =
+    parse_config(argc, argv);
 
-    ifstream fin(input_file);
+  ifstream fin(input_file);
+  if (!fin.good()) {
+    cout << "can't open file " << input_file << endl;
+    return -1;
+  }
+
+  Theory predef;
+  if (!predef_file.empty()) {
+    ifstream fin(predef_file);
     if (!fin.good()) {
-        cout << "can't open file " << input_file << endl;
-        return -1;
+      cout << "can't open file " << predef_file << endl;
+      return -1;
     }
 
-    Theory predef;
-    if (!predef_file.empty()) {
-        ifstream fin(predef_file);
-        if (!fin.good()) {
-            cout << "can't open file " << predef_file << endl;
-            return -1;
-        }
+    Parser parser(fin, predef_file);
+    predef = parser.gen_predef();
+  }
 
-        Parser parser(fin, predef_file);
-        predef = parser.gen_predef();
-    }
+  auto theory = Parser(fin, input_file).gen_theory(move(predef));
 
-    auto theory = Parser(fin, input_file).gen_theory(move(predef));
+  auto inf = TypeInference(theory);
+  inf.theory_infer();
+  if (print_type) {
+    inf.print_theory();
+  }
 
-    auto inf = TypeInference(theory);
-    inf.theory_infer();
-    if (print_type) {
-        inf.print_theory();
-    }
+  auto code = theory.gen_code();
 
-    auto code = theory.gen_code();
+  Synthesizer syner(output_file.empty() ? theory.name : output_file);
+  syner.synthesize(code);
 
-    Synthesizer syner(output_file.empty() ? theory.name : output_file);
-    syner.synthesize(code);
-
-    return 0;
+  return 0;
 }
 
-Config parse_config(int argc, char *argv[]) {
-    auto arg_parser = build_parser();
-    arg_parser.parse(argc, argv);
+Config
+parse_config(int argc, char* argv[])
+{
+  auto arg_parser = build_parser();
+  arg_parser.parse(argc, argv);
 
-    Config config;
+  Config config;
 
-    // check the input theory file
-    config.input_file = arg_parser.get<string>("input");
-    auto pos = config.input_file.rfind(".thy");
-    if (pos == config.input_file.npos) {
-        throw std::invalid_argument("input file should be .thy file");
-    }
+  // check the input theory file
+  config.input_file = arg_parser.get<string>("input");
+  auto pos = config.input_file.rfind(".thy");
+  if (pos == config.input_file.npos) {
+    throw std::invalid_argument("input file should be .thy file");
+  }
 
-    // determine the output file
-    if (auto same_path = arg_parser.get<bool>("s")) {
-        if (!arg_parser.get<string>("output").empty()) {
-            throw std::invalid_argument("-s or assign output file");
-        } else {
-            config.output_file = config.input_file.substr(0, pos);
-        }
+  // determine the output file
+  if (auto same_path = arg_parser.get<bool>("s")) {
+    if (!arg_parser.get<string>("output").empty()) {
+      throw std::invalid_argument("-s or assign output file");
     } else {
-        config.output_file = arg_parser.get<string>("output");
+      config.output_file = config.input_file.substr(0, pos);
     }
+  } else {
+    config.output_file = arg_parser.get<string>("output");
+  }
 
-    // set optimizer options
-    if (arg_parser.get<bool>("move-list")) {
-        theOptimizer.enable_move_list();
-    }
-    if (arg_parser.get<bool>("reduce-cond")) {
-        theOptimizer.enable_reduce_cond();
-    }
-    if (arg_parser.get<bool>("use-deque")) {
-        theOptimizer.enable_use_deque();
-    }
+  // set optimizer options
+  if (arg_parser.get<bool>("move-list")) {
+    theOptimizer.enable_move_list();
+  }
+  if (arg_parser.get<bool>("reduce-cond")) {
+    theOptimizer.enable_reduce_cond();
+  }
+  if (arg_parser.get<bool>("use-deque")) {
+    theOptimizer.enable_use_deque();
+  }
 
-    // set experimental options
-    if (arg_parser.get<bool>("use-class")) {
-        theOptimizer.enable_use_class();
-    }
-    if (arg_parser.get<bool>("uncurry")) {
-        theOptimizer.enable_uncurry();
-    }
+  // set experimental options
+  if (arg_parser.get<bool>("use-class")) {
+    theOptimizer.enable_use_class();
+  }
+  if (arg_parser.get<bool>("uncurry")) {
+    theOptimizer.enable_uncurry();
+  }
 
-    // print type
-    if (arg_parser.get<bool>("print-type")) {
-        config.print_type = true;
-    }
+  // print type
+  if (arg_parser.get<bool>("print-type")) {
+    config.print_type = true;
+  }
 
-    config.predef_file = arg_parser.get<string>("predef");
+  config.predef_file = arg_parser.get<string>("predef");
 
-    return config;
+  return config;
 }
 
-ArgumentParser build_parser() {
-    ArgumentParser arg_parser("hol2cpp");
+ArgumentParser
+build_parser()
+{
+  ArgumentParser arg_parser("hol2cpp");
 
-    arg_parser.add_argument("input")
-              .help("source hol file")
-    ;
-    arg_parser.add_argument("output")
-              .help("output hpp/cpp file")
-              .default_value(""s)
-    ;
-    arg_parser.add_argument("-s")
-              .help("choose the same path with input file")
-              .default_value(false)
-              .implict_value(true)
-    ;
+  arg_parser.add_argument("input").help("source hol file");
+  arg_parser.add_argument("output")
+    .help("output hpp/cpp file")
+    .default_value(""s);
+  arg_parser.add_argument("-s")
+    .help("choose the same path with input file")
+    .default_value(false)
+    .implict_value(true);
 
-    arg_parser.add_argument("--move-list")
-              .help("enable move-list")
-              .default_value(false)
-              .implict_value(true)
-    ;
-    arg_parser.add_argument("--reduce-cond")
-              .help("enable reduce-cond")
-              .default_value(false)
-              .implict_value(true)
-    ;
-    arg_parser.add_argument("--use-deque")
-              .help("enable use-deque")
-              .default_value(false)
-              .implict_value(true)
-    ;
+  arg_parser.add_argument("--move-list")
+    .help("enable move-list")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--reduce-cond")
+    .help("enable reduce-cond")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--use-deque")
+    .help("enable use-deque")
+    .default_value(false)
+    .implict_value(true);
 
-    arg_parser.add_argument("--use-class")
-              .help("generating class instead struct for a datatype")
-              .default_value(false)
-              .implict_value(true)
-    ;
-    arg_parser.add_argument("--uncurry")
-              .help("enable uncurrying")
-              .default_value(false)
-              .implict_value(true)
-    ;
+  arg_parser.add_argument("--use-class")
+    .help("generating class instead struct for a datatype")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--uncurry")
+    .help("enable uncurrying")
+    .default_value(false)
+    .implict_value(true);
 
-    arg_parser.add_argument("--print-type")
-              .help("enable type print for function definitions")
-              .default_value(false)
-              .implict_value(true)
-    ;
+  arg_parser.add_argument("--print-type")
+    .help("enable type print for function definitions")
+    .default_value(false)
+    .implict_value(true);
 
-    arg_parser.add_argument("--predef")
-              .help("predefined types")
-              .default_value(""s)
-    ;
+  arg_parser.add_argument("--predef")
+    .help("predefined types")
+    .default_value(""s);
 
-    return arg_parser;
+  return arg_parser;
 }
