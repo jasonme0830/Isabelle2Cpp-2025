@@ -1,4 +1,4 @@
-#include "../optimizer/optimizer.hpp"
+#include "../utility/config.hpp"
 #include "codegen.hpp"
 
 using namespace std;
@@ -57,7 +57,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
         args[i]->gen_pattern(func, "arg" + to_string(i + 1));
       }
     } else { // for uncurry and will only be called once at the first pattern
-      assert_true(theOptimizer.option().uncurry);
+      assert_true(theConfig.uncurry());
       assert_true(args.size() < func.args_size());
       assert_true(func.statements().back().empty());
     }
@@ -81,13 +81,13 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
 
   // for List
   else if (constructor == "Cons") {
-    if (!theOptimizer.option().move_list) {
+    if (!theConfig.move_list()) {
       func.add_pattern_cond("!$.empty()", prev);
       args[0]->gen_pattern(func, prev + ".front()");
 
       auto type = expr_type->gen_typeinfo(func).to_str();
       if (dynamic_cast<VarExpr*>(args[1].get())) {
-        if (theOptimizer.option().use_deque) {
+        if (theConfig.use_deque()) {
           args[1]->gen_pattern(
             func, "$($.begin() + 1, $.end())"_fs.format(type, prev, prev));
         } else {
@@ -98,7 +98,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
       } else {
         auto temp = func.gen_temp();
 
-        if (theOptimizer.option().use_deque) {
+        if (theConfig.use_deque()) {
           func.add_pattern(
             "$ $($.begin() + 1, $.end());", type, temp, prev, prev);
         } else {
@@ -130,7 +130,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
       for (int i = 1; i < n; ++i) {
         auto cons_expr = reinterpret_cast<ConsExpr*>(rhs);
 
-        if (theOptimizer.option().use_deque) {
+        if (theConfig.use_deque()) {
           cons_expr->args[0]->gen_pattern(func, "$[$]"_fs.format(prev, i));
         } else {
           cons_expr->args[0]->gen_pattern(
@@ -141,7 +141,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
       }
 
       if (var_expr->name != "Nil") {
-        if (theOptimizer.option().use_deque) {
+        if (theConfig.use_deque()) {
           func.add_delay_statement(
             "$.erase($.begin(), $.begin() + $);", prev, prev, prev, n);
         } else {
@@ -180,7 +180,7 @@ ListExpr::gen_pattern(FuncEntity& func, const string& prev) const
   } else {
     func.add_pattern_cond("$.size() == $", prev, exprs.size());
     for (std::size_t i = 0; i < exprs.size(); ++i) {
-      if (theOptimizer.option().use_deque) {
+      if (theConfig.use_deque()) {
         exprs[i]->gen_pattern(func, "$[$]"_fs.format(prev, i));
       } else {
         exprs[i]->gen_pattern(func,

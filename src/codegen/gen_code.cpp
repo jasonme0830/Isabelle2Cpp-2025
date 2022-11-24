@@ -1,4 +1,4 @@
-#include "../optimizer/optimizer.hpp"
+#include "../utility/config.hpp"
 #include "codegen.hpp"
 
 #include <algorithm>

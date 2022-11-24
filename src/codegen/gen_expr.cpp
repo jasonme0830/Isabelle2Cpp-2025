@@ -1,4 +1,4 @@
-#include "../optimizer/optimizer.hpp"
+#include "../utility/config.hpp"
 #include "codegen.hpp"
 
 using namespace std;
@@ -82,7 +82,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     func.add_expr("auto $ = $;", temp, xs)
       .add_expr("$.push_front($);", temp, x);
 
-    if (theOptimizer.option().move_list) {
+    if (theConfig.move_list()) {
       return "std::move($)"_fs.format(temp);
     } else {
       return temp;
@@ -96,7 +96,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto n = args[0]->gen_expr(func);
     auto xs = unmove_expr(args[1]->gen_expr(func));
 
-    if (theOptimizer.option().use_deque) {
+    if (theConfig.use_deque()) {
       return "$($.begin(), $.begin() + $)"_fs.format(
         typeinfo.to_str(), xs, xs, n);
     } else {
@@ -109,7 +109,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto n = args[0]->gen_expr(func);
     auto xs = unmove_expr(args[1]->gen_expr(func));
 
-    if (theOptimizer.option().use_deque) {
+    if (theConfig.use_deque()) {
       return "$($.begin() + $, $.end())"_fs.format(
         typeinfo.to_str(), xs, n, xs);
     } else {
@@ -126,7 +126,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto temp1 = func.gen_temp();
     func.add_expr("auto $ = $;", temp0, l).add_expr("auto $ = $;", temp1, r);
 
-    if (theOptimizer.option().use_deque) {
+    if (theConfig.use_deque()) {
       func.add_expr(
         "$.insert($.end(), $.begin(), $.end());", temp0, temp0, temp1, temp1);
     } else {
@@ -142,7 +142,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto temp0 = func.gen_temp();
     func.add_expr("auto $ = $;", temp0, l);
 
-    if (theOptimizer.option().use_deque) {
+    if (theConfig.use_deque()) {
       return "$[$]"_fs.format(temp0, r);
     } else {
       return "*std::next($.begin(), $)"_fs.format(temp0, r);

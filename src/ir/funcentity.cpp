@@ -1,6 +1,6 @@
 #include "funcentity.hpp"
 #include "../codegen/codegen.hpp"
-#include "../optimizer/optimizer.hpp"
+#include "../utility/config.hpp"
 #include "../utility/error.hpp"
 #include "../utility/format.hpp"
 #include "code.hpp"
@@ -126,7 +126,7 @@ TypeInfo::args_size() const
 bool
 TypeInfo::movable() const
 {
-  return theOptimizer.option().move_list &&
+  return theConfig.move_list() &&
          name == theTemplateTypeMapping["list"];
 }
 
@@ -315,7 +315,7 @@ void
 FuncEntity::add_pattern_cond(const string& cond)
 {
   // remove only if the option is used and the function is total
-  auto remove_last_cond = theOptimizer.option().reduce_cond && !nonexhaustive_;
+  auto remove_last_cond = theConfig.reduce_cond() && !nonexhaustive_;
 
   if (!is_last_equation_ || !remove_last_cond) {
     statements_.back().push_back(string(indent_, ' ') +

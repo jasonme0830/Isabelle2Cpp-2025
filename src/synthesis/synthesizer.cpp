@@ -1,5 +1,5 @@
 #include "synthesizer.hpp"
-#include "../optimizer/optimizer.hpp"
+#include "../utility/config.hpp"
 
 using namespace std;
 
@@ -112,7 +112,7 @@ Synthesizer::syn_class_template(const Datatype& datatype)
 void
 Synthesizer::syn_class_definition(const Datatype& datatype)
 {
-  auto use_class = theOptimizer.option().use_class;
+  auto use_class = theConfig.use_class();
 
   auto& name = datatype.name();
   auto& self = datatype.self();

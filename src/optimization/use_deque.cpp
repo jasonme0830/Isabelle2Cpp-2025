@@ -1,13 +1,17 @@
 #include "../codegen/codegen.hpp"
-#include "optimizer.hpp"
+#include "../utility/config.hpp"
 
 using namespace std;
 
 namespace hol2cpp {
 void
-Optimizer::enable_use_deque()
+Config::use_deque(bool enable)
 {
-  option_.use_deque = true;
+  use_deque_ = enable;
+
+  if (!enable) {
+    return;
+  }
 
   theTemplateTypeMapping["list"] = "std::deque";
   theHeaderMapping["list"] = "deque";

@@ -1,15 +1,19 @@
 #include "../codegen/codegen.hpp"
 #include "../ir/ast.hpp"
 #include "../ir/funcentity.hpp"
-#include "optimizer.hpp"
+#include "../utility/config.hpp"
 
 using namespace std;
 
 namespace hol2cpp {
 void
-Optimizer::enable_move_list()
+Config::move_list(bool enable)
 {
-  option_.move_list = true;
+  move_list_ = enable;
+
+  if (!enable) {
+    return;
+  }
 
   auto origin_as_arg = TypeInfo::as_arg;
   TypeInfo::as_arg = [=](const TypeInfo& type) {

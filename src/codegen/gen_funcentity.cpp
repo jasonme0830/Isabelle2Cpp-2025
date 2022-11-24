@@ -1,4 +1,4 @@
-#include "../optimizer/optimizer.hpp"
+#include "../utility/config.hpp"
 #include "codegen.hpp"
 
 using namespace std;
@@ -18,7 +18,7 @@ Equation::gen_funcentity(FuncEntity& func) const
   pattern->gen_pattern(func, "");
   func.close_pattern(); // for delay declarations
 
-  if (theOptimizer.option().move_list) {
+  if (theConfig.move_list()) {
     set<string> movables;
     expr->analyze_var_movable(movables);
     func.add_expr("return $;", unmove_expr(expr->gen_expr(func)));

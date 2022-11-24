@@ -1,5 +1,5 @@
 #include "inference/inference.hpp"
-#include "optimizer/optimizer.hpp"
+#include "utility/config.hpp"
 #include "parser/parser.hpp"
 #include "synthesis/synthesizer.hpp"
 #include "utility/argparse.hpp"
@@ -21,102 +21,87 @@ struct Config
 
 ArgumentParser
 build_parser();
-Config
+
+// affect the global config
+void
 parse_config(int, char*[]);
 
 int
 main(int argc, char* argv[])
 {
-  auto [input_file, output_file, predef_file, print_type] =
-    parse_config(argc, argv);
+  parse_config(argc, argv);
 
-  ifstream fin(input_file);
+  ifstream fin(theConfig.input_file());
   if (!fin.good()) {
-    cout << "can't open file " << input_file << endl;
+    cout << "can't open file " << theConfig.input_file() << endl;
     return -1;
   }
 
   Theory predef;
-  if (!predef_file.empty()) {
-    ifstream fin(predef_file);
+  if (!theConfig.predef_file().empty()) {
+    ifstream fin(theConfig.predef_file());
     if (!fin.good()) {
-      cout << "can't open file " << predef_file << endl;
+      cout << "can't open file " << theConfig.predef_file() << endl;
       return -1;
     }
 
-    Parser parser(fin, predef_file);
+    Parser parser(fin, theConfig.predef_file());
     predef = parser.gen_predef();
   }
 
-  auto theory = Parser(fin, input_file).gen_theory(move(predef));
+  auto theory = Parser(fin, theConfig.input_file()).gen_theory(move(predef));
 
   auto inf = TypeInference(theory);
   inf.theory_infer();
-  if (print_type) {
+  if (theConfig.print_type()) {
     inf.print_theory();
   }
 
   auto code = theory.gen_code();
 
-  Synthesizer syner(output_file.empty() ? theory.name : output_file);
+  Synthesizer syner(theConfig.output_file().empty() ? theory.name : theConfig.output_file());
   syner.synthesize(code);
 
   return 0;
 }
 
-Config
+void
 parse_config(int argc, char* argv[])
 {
   auto arg_parser = build_parser();
   arg_parser.parse(argc, argv);
 
-  Config config;
-
   // check the input theory file
-  config.input_file = arg_parser.get<string>("input");
-  auto pos = config.input_file.rfind(".thy");
-  if (pos == config.input_file.npos) {
+  auto input_file = arg_parser.get<string>("input");
+  auto pos = input_file.rfind(".thy");
+  if (pos == input_file.npos) {
     throw std::invalid_argument("input file should be .thy file");
   }
-
+ 
   // determine the output file
+  auto output_file = arg_parser.get<string>("output");
   if (auto same_path = arg_parser.get<bool>("s")) {
     if (!arg_parser.get<string>("output").empty()) {
       throw std::invalid_argument("-s or assign output file");
     } else {
-      config.output_file = config.input_file.substr(0, pos);
+      output_file = input_file.substr(0, pos);
     }
-  } else {
-    config.output_file = arg_parser.get<string>("output");
   }
+
+  // common parameters
+  theConfig.input_file(move(input_file));
+  theConfig.output_file(move(output_file));
+  theConfig.predef_file(arg_parser.get<string>("predef"));
+  theConfig.print_type(arg_parser.get<bool>("print-type"));
 
   // set optimizer options
-  if (arg_parser.get<bool>("move-list")) {
-    theOptimizer.enable_move_list();
-  }
-  if (arg_parser.get<bool>("reduce-cond")) {
-    theOptimizer.enable_reduce_cond();
-  }
-  if (arg_parser.get<bool>("use-deque")) {
-    theOptimizer.enable_use_deque();
-  }
+  theConfig.move_list(arg_parser.get<bool>("move-list"));
+  theConfig.reduce_cond(arg_parser.get<bool>("reduce-cond"));
+  theConfig.use_deque(arg_parser.get<bool>("use-deque"));
 
   // set experimental options
-  if (arg_parser.get<bool>("use-class")) {
-    theOptimizer.enable_use_class();
-  }
-  if (arg_parser.get<bool>("uncurry")) {
-    theOptimizer.enable_uncurry();
-  }
-
-  // print type
-  if (arg_parser.get<bool>("print-type")) {
-    config.print_type = true;
-  }
-
-  config.predef_file = arg_parser.get<string>("predef");
-
-  return config;
+  theConfig.use_class(arg_parser.get<bool>("use-class"));
+  theConfig.uncurry(arg_parser.get<bool>("uncurry"));
 }
 
 ArgumentParser
