@@ -10,6 +10,7 @@ public:
   const std::string &output_file() const { return output_file_; }
   const std::string &predef_file() const { return predef_file_; }
   bool print_type() const { return print_type_; }
+
   // move list as much as possible
   bool move_list() const { return move_list_; }
   // removes the conditions for the last pattern for total
@@ -17,6 +18,9 @@ public:
   bool reduce_cond() const { return reduce_cond_; }
   // use std::deque instead of std::list as the target type for list
   bool use_deque() const { return use_deque_; }
+  // memoize the result of generated functions
+  bool memoize() const { return memoize_; }
+
   // generates classes instead of structs for datatypes
   bool use_class() const { return use_class_; }
   // returns lambda-expression if the arguments are less than
@@ -28,9 +32,12 @@ public:
   void output_file(std::string output_file) { output_file_ = output_file; }
   void predef_file(std::string predef_file) { predef_file_ = predef_file; }
   void print_type(bool enable) { print_type_ = enable; }
+
   void move_list(bool enable); // implemented in src/optimization/move_list.cpp
   void reduce_cond(bool enable) { reduce_cond_ = enable; }
   void use_deque(bool enable); // implemented in src/optimization/use_deque.cpp
+  void memoize(bool enable) { memoize_ = enable; }
+
   void use_class(bool enable) { use_class_ = enable; }
   void uncurry(bool enable) { uncurry_ = enable; }
 
@@ -45,6 +52,7 @@ private:
   bool move_list_;   
   bool reduce_cond_; 
   bool use_deque_;
+  bool memoize_;
 
   // experimental options that do not improve performance
   bool use_class_; 

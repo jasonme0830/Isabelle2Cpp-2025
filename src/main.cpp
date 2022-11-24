@@ -71,6 +71,11 @@ parse_config(int argc, char* argv[])
   auto arg_parser = build_parser();
   arg_parser.parse(argc, argv);
 
+  if (arg_parser.get<bool>("help")) {
+    arg_parser.print_help();
+    exit(0);
+  }
+
   // check the input theory file
   auto input_file = arg_parser.get<string>("input");
   auto pos = input_file.rfind(".thy");
@@ -98,6 +103,7 @@ parse_config(int argc, char* argv[])
   theConfig.move_list(arg_parser.get<bool>("move-list"));
   theConfig.reduce_cond(arg_parser.get<bool>("reduce-cond"));
   theConfig.use_deque(arg_parser.get<bool>("use-deque"));
+  theConfig.memoize(arg_parser.get<bool>("memoize"));
 
   // set experimental options
   theConfig.use_class(arg_parser.get<bool>("use-class"));
@@ -109,12 +115,24 @@ build_parser()
 {
   ArgumentParser arg_parser("hol2cpp");
 
+  arg_parser.add_argument("--help")
+    .help("print help message")
+    .default_value(false)
+    .implict_value(true);
+
   arg_parser.add_argument("input").help("source hol file");
   arg_parser.add_argument("output")
-    .help("output hpp/cpp file")
+    .help("output hpp/cpp file without extension")
     .default_value(""s);
   arg_parser.add_argument("-s")
-    .help("choose the same path with input file")
+    .help("make the output file same with input file without extension")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--predef")
+    .help("file contains predefined types")
+    .default_value(""s);
+  arg_parser.add_argument("--print-type")
+    .help("enable type print for function definitions")
     .default_value(false)
     .implict_value(true);
 
@@ -130,24 +148,19 @@ build_parser()
     .help("enable use-deque")
     .default_value(false)
     .implict_value(true);
+  arg_parser.add_argument("--memoize")
+    .help("enable memoize")
+    .default_value(false)
+    .implict_value(true);
 
   arg_parser.add_argument("--use-class")
-    .help("generating class instead struct for a datatype")
+    .help("generate class instead struct for a datatype")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--uncurry")
     .help("enable uncurrying")
     .default_value(false)
     .implict_value(true);
-
-  arg_parser.add_argument("--print-type")
-    .help("enable type print for function definitions")
-    .default_value(false)
-    .implict_value(true);
-
-  arg_parser.add_argument("--predef")
-    .help("predefined types")
-    .default_value(""s);
 
   return arg_parser;
 }
