@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string> 
+#include <string>
 
 namespace hol2cpp {
 class Config
 {
 public:
-  const std::string &input_file() const { return input_file_; }
-  const std::string &output_file() const { return output_file_; }
-  const std::string &predef_file() const { return predef_file_; }
+  const std::string& input_file() const { return input_file_; }
+  const std::string& output_file() const { return output_file_; }
+  const std::string& predef_file() const { return predef_file_; }
   bool print_type() const { return print_type_; }
 
   // move list as much as possible
@@ -49,14 +49,14 @@ private:
   bool print_type_;
 
   // optimization options
-  bool move_list_;   
-  bool reduce_cond_; 
+  bool move_list_;
+  bool reduce_cond_;
   bool use_deque_;
   bool memoize_;
 
   // experimental options that do not improve performance
-  bool use_class_; 
-  bool uncurry_;   
+  bool use_class_;
+  bool uncurry_;
 };
 
 inline Config theConfig;

@@ -25,7 +25,7 @@ Config::move_list(bool enable)
   };
 }
 
-// TODO: use 'unmove_expr' correctly
+// todo use 'unmove_expr' correctly
 void
 Expr::analyze_var_movable(set<string>&)
 {
@@ -43,7 +43,7 @@ VarExpr::analyze_var_movable(set<string>& movables)
   }
 }
 
-// TODO: do different by different constructors. e.g., If-expr
+// todo do different by different constructors. e.g., If-expr
 void
 ConsExpr::analyze_var_movable(set<string>& movables)
 {

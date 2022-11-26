@@ -1,8 +1,8 @@
 #include "inference/inference.hpp"
-#include "utility/config.hpp"
 #include "parser/parser.hpp"
 #include "synthesis/synthesizer.hpp"
 #include "utility/argparse.hpp"
+#include "utility/config.hpp"
 
 #include <exception>
 #include <fstream>
@@ -59,7 +59,8 @@ main(int argc, char* argv[])
 
   auto code = theory.gen_code();
 
-  Synthesizer syner(theConfig.output_file().empty() ? theory.name : theConfig.output_file());
+  Synthesizer syner(theConfig.output_file().empty() ? theory.name
+                                                    : theConfig.output_file());
   syner.synthesize(code);
 
   return 0;
@@ -82,7 +83,7 @@ parse_config(int argc, char* argv[])
   if (pos == input_file.npos) {
     throw std::invalid_argument("input file should be .thy file");
   }
- 
+
   // determine the output file
   auto output_file = arg_parser.get<string>("output");
   if (auto same_path = arg_parser.get<bool>("s")) {

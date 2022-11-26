@@ -126,8 +126,7 @@ TypeInfo::args_size() const
 bool
 TypeInfo::movable() const
 {
-  return theConfig.move_list() &&
-         name == theTemplateTypeMapping["list"];
+  return theConfig.move_list() && name == theTemplateTypeMapping["list"];
 }
 
 const TypeInfo&
@@ -173,10 +172,10 @@ FuncEntity::sub_indent()
   return *this;
 }
 
-string&
-FuncEntity::name()
+void
+FuncEntity::name(std::string name)
 {
-  return name_;
+  name_ = move(name);
 }
 
 const string&
@@ -202,7 +201,7 @@ FuncEntity::add_argument_type(string name)
 }
 
 const TypeInfo&
-FuncEntity::result_typeinfo()
+FuncEntity::result_typeinfo() const
 {
   return typeinfos_.back();
 }
@@ -394,6 +393,14 @@ bool
 FuncEntity::is_last_equation() const
 {
   return is_last_equation_;
+}
+
+void FuncEntity::memoize(bool memoize) {
+  memoize_ = memoize;
+}
+
+bool FuncEntity::memoize() const {
+  return memoize_;
 }
 
 void

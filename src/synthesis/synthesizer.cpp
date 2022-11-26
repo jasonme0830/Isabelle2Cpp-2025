@@ -270,25 +270,47 @@ Synthesizer::syn_func_template(const FuncEntity& func)
 void
 Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
 {
-  auto& types = func.typeinfos();
-  "$ $("_fs.outf(newline(), types.back().to_str(), func.name());
-  for (size_t i = 0; i < types.size() - 1; ++i) {
-    if (i == 0) {
-      "$arg$"_fs.outf(out_.get(), types[i].to_str_as_arg(), i + 1);
-    } else {
-      ", $arg$"_fs.outf(out_.get(), types[i].to_str_as_arg(), i + 1);
-    }
-  }
+  auto params = syn_func_params(func);
+  auto result_type = func.result_typeinfo().to_str();
+
+  "$ $($)"_fs.outf(newline(), result_type, func.name(), params);
 
   if (!is_impl) {
-    ");\n\n"_fs.outf(out_.get());
+    ";\n\n"_fs.outf(out_.get());
     return;
   }
 
-  ") {\n"_fs.outf(out_.get());
-
-  auto& statements = func.statements();
+  " {\n"_fs.outf(out_.get());
   add_indent();
+  {
+    if (func.memoize()) {
+      "auto impl = [&]() -> $ {\n"_fs.outf(newline(), result_type);
+      add_indent();
+    }
+
+    syn_func_body(func);
+
+    if (func.memoize()) {
+      sub_indent();
+      "};\n\n"_fs.outf(newline());
+
+      auto param_types = syn_func_param_types(func);
+      auto args = syn_func_args(func);
+
+      "static std::map<std::tuple<$>, $> cache;\n"_fs.outf(newline(), param_types, result_type);
+      "auto args = std::make_tuple($);\n"_fs.outf(newline(), args);
+      "auto it = cache.find(args);\n"_fs.outf(newline());
+      "return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);\n"_fs.outf(newline());
+    }
+  }
+  sub_indent();
+  "}\n\n"_fs.outf(newline());
+}
+
+void
+Synthesizer::syn_func_body(const FuncEntity& func)
+{
+  auto& statements = func.statements();
   for (size_t i = 0; i < statements.size(); ++i) {
     if (i) {
       "\n"_fs.outf(out_.get());
@@ -300,8 +322,47 @@ Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
       }
     }
   }
-  sub_indent();
-  "}\n\n"_fs.outf(newline());
+}
+
+string
+Synthesizer::syn_func_params(const FuncEntity& func)
+{
+  string params;
+  auto& types = func.typeinfos();
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i) {
+      params += ", ";
+    }
+    params += "$arg$"_fs.format(types[i].to_str_as_arg(), i + 1);
+  }
+  return params;
+}
+
+string
+Synthesizer::syn_func_param_types(const FuncEntity &func) {
+  string param_types;
+  auto& types = func.typeinfos();
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i) {
+      param_types += ", ";
+    }
+    param_types += "$"_fs.format(types[i].to_str());
+  }
+  return param_types;
+}
+
+string
+Synthesizer::syn_func_args(const FuncEntity& func)
+{
+  string args;
+  auto& types = func.typeinfos();
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i) {
+      args += ", ";
+    }
+    args += "arg$"_fs.format(i + 1);
+  }
+  return args;
 }
 
 ostream&

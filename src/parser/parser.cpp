@@ -323,6 +323,9 @@ Parser::gen_function_definition()
     auto option = gen_ident_str();
     if (option == "nonexhaustive") {
       decl->nonexhaustive = true;
+    } else if (option == "memoize") { // todo @xubo re-use comments instead of
+                                      // invalid option in spec
+      decl->memoize = true;
     }
 
     eat<Token::Type::RParen>("expected token RParen");

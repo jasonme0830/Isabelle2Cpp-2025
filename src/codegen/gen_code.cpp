@@ -134,9 +134,15 @@ FunctionDef::gen_code(Code& code) const
 
   func.is_predef(is_predef());
   func.nonexhaustive(nonexhaustive);
-  func.name() = name;
+  func.memoize(memoize);
+  func.name(name);
 
   type->gen_funcentity(func);
+
+  if (memoize) {
+    assert_true(func.typeinfos().size() > 1);
+    code.add_header("map");
+  }
 
   for (size_t i = 0; i < equations.size(); ++i) {
     func.is_last_equation(i == equations.size() - 1); // for reduce-cond

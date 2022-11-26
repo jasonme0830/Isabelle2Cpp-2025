@@ -445,7 +445,8 @@ struct FunctionDef : Definition
   Ptr<FuncType> type;
   std::vector<Equation> equations;
 
-  bool nonexhaustive;
+  bool nonexhaustive = false;
+  bool memoize = false;
 
   std::string def_name() const override;
 

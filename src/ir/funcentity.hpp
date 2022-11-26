@@ -66,9 +66,8 @@ public:
   // sub indent by the defined indent size
   FuncEntity& sub_indent();
 
-  // set or get the name of this function
-  std::string& name();
-
+  // set the name of this function
+  void name(std::string name);
   // get the name of this function
   const std::string& name() const;
 
@@ -87,7 +86,7 @@ public:
   /**
    * return the result type
    */
-  const TypeInfo& result_typeinfo();
+  const TypeInfo& result_typeinfo() const;
 
   /**
    * return the types of this function
@@ -173,6 +172,9 @@ public:
   void is_last_equation(bool is_last); // for reduce-cond
   bool is_last_equation() const;       // for reduce-cond
 
+  void memoize(bool is_memoize); // for memoize
+  bool memoize() const;          // for memoize
+
   void is_predef(bool value);
   bool is_predef() const;
 
@@ -183,7 +185,7 @@ private:
   std::string name_;
   std::vector<std::string> raw_equations_;
 
-  // the first type is the result type
+  // the last is the result type
   std::vector<TypeInfo> typeinfos_;
   std::map<std::string, std::size_t> template_mapping_;
   std::vector<std::string> template_args_;
@@ -199,6 +201,7 @@ private:
 
   bool nonexhaustive_;    // for reduce-cond
   bool is_last_equation_; // for reduce-cond
+  bool memoize_;
   bool is_predef_;
 
   std::map<std::string, TypeInfo> var_typeinfos_;
