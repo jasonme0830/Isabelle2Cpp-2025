@@ -395,11 +395,15 @@ FuncEntity::is_last_equation() const
   return is_last_equation_;
 }
 
-void FuncEntity::memoize(bool memoize) {
+void
+FuncEntity::memoize(bool memoize)
+{
   memoize_ = memoize;
 }
 
-bool FuncEntity::memoize() const {
+bool
+FuncEntity::memoize() const
+{
   return memoize_;
 }
 

@@ -23,8 +23,8 @@ private:
   void syn_func_definition(const FuncEntity& func, bool is_impl);
   void syn_func_body(const FuncEntity& func);
   std::string syn_func_params(const FuncEntity& func);
-  std::string syn_func_param_types(const FuncEntity &func);
-  std::string syn_func_args(const FuncEntity &func);
+  std::string syn_func_param_types(const FuncEntity& func);
+  std::string syn_func_args(const FuncEntity& func);
 
   std::ostream& newline(int more_indent = 0);
 

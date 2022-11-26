@@ -297,10 +297,12 @@ Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
       auto param_types = syn_func_param_types(func);
       auto args = syn_func_args(func);
 
-      "static std::map<std::tuple<$>, $> cache;\n"_fs.outf(newline(), param_types, result_type);
+      "static std::map<std::tuple<$>, $> cache;\n"_fs.outf(
+        newline(), param_types, result_type);
       "auto args = std::make_tuple($);\n"_fs.outf(newline(), args);
       "auto it = cache.find(args);\n"_fs.outf(newline());
-      "return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);\n"_fs.outf(newline());
+      "return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);\n"_fs
+        .outf(newline());
     }
   }
   sub_indent();
@@ -339,7 +341,8 @@ Synthesizer::syn_func_params(const FuncEntity& func)
 }
 
 string
-Synthesizer::syn_func_param_types(const FuncEntity &func) {
+Synthesizer::syn_func_param_types(const FuncEntity& func)
+{
   string param_types;
   auto& types = func.typeinfos();
   for (size_t i = 0; i < types.size() - 1; ++i) {
