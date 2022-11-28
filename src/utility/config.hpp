@@ -18,8 +18,6 @@ public:
   bool reduce_cond() const { return reduce_cond_; }
   // use std::deque instead of std::list as the target type for list
   bool use_deque() const { return use_deque_; }
-  // memoize the result of generated functions
-  bool memoize() const { return memoize_; }
 
   // generates classes instead of structs for datatypes
   bool use_class() const { return use_class_; }
@@ -36,7 +34,6 @@ public:
   void move_list(bool enable); // implemented in src/optimization/move_list.cpp
   void reduce_cond(bool enable) { reduce_cond_ = enable; }
   void use_deque(bool enable); // implemented in src/optimization/use_deque.cpp
-  void memoize(bool enable) { memoize_ = enable; }
 
   void use_class(bool enable) { use_class_ = enable; }
   void uncurry(bool enable) { uncurry_ = enable; }
@@ -52,7 +49,6 @@ private:
   bool move_list_;
   bool reduce_cond_;
   bool use_deque_;
-  bool memoize_;
 
   // experimental options that do not improve performance
   bool use_class_;

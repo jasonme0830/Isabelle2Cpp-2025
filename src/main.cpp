@@ -104,7 +104,6 @@ parse_config(int argc, char* argv[])
   theConfig.move_list(arg_parser.get<bool>("move-list"));
   theConfig.reduce_cond(arg_parser.get<bool>("reduce-cond"));
   theConfig.use_deque(arg_parser.get<bool>("use-deque"));
-  theConfig.memoize(arg_parser.get<bool>("memoize"));
 
   // set experimental options
   theConfig.use_class(arg_parser.get<bool>("use-class"));
@@ -147,10 +146,6 @@ build_parser()
     .implict_value(true);
   arg_parser.add_argument("--use-deque")
     .help("enable use-deque")
-    .default_value(false)
-    .implict_value(true);
-  arg_parser.add_argument("--memoize")
-    .help("enable memoize")
     .default_value(false)
     .implict_value(true);
 

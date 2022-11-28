@@ -134,18 +134,33 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
     variant.arguments.emplace_back("_$"_fs.format(constructors[i]));
 
     if (components[i].empty()) {
-      "struct _$ {};\n"_fs.outf(newline(), constructors[i]);
+      "struct _$ {\n"_fs.outf(newline(), constructors[i]);
+      add_indent();
+      "bool operator<(const _$ &) const { return false; }\n"_fs.outf(
+        newline(), constructors[i]);
+      sub_indent();
+      "};\n"_fs.outf(newline());
     } else {
       "struct _$ {\n"_fs.outf(newline(), constructors[i]);
       add_indent();
+
+      // for operator<
+      string lhs, rhs;
+
       // generate members
       for (size_t j = 0; j < components[i].size(); ++j) {
         if (components[i][j] == self) {
           "std::shared_ptr<$> p$_;\n"_fs.outf(
             newline(), components[i][j], j + 1);
+
+          lhs.push_back('*');
+          rhs.push_back('*');
         } else {
           "$ p$_;\n"_fs.outf(newline(), components[i][j], j + 1);
         }
+
+        lhs += "p$_"_fs.format(j + 1);
+        rhs += "rhs.p$_"_fs.format(j + 1);
       }
       out_.get() << endl;
 
@@ -159,6 +174,16 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
             newline(), components[i][j], j + 1, j + 1);
         }
       }
+      out_.get() << endl;
+
+      // generate operator<
+      "bool operator<(const _$ &rhs) const {\n"_fs.outf(newline(),
+                                                        constructors[i]);
+      add_indent();
+      "return std::tie($) < std::tie($);\n"_fs.outf(newline(), lhs, rhs);
+      sub_indent();
+      "}\n"_fs.outf(newline());
+
       sub_indent();
       "};\n"_fs.outf(newline());
     }
@@ -237,6 +262,11 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
       }
     }
   }
+
+  // generate operator<
+  out_.get() << endl;
+  "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
+    .outf(newline(), self);
 
   sub_indent();
   "};\n\n"_fs.outf(newline());
