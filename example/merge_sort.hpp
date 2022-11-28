@@ -6,13 +6,19 @@
 
 template<typename T1>
 class slist {
-    struct _sNil {};
+    struct _sNil {
+        bool operator<(const _sNil &) const { return false; }
+    };
     struct _sCons {
         T1 p1_;
         std::shared_ptr<slist<T1>> p2_;
 
         const T1 &p1() const { return p1_; }
         slist<T1> p2() const { return *p2_; }
+
+        bool operator<(const _sCons &rhs) const {
+            return std::tie(p1_*p2_) < std::tie(rhs.p1_*rhs.p2_);
+        }
     };
 
     std::variant<_sNil, _sCons> value_;
@@ -32,6 +38,8 @@ class slist {
     bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
 
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
+
+    bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
 };
 
 std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::uint64_t> arg2);

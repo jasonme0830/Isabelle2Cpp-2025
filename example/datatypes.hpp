@@ -4,11 +4,17 @@
 #include <variant>
 
 class snat {
-    struct _sZero {};
+    struct _sZero {
+        bool operator<(const _sZero &) const { return false; }
+    };
     struct _sSucc {
         std::shared_ptr<snat> p1_;
 
         snat p1() const { return *p1_; }
+
+        bool operator<(const _sSucc &rhs) const {
+            return std::tie(*p1_) < std::tie(*rhs.p1_);
+        }
     };
 
     std::variant<_sZero, _sSucc> value_;
@@ -28,17 +34,25 @@ class snat {
     bool is_sSucc() const { return std::holds_alternative<_sSucc>(value_); }
 
     const _sSucc &as_sSucc() const { return std::get<_sSucc>(value_); }
+
+    bool operator<(const snat &rhs) const { return value_ < rhs.value_; }
 };
 
 template<typename T1>
 class slist {
-    struct _sNil {};
+    struct _sNil {
+        bool operator<(const _sNil &) const { return false; }
+    };
     struct _sCons {
         T1 p1_;
         std::shared_ptr<slist<T1>> p2_;
 
         const T1 &p1() const { return p1_; }
         slist<T1> p2() const { return *p2_; }
+
+        bool operator<(const _sCons &rhs) const {
+            return std::tie(p1_*p2_) < std::tie(rhs.p1_*rhs.p2_);
+        }
     };
 
     std::variant<_sNil, _sCons> value_;
@@ -58,11 +72,17 @@ class slist {
     bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
 
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
+
+    bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
 };
 
 class sbool {
-    struct _sTrue {};
-    struct _sFalse {};
+    struct _sTrue {
+        bool operator<(const _sTrue &) const { return false; }
+    };
+    struct _sFalse {
+        bool operator<(const _sFalse &) const { return false; }
+    };
 
     std::variant<_sTrue, _sFalse> value_;
     sbool(const std::variant<_sTrue, _sFalse> &value) : value_(value) {}
@@ -79,6 +99,8 @@ class sbool {
 
     bool is_sTrue() const { return std::holds_alternative<_sTrue>(value_); }
     bool is_sFalse() const { return std::holds_alternative<_sFalse>(value_); }
+
+    bool operator<(const sbool &rhs) const { return value_ < rhs.value_; }
 };
 
 snat add(const snat &arg1, const snat &arg2);
