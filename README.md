@@ -10,8 +10,18 @@ make example # make examples in example/
 
 make clean # clean target bin/hol2cpp
 make cleanall # clean target and generated example codes
+```
 
-make bench # make benchmarks, not work now
+## Benchmark
+
+### Requirement
+
+Install the [Google Benchmark](https://github.com/google/benchmark#installation) in the parent directory of hol2cpp
+
+### Bench
+
+```bash
+make bench # make benchmarks
 ```
 
 ## Code Style
