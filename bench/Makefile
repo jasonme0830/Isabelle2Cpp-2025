@@ -4,7 +4,7 @@ hol2cpp = ../bin/hol2cpp
 compare = ../../benchmark/tools/compare.py
 format = console
 
-thy = $(wildcard merge_sort/*.thy) $(wildcard binary_search/*.thy)
+thy = $(wildcard merge_sort/*.thy) $(wildcard binary_search/*.thy) $(wildcard fibonacci/*.thy)
 hpp = $(patsubst %.thy, %.hpp, $(thy))
 cpp = $(patsubst %.thy, %.cpp, $(thy))
 
@@ -26,12 +26,12 @@ $(target): $(cpp) bench.cpp
 %.cpp: %.thy $(hol2cpp)
 	$(hol2cpp) $< -s --predef ../bin/defs.pre
 
-.PHONY: clean bm cmp cmp1 cmp2 cmp3 cmp4 cmp5
+.PHONY: clean bm cmp cmp1 cmp2 cmp3 cmp4 cmp5 cmp6
 
 bm: bench
 	./bench
 
-cmp: cmp1 cmp2 cmp3 cmp4 cmp5
+cmp: cmp1 cmp2 cmp3 cmp4 cmp5 cmp6
 
 cmp1: bench
 	python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=$(format)
@@ -47,6 +47,9 @@ cmp4: bench
 
 cmp5: bench
 	python3 $(compare) filters ./bench bench_binary_search/ bench_binary_search_ud/ --benchmark_format=$(format)
+
+cmp6: bench
+	python3 $(compare) filters ./bench bench_fib/ bench_fib_mem/ --benchmark_format=$(format)
 
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
