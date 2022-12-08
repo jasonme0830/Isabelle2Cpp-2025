@@ -10,23 +10,23 @@ $(target): $(cpp) bench.cpp
 	g++ -o $@ -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
 
 %.ml.rc.cpp: %.ml.rc.thy $(hol2cpp)
-	$(hol2cpp) $< -s --move-list --reduce-cond
+	$(hol2cpp) $< -s --move-list --reduce-cond --predef ../bin/defs.pre
 
 %.ml.ud.cpp: %.ml.ud.thy $(hol2cpp)
-	$(hol2cpp) $< -s --move-list --use-deque
+	$(hol2cpp) $< -s --move-list --use-deque --predef ../bin/defs.pre
 
 %.ml.cpp: %.ml.thy $(hol2cpp)
-	$(hol2cpp) $< -s --move-list
+	$(hol2cpp) $< -s --move-list --predef ../bin/defs.pre
 
 %.ud.cpp: %.ud.thy $(hol2cpp)
-	$(hol2cpp) $< -s --use-deque
+	$(hol2cpp) $< -s --use-deque --predef ../bin/defs.pre
 
 %.cpp: %.thy $(hol2cpp)
-	$(hol2cpp) $< -s
+	$(hol2cpp) $< -s --predef ../bin/defs.pre
 
 .PHONY: clean bm cmp cmp1 cmp2
 
-compare = /Users/mu00/Repos/others/benchmark/tools/compare.py
+compare = ../../benchmark/tools/compare.py
 
 bm_cmp1 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
 bm_cmp2 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
