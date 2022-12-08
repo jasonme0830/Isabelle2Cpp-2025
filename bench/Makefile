@@ -1,10 +1,12 @@
 target = bench
 
+hol2cpp = ../bin/hol2cpp
+compare = ../../benchmark/tools/compare.py
+format = console
+
 thy = $(wildcard merge_sort/*.thy) $(wildcard binary_search/*.thy)
 hpp = $(patsubst %.thy, %.hpp, $(thy))
 cpp = $(patsubst %.thy, %.cpp, $(thy))
-
-hol2cpp = ../bin/hol2cpp
 
 $(target): $(cpp) bench.cpp
 	g++ -o $@ -Wall -O2 -std=c++17 $^ -pthread -lbenchmark
@@ -24,40 +26,27 @@ $(target): $(cpp) bench.cpp
 %.cpp: %.thy $(hol2cpp)
 	$(hol2cpp) $< -s --predef ../bin/defs.pre
 
-.PHONY: clean bm cmp cmp1 cmp2
-
-compare = ../../benchmark/tools/compare.py
-
-bm_cmp1 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=console
-bm_cmp2 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=console
-bm_cmp3 = python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ud/ --benchmark_format=console
-bm_cmp4 = python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_ud/ --benchmark_format=console
-bm_cmp5 = python3 $(compare) filters ./bench bench_binary_search/ bench_binary_search_ud/ --benchmark_format=console
+.PHONY: clean bm cmp cmp1 cmp2 cmp3 cmp4 cmp5
 
 bm: bench
 	./bench
 
-cmp: bench
-	$(bm_cmp1)
-	$(bm_cmp2)
-	$(bm_cmp3)
-	$(bm_cmp4)
-	$(bm_cmp5)
+cmp: cmp1 cmp2 cmp3 cmp4 cmp5
 
 cmp1: bench
-	$(bm_cmp1)
+	python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=$(format)
 
 cmp2: bench
-	$(bm_cmp2)
+	python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_rc/ --benchmark_format=$(format)
 
 cmp3: bench
-	$(bm_cmp3)
+	python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ud/ --benchmark_format=$(format)
 
 cmp4: bench
-	$(bm_cmp4)
+	python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_ml_ud/ --benchmark_format=$(format)
 
 cmp5: bench
-	$(bm_cmp5)
+	python3 $(compare) filters ./bench bench_binary_search/ bench_binary_search_ud/ --benchmark_format=$(format)
 
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
