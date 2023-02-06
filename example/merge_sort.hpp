@@ -17,7 +17,7 @@ class slist {
         slist<T1> p2() const { return *p2_; }
 
         bool operator<(const _sCons &rhs) const {
-            return std::tie(p1_*p2_) < std::tie(rhs.p1_*rhs.p2_);
+            return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
     };
 

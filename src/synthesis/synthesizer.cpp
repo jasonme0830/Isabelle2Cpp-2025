@@ -149,6 +149,11 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
       // generate members
       for (size_t j = 0; j < components[i].size(); ++j) {
+        if (j) {
+          lhs += ", ";
+          rhs += ", ";
+        }
+
         if (components[i][j] == self) {
           "std::shared_ptr<$> p$_;\n"_fs.outf(
             newline(), components[i][j], j + 1);
