@@ -60,5 +60,11 @@ cmp8: bench
 cmp9: bench
 	python3 $(compare) filters ./bench bench_merge_sort_ml_ud/ bench_merge_sort_raw_ud/ --benchmark_format=$(format)
 
+cmp_fib: bench
+	python3 $(compare) filters ./bench bench_fib_raw/ bench_fib/ --benchmark_format=$(format)
+
+cmp_fib_mem: bench
+	python3 $(compare) filters ./bench bench_fib_mem/ bench_fib_raw_quick/ --benchmark_format=$(format)
+
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
