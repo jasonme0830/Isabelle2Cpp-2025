@@ -31,7 +31,7 @@ $(target): $(cpp) bench.cpp
 bm: bench
 	./bench
 
-cmp: cmp1 cmp2 cmp3 cmp4 cmp5 cmp6 cmp7
+cmp: cmp1 cmp2 cmp3 cmp4 cmp5 cmp6 cmp7 cmp8 cmp9
 
 cmp1: bench
 	python3 $(compare) filters ./bench bench_merge_sort/ bench_merge_sort_ml/ --benchmark_format=$(format)
@@ -53,6 +53,12 @@ cmp6: bench
 
 cmp7: bench
 	python3 $(compare) filters ./bench bench_find_fact/ bench_find_fact_mem/ --benchmark_format=$(format)
+
+cmp8: bench
+	python3 $(compare) filters ./bench bench_merge_sort_ml/ bench_merge_sort_raw/ --benchmark_format=$(format)
+
+cmp9: bench
+	python3 $(compare) filters ./bench bench_merge_sort_ml_ud/ bench_merge_sort_raw_ud/ --benchmark_format=$(format)
 
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
