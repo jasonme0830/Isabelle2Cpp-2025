@@ -1,0 +1,64 @@
+(* EBNF for HOL2Cpp *)
+
+theory = "theory" ident "imports" { ident } "begin" { definition } "end" ;
+definition = datatype_definition
+           | function_definition
+           ;
+
+datatype_definition = "datatype" type '=' construction { '|' construction } ;
+construction = ident { type }
+type = func_type ;
+func_type = pair_type [ rightarrow func_type ] ;
+pair_type = template_type [ '*' pair_type ] ;
+template_type = type_term { ident } ;
+type_term = type_variable
+          | normal_type
+          | '(' type { ',' type } ')' ident
+          | '(' type ')'
+          | '"' type '"'
+          ;
+type_variable = "'" ident [ "::" type ] ;
+normal_type = ident ;
+
+function_definition = func_word [ attr ] ident "::" '"' func_type '"' [ infix_op_def ] "where" equations ;
+func_word = "fun"
+          | "function"
+          | "primrec"
+          | "definition"
+          | "abbreviation"
+          ;
+attr = "(nonexhaustive)" ;
+infix_op_def = '(' ("infixl" | "infixr") operator integer ')' ;
+equations = '"' equation '"' { '|' '"' equation '"' } ;
+equation = expr equiv expr ;
+expr = term [ operator expr ] ;
+term = cons_expr
+     | factor
+     ;
+factor = letin_expr
+       | case_expr
+       | lambda_expr
+       | variable
+       | if_expr
+       | list_expr
+       | set_expr
+       | pair_expr
+       | integer_expr
+       ;
+cons_expr = ident { factor } ;
+letin_expr = "let" equation "in" expr ;
+case_expr = "case" expr "of" case_equation { '|' case_equation } ;
+case_equation = expr rightarrow expr ;
+lambda_expr = [ "lambda" | '%' ] ( ident { ident } | '(' ident { ',' ident } ')' ) '.' expr ;
+variable = ident ;
+if_expr = "if" expr "then" expr "else" expr ;
+list_expr = '[' [ expr { ',' expr } ] ']' ;
+set_expr = '{' [ expr { ',' expr } ] '}' ;
+pair_expr = '(' expr ',' expr ')' ;
+integer_expr = integer ;
+
+rightarrow = "=>" | "<Rightarrow>" ;
+equiv = '=' | "<longleftrightarrow>" | "<equiv>" ;
+ident = ? Regex: [a-zA-Z_][a-zA-Z0-9_]* ? ;
+integer = ? Regex: [0-9]+ ? ;
+operator = ? Regex: \S+ ? ;
