@@ -26,7 +26,7 @@ $(target): $(cpp) bench.cpp
 %.cpp: %.thy $(hol2cpp)
 	$(hol2cpp) $< -s --predef ../bin/defs.pre
 
-.PHONY: clean bm cmp cmp1 cmp2 cmp3 cmp4 cmp5 cmp6
+.PHONY: clean bm cmp
 
 bm: bench
 	./bench
@@ -65,6 +65,9 @@ cmp_fib: bench
 
 cmp_fib_mem: bench
 	python3 $(compare) filters ./bench bench_fib_mem/ bench_fib_raw_quick/ --benchmark_format=$(format)
+
+cmp_bs_ml: bench
+	python3 $(compare) filters ./bench bench_binary_search/ bench_binary_search_ml/ --benchmark_format=$(format)
 
 clean:
 	rm -rf $(target) $(hpp) $(cpp)

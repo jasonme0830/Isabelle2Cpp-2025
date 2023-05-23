@@ -39,4 +39,10 @@ unmove_expr(string expr)
     return expr;
   }
 }
+
+bool
+is_moved(const string& expr)
+{
+  return expr.substr(0, 9) == "std::move";
+}
 } // namespace hol2cpp

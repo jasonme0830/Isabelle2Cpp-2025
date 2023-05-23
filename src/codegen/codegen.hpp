@@ -52,6 +52,9 @@ enclose_if_needed(const std::string& expr)
 std::string
 unmove_expr(std::string expr);
 
+bool
+is_moved(const std::string& expr);
+
 template<typename T, typename ToStr = std::function<std::string(const T&)>>
 inline std::string
 join(const std::vector<T>& vec,
