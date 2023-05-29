@@ -1,16 +1,16 @@
 #include "List_raw.hpp"
 
-std::deque<std::int64_t> upto_aux(const std::int64_t &arg1, const std::int64_t &arg2, std::deque<std::int64_t> arg3) {
+std::list<std::int64_t> upto_aux(const std::int64_t &arg1, const std::int64_t &arg2, const std::list<std::int64_t> &arg3) {
     // upto_aux i j js = [i..j] @ js
     auto temp0 = arg1;
     auto temp1 = arg2;
-    std::deque<std::int64_t> temp2;
+    std::list<std::int64_t> temp2;
     for (auto temp3 = temp0; temp3 <= temp1; ++temp3) {
         temp2.push_back(temp3);
     }
     auto temp4 = temp2;
-    auto temp5 = std::move(arg3);
-    temp4.insert(temp4.end(), temp5.begin(), temp5.end());
+    auto temp5 = arg3;
+    temp4.splice(temp4.end(), temp5);
     return temp4;
 }
 

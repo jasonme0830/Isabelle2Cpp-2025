@@ -1,6 +1,6 @@
 #include "merge_sort.hpp"
 
-std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::uint64_t> arg2) {
+std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::list<std::uint64_t> &arg2) {
     // merge xs [] = xs
     if (arg2.empty()) {
         return arg1;
@@ -13,42 +13,40 @@ std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::
 
     // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
     auto x = arg1.front();
-    arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(arg1);
+    auto xs = std::list<std::uint64_t>(std::next(arg1.begin()), arg1.end());
     auto y = arg2.front();
-    arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto ys = std::move(arg2);
-    std::deque<std::uint64_t> temp0;
+    auto ys = std::list<std::uint64_t>(std::next(arg2.begin()), arg2.end());
+    std::list<std::uint64_t> temp0;
     if (x <= y) {
-        auto temp1 = std::move(ys);
+        auto temp1 = ys;
         temp1.push_front(y);
-        auto temp2 = merge(std::move(xs), std::move(temp1));
+        auto temp2 = merge(xs, temp1);
         temp2.push_front(x);
-        temp0 = std::move(temp2);
+        temp0 = temp2;
     } else {
-        auto temp3 = std::move(xs);
+        auto temp3 = xs;
         temp3.push_front(x);
-        auto temp4 = merge(std::move(temp3), std::move(ys));
+        auto temp4 = merge(temp3, ys);
         temp4.push_front(y);
-        temp0 = std::move(temp4);
+        temp0 = temp4;
     }
     return temp0;
 }
 
-std::deque<std::uint64_t> merge_sort(std::deque<std::uint64_t> arg1) {
+std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1) {
     // merge_sort [] = []
     if (arg1.empty()) {
-        return std::deque<std::uint64_t>();
+        return std::list<std::uint64_t>();
     }
 
     // merge_sort [x] = [x]
     if (arg1.size() == 1) {
-        auto x = arg1[0];
-        return std::deque<std::uint64_t>{x};
+        auto x = *std::next(arg1.begin(), 0);
+        return std::list<std::uint64_t>{x};
     }
 
     // merge_sort xs = merge (merge_sort (take ((length xs) div 2) xs)) (merge_sort (drop ((length xs) div 2) xs))
-    return merge(merge_sort(std::deque<std::uint64_t>(arg1.begin(), arg1.begin() + arg1.size() / 2)), merge_sort(std::deque<std::uint64_t>(arg1.begin() + arg1.size() / 2, arg1.end())));
+    return merge(merge_sort(std::list<std::uint64_t>(arg1.begin(), std::next(arg1.begin(), arg1.size() / 2))), merge_sort(std::list<std::uint64_t>(std::next(arg1.begin(), arg1.size() / 2), arg1.end())));
 }
 
 slist<std::uint64_t> smerge(const slist<std::uint64_t> &arg1, const slist<std::uint64_t> &arg2) {

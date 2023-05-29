@@ -1,6 +1,6 @@
 #include "binary_search.hpp"
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint64_t> arg2) {
+std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
@@ -8,7 +8,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint6
 
     // bs x [y] = If (x = y) (Some 0) None
     if (arg2.size() == 1) {
-        auto y = arg2[0];
+        auto y = *std::next(arg2.begin(), 0);
         std::optional<std::uint64_t> temp0;
         if (arg1 == y) {
             temp0 = std::make_optional<std::uint64_t>(0);
@@ -22,7 +22,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint6
     auto temp0 = arg2.size() / 2;
     auto m = temp0;
     auto temp2 = arg2;
-    auto temp1 = temp2[m];
+    auto temp1 = *std::next(temp2.begin(), m);
     auto y = temp1;
     std::optional<std::uint64_t> temp3;
     if (y == arg1) {
@@ -31,7 +31,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint6
         std::optional<std::uint64_t> temp4;
         if (y < arg1) {
             auto temp5 = ([&] {
-                auto temp6 = bs(arg1, std::deque<std::uint64_t>(arg2.begin() + m + 1, arg2.end()));
+                auto temp6 = bs(arg1, std::list<std::uint64_t>(std::next(arg2.begin(), m + 1), arg2.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp6.has_value()) {
@@ -44,7 +44,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::deque<std::uint6
             })();
             temp4 = temp5;
         } else {
-            temp4 = bs(arg1, std::deque<std::uint64_t>(arg2.begin(), arg2.begin() + m));
+            temp4 = bs(arg1, std::list<std::uint64_t>(arg2.begin(), std::next(arg2.begin(), m)));
         }
         temp3 = temp4;
     }

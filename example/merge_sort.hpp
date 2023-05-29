@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
-#include <deque>
+#include <list>
 #include <memory>
 #include <variant>
 
@@ -42,9 +42,9 @@ class slist {
     bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
 };
 
-std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::uint64_t> arg2);
+std::list<std::uint64_t> merge(const std::list<std::uint64_t> &arg1, const std::list<std::uint64_t> &arg2);
 
-std::deque<std::uint64_t> merge_sort(std::deque<std::uint64_t> arg1);
+std::list<std::uint64_t> merge_sort(const std::list<std::uint64_t> &arg1);
 
 template<typename T1>
 std::uint64_t slength(const slist<T1> &arg1) {
