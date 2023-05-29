@@ -41,7 +41,7 @@ unmove_expr(string expr)
 }
 
 string
-move_expr(const string &expr)
+move_expr(const string& expr)
 {
   if (expr.substr(0, 9) == "std::move") {
     return expr;

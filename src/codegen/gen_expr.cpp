@@ -55,14 +55,14 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 
     if (theConfig.move_list()) {
       return constructor + enclose(join(args, [&](const auto& arg) {
-             auto temp = func.gen_temp();
-             func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-             return move_expr(temp);
-           }));
+               auto temp = func.gen_temp();
+               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+               return move_expr(temp);
+             }));
     } else {
       return constructor + enclose(join(args, [&](const auto& arg) {
-             return arg->gen_expr(func);
-           }));
+               return arg->gen_expr(func);
+             }));
     }
   }
 
@@ -109,8 +109,11 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
       func.add_expr("auto $ = $;", temp_xs, xs);
-      func.add_expr(
-        "$.erase(std::next($.begin(), $), $.end());", temp_xs, temp_xs, temp_n, temp_xs);
+      func.add_expr("$.erase(std::next($.begin(), $), $.end());",
+                    temp_xs,
+                    temp_xs,
+                    temp_n,
+                    temp_xs);
       return move_expr(temp_xs);
     }
 
@@ -133,8 +136,11 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
       func.add_expr("auto $ = $;", temp_xs, xs);
-      func.add_expr(
-        "$.erase($.begin(), std::next($.begin(), $));", temp_xs, temp_xs, temp_xs, temp_n);
+      func.add_expr("$.erase($.begin(), std::next($.begin(), $));",
+                    temp_xs,
+                    temp_xs,
+                    temp_xs,
+                    temp_n);
       return move_expr(temp_xs);
     }
 
@@ -289,14 +295,14 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 
     if (theConfig.move_list()) {
       return constructor + enclose(join(args, [&](const auto& arg) {
-             auto temp = func.gen_temp();
-             func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-             return move_expr(temp);
-           }));
+               auto temp = func.gen_temp();
+               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+               return move_expr(temp);
+             }));
     } else {
       return constructor + enclose(join(args, [&](const auto& arg) {
-             return arg->gen_expr(func);
-           }));
+               return arg->gen_expr(func);
+             }));
     }
   }
 

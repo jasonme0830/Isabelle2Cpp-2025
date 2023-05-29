@@ -53,7 +53,7 @@ std::string
 unmove_expr(std::string expr);
 
 std::string
-move_expr(const std::string &expr);
+move_expr(const std::string& expr);
 
 bool
 is_moved(const std::string& expr);
