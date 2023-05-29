@@ -13,9 +13,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: make
-      run: make
-    - name: make example
-      run: make example
-    - bench: make bench
-      run: make bench
+    - run: make
+    - run: make example
+    - run: |
+        git clone https://github.com/google/benchmark.git
+        cd benchmark
+        cmake -E make_directory "build"
+        cmake -E chdir "build" cmake -DBENCHMARK_DOWNLOAD_DEPENDENCIES=on -DCMAKE_BUILD_TYPE=Release ../
+        sudo cmake --build "build" --config Release --target install
+    - run: make bench
