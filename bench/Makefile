@@ -69,5 +69,11 @@ cmp_fib_mem: bench
 cmp_bs_ml: bench
 	python3 $(compare) filters ./bench bench_binary_search/ bench_binary_search_ml/ --benchmark_format=$(format)
 
+cmp_mg_raw: bench
+	python3 $(compare) filters ./bench bench_merge_sort_raw/ bench_merge_sort_ml/ --benchmark_format=$(format)
+
+cmp_mg_raw_ud: bench
+	python3 $(compare) filters ./bench bench_merge_sort_raw_ud/ bench_merge_sort_ml_ud/ --benchmark_format=$(format)
+
 clean:
 	rm -rf $(target) $(hpp) $(cpp)
