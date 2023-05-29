@@ -17,3 +17,5 @@ jobs:
       run: make
     - name: make example
       run: make example
+    - bench: make bench
+      run: make bench
