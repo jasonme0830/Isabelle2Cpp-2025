@@ -296,8 +296,13 @@ Parser::gen_datatype_definition()
     decl->components.push_back(gen_component());
   } while (try_eat<Token::Type::Pipe>());
   /*
-    
+    These step code by myk.
+    To compare the definition of the definition datatypes.
   */
+  if(decl->is_defined()){
+    //How to handle the isomorphise definition datatypes has not been decided.
+    return decl;
+  }
  
   return decl;
 }

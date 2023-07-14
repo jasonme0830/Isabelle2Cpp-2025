@@ -444,14 +444,22 @@ struct DatatypeDef : Definition
   bool is_datatype_decl() const override;
 
   /*    These two function is code by myk.  */
+  //Has been defined, return true; else return false.
   bool is_defined() const override;
   bool is_declared() const override;
+  //Normal type return 1; Argument type return 2; Templete type return 3.
   int get_type() const override;
 
   DatatypeDef clone() const;
 
 public:
   void gen_code(Code&) const override;
+  //Have same, return true; don't have, return false.
+  bool compare_type(Ptr<Type>, Ptr<Type>) const;
+  //Compare components, same return true; else return false.
+  bool compare_components(vector<Component>, vector<Component>) const;
+  //Compare arguments, same return true; else return false.
+  bool compare_arguments(vector<Ptr<Type>>, vector<Ptr<Type>>) const;
 };
 
 struct FunctionDef : Definition
@@ -474,6 +482,7 @@ struct FunctionDef : Definition
 
 public:
   void gen_code(Code&) const override;
+  bool compare_type(Ptr<FuncType>);
 };
 
 // as a special DatatypeDef
