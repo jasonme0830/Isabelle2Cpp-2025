@@ -200,27 +200,39 @@ DatatypeDef::is_defined() const
   std::set<Ptr<DatatypeDef>>::iterator it_data;
   for(it_data = theDefinedDatatypes.begin(); it_data != theDefinedDatatypes.end(); it_data++)
   {
-    if(this->decl_type ==  (*it_data)->decl_type){
+    if(compare_type(decl_type, (*it_data)->decl_type)){
       //Same type, handle by type.
-      int type_id = 0;
-      type_id = this->get_type();
-      switch (type_id)
+      switch (get_type())
       {
       case 0:
-        /* code */
-        break;
+        //Something wrong.
+        return true;
       case 1:
-
-        break;
+        //Normal type, even same, temporarily do nothing.
+        return false;
       case 2:
-        break;
+        //Argument type, even same, temporarily do nothing.
+        return false;
       case 3:
+        //Templete type, and same type, then compare compents.
+        if(compare_components(components, (*it_data)->components)){
+          //Same, need to do something, but temporarily don't know do waht.
+          return true;
+        }
+        else{
+          //Not same
+          return false;
+        }
         break;
       default:
+        //Default: not same.
+        return false;
         break;
       }
     }
   }
+  //compare finished, and type different from all the definition.
+  return false;
 }
 bool
 FunctionDef::is_defined() const
