@@ -22,6 +22,20 @@
 namespace hol2cpp {
 inline std::set<std::string> thePredefinedDatatypes;
 inline std::set<std::string> thePredefinedFunctions;
+/*
+  These variable is code by myk.
+  To store the definitions for the comparation of the isomorphism definitions.
+*/
+inline std::set<Ptr<DatatypeDef>> theDefinedDatatypes;
+inline std::set<Ptr<FunctionDef>> theDefinedFunctions;
+/*
+  These variable is code by myk.
+  To store the declaritions for the comparation of the same name declararions.
+  Have the same use with the variable thePredefinedDatatypes.
+  Xubo's variable have some name ambiguity.
+*/
+inline std::set<std::string> theDeclaredDatatypes;
+inline std::set<std::string> theDeclaredFunctions;
 
 extern std::map<std::string, std::string> theNormalTypeMapping;
 extern std::map<std::string, std::string> theTemplateTypeMapping;

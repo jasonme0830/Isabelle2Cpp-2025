@@ -182,6 +182,11 @@ Parser::gen_predef_datatype_definition()
   } while (try_eat<Token::Type::Pipe>());
 
   thePredefinedDatatypes.insert(decl->decl_type->main_name());
+  /*
+    We should check the datatype and the function has been defined or not,
+    but now think it as not been defined and insert into variable.
+  */
+  theDefinedDatatypes.insert(move(decl));
 
   return decl;
 }
@@ -290,7 +295,10 @@ Parser::gen_datatype_definition()
   do {
     decl->components.push_back(gen_component());
   } while (try_eat<Token::Type::Pipe>());
-
+  /*
+    
+  */
+ 
   return decl;
 }
 
