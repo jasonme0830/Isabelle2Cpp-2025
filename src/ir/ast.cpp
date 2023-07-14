@@ -135,6 +135,13 @@ DatatypeDef::is_datatype_decl() const
   return true;
 }
 
+int 
+DatatypeDef::get_type() const {
+  if(typeid(this->decl_type) == typeid(NormalType)) return 1;
+  if(typeid(this->decl_type) == typeid(ArgumentType)) return 2;
+  if(typeid(this->decl_type) == typeid(TemplateType)) return 3;
+}
+
 string
 FunctionDef::def_name() const
 {

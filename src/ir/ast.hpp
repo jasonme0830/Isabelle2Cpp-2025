@@ -382,9 +382,15 @@ struct Definition
   virtual bool is_predef() const { return false; }
   /// check the def has been pre-defined or not
   virtual bool is_predefined() const { return false; }
-
   virtual bool is_datatype_decl() const { return false; }
   virtual bool is_function_decl() const { return false; }
+
+  /*    These two function is code by myk.  */
+  //Func is_declared aims to check the same name declaration.
+  virtual bool is_declared() const { return false; }
+  //Func is_defined aims to check the isomorphism definitions.
+  virtual bool is_defined() const { return false; }
+  virtual int get_type() const { return 0; }
 
   virtual void gen_code(Code&) const;
 };
@@ -398,6 +404,10 @@ struct ErrorDefinition : Definition
   bool is_error() const override;
   bool is_datatype_decl() const override;
   bool is_function_decl() const override;
+
+  /*    These two function is code by myk.  */
+  bool is_defined() const override;
+  bool is_declared() const override;
 };
 
 /**
@@ -433,6 +443,11 @@ struct DatatypeDef : Definition
   bool is_predefined() const override;
   bool is_datatype_decl() const override;
 
+  /*    These two function is code by myk.  */
+  bool is_defined() const override;
+  bool is_declared() const override;
+  int get_type() const override;
+
   DatatypeDef clone() const;
 
 public:
@@ -453,6 +468,10 @@ struct FunctionDef : Definition
   bool is_predefined() const override;
   bool is_function_decl() const override;
 
+  /*    These two function is code by myk.  */
+  bool is_defined() const override;
+  bool is_declared() const override;
+
 public:
   void gen_code(Code&) const override;
 };
@@ -462,6 +481,10 @@ struct PreDatatypeDef final : DatatypeDef
 {
   virtual bool is_predef() const override { return true; }
   virtual bool is_predefined() const override { return false; }
+
+  /*    These two function is code by myk.  */
+  bool is_defined() const override { return true; }
+  bool is_declared() const override { return false; }
 };
 
 // as a special FunctionDef
@@ -469,6 +492,10 @@ struct PreFunctionDef final : FunctionDef
 {
   virtual bool is_predef() const override { return true; }
   virtual bool is_predefined() const override { return false; }
+
+  /*    These two function is code by myk.  */
+  bool is_defined() const override { return true; }
+  bool is_declared() const override { return false; }
 };
 
 struct ShortDef final : Definition

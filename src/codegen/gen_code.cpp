@@ -180,7 +180,6 @@ DatatypeDef::is_predefined() const
 {
   return thePredefinedDatatypes.count(decl_type->main_name());
 }
-
 /**
  * @brief check the function is pre-defined or not
  *
@@ -191,5 +190,41 @@ bool
 FunctionDef::is_predefined() const
 {
   return thePredefinedFunctions.count(name);
+}
+
+//These definition is code by myk.
+
+bool
+DatatypeDef::is_defined() const
+{
+  std::set<Ptr<DatatypeDef>>::iterator it_data;
+  for(it_data = theDefinedDatatypes.begin(); it_data != theDefinedDatatypes.end(); it_data++)
+  {
+    if(this->decl_type ==  (*it_data)->decl_type){
+      //Same type, handle by type.
+      int type_id = 0;
+      type_id = this->get_type();
+      switch (type_id)
+      {
+      case 0:
+        /* code */
+        break;
+      case 1:
+
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      default:
+        break;
+      }
+    }
+  }
+}
+bool
+FunctionDef::is_defined() const
+{
+
 }
 } // namespace hol2cpp
