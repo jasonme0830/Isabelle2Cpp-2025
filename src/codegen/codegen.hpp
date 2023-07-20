@@ -34,8 +34,8 @@ inline std::set<Ptr<FunctionDef>> theDefinedFunctions;
   Have the same use with the variable thePredefinedDatatypes.
   Xubo's variable have some name ambiguity.
 */
-inline std::set<std::string> theDeclaredDatatypes;
-inline std::set<std::string> theDeclaredFunctions;
+// inline std::set<std::string> theDeclaredDatatypes;
+// inline std::set<std::string> theDeclaredFunctions;
 
 extern std::map<std::string, std::string> theNormalTypeMapping;
 extern std::map<std::string, std::string> theTemplateTypeMapping;

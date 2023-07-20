@@ -135,49 +135,6 @@ DatatypeDef::is_datatype_decl() const
   return true;
 }
 
-int 
-DatatypeDef::get_type() const {
-  if(typeid(this->decl_type) == typeid(NormalType)) return 1;
-  if(typeid(this->decl_type) == typeid(ArgumentType)) return 2;
-  if(typeid(this->decl_type) == typeid(TemplateType)) return 3;
-  return 0;
-}
-bool
-DatatypeDef::compare_type (Ptr<Type> type_1, Ptr<Type> type_2) const {
-  if(typeid(type_1) == typeid(type_2)) return true;
-  else return false;
-}
-bool
-DatatypeDef::compare_components(vector<Component> com_1, vector<Component> com_2) const{
-  //First, compare the size of the components vector.
-  if(com_1.size() != com_2.size()) return false;
-  //Then, same size, compare the content of the components.
-  std::vector<Component>::iterator it_com_1;
-  std::vector<Component>::iterator it_com_2;
-  for(it_com_1=com_1.begin(); it_com_1!=com_1.end(); it_com_1++){
-    for(it_com_2=com_2.begin(); it_com_2!=com_2.end(); it_com_2++){
-      //Component variable constructor affect nothing, so ignore.
-      if(compare_arguments(it_com_1->arguments,it_com_2->arguments)){
-        //If arguments same, should do something, but temporarily don't know do what.
-        continue;
-      }
-    }
-  }
-  return false;
-}
-bool
-DatatypeDef::compare_arguments(vector<Ptr<Type>> argu_1, vector<Ptr<Type>> argu_2) const{
-  std::vector<Ptr<Type>>::iterator it_argu_1;
-  std::vector<Ptr<Type>>::iterator it_argu_2;
-  for(it_argu_1=argu_1.begin(); it_argu_1!=argu_1.end(); it_argu_1++){
-    for(it_argu_2=argu_2.begin(); it_argu_2!=argu_2.end(); it_argu_2++){
-
-    }
-
-  }
-  return false;
-}
-
 string
 FunctionDef::def_name() const
 {

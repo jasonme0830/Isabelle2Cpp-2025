@@ -193,50 +193,24 @@ FunctionDef::is_predefined() const
 }
 
 //These definition is code by myk.
-
-bool
-DatatypeDef::is_defined() const
+bool 
+DatatypeDef::is_isomorphism() const
 {
-  std::set<Ptr<DatatypeDef>>::iterator it_data;
-  for(it_data = theDefinedDatatypes.begin(); it_data != theDefinedDatatypes.end(); it_data++)
-  {
-    if(compare_type(decl_type, (*it_data)->decl_type)){
-      //Same type, handle by type.
-      switch (get_type())
-      {
-      case 0:
-        //Something wrong.
-        return true;
-      case 1:
-        //Normal type, even same, temporarily do nothing.
-        return false;
-      case 2:
-        //Argument type, even same, temporarily do nothing.
-        return false;
-      case 3:
-        //Templete type, and same type, then compare compents.
-        if(compare_components(components, (*it_data)->components)){
-          //Same, need to do something, but temporarily don't know do waht.
-          return true;
-        }
-        else{
-          //Not same
-          return false;
-        }
-        break;
-      default:
-        //Default: not same.
-        return false;
-        break;
-      }
-    }
+  if(typeid(decl_type) == typeid(NormalType)){
+    cout<<"####### normalType"<<endl;
   }
-  //compare finished, and type different from all the definition.
+  else if(typeid(decl_type) == typeid(ArgumentType)){
+    cout<<"####### argumentType"<<endl;
+  }
+  else if(typeid(decl_type) == typeid(TemplateType)){
+    cout<<"####### templateType"<<endl;
+  }
+  else{
+    if(typeid(decl_type) == typeid(Type)){
+      cout<<"####### just reach type"<<endl;
+    }
+    cout<<"####### typeid bu guan yong"<<endl;
+  }
   return false;
-}
-bool
-FunctionDef::is_defined() const
-{
-
 }
 } // namespace hol2cpp

@@ -186,7 +186,7 @@ Parser::gen_predef_datatype_definition()
     We should check the datatype and the function has been defined or not,
     but now think it as not been defined and insert into variable.
   */
-  theDefinedDatatypes.insert(move(decl));
+  // theDefinedDatatypes.insert(move(decl));
 
   return decl;
 }
@@ -288,7 +288,7 @@ Parser::gen_datatype_definition()
   }
 
   if (decl->is_predefined()) {
-    return decl;
+    // return decl;
   }
 
   eat<Token::Type::Equiv>("expected token Equiv");
@@ -296,14 +296,11 @@ Parser::gen_datatype_definition()
     decl->components.push_back(gen_component());
   } while (try_eat<Token::Type::Pipe>());
   /*
-    These step code by myk.
-    To compare the definition of the definition datatypes.
+    This function is code by myk.
   */
-  if(decl->is_defined()){
-    //How to handle the isomorphise definition datatypes has not been decided.
-    return decl;
+  if(decl->is_isomorphism()){
+    cout<<"# judge if isomorphism"<<endl;
   }
- 
   return decl;
 }
 
