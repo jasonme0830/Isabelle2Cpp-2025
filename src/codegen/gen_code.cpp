@@ -196,21 +196,44 @@ FunctionDef::is_predefined() const
 bool 
 DatatypeDef::is_isomorphism() const
 {
-  if(typeid(decl_type) == typeid(NormalType)){
+  //声明一个int数组用来存储对比信息
+  int compare_res[theDefinedDatatypes.size()] = {0};
+  std::vector<DatatypeDef>::iterator decl_ptr;
+  for(decl_ptr=theDefinedDatatypes.begin();decl_ptr!=theDefinedDatatypes.end();++decl_ptr){
+    //比较等号左边的类型,相同才有必要继续比
+    if(decl_type->get_datatype() == decl_ptr->decl_type->get_datatype()){
+      //接着比较components内元素的数量，不一致就跳出本次循环
+      if(components.size() != decl_ptr->components.size()) continue;
+      if(compare_components(decl_ptr->components)){
+        //components也相同，则这两个datatypedef同构
+          int index = distance(theDefinedDatatypes.begin(), decl_ptr);
+          compare_res[index] = 1;
+      }
+    }
+  }
+  int res = 0;
+  for(int i=0;i<(int)theDefinedDatatypes.size();i++){
+    res += compare_res[i];
+  }
+  if(res > 0)   return true;
+  else   return false;
+/*
+  //myk, step one, compare decl_type.
+  if(decl_type->get_datatype() == "Normal"){
     cout<<"####### normalType"<<endl;
+    return false;
   }
-  else if(typeid(decl_type) == typeid(ArgumentType)){
+  else if(decl_type->get_datatype() == "Argument"){
     cout<<"####### argumentType"<<endl;
+    return false;
   }
-  else if(typeid(decl_type) == typeid(TemplateType)){
+  else if(decl_type->get_datatype() == "Template"){
     cout<<"####### templateType"<<endl;
   }
   else{
-    if(typeid(decl_type) == typeid(Type)){
-      cout<<"####### just reach type"<<endl;
-    }
     cout<<"####### typeid bu guan yong"<<endl;
   }
-  return false;
+  //myk, step two, compare components.
+*/
 }
 } // namespace hol2cpp
