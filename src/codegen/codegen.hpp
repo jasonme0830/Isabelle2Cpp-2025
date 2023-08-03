@@ -26,7 +26,7 @@ inline std::set<std::string> thePredefinedFunctions;
   These variable is code by myk.
   To store the definitions for the comparation of the isomorphism definitions.
 */
-inline std::set<Ptr<DatatypeDef>> theDefinedDatatypes;
+inline std::vector<DatatypeDef> theDefinedDatatypes;
 inline std::set<Ptr<FunctionDef>> theDefinedFunctions;
 /*
   These variable is code by myk.

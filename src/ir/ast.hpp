@@ -43,6 +43,9 @@ struct Type
 
   virtual Ptr<Type> clone() const;
   virtual void print_type() const = 0;
+
+  //code by myk
+  virtual std::string get_datatype() const = 0;
 };
 
 /**
@@ -69,6 +72,9 @@ public:
 
   Ptr<Type> clone() const override;
   void print_type() const override;
+
+  //code by myk
+  std::string get_datatype() const override;
 };
 
 /**
@@ -94,6 +100,9 @@ public:
 
   Ptr<Type> clone() const override;
   void print_type() const override;
+
+  //code by myk
+  std::string get_datatype() const override;
 };
 
 /**
@@ -125,6 +134,9 @@ public:
 
   Ptr<Type> clone() const override;
   void print_type() const override;
+
+  //code by myk
+  std::string get_datatype() const override;
 };
 
 // unused now
@@ -153,6 +165,9 @@ public:
 
   Ptr<Type> clone() const override;
   void print_type() const override;
+
+  //code by myk
+  std::string get_datatype() const override;
 };
 
 /**
@@ -435,20 +450,17 @@ struct DatatypeDef : Definition
 
   bool is_predefined() const override;
   bool is_datatype_decl() const override;
+  DatatypeDef clone() const;
 
   //These func is code by myk.
   bool is_isomorphism() const override;
-
-  DatatypeDef clone() const;
+  //compare struct component, same return true.
+  bool compare_component(DatatypeDef::Component, DatatypeDef::Component) const;
+  bool compare_components(std::vector<DatatypeDef::Component>&) const;
+  bool compare_type(Ptr<Type>, Ptr<Type>) const;
 
 public:
   void gen_code(Code&) const override;
-  //Have same, return true; don't have, return false.
-  bool compare_type(Ptr<Type>, Ptr<Type>) const;
-  //Compare components, same return true; else return false.
-  bool compare_components(vector<Component>, vector<Component>) const;
-  //Compare arguments, same return true; else return false.
-  bool compare_arguments(vector<Ptr<Type>>, vector<Ptr<Type>>) const;
 };
 
 struct FunctionDef : Definition

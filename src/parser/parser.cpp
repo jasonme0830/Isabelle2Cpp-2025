@@ -231,6 +231,7 @@ Parser::gen_theory(Theory theory)
   while (!meet<Token::Type::EndOfFile>()) {
     try {
       if (auto decl = gen_declaration()) {
+        //myk,some measure should be inserted.
         theory.definitions.push_back(move(decl));
       }
     } catch (const TokenizeError& e) {
@@ -300,6 +301,10 @@ Parser::gen_datatype_definition()
   */
   if(decl->is_isomorphism()){
     cout<<"# judge if isomorphism"<<endl;
+  }
+  else{
+    cout<<"# not same, insert into theDefinedDatatypes"<<endl;
+    theDefinedDatatypes.push_back(*decl);
   }
   return decl;
 }
