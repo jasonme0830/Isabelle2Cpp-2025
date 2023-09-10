@@ -61,6 +61,12 @@ NormalType::main_name() const
 }
 
 string
+ArgumentType::main_name() const
+{
+  return name;
+}
+
+string
 TemplateType::main_name() const
 {
   return name;

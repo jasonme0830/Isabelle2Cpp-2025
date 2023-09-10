@@ -217,23 +217,5 @@ DatatypeDef::is_isomorphism() const
   }
   if(res > 0)   return true;
   else   return false;
-/*
-  //myk, step one, compare decl_type.
-  if(decl_type->get_datatype() == "Normal"){
-    cout<<"####### normalType"<<endl;
-    return false;
-  }
-  else if(decl_type->get_datatype() == "Argument"){
-    cout<<"####### argumentType"<<endl;
-    return false;
-  }
-  else if(decl_type->get_datatype() == "Template"){
-    cout<<"####### templateType"<<endl;
-  }
-  else{
-    cout<<"####### typeid bu guan yong"<<endl;
-  }
-  //myk, step two, compare components.
-*/
 }
 } // namespace hol2cpp
