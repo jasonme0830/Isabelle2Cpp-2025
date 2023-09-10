@@ -46,6 +46,7 @@ struct Type
 
   //code by myk
   virtual std::string get_datatype() const = 0;
+  virtual std::vector<Ptr<Type>> depth_traversal() = 0;
 };
 
 /**
@@ -75,6 +76,7 @@ public:
 
   //code by myk
   std::string get_datatype() const override;
+  std::vector<Ptr<Type>> depth_traversal() override;
 };
 
 /**
@@ -103,6 +105,8 @@ public:
 
   //code by myk
   std::string get_datatype() const override;
+  std::vector<Ptr<Type>> depth_traversal() override;
+  std::string main_name() const override;
 };
 
 /**
@@ -137,6 +141,7 @@ public:
 
   //code by myk
   std::string get_datatype() const override;
+  std::vector<Ptr<Type>> depth_traversal() override;
 };
 
 // unused now
@@ -168,6 +173,7 @@ public:
 
   //code by myk
   std::string get_datatype() const override;
+  std::vector<Ptr<Type>> depth_traversal() override;
 };
 
 /**
@@ -442,6 +448,23 @@ struct DatatypeDef : Definition
     Component clone() const;
   };
 
+  struct Compare
+  {
+    bool res = false;
+    std::vector<Ptr<Type>> types_one;
+    std::vector<Ptr<Type>> types_two;
+    std::vector<int> class_one; //用来标记类别，值为0或1
+    std::vector<int> class_two; //0或1
+    std::vector<int> ir_one; //用来标记同类别但是不同类型，值为1-n
+    std::vector<int> ir_two; //值为1-n
+
+    bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
+    std::vector<Ptr<Type>> get_vector(std::vector<Ptr<Type>> &);
+    // bool compare_type(Ptr<Type>, Ptr<Type>) const;
+    void gen_ir();
+    bool get_res();
+  };
+
   Ptr<Type> decl_type;
   // mutable for gen_code
   mutable std::vector<Component> components;
@@ -455,9 +478,7 @@ struct DatatypeDef : Definition
   //These func is code by myk.
   bool is_isomorphism() const override;
   //compare struct component, same return true.
-  bool compare_component(DatatypeDef::Component, DatatypeDef::Component) const;
   bool compare_components(std::vector<DatatypeDef::Component>&) const;
-  bool compare_type(Ptr<Type>, Ptr<Type>) const;
 
 public:
   void gen_code(Code&) const override;
