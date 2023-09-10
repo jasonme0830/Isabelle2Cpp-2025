@@ -461,7 +461,8 @@ struct DatatypeDef : Definition
     bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
     std::vector<Ptr<Type>> get_vector(std::vector<Ptr<Type>> &);
     // bool compare_type(Ptr<Type>, Ptr<Type>) const;
-    void gen_ir();
+    void gen_ir_one();
+    void gen_ir_two();
     bool get_res();
   };
 
@@ -478,7 +479,7 @@ struct DatatypeDef : Definition
   //These func is code by myk.
   bool is_isomorphism() const override;
   //compare struct component, same return true.
-  bool compare_components(std::vector<DatatypeDef::Component>&) const;
+  bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
 
 public:
   void gen_code(Code&) const override;

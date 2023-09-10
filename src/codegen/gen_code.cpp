@@ -196,25 +196,31 @@ FunctionDef::is_predefined() const
 bool 
 DatatypeDef::is_isomorphism() const
 {
+  // cout<<"@ one compare isomorphism"<<endl;
   //声明一个int数组用来存储对比信息
   int compare_res[theDefinedDatatypes.size()] = {0};
   std::vector<DatatypeDef>::iterator decl_ptr;
   for(decl_ptr=theDefinedDatatypes.begin();decl_ptr!=theDefinedDatatypes.end();++decl_ptr){
+    cout<<"^ two datatype name: "<<this->def_name()<<" "<<decl_ptr->def_name()<<endl;
     //比较等号左边的类型,相同才有必要继续比
     if(decl_type->get_datatype() == decl_ptr->decl_type->get_datatype()){
       //接着比较components内元素的数量，不一致就跳出本次循环
       if(components.size() != decl_ptr->components.size()) continue;
-      if(compare_components(decl_ptr->components)){
+      if(compare_components(decl_ptr->components, this->components)){
         //components也相同，则这两个datatypedef同构
           int index = distance(theDefinedDatatypes.begin(), decl_ptr);
           compare_res[index] = 1;
+          break;
       }
     }
   }
   int res = 0;
+  cout<<"* theDefinedDatatypes: ";
   for(int i=0;i<(int)theDefinedDatatypes.size();i++){
     res += compare_res[i];
+    cout<<compare_res[i]<<" ";
   }
+  cout<<endl;
   if(res > 0)   return true;
   else   return false;
 }
