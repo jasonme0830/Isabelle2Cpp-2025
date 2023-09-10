@@ -300,10 +300,10 @@ Parser::gen_datatype_definition()
     This function is code by myk.
   */
   if(decl->is_isomorphism()){
-    cout<<"# judge if isomorphism"<<endl;
+    // cout<<"# judge if isomorphism"<<endl;
   }
   else{
-    cout<<"# not same, insert into theDefinedDatatypes"<<endl;
+    // cout<<"# not same, insert into theDefinedDatatypes"<<endl;
     theDefinedDatatypes.push_back(*decl);
   }
   return decl;
