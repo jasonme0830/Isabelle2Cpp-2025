@@ -219,6 +219,48 @@ std::vector<Ptr<Type>> FuncType::depth_traversal()
   }
   return typev;
 }
+std::vector<Ptr<Type>> NormalType::width_traversal()
+{
+  std::vector<Ptr<Type>> temp;
+  return temp;
+}
+std::vector<Ptr<Type>> ArgumentType::width_traversal()
+{
+  std::vector<Ptr<Type>> temp;
+  return temp;
+}
+std::vector<Ptr<Type>> TemplateType::width_traversal()
+{
+  std::vector<Ptr<Type>> temp;
+  for(auto ptr=args.cbegin();ptr!=args.cend();++ptr){
+    temp.push_back(ptr->get()->clone());
+  }
+  return temp;
+}
+std::vector<Ptr<Type>> FuncType::width_traversal()
+{
+  std::vector<Ptr<Type>> temp;
+  for(auto ptr=types.cbegin();ptr!=types.cend();++ptr){
+    temp.push_back(ptr->get()->clone());
+  }
+  return temp;
+}
+int NormalType::args_num()
+{
+  return 0;
+}
+int ArgumentType::args_num()
+{
+  return 0;
+}
+int TemplateType::args_num()
+{
+  return this->args.size();
+}
+int FuncType::args_num()
+{
+  return this->types.size();
+}
 
 bool 
 DatatypeDef::compare_components(std::vector<DatatypeDef::Component> &the_components,
@@ -238,16 +280,22 @@ DatatypeDef::compare_components(std::vector<DatatypeDef::Component> &the_compone
       int index = distance(the_components.begin(),the_component_ptr);
       //如果全局定义中的这个定义，某个模式已经匹配了则可跳过
       if(the_components_res[index] == 1) continue;
-      //只有arguments的长度一样才用继续比
-      if((*component_ptr).arguments.size() != (*the_component_ptr).arguments.size()) continue;
-      //都只有一个构造子可以视为相同
+      //都只有一个构造子，可以视为相同
       if((*component_ptr).arguments.size()==0 && (*the_component_ptr).arguments.size()==0){
         the_components_res[index] = 1;
         break;        
       }
-      // cout<<"^^ two argument size: "<<(*component_ptr).arguments.size()
-      //     <<" "<<(*the_component_ptr).arguments.size()<<endl;
+
+      //存在树结构时
       DatatypeDef::Compare compare;
+      //比较两个树的结构
+      if(!compare.compare_structure((*component_ptr).arguments, (*the_component_ptr).arguments)){
+        //两个树结构不相同时，不用再比较叶子节点
+        continue;
+      }
+
+      //两个树结构相同时，比较叶子节点
+      cout<<"!! compare arguments same!!!"<<endl;
       if(compare.compare_arguments((*component_ptr).arguments, (*the_component_ptr).arguments)){
         // cout<<"## arguments same"<<endl;
         // cout<<"^^ two argument size: "<<(*component_ptr).arguments.size()
@@ -264,12 +312,13 @@ DatatypeDef::compare_components(std::vector<DatatypeDef::Component> &the_compone
   if(res == (int)the_components.size()) return true;
   else return false;
 }
+
 bool 
 DatatypeDef::Compare::compare_arguments(std::vector<Ptr<Type>> &args_one, std::vector<Ptr<Type>> &args_two)
 {
   //数组args是第一层的叶子节点，采用深度优先遍历将树展开成vector
-  types_one = get_vector(args_one);
-  types_two = get_vector(args_two);
+  types_one = get_depth_vector(args_one);
+  types_two = get_depth_vector(args_two);
   //需要比较生成数组的长度，长度一致才继续比
   if(types_one.size() != types_two.size()) return false;
   //继续比较，则初始化数组变量
@@ -297,10 +346,10 @@ DatatypeDef::Compare::compare_arguments(std::vector<Ptr<Type>> &args_one, std::v
 
   gen_ir_one();
   gen_ir_two();
-  return get_res();
+  return get_depth_res();
 }
 std::vector<Ptr<Type>> 
-DatatypeDef::Compare::get_vector(std::vector<Ptr<Type>> &args)
+DatatypeDef::Compare::get_depth_vector(std::vector<Ptr<Type>> &args)
 {
   std::vector<Ptr<Type>> typev;
   for(auto ptr=args.cbegin();ptr!=args.cend();++ptr){
@@ -372,7 +421,7 @@ void DatatypeDef::Compare::gen_ir_two(){
     }
   }
 }
-bool DatatypeDef::Compare::get_res()
+bool DatatypeDef::Compare::get_depth_res()
 {
   for(int i=0;i<(int)types_one.size();i++){
     if(class_one[i] != class_two[i]){
@@ -382,7 +431,7 @@ bool DatatypeDef::Compare::get_res()
       break;
     }
     if(i == (int)(types_one.size()-1)){
-      res = true;
+      depth_res = true;
     }
   }
 
@@ -406,7 +455,65 @@ bool DatatypeDef::Compare::get_res()
     }  
     cout<<endl;
   // }
-  return res;
+  return depth_res;
 }
 
+bool
+DatatypeDef::Compare::compare_structure(std::vector<Ptr<Type>>& args_one, 
+                                        std::vector<Ptr<Type>>& args_two)
+{
+  //只有arguments的长度一样才用继续比
+  if(args_one.size() != args_two.size()) return false;
+  //初始化子树数组
+  subtree_one = get_width_queue(args_one);
+  subtree_two = get_width_queue(args_two);
+  //开始广度优先遍历
+  subtree_one = get_width_traversual(subtree_one);
+  subtree_two = get_width_traversual(subtree_two);
+  //对广度遍历数组进行比较
+  return get_width_res();
+}
+std::vector<Ptr<Type>>
+DatatypeDef::Compare::get_width_queue(std::vector<Ptr<Type>> args)
+{
+  // cout<<"@ args size: "<<args.size()<<endl;
+  std::vector<Ptr<Type>> tempv;
+  for(auto ptr=args.cbegin(); ptr!=args.cend();++ptr){
+    tempv.push_back(ptr->get()->clone());
+    // cout<<"  push third. tempv size: "<<tempv.size()<<endl;
+  }
+  return tempv;
+}
+std::vector<Ptr<Type>>
+DatatypeDef::Compare::get_width_traversual(std::vector<Ptr<Type>> args)
+{
+  //将所有子树全部拆分整合到同一层级
+  // cout<<"# subtree vector sub_num: ";
+  int pos = 0;
+  while(true){
+    if(pos >= (int)(args.size())) break;
+    // cout<<args[pos].get()->args_num()<<" ";
+    if(args[pos].get()->args_num() > 0){
+      std::vector<Ptr<Type>> temp = args[pos].get()->width_traversal();
+      args.insert(args.end(), temp.begin(), temp.end());
+    }
+    pos++;
+  }
+  // cout<<endl;
+  return args;
+}
+bool DatatypeDef::Compare::get_width_res()
+{
+  //比较两个生成数组的长度
+  if(subtree_one.size() != subtree_two.size()) return false;
+  //比较所有子树的节点数量
+  for(int i=0;i<(int)subtree_one.size();i++){
+    if(subtree_one[i]->args_num() != subtree_two[i]->args_num()){
+      return false;
+    }
+  }
+  //所有子树全部遍历完成
+  width_res = true;
+  return true;
+}
 } // namespace hol2cpp

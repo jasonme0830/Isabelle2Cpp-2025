@@ -7,7 +7,7 @@ datatype 'a slist = sNil | sCons 'a "'a slist"
 datatype sbool = sTrue | sFalse
 datatype option = None | Some 'a
 
-datatype 'a slist = sNil | sCons 'a "'a slist"
+datatype 'b alist = sNil | sCons 'b "'b alist"
 
 fun add :: "snat \<Rightarrow> snat \<Rightarrow> snat" where
   "add sZero n = n" |
