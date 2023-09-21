@@ -215,12 +215,12 @@ DatatypeDef::is_isomorphism() const
     }
   }
   int res = 0;
-  cout<<"* theDefinedDatatypes: ";
+  // cout<<"* theDefinedDatatypes: ";
   for(int i=0;i<(int)theDefinedDatatypes.size();i++){
     res += compare_res[i];
-    cout<<compare_res[i]<<" ";
+    // cout<<compare_res[i]<<" ";
   }
-  cout<<endl;
+  // cout<<endl;
   if(res > 0)   return true;
   else   return false;
 }

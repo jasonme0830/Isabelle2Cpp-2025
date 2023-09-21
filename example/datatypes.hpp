@@ -54,23 +54,9 @@ class slist {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
     };
-    struct _sNil {
-        bool operator<(const _sNil &) const { return false; }
-    };
-    struct _sCons {
-        T1 p1_;
-        std::shared_ptr<slist<T1>> p2_;
 
-        const T1 &p1() const { return p1_; }
-        slist<T1> p2() const { return *p2_; }
-
-        bool operator<(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
-        }
-    };
-
-    std::variant<_sNil, _sCons, _sNil, _sCons> value_;
-    slist(const std::variant<_sNil, _sCons, _sNil, _sCons> &value) : value_(value) {}
+    std::variant<_sNil, _sCons> value_;
+    slist(const std::variant<_sNil, _sCons> &value) : value_(value) {}
 
   public:
     slist() = default;
@@ -81,19 +67,10 @@ class slist {
     static slist<T1> sCons(const T1 &p1, const slist<T1> &p2) {
         return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
     }
-    static slist<T1> sNil() {
-        return slist<T1> { _sNil {  } };
-    }
-    static slist<T1> sCons(const T1 &p1, const slist<T1> &p2) {
-        return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
-    }
 
     bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
     bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
-    bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
-    bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
 
-    const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 
     bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
@@ -127,64 +104,41 @@ class sbool {
 };
 
 template<typename T1>
-class slist {
+class alist {
     struct _sNil {
         bool operator<(const _sNil &) const { return false; }
     };
     struct _sCons {
         T1 p1_;
-        std::shared_ptr<slist<T1>> p2_;
+        std::shared_ptr<alist<T1>> p2_;
 
         const T1 &p1() const { return p1_; }
-        slist<T1> p2() const { return *p2_; }
-
-        bool operator<(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
-        }
-    };
-    struct _sNil {
-        bool operator<(const _sNil &) const { return false; }
-    };
-    struct _sCons {
-        T1 p1_;
-        std::shared_ptr<slist<T1>> p2_;
-
-        const T1 &p1() const { return p1_; }
-        slist<T1> p2() const { return *p2_; }
+        alist<T1> p2() const { return *p2_; }
 
         bool operator<(const _sCons &rhs) const {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
     };
 
-    std::variant<_sNil, _sCons, _sNil, _sCons> value_;
-    slist(const std::variant<_sNil, _sCons, _sNil, _sCons> &value) : value_(value) {}
+    std::variant<_sNil, _sCons> value_;
+    alist(const std::variant<_sNil, _sCons> &value) : value_(value) {}
 
   public:
-    slist() = default;
+    alist() = default;
 
-    static slist<T1> sNil() {
-        return slist<T1> { _sNil {  } };
+    static alist<T1> sNil() {
+        return alist<T1> { _sNil {  } };
     }
-    static slist<T1> sCons(const T1 &p1, const slist<T1> &p2) {
-        return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
-    }
-    static slist<T1> sNil() {
-        return slist<T1> { _sNil {  } };
-    }
-    static slist<T1> sCons(const T1 &p1, const slist<T1> &p2) {
-        return slist<T1> { _sCons { p1, std::make_shared<slist<T1>>(p2) } };
+    static alist<T1> sCons(const T1 &p1, const alist<T1> &p2) {
+        return alist<T1> { _sCons { p1, std::make_shared<alist<T1>>(p2) } };
     }
 
     bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
     bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
-    bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
-    bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
 
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
-    const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 
-    bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
+    bool operator<(const alist<T1> &rhs) const { return value_ < rhs.value_; }
 };
 
 snat add(const snat &arg1, const snat &arg2);

@@ -11,6 +11,7 @@
 #include <optional>
 #include <set>
 #include <vector>
+#include <queue>
 
 namespace hol2cpp {
 
@@ -47,6 +48,8 @@ struct Type
   //code by myk
   virtual std::string get_datatype() const = 0;
   virtual std::vector<Ptr<Type>> depth_traversal() = 0;
+  virtual std::vector<Ptr<Type>> width_traversal() = 0;
+  virtual int args_num() = 0;
 };
 
 /**
@@ -77,6 +80,8 @@ public:
   //code by myk
   std::string get_datatype() const override;
   std::vector<Ptr<Type>> depth_traversal() override;
+  std::vector<Ptr<Type>> width_traversal() override;
+  int args_num() override;
 };
 
 /**
@@ -107,6 +112,8 @@ public:
   std::string get_datatype() const override;
   std::vector<Ptr<Type>> depth_traversal() override;
   std::string main_name() const override;
+  std::vector<Ptr<Type>> width_traversal() override;
+  int args_num() override;
 };
 
 /**
@@ -142,6 +149,8 @@ public:
   //code by myk
   std::string get_datatype() const override;
   std::vector<Ptr<Type>> depth_traversal() override;
+  std::vector<Ptr<Type>> width_traversal() override;
+  int args_num() override;
 };
 
 // unused now
@@ -174,6 +183,8 @@ public:
   //code by myk
   std::string get_datatype() const override;
   std::vector<Ptr<Type>> depth_traversal() override;
+  std::vector<Ptr<Type>> width_traversal() override;
+  int args_num() override;
 };
 
 /**
@@ -450,7 +461,7 @@ struct DatatypeDef : Definition
 
   struct Compare
   {
-    bool res = false;
+    bool depth_res = false;
     std::vector<Ptr<Type>> types_one;
     std::vector<Ptr<Type>> types_two;
     std::vector<int> class_one; //用来标记类别，值为0或1
@@ -458,12 +469,20 @@ struct DatatypeDef : Definition
     std::vector<int> ir_one; //用来标记同类别但是不同类型，值为1-n
     std::vector<int> ir_two; //值为1-n
 
+    bool width_res = false;
+    std::vector<Ptr<Type>> subtree_one;
+    std::vector<Ptr<Type>> subtree_two;
+
     bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
-    std::vector<Ptr<Type>> get_vector(std::vector<Ptr<Type>> &);
-    // bool compare_type(Ptr<Type>, Ptr<Type>) const;
+    std::vector<Ptr<Type>> get_depth_vector(std::vector<Ptr<Type>> &);
     void gen_ir_one();
     void gen_ir_two();
-    bool get_res();
+    bool get_depth_res();
+
+    bool compare_structure(std::vector<Ptr<Type>>&, std::vector<Ptr<Type>>&);
+    std::vector<Ptr<Type>> get_width_queue(std::vector<Ptr<Type>>);
+    std::vector<Ptr<Type>> get_width_traversual(std::vector<Ptr<Type>>);
+    bool get_width_res();
   };
 
   Ptr<Type> decl_type;
