@@ -176,6 +176,7 @@ public:
     std::function<TypeInfo(const std::string&)>& trans) const override;
 
   std::string gen_datatype(Datatype&) const override;
+  // std::string main_name() const override;
 
   Ptr<Type> clone() const override;
   void print_type() const override;
@@ -461,6 +462,10 @@ struct DatatypeDef : Definition
 
   struct Compare
   {
+    //tuple里面分别是输入参数的类型、位置、数量
+    std::map<std::string, std::tuple<int,int,int>> decl_type_map_one;
+    std::map<std::string, std::tuple<int,int,int>> decl_type_map_two;
+
     bool depth_res = false;
     std::vector<Ptr<Type>> types_one;
     std::vector<Ptr<Type>> types_two;
@@ -473,16 +478,25 @@ struct DatatypeDef : Definition
     std::vector<Ptr<Type>> subtree_one;
     std::vector<Ptr<Type>> subtree_two;
 
+    //compare DatatypeDef decl_type
+    bool compare_decl_type(Ptr<Type>, Ptr<Type>);
+
+    //compare struct component, same return true.
+    bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
+
+    //compare ast structer
+    bool compare_structure(std::vector<Ptr<Type>>&, std::vector<Ptr<Type>>&);
+    std::vector<Ptr<Type>> get_width_queue(std::vector<Ptr<Type>>);
+    std::vector<Ptr<Type>> get_width_traversual(std::vector<Ptr<Type>>);
+    bool get_width_res();
+    
+    //compare ast leaf node
     bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
     std::vector<Ptr<Type>> get_depth_vector(std::vector<Ptr<Type>> &);
     void gen_ir_one();
     void gen_ir_two();
     bool get_depth_res();
 
-    bool compare_structure(std::vector<Ptr<Type>>&, std::vector<Ptr<Type>>&);
-    std::vector<Ptr<Type>> get_width_queue(std::vector<Ptr<Type>>);
-    std::vector<Ptr<Type>> get_width_traversual(std::vector<Ptr<Type>>);
-    bool get_width_res();
   };
 
   Ptr<Type> decl_type;
@@ -497,8 +511,7 @@ struct DatatypeDef : Definition
 
   //These func is code by myk.
   bool is_isomorphism() const override;
-  //compare struct component, same return true.
-  bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
+
 
 public:
   void gen_code(Code&) const override;

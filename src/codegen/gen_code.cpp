@@ -201,12 +201,13 @@ DatatypeDef::is_isomorphism() const
   int index = -1;
   std::vector<DatatypeDef>::iterator decl_ptr;
   for(decl_ptr=theDefinedDatatypes.begin();decl_ptr!=theDefinedDatatypes.end();++decl_ptr){
+    Compare compare;
     cout<<"^ two datatype name: "<<this->def_name()<<" "<<decl_ptr->def_name()<<endl;
     //比较等号左边的类型,相同才有必要继续比
-    if(decl_type->get_datatype() == decl_ptr->decl_type->get_datatype()){
+    if(compare.compare_decl_type(decl_type,decl_ptr->decl_type)){
       //接着比较components内元素的数量，不一致就跳出本次循环
       if(components.size() != decl_ptr->components.size()) continue;
-      if(compare_components(decl_ptr->components, this->components)){
+      if(compare.compare_components(decl_ptr->components, this->components)){
         //components也相同，则这两个datatypedef同构
         index = distance(theDefinedDatatypes.begin(), decl_ptr);
         break;
@@ -216,19 +217,63 @@ DatatypeDef::is_isomorphism() const
 
   if(index == -1){
     //不同构，则自己与自己建立对应关系
-    theIsomorphismDatatypeMap.insert(this->def_name(),this->def_name());
+    //用数据类型左侧类型的类型名，functype没有类型名
+    if(decl_type->get_datatype() != "Func"){
+      theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
+                                      (decl_type->main_name(),decl_type->main_name()));
+    }
+    else{
+      //TODO:数据类型的定义中出现函数类型，处理方式待定
+    }
+
     return false;
   }
   else{
     //与前文定义的数据类型同构，建立对应关系
-    theIsomorphismDatatypeMap.insert(this->def_name(),theDefinedDatatypes[index].def_name());
+    if(decl_type->get_datatype() != "Func"){
+      theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
+                                      (decl_type->main_name(),theDefinedDatatypes[index].decl_type->main_name()));
+    }
+    else{
+      //TODO:数据类型的定义中出现函数类型，处理方式待定
+    }
     return true;
   }
 }
 
+bool
+DatatypeDef::Compare::compare_decl_type(Ptr<Type> ptr_one, Ptr<Type> ptr_two)
+{
+  //等号左边类型不同，直接退出
+  if(ptr_one->get_datatype() != ptr_two->get_datatype()) return false;
+  std::vector<Ptr<Type>> vec_one = ptr_one->depth_traversal();
+  std::vector<Ptr<Type>> vec_two = ptr_two->depth_traversal();
+  //等号左边输入参数的数量不同，直接退出
+  if(vec_one.size() != vec_two.size()) return false;
+  //形成输入参数记录
+  for(int i=0;i<(int)vec_one.size();i++){
+    //输入参数的类型须一致，名字不用一致
+    if(vec_one[i]->get_datatype() != vec_two[i]->get_datatype()) return false;
+    //将信息进行存储
+    int type_class_both = -1;
+    if(vec_one[i]->get_datatype() == "Normal"){
+      type_class_both = 0;
+    }
+    if(vec_one[i]->get_datatype() == "Template"){
+      type_class_both = 1;
+    }
+    std::string type_name_one = theIsomorphismDatatypeMap.find(vec_one[i]->main_name())->second;
+    std::string type_name_two = theIsomorphismDatatypeMap.find(vec_two[i]->main_name())->second;
+    decl_type_map_one.insert(std::make_pair(type_name_one, std::make_tuple(type_class_both,i,1)));
+    decl_type_map_two.insert(std::make_pair(type_name_two, std::make_tuple(type_class_both,i,1)));
+  }
+
+  return true;
+}
+
 bool 
-DatatypeDef::compare_components(std::vector<DatatypeDef::Component> &the_components,
-                                std::vector<DatatypeDef::Component> &this_components) const
+DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &the_components,
+                                         std::vector<DatatypeDef::Component> &this_components) const
 {
   //用int数组存储全局比较记录
   int the_components_res[the_components.size()] = {0};
@@ -478,10 +523,16 @@ bool DatatypeDef::Compare::get_width_res()
   }
   //比较所有非叶子节点的名字
   for(int i=0;i<(int)subtree_one.size();i++){
-    if(subtree_one[i]->get_datatype() == "Normal") continue;
+    if(subtree_one[i]->get_datatype() == "Normal"){
+      //虽然也可以适用同构匹配，但是Normal类型属于叶子节点，暂定在叶子比较中处理
+      continue;
+    }
     if(subtree_one[i]->get_datatype() == "Argument") continue;
-    if(subtree_one[i]->main_name() != subtree_two[i]->main_name()){
-      //构造规则中使用的类型名不同，查看是否是不同名但同构的
+    if(subtree_one[i]->get_datatype() == "Func"){
+      //TODO:数据类型定义中出现函数类型，处理方式待定
+    }
+    if(subtree_one[i]->get_datatype() == "Template"){
+      //构造规则中使用的类型名不同，查看是否为同构的
       if(theIsomorphismDatatypeMap[subtree_one[i]->main_name()] 
       != theIsomorphismDatatypeMap[subtree_two[i]->main_name()]){
         //不同名也不同构

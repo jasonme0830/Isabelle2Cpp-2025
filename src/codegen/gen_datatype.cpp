@@ -71,4 +71,10 @@ TemplateType::main_name() const
 {
   return name;
 }
+// string
+// FuncType::main_name() const
+// {
+//   //权宜之计，函数数据类型是没有名字的
+//   return "FuncType";
+// }
 } // namespace hol2cpp
