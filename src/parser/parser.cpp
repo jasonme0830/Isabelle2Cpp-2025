@@ -299,13 +299,11 @@ Parser::gen_datatype_definition()
   /*
     This function is code by myk.
   */
-  if(decl->is_isomorphism()){
-    // cout<<"# judge if isomorphism"<<endl;
-  }
-  else{
-    // cout<<"# not same, insert into theDefinedDatatypes"<<endl;
+  if(!decl->is_isomorphism()){
+    //只能进行值的拷贝，独享指针不能进行复制
     theDefinedDatatypes.push_back(*decl);
   }
+
   return decl;
 }
 
