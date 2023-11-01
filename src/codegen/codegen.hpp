@@ -23,13 +23,18 @@ namespace hol2cpp {
 inline std::set<std::string> thePredefinedDatatypes;
 inline std::set<std::string> thePredefinedFunctions;
 /*
-  These variable is code by myk.
+  These two variable is code by myk.
   To store the definitions for the comparation of the isomorphism definitions.
 */
 inline std::vector<DatatypeDef> theDefinedDatatypes;
 inline std::set<Ptr<FunctionDef>> theDefinedFunctions;
 /*
-  These variable is code by myk.
+  This variable is code by myk.
+  To establish a one-to-one correspondence between two isomorphism datatypes.
+*/
+inline std::map<string, string> theIsomorphismDatatypeMap;
+/*
+  These two variable is code by myk.
   To store the declaritions for the comparation of the same name declararions.
   Have the same use with the variable thePredefinedDatatypes.
   Xubo's variable have some name ambiguity.
