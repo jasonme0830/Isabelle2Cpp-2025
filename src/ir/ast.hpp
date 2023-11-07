@@ -462,40 +462,62 @@ struct DatatypeDef : Definition
 
   struct Compare
   {
-    //tuple里面分别是输入参数的类型、位置、数量
-    std::map<std::string, std::tuple<int,int,int>> decl_type_map_one;
-    std::map<std::string, std::tuple<int,int,int>> decl_type_map_two;
+    //比较结构
+    struct Structer{
+      bool width_res = false;
+      std::vector<Ptr<Type>> subtree_one;
+      std::vector<Ptr<Type>> subtree_two;
+      //复制等号左侧的信息，以备处理递归
+      Ptr<Type> decl_type_one;
+      Ptr<Type> decl_type_two;
 
-    bool depth_res = false;
-    std::vector<Ptr<Type>> types_one;
-    std::vector<Ptr<Type>> types_two;
-    std::vector<int> class_one; //用来标记类别，值为0或1
-    std::vector<int> class_two; //0或1
-    std::vector<int> ir_one; //用来标记同类别但是不同类型，值为1-n
-    std::vector<int> ir_two; //值为1-n
+    public:
+      //compare ast structer
+      bool compare_structure(std::vector<Ptr<Type>>&, std::vector<Ptr<Type>>&);
+      std::vector<Ptr<Type>> clone_width_queue(std::vector<Ptr<Type>>);
+      std::vector<Ptr<Type>> get_width_traversual(std::vector<Ptr<Type>>);
+      bool get_width_res();
+      void initial();
+    };
 
-    bool width_res = false;
-    std::vector<Ptr<Type>> subtree_one;
-    std::vector<Ptr<Type>> subtree_two;
+    //比较叶子节点的变量
+    struct Leafargu{
+      //tuple里面分别是输入参数的类型、位置、数量
+      std::map<std::string, std::tuple<int,int,int>> decl_type_map_one;
+      std::map<std::string, std::tuple<int,int,int>> decl_type_map_two;
+      //内部临时变量
+      bool depth_res = false;
+      std::vector<Ptr<Type>> types_one;
+      std::vector<Ptr<Type>> types_two;
+      //复制等号左侧的信息，以备处理递归
+      Ptr<Type> decl_type_one;
+      Ptr<Type> decl_type_two;
 
+      std::vector<int> class_one; //用来标记类别，值为0或1
+      std::vector<int> class_two; //0或1
+      std::vector<int> ir_one; //用来标记同类别但是不同类型，值为1-n
+      std::vector<int> ir_two; //值为1-n
+
+    public:
+      //compare ast leaf node
+      bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
+      std::vector<Ptr<Type>> get_depth_vector(std::vector<Ptr<Type>> &);
+      void gen_ir_one();
+      void gen_ir_two();
+      bool get_depth_res();
+      bool get_depth_res_two(std::vector<Ptr<Type>> &,std::vector<Ptr<Type>> &);
+      void initial();
+    };
+
+    mutable Structer structer;
+    mutable Leafargu leafargu;
+
+  public:
     //compare DatatypeDef decl_type
     bool compare_decl_type(Ptr<Type>, Ptr<Type>);
 
     //compare struct component, same return true.
     bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
-
-    //compare ast structer
-    bool compare_structure(std::vector<Ptr<Type>>&, std::vector<Ptr<Type>>&);
-    std::vector<Ptr<Type>> get_width_queue(std::vector<Ptr<Type>>);
-    std::vector<Ptr<Type>> get_width_traversual(std::vector<Ptr<Type>>);
-    bool get_width_res();
-    
-    //compare ast leaf node
-    bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
-    std::vector<Ptr<Type>> get_depth_vector(std::vector<Ptr<Type>> &);
-    void gen_ir_one();
-    void gen_ir_two();
-    bool get_depth_res();
 
   };
 
