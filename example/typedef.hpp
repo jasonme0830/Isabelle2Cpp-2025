@@ -457,4 +457,198 @@ class ttree {
     bool operator<(const ttree<T1, T2> &rhs) const { return value_ < rhs.value_; }
 };
 
+template<typename T1, typename T2>
+class ytree {
+    struct _aNode {
+        T1 p1_;
+
+        const T1 &p1() const { return p1_; }
+
+        bool operator<(const _aNode &rhs) const {
+            return std::tie(p1_) < std::tie(rhs.p1_);
+        }
+    };
+    struct _bNode {
+        T2 p1_;
+
+        const T2 &p1() const { return p1_; }
+
+        bool operator<(const _bNode &rhs) const {
+            return std::tie(p1_) < std::tie(rhs.p1_);
+        }
+    };
+    struct _asNode {
+        ttree<T1, T2> p1_;
+        T1 p2_;
+        ttree<T1, T2> p3_;
+
+        const ttree<T1, T2> &p1() const { return p1_; }
+        const T1 &p2() const { return p2_; }
+        const ttree<T1, T2> &p3() const { return p3_; }
+
+        bool operator<(const _asNode &rhs) const {
+            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+    };
+    struct _sNode {
+        stree<T1> p1_;
+        T2 p2_;
+        stree<T1> p3_;
+
+        const stree<T1> &p1() const { return p1_; }
+        const T2 &p2() const { return p2_; }
+        const stree<T1> &p3() const { return p3_; }
+
+        bool operator<(const _sNode &rhs) const {
+            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+    };
+    struct _lNode {
+        stree<T2> p1_;
+        T1 p2_;
+        stree<T2> p3_;
+
+        const stree<T2> &p1() const { return p1_; }
+        const T1 &p2() const { return p2_; }
+        const stree<T2> &p3() const { return p3_; }
+
+        bool operator<(const _lNode &rhs) const {
+            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+    };
+
+    std::variant<_aNode, _bNode, _asNode, _sNode, _lNode> value_;
+    ytree(const std::variant<_aNode, _bNode, _asNode, _sNode, _lNode> &value) : value_(value) {}
+
+  public:
+    ytree() = default;
+
+    static ytree<T1, T2> aNode(const T1 &p1) {
+        return ytree<T1, T2> { _aNode { p1 } };
+    }
+    static ytree<T1, T2> bNode(const T2 &p1) {
+        return ytree<T1, T2> { _bNode { p1 } };
+    }
+    static ytree<T1, T2> asNode(const ttree<T1, T2> &p1, const T1 &p2, const ttree<T1, T2> &p3) {
+        return ytree<T1, T2> { _asNode { p1, p2, p3 } };
+    }
+    static ytree<T1, T2> sNode(const stree<T1> &p1, const T2 &p2, const stree<T1> &p3) {
+        return ytree<T1, T2> { _sNode { p1, p2, p3 } };
+    }
+    static ytree<T1, T2> lNode(const stree<T2> &p1, const T1 &p2, const stree<T2> &p3) {
+        return ytree<T1, T2> { _lNode { p1, p2, p3 } };
+    }
+
+    bool is_aNode() const { return std::holds_alternative<_aNode>(value_); }
+    bool is_bNode() const { return std::holds_alternative<_bNode>(value_); }
+    bool is_asNode() const { return std::holds_alternative<_asNode>(value_); }
+    bool is_sNode() const { return std::holds_alternative<_sNode>(value_); }
+    bool is_lNode() const { return std::holds_alternative<_lNode>(value_); }
+
+    const _aNode &as_aNode() const { return std::get<_aNode>(value_); }
+    const _bNode &as_bNode() const { return std::get<_bNode>(value_); }
+    const _asNode &as_asNode() const { return std::get<_asNode>(value_); }
+    const _sNode &as_sNode() const { return std::get<_sNode>(value_); }
+    const _lNode &as_lNode() const { return std::get<_lNode>(value_); }
+
+    bool operator<(const ytree<T1, T2> &rhs) const { return value_ < rhs.value_; }
+};
+
+template<typename T1, typename T2>
+class ptree {
+    struct _aNode {
+        T2 p1_;
+
+        const T2 &p1() const { return p1_; }
+
+        bool operator<(const _aNode &rhs) const {
+            return std::tie(p1_) < std::tie(rhs.p1_);
+        }
+    };
+    struct _bNode {
+        T1 p1_;
+
+        const T1 &p1() const { return p1_; }
+
+        bool operator<(const _bNode &rhs) const {
+            return std::tie(p1_) < std::tie(rhs.p1_);
+        }
+    };
+    struct _asNode {
+        ttree<T2, T1> p1_;
+        T2 p2_;
+        ttree<T2, T1> p3_;
+
+        const ttree<T2, T1> &p1() const { return p1_; }
+        const T2 &p2() const { return p2_; }
+        const ttree<T2, T1> &p3() const { return p3_; }
+
+        bool operator<(const _asNode &rhs) const {
+            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+    };
+    struct _sNode {
+        stree<T2> p1_;
+        T1 p2_;
+        stree<T2> p3_;
+
+        const stree<T2> &p1() const { return p1_; }
+        const T1 &p2() const { return p2_; }
+        const stree<T2> &p3() const { return p3_; }
+
+        bool operator<(const _sNode &rhs) const {
+            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+    };
+    struct _lNode {
+        stree<T1> p1_;
+        T2 p2_;
+        stree<T1> p3_;
+
+        const stree<T1> &p1() const { return p1_; }
+        const T2 &p2() const { return p2_; }
+        const stree<T1> &p3() const { return p3_; }
+
+        bool operator<(const _lNode &rhs) const {
+            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+    };
+
+    std::variant<_aNode, _bNode, _asNode, _sNode, _lNode> value_;
+    ptree(const std::variant<_aNode, _bNode, _asNode, _sNode, _lNode> &value) : value_(value) {}
+
+  public:
+    ptree() = default;
+
+    static ptree<T1, T2> aNode(const T2 &p1) {
+        return ptree<T1, T2> { _aNode { p1 } };
+    }
+    static ptree<T1, T2> bNode(const T1 &p1) {
+        return ptree<T1, T2> { _bNode { p1 } };
+    }
+    static ptree<T1, T2> asNode(const ttree<T2, T1> &p1, const T2 &p2, const ttree<T2, T1> &p3) {
+        return ptree<T1, T2> { _asNode { p1, p2, p3 } };
+    }
+    static ptree<T1, T2> sNode(const stree<T2> &p1, const T1 &p2, const stree<T2> &p3) {
+        return ptree<T1, T2> { _sNode { p1, p2, p3 } };
+    }
+    static ptree<T1, T2> lNode(const stree<T1> &p1, const T2 &p2, const stree<T1> &p3) {
+        return ptree<T1, T2> { _lNode { p1, p2, p3 } };
+    }
+
+    bool is_aNode() const { return std::holds_alternative<_aNode>(value_); }
+    bool is_bNode() const { return std::holds_alternative<_bNode>(value_); }
+    bool is_asNode() const { return std::holds_alternative<_asNode>(value_); }
+    bool is_sNode() const { return std::holds_alternative<_sNode>(value_); }
+    bool is_lNode() const { return std::holds_alternative<_lNode>(value_); }
+
+    const _aNode &as_aNode() const { return std::get<_aNode>(value_); }
+    const _bNode &as_bNode() const { return std::get<_bNode>(value_); }
+    const _asNode &as_asNode() const { return std::get<_asNode>(value_); }
+    const _sNode &as_sNode() const { return std::get<_sNode>(value_); }
+    const _lNode &as_lNode() const { return std::get<_lNode>(value_); }
+
+    bool operator<(const ptree<T1, T2> &rhs) const { return value_ < rhs.value_; }
+};
+
 // generated by HOL2Cpp

@@ -303,6 +303,9 @@ Parser::gen_datatype_definition()
     //只能进行值的拷贝，独享指针不能进行复制
     theDefinedDatatypes.push_back(*decl);
   }
+  else{
+    cout<<"### isomorphism!"<<endl;
+  }
 
   return decl;
 }
