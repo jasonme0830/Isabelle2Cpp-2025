@@ -27,19 +27,19 @@ datatype ('a, 'b) ttree = aNode 'a |
                           bNode 'b |
                           asNode "('a, 'b) ttree" 'a "('a, 'b) ttree" |
                           sNode "'a stree" 'b "'a stree" |
-                          lNode "'b stree" 'a "'b stree" 
+                          lNode "'b stree" 'a 
                           
 datatype ('c, 'd) ytree = aNode 'c |
                           bNode 'd |
                           asNode "('c, 'd) ttree" 'c "('c, 'd) ttree" |
                           sNode "'c stree" 'd "'c stree" |
-                          lNode "'d stree" 'c "'d stree"
+                          lNode "'d stree" 'c 
 
-datatype ('d, 'c) ptree = aNode 'c |
-                          bNode 'd |
+datatype ('d, 'c) ptree = aNode 'd |
+                          bNode 'c |
                           asNode "('c, 'd) ttree" 'c "('c, 'd) ttree" |
                           sNode "'c stree" 'd "'c stree" |
-                          lNode "'d stree" 'c "'d stree"
+                          lNode "'d stree" 'c 
 
 
 

@@ -196,24 +196,34 @@ FunctionDef::is_predefined() const
 bool 
 DatatypeDef::is_isomorphism() const
 {
-  // cout<<"@ one compare isomorphism"<<endl;
+  Compare compare;
   //声明一个int数组用来存储对比信息
   int index = -1;
   std::vector<DatatypeDef>::iterator decl_ptr;
+  //提前将本定义的构造规则进行排列组合
+  std::vector<std::vector<Component>> 
+  components_combination = compare.get_components_combinations(this->components);
+
+  //遍历全局已经比较完成的数据类型定义
   for(decl_ptr=theDefinedDatatypes.begin();decl_ptr!=theDefinedDatatypes.end();++decl_ptr){
-    Compare compare;
+    
     cout<<"^ two datatype name: "<<this->def_name()<<" "<<decl_ptr->def_name()<<endl;
-    //比较等号左边的类型,相同才有必要继续比
-    if(compare.compare_decl_type(decl_type,decl_ptr->decl_type)){
-      //接着比较components内元素的数量，不一致就跳出本次循环
-      if(components.size() != decl_ptr->components.size()) continue;
+    //等号左边的类型不同直接退出
+    if(!compare.compare_decl_type(decl_type,decl_ptr->decl_type)) continue;
+    //接着比较components内元素的数量，不一致就跳出本次循环
+    if(components.size() != decl_ptr->components.size()) continue;
+
+    //对全局定义的规则数组进行排序
+    std::vector<Component> the_base_components = compare.get_base_order_vector(decl_ptr->components);
+
+
       // cout<<"^ compare components ^"<<endl;
       if(compare.compare_components(decl_ptr->components, this->components)){
         //components也相同，则这两个datatypedef同构
         index = distance(theDefinedDatatypes.begin(), decl_ptr);
         break;
       }
-    }
+    
   }
 
   if(index == -1){
@@ -300,8 +310,8 @@ DatatypeDef::Compare::compare_decl_type(Ptr<Type> ptr_one, Ptr<Type> ptr_two)
         type_name_two = vec_two[i]->main_name();
       }
     
-      leafargu.decl_type_map_one.insert(std::make_pair(type_name_one, std::make_tuple(type_class_both,i,1)));
-      leafargu.decl_type_map_two.insert(std::make_pair(type_name_two, std::make_tuple(type_class_both,i,1)));
+      leafargu.decl_type_map_one.insert(std::make_pair(type_name_one, std::make_tuple(type_class_both,i,0)));
+      leafargu.decl_type_map_two.insert(std::make_pair(type_name_two, std::make_tuple(type_class_both,i,0)));
     }
     return true;
   }
@@ -311,7 +321,64 @@ DatatypeDef::Compare::compare_decl_type(Ptr<Type> ptr_one, Ptr<Type> ptr_two)
     return false;
   }
 }
-
+std::vector<DatatypeDef::Component>
+DatatypeDef::Compare::get_base_order_vector(std::vector<DatatypeDef::Component>& the_sort)
+{
+  std::vector<DatatypeDef::Component> order_components;
+  //用来标记哪个已经被排序过了
+  bool the_sort_flag[the_sort.size()] = {false};
+  //用来标记当前规则的参数数量
+  std::vector<int> the_sort_argu_num = {-1};
+  
+  //遍历，获取所有规则中的参数数量
+  std::vector<DatatypeDef::Component>::iterator sort_ptr;
+  for(sort_ptr=the_sort.begin();sort_ptr!=the_sort.end();++sort_ptr){
+    the_sort_argu_num.push_back((int)sort_ptr->arguments.size());
+  }
+  //获取最大参数个数
+  int the_sort_argu_num_max = *std::max_element(the_sort_argu_num.begin(),the_sort_argu_num.end());
+  //从大到小，将规则排序
+  for(int i=the_sort_argu_num_max; i>=0; i--){
+    //每一个参数数量都进行一次遍历
+    for(sort_ptr=the_sort.begin();sort_ptr!=the_sort.end();++sort_ptr){
+      int index = distance(the_sort.begin(), sort_ptr);
+      //如果已经被排序过则直接跳过
+      if(the_sort_flag[index] == true) continue;
+      //参数数量不匹配也直接跳过
+      if(the_sort_argu_num[index] != i) continue;
+      //参数数量匹配则插入排序并做记号
+      else{
+        order_components.push_back(*sort_ptr);
+        the_sort_flag[index] = true;
+      }
+    }
+  }
+  //检查，排序完成的数组和原数组应该长度相等
+  if(order_components.size() != the_sort.size()){
+    cout<<"## the base order component vector sort failed!"<<endl;
+    exit(0);
+  }
+  return order_components;
+}
+std::vector<std::vector<DatatypeDef::Component>>
+DatatypeDef::Compare::get_components_combinations(std::vector<DatatypeDef::Component>& the_arrange)
+{
+  //键是规则的参数数量，值是规则数组
+  std::map<int,std::vector<Component>> component_map;
+  std::vector<Component>::iterator range_ptr;
+  for(range_ptr=the_arrange.begin();range_ptr!=the_arrange.end();++range_ptr){
+    int index = distance(the_arrange.begin(),range_ptr);
+    component_map[range_ptr->arguments.size()].push_back(*range_ptr);
+  }
+  //计算排列组合有多少种可能性
+  int total_num = 1;
+  std::map<int, std::vector<Component>>::iterator map_ptr;
+  for(map_ptr=component_map.begin();map_ptr!=component_map.end();++map_ptr){
+    if((int)map_ptr->second.size()<=0) continue; 
+    total_num = total_num * (int)map_ptr->second.size();
+  }
+  
+}
 bool 
 DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &the_components,
                                          std::vector<DatatypeDef::Component> &this_components) const
@@ -347,7 +414,6 @@ DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &th
 
       leafargu.initial();
       //两个树结构相同时，比较叶子节点
-      // cout<<"!! compare arguments same!!!"<<endl;
       if(leafargu.compare_arguments((*component_ptr).arguments, (*the_component_ptr).arguments)){
         // cout<<"## arguments same"<<endl;
         // cout<<"^^ two argument size: "<<(*component_ptr).arguments.size()
@@ -500,33 +566,18 @@ DatatypeDef::Compare::Leafargu::compare_arguments(std::vector<Ptr<Type>> &args_o
   types_two = get_depth_vector(args_two);
   //需要比较生成数组的长度，长度一致才继续比
   if(types_one.size() != types_two.size()) return false;
-  // //继续比较，则初始化数组变量
-  // for(int i=0;i<(int)types_one.size();i++){
-  //   class_one.push_back(-1);
-  //   class_two.push_back(-1);
-  //   ir_one.push_back(-1);
-  //   ir_two.push_back(-1);
-  // }
-  // //填充类别标记数组
-  // for(int i=0;i<(int)types_one.size();i++){
-  //   if((*types_one[i]).get_datatype() == "Normal"){
-  //     class_one[i] = 0;
-  //   }
-  //   if((*types_one[i]).get_datatype() == "Argument"){
-  //     class_one[i] = 1;
-  //   }
-  //   if((*types_two[i]).get_datatype() == "Normal"){
-  //     class_two[i] = 0;
-  //   }
-  //   if((*types_two[i]).get_datatype() == "Argument"){
-  //     class_two[i] = 1;
-  //   }
-  // }
-
-  // gen_ir_one();
-  // gen_ir_two();
-
-  return get_depth_res_two(types_one, types_two);
+  for(int i=0;i<(int)types_one.size();i++){
+    //类别不同，直接退出
+    if(types_one[i]->get_datatype() != types_two[i]->get_datatype()) return false;
+    //类别相同，继续比较
+    if(types_one[i]->get_datatype() == "Normal"){
+      if(!compare_argu_normal(types_one[i],types_two[i])) return false;
+    }
+    if(types_one[i]->get_datatype() == "Argument"){
+      if(!compare_argu_argument(types_one[i], types_two[i])) return false;
+    }
+  }
+  return get_depth_res_both(types_one, types_two);
 }
 std::vector<Ptr<Type>> 
 DatatypeDef::Compare::Leafargu::get_depth_vector(std::vector<Ptr<Type>> &args)
@@ -538,147 +589,71 @@ DatatypeDef::Compare::Leafargu::get_depth_vector(std::vector<Ptr<Type>> &args)
   }
   return typev;
 }
-void DatatypeDef::Compare::Leafargu::gen_ir_one()
+bool DatatypeDef::Compare::Leafargu::compare_argu_normal(Ptr<Type> one, Ptr<Type> two)
 {
-  //识别同类别不同类型，生成中间表示
-  for(int i=0;i<(int)types_one.size();i++){
-    int cur_type_id = 1;
-    //第一个元素，之前没有可查的
-    if(i==0){
-      ir_one[i] = cur_type_id;
-      continue;
-    }
-    //非第一个元素都需要向前遍历比较
-    for(int j=0; j<i; j++){
-      //只有类别相同才有必要继续比
-      if((*types_one[i]).get_datatype() == (*types_one[j]).get_datatype()){
-        if((*types_one[i]).main_name() == (*types_one[j]).main_name()){
-          ir_one[i] = ir_one[j];
-          break; //找到类型相同的就可以停止了
-        }
-        else{
-          //当前类型不一定是最大，需要比较一下
-          if(cur_type_id <= ir_one[j]) cur_type_id = ir_one[j]+1; //不用停止，需要找最大类型数
-          //如果cur比当前类型数还大，那不用做处理
-        }
-        //这样循环完成时cur才能比最大类型数大1
-      }
-    }
-    //向前寻找完成，如果是新类型甚至新类别
-    if(ir_one[i] == -1){
-      ir_one[i] = cur_type_id;
-    }
+  //找到该类型名的同构类型名，有可能有，也可能是它自己。
+  std::string iso_name_one = theIsomorphismDatatypeMap.find(one->main_name())->second;
+  std::string iso_name_two = theIsomorphismDatatypeMap.find(two->main_name())->second;
+  //两类型的同构类型名应该相同
+  if(iso_name_one != iso_name_two) return false;
+  //同构类型名可能在等号左侧出现，也可能不出现
+  auto itr_one = decl_type_map_one.find(iso_name_one);
+  auto itr_two = decl_type_map_two.find(iso_name_two);
+  //都没出现
+  if((itr_one==decl_type_map_one.end())&&(itr_two==decl_type_map_two.end())){
+    //都没在等号左侧出现，同构类型名一致即可
   }
-}
-void DatatypeDef::Compare::Leafargu::gen_ir_two(){
-  //识别同类别不同类型，生成中间表示
-  for(int i=0;i<(int)types_two.size();i++){
-    int cur_type_id = 1;
-    //第一个元素，之前没有可查的
-    if(i==0){
-      ir_two[i] = cur_type_id;
-      continue;
-    }
-    //非第一个元素都需要向前遍历比较
-    for(int j=0; j<i; j++){
-      //只有类别相同才有必要继续比
-      if((*types_two[i]).get_datatype() == (*types_two[j]).get_datatype()){
-        if((*types_two[i]).main_name() == (*types_two[j]).main_name()){
-          ir_two[i] = ir_two[j];
-          break; //找到类型相同的就可以停止了
-        }
-        else{
-          //当前类型不一定是最大，需要比较一下
-          if(cur_type_id <= ir_two[j]) cur_type_id = ir_two[j]+1; //不用停止，需要找最大类型数
-          //如果cur比当前类型数还大，那不用做处理
-        }
-        //这样循环完成时cur才能比最大类型数大1
-      }
-    }
-    //向前寻找完成，如果是新类型甚至新类别
-    if(ir_two[i] == -1){
-      ir_two[i] = cur_type_id;
-    }
+  //都出现了
+  else if((itr_one!=decl_type_map_one.end())&&(itr_two!=decl_type_map_two.end())){
+    //都在等号左侧出现，normal类型不存在顺序问题
   }
+  //一个出现，一个没出现
+  else{
+    //同构类型名相同，却一个出现一个没出现，注定不同构
+    return false;
+  }
+  return true;
 }
-bool DatatypeDef::Compare::Leafargu::get_depth_res()
+bool DatatypeDef::Compare::Leafargu::compare_argu_argument(Ptr<Type> one, Ptr<Type> two)
 {
-  for(int i=0;i<(int)types_one.size();i++){
-    if(class_one[i] != class_two[i]){
-      break;
-    }
-    if(ir_one[i] != ir_two[i]){
-      break;
-    }
-    if(i == (int)(types_one.size()-1)){
-      depth_res = true;
-    }
+  auto itr_one = decl_type_map_one.find(one->main_name());
+  auto itr_two = decl_type_map_two.find(two->main_name());
+  //只要有一个类型变量没在等号左侧出现，直接退出
+  if(itr_one==decl_type_map_one.end() || itr_two==decl_type_map_two.end()) return false;
+  
+  //首先查看类型变量是否已经在右侧出现过，第一个
+  if(std::get<2>(itr_one->second)==0){
+    //如果没有在前面的比较中出现，则利用顺序标识给出它的出现顺序
+    var_type_order_one += 1;
+    auto& tuple_one = itr_one->second;
+    tuple_one = std::make_tuple(std::get<0>(tuple_one),std::get<1>(tuple_one),var_type_order_one);
+    decl_type_map_one[one->main_name()] = tuple_one;
+  }
+  else{
+    //如果已经在前面的比较中出现，则不做处理，直接使用出现顺序
   }
 
-  // if(res){
-    cout<<"### class one: ";
-    for(int i=0;i<(int)types_one.size();i++){
-      cout<<class_one[i]<<" ";
-    } 
-    cout<<"class two: ";
-    for(int i=0;i<(int)types_one.size();i++){
-      cout<<class_two[i]<<" ";
-    }  
-    cout<<endl;
-    cout<<"### type one: ";
-    for(int i=0;i<(int)types_one.size();i++){
-      cout<<ir_one[i]<<" ";
-    } 
-    cout<<"type two: ";
-    for(int i=0;i<(int)types_one.size();i++){
-      cout<<ir_two[i]<<" ";
-    }  
-    cout<<endl;
-  // }
-  return depth_res;
-}
-bool DatatypeDef::Compare::Leafargu::get_depth_res_two(std::vector<Ptr<Type>> &one,std::vector<Ptr<Type>> &two)
-{
-  for(int i=0;i<(int)one.size();i++){
-    //类别不同，直接退出
-    if(one[i]->get_datatype() != two[i]->get_datatype()) return false;
-    //类别相同，继续比较
-    if(one[i]->get_datatype() == "Normal"){
-      //找到该类型名的同构类型名，有可能有，也可能是它自己。
-      std::string iso_name_one = theIsomorphismDatatypeMap.find(one[i]->main_name())->second;
-      std::string iso_name_two = theIsomorphismDatatypeMap.find(two[i]->main_name())->second;
-      //两类型的同构类型名应该相同
-      if(iso_name_one != iso_name_two) return false;
-      //同构类型名可能在等号左侧出现，也可能不出现
-      auto itr_one = decl_type_map_one.find(iso_name_one);
-      auto itr_two = decl_type_map_two.find(iso_name_two);
-      //都没出现
-      if((itr_one==decl_type_map_one.end())&&(itr_two==decl_type_map_two.end())){
-        //都没在等号左侧出现，同构类型名一致即可
-      }
-      //都出现了
-      else if((itr_one!=decl_type_map_one.end())&&(itr_two!=decl_type_map_two.end())){
-        //都在等号左侧出现，normal类型不存在顺序问题
-      }
-      //一个出现，一个没出现
-      else{
-        //同构类型名相同，却一个出现一个没出现，注定不同构
-        return false;
-      }
-    }
-    if(one[i]->get_datatype() == "Argument"){
-      auto itr_one = decl_type_map_one.find(one[i]->main_name());
-      auto itr_two = decl_type_map_two.find(two[i]->main_name());
-      //只要有一个类型变量没在等号左侧出现，直接退出
-      if(itr_one==decl_type_map_one.end() || itr_two==decl_type_map_two.end()){
-        return false;
-      }
-      //类型变量的出现顺序不同，直接退出
-      if(std::get<1>(itr_one->second) != std::get<1>(itr_two->second)){
-        return false;
-      }
-    }
+  //首先查看类型变量是否已经在右侧出现过，第二个
+  if(std::get<2>(itr_two->second)==0){
+    //如果没有在前面的比较中出现，则利用顺序标识给出它的出现顺序
+    var_type_order_two += 1;
+    auto& tuple_two = itr_two->second;
+    tuple_two = std::make_tuple(std::get<0>(tuple_two),std::get<1>(tuple_two),var_type_order_one);
+    decl_type_map_two[two->main_name()] = tuple_two;
   }
+  else{
+    //如果已经在前面的比较中出现，则不做处理，直接使用出现顺序
+  }
+  
+  //比较两个类型变量在右侧的出现顺序，不一致就退出
+  if(std::get<2>(itr_one->second) != std::get<2>(itr_two->second)){
+    return false;
+  }
+  return true;
+}
+bool DatatypeDef::Compare::Leafargu::get_depth_res_both(std::vector<Ptr<Type>> &one,std::vector<Ptr<Type>> &two)
+{
+
   return true;
 }
 

@@ -409,14 +409,12 @@ class ttree {
     struct _lNode {
         stree<T2> p1_;
         T1 p2_;
-        stree<T2> p3_;
 
         const stree<T2> &p1() const { return p1_; }
         const T1 &p2() const { return p2_; }
-        const stree<T2> &p3() const { return p3_; }
 
         bool operator<(const _lNode &rhs) const {
-            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+            return std::tie(p1_, p2_) < std::tie(rhs.p1_, rhs.p2_);
         }
     };
 
@@ -438,8 +436,8 @@ class ttree {
     static ttree<T1, T2> sNode(const stree<T1> &p1, const T2 &p2, const stree<T1> &p3) {
         return ttree<T1, T2> { _sNode { p1, p2, p3 } };
     }
-    static ttree<T1, T2> lNode(const stree<T2> &p1, const T1 &p2, const stree<T2> &p3) {
-        return ttree<T1, T2> { _lNode { p1, p2, p3 } };
+    static ttree<T1, T2> lNode(const stree<T2> &p1, const T1 &p2) {
+        return ttree<T1, T2> { _lNode { p1, p2 } };
     }
 
     bool is_aNode() const { return std::holds_alternative<_aNode>(value_); }
@@ -506,14 +504,12 @@ class ytree {
     struct _lNode {
         stree<T2> p1_;
         T1 p2_;
-        stree<T2> p3_;
 
         const stree<T2> &p1() const { return p1_; }
         const T1 &p2() const { return p2_; }
-        const stree<T2> &p3() const { return p3_; }
 
         bool operator<(const _lNode &rhs) const {
-            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+            return std::tie(p1_, p2_) < std::tie(rhs.p1_, rhs.p2_);
         }
     };
 
@@ -535,8 +531,8 @@ class ytree {
     static ytree<T1, T2> sNode(const stree<T1> &p1, const T2 &p2, const stree<T1> &p3) {
         return ytree<T1, T2> { _sNode { p1, p2, p3 } };
     }
-    static ytree<T1, T2> lNode(const stree<T2> &p1, const T1 &p2, const stree<T2> &p3) {
-        return ytree<T1, T2> { _lNode { p1, p2, p3 } };
+    static ytree<T1, T2> lNode(const stree<T2> &p1, const T1 &p2) {
+        return ytree<T1, T2> { _lNode { p1, p2 } };
     }
 
     bool is_aNode() const { return std::holds_alternative<_aNode>(value_); }
@@ -557,18 +553,18 @@ class ytree {
 template<typename T1, typename T2>
 class ptree {
     struct _aNode {
-        T2 p1_;
+        T1 p1_;
 
-        const T2 &p1() const { return p1_; }
+        const T1 &p1() const { return p1_; }
 
         bool operator<(const _aNode &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
     };
     struct _bNode {
-        T1 p1_;
+        T2 p1_;
 
-        const T1 &p1() const { return p1_; }
+        const T2 &p1() const { return p1_; }
 
         bool operator<(const _bNode &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
@@ -603,14 +599,12 @@ class ptree {
     struct _lNode {
         stree<T1> p1_;
         T2 p2_;
-        stree<T1> p3_;
 
         const stree<T1> &p1() const { return p1_; }
         const T2 &p2() const { return p2_; }
-        const stree<T1> &p3() const { return p3_; }
 
         bool operator<(const _lNode &rhs) const {
-            return std::tie(p1_, p2_, p3_) < std::tie(rhs.p1_, rhs.p2_, rhs.p3_);
+            return std::tie(p1_, p2_) < std::tie(rhs.p1_, rhs.p2_);
         }
     };
 
@@ -620,10 +614,10 @@ class ptree {
   public:
     ptree() = default;
 
-    static ptree<T1, T2> aNode(const T2 &p1) {
+    static ptree<T1, T2> aNode(const T1 &p1) {
         return ptree<T1, T2> { _aNode { p1 } };
     }
-    static ptree<T1, T2> bNode(const T1 &p1) {
+    static ptree<T1, T2> bNode(const T2 &p1) {
         return ptree<T1, T2> { _bNode { p1 } };
     }
     static ptree<T1, T2> asNode(const ttree<T2, T1> &p1, const T2 &p2, const ttree<T2, T1> &p3) {
@@ -632,8 +626,8 @@ class ptree {
     static ptree<T1, T2> sNode(const stree<T2> &p1, const T1 &p2, const stree<T2> &p3) {
         return ptree<T1, T2> { _sNode { p1, p2, p3 } };
     }
-    static ptree<T1, T2> lNode(const stree<T1> &p1, const T2 &p2, const stree<T1> &p3) {
-        return ptree<T1, T2> { _lNode { p1, p2, p3 } };
+    static ptree<T1, T2> lNode(const stree<T1> &p1, const T2 &p2) {
+        return ptree<T1, T2> { _lNode { p1, p2 } };
     }
 
     bool is_aNode() const { return std::holds_alternative<_aNode>(value_); }

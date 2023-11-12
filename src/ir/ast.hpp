@@ -482,30 +482,28 @@ struct DatatypeDef : Definition
 
     //比较叶子节点的变量
     struct Leafargu{
-      //tuple里面分别是输入参数的类型、位置、数量
+      //tuple里面分别是输入参数的类型、等号左侧顺序、等号右侧顺序默认为0
       std::map<std::string, std::tuple<int,int,int>> decl_type_map_one;
       std::map<std::string, std::tuple<int,int,int>> decl_type_map_two;
-      //内部临时变量
-      bool depth_res = false;
-      std::vector<Ptr<Type>> types_one;
-      std::vector<Ptr<Type>> types_two;
+      //等号右侧类型变量顺序总标记
+      int var_type_order_one = 0;
+      int var_type_order_two = 0;
       //复制等号左侧的信息，以备处理递归
       Ptr<Type> decl_type_one;
       Ptr<Type> decl_type_two;
 
-      std::vector<int> class_one; //用来标记类别，值为0或1
-      std::vector<int> class_two; //0或1
-      std::vector<int> ir_one; //用来标记同类别但是不同类型，值为1-n
-      std::vector<int> ir_two; //值为1-n
+      //内部临时变量，每次比较归零
+      bool depth_res = false;
+      std::vector<Ptr<Type>> types_one;
+      std::vector<Ptr<Type>> types_two;
 
     public:
       //compare ast leaf node
       bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
       std::vector<Ptr<Type>> get_depth_vector(std::vector<Ptr<Type>> &);
-      void gen_ir_one();
-      void gen_ir_two();
-      bool get_depth_res();
-      bool get_depth_res_two(std::vector<Ptr<Type>> &,std::vector<Ptr<Type>> &);
+      bool compare_argu_normal(Ptr<Type>, Ptr<Type>);
+      bool compare_argu_argument(Ptr<Type>, Ptr<Type>);
+      bool get_depth_res_both(std::vector<Ptr<Type>> &,std::vector<Ptr<Type>> &);
       void initial();
     };
 
@@ -516,8 +514,15 @@ struct DatatypeDef : Definition
     //compare DatatypeDef decl_type
     bool compare_decl_type(Ptr<Type>, Ptr<Type>);
 
+    //sort the component vector by priority(argu nums)
+    std::vector<Component> get_base_order_vector(std::vector<Component>&);
+    //arrange the components to many vectors by priority(argu nums)
+    std::vector<std::vector<Component>> get_components_combinations(std::vector<Component>&);
+    
     //compare struct component, same return true.
     bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
+
+
 
   };
 
