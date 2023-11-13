@@ -201,8 +201,7 @@ DatatypeDef::is_isomorphism() const
   int index = -1;
   std::vector<DatatypeDef>::iterator decl_ptr;
   //提前将本定义的构造规则进行排列组合
-  std::vector<std::vector<Component>> 
-  components_combination = compare.get_components_combinations(this->components);
+  compare.get_components_combinations(this->components);
 
   //遍历全局已经比较完成的数据类型定义
   for(decl_ptr=theDefinedDatatypes.begin();decl_ptr!=theDefinedDatatypes.end();++decl_ptr){
@@ -216,18 +215,38 @@ DatatypeDef::is_isomorphism() const
     //对全局定义的规则数组进行排序
     std::vector<Component> the_base_components = compare.get_base_order_vector(decl_ptr->components);
 
+    //遍历本定义所有排列的规则组合
+    std::vector<std::vector<Component>>::iterator combina_ptr;
+    for(combina_ptr = compare.components_combination.begin();
+        combina_ptr != compare.components_combination.end();
+        ++combina_ptr)
+    {
+      //输出
+      // std::vector<Component>::iterator this_ptr;
+      // for(this_ptr=(*combina_ptr).begin();this_ptr!=(*combina_ptr).end();++this_ptr){
+      //   cout<<(*this_ptr).constructor<<" ";
+      // }
+      // cout<<endl;
+      // for(this_ptr=the_base_components.begin();this_ptr!=the_base_components.end();++this_ptr){
+      //   cout<<(*this_ptr).constructor<<" ";
+      // }
+      // cout<<endl;
 
       // cout<<"^ compare components ^"<<endl;
-      if(compare.compare_components(decl_ptr->components, this->components)){
+      if(compare.compare_components(the_base_components,(*combina_ptr))){
         //components也相同，则这两个datatypedef同构
         index = distance(theDefinedDatatypes.begin(), decl_ptr);
+        //所有的排列，对应上一个就可以
         break;
       }
-    
+    }
+
+    //利用index判断是否已经找到同构类型，找到就退出全局定义循环
+    if(index != -1) break;
   }
 
+  //不同构，则自己与自己建立对应关系
   if(index == -1){
-    //不同构，则自己与自己建立对应关系
     //用数据类型左侧类型的类型名，functype没有类型名
     if(decl_type->get_datatype() != "Func"){
       theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
@@ -239,8 +258,8 @@ DatatypeDef::is_isomorphism() const
 
     return false;
   }
+  //与前文定义的数据类型同构，建立对应关系
   else{
-    //与前文定义的数据类型同构，建立对应关系
     if(decl_type->get_datatype() != "Func"){
       theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
                                       (decl_type->main_name(),theDefinedDatatypes[index].decl_type->main_name()));
@@ -328,13 +347,14 @@ DatatypeDef::Compare::get_base_order_vector(std::vector<DatatypeDef::Component>&
   //用来标记哪个已经被排序过了
   bool the_sort_flag[the_sort.size()] = {false};
   //用来标记当前规则的参数数量
-  std::vector<int> the_sort_argu_num = {-1};
+  std::vector<int> the_sort_argu_num;
   
   //遍历，获取所有规则中的参数数量
   std::vector<DatatypeDef::Component>::iterator sort_ptr;
   for(sort_ptr=the_sort.begin();sort_ptr!=the_sort.end();++sort_ptr){
     the_sort_argu_num.push_back((int)sort_ptr->arguments.size());
   }
+
   //获取最大参数个数
   int the_sort_argu_num_max = *std::max_element(the_sort_argu_num.begin(),the_sort_argu_num.end());
   //从大到小，将规则排序
@@ -356,28 +376,91 @@ DatatypeDef::Compare::get_base_order_vector(std::vector<DatatypeDef::Component>&
   //检查，排序完成的数组和原数组应该长度相等
   if(order_components.size() != the_sort.size()){
     cout<<"## the base order component vector sort failed!"<<endl;
+    cout<<"length: "<<order_components.size()<<" "<<the_sort.size()<<endl;
     exit(0);
   }
   return order_components;
 }
-std::vector<std::vector<DatatypeDef::Component>>
+void
 DatatypeDef::Compare::get_components_combinations(std::vector<DatatypeDef::Component>& the_arrange)
 {
-  //键是规则的参数数量，值是规则数组
-  std::map<int,std::vector<Component>> component_map;
-  std::vector<Component>::iterator range_ptr;
-  for(range_ptr=the_arrange.begin();range_ptr!=the_arrange.end();++range_ptr){
-    int index = distance(the_arrange.begin(),range_ptr);
-    component_map[range_ptr->arguments.size()].push_back(*range_ptr);
-  }
-  //计算排列组合有多少种可能性
-  int total_num = 1;
-  std::map<int, std::vector<Component>>::iterator map_ptr;
-  for(map_ptr=component_map.begin();map_ptr!=component_map.end();++map_ptr){
-    if((int)map_ptr->second.size()<=0) continue; 
-    total_num = total_num * (int)map_ptr->second.size();
-  }
+  int the_arrange_size = (int)the_arrange.size();
+  std::vector<Component> the_store;
+  //完成排列组合
+  recursion_arrange_component(the_arrange, 0, the_arrange_size-1, the_store);
   
+  //根据规则内参数数量的多少进行精简
+  cutdown_components_combination_by_order();
+
+  //输出所有排列的规则构造子
+  // std::vector<std::vector<Component>>::iterator combina_ptr;
+  // for(combina_ptr=components_combination.begin();combina_ptr!=components_combination.end();++combina_ptr){
+  //   std::vector<Component>::iterator vector_ptr;
+  //   for(vector_ptr=(*combina_ptr).begin();vector_ptr!=(*combina_ptr).end();++vector_ptr){
+  //     cout<<(*vector_ptr).constructor<<" ";
+  //   }
+  //   cout<<endl;
+  // }
+  // cout<<"size: "<<components_combination.size()<<endl;
+}
+void
+DatatypeDef::Compare::recursion_arrange_component(std::vector<DatatypeDef::Component>& the_raw,
+                                                  int start_index,
+                                                  int end_index,
+                                                  std::vector<DatatypeDef::Component> the_store)
+{
+  //递归到末尾，将当前生成的规则序列存储到全局
+  if(start_index == end_index+1){
+    components_combination.push_back(the_store);
+    return;
+  }
+
+  //将规则依次调换顺序进行排列
+  for(int i=start_index; i<=end_index; i++){
+    Component temp = the_raw[i];
+    the_raw[i] = the_raw[start_index];
+    the_raw[start_index] = temp;
+
+    the_store.push_back(the_raw[start_index]);
+    recursion_arrange_component(the_raw, start_index+1, end_index, the_store);
+    the_store.pop_back();
+
+    Component peory = the_raw[i];
+    the_raw[i] = the_raw[start_index];
+    the_raw[start_index] = peory;    
+  }
+}
+void
+DatatypeDef::Compare::cutdown_components_combination_by_order()
+{
+  //遍历所有的规则排列
+  std::vector<std::vector<Component>>::iterator combina_ptr;
+  for(combina_ptr=components_combination.begin();combina_ptr!=components_combination.end();){
+    //标记参数数量是否降序
+    bool is_argu_num_order = true;
+    //找到当前规则下的参数数量
+    std::vector<Component>::iterator vector_ptr;
+    std::vector<Component>::iterator vector_ptr_next;
+    for(vector_ptr=(*combina_ptr).begin();vector_ptr!=(*combina_ptr).end();++vector_ptr){
+      vector_ptr_next = vector_ptr;
+      if(++vector_ptr_next != (*combina_ptr).end()){
+        //如果出现参数数量的升序，就将当前排列删除
+        if((*vector_ptr).arguments.size() < (*vector_ptr_next).arguments.size()){
+          is_argu_num_order = false;
+          break;
+        }
+      }
+      else break;
+    }
+    //出现升序就删除
+    if(!is_argu_num_order){
+      combina_ptr = components_combination.erase(combina_ptr);
+    }
+    //没有升序就继续
+    else{
+      ++combina_ptr;
+    }
+  }
 }
 bool 
 DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &the_components,
@@ -404,14 +487,16 @@ DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &th
         break;        
       }
 
+      // cout<<"^^ compare structer ^^"<<endl;
       structer.initial();
       // 比较两个树的结构
       if(!structer.compare_structure((*component_ptr).arguments, (*the_component_ptr).arguments)){
         //两个树结构不相同时，不用再比较叶子节点
-        // cout<<"structer not same"<<endl;
+        // cout<<"^^^ structer not same ^^^"<<endl;
         continue;
       }
 
+      // cout<<"^^ compare leafnode ^^"<<endl;
       leafargu.initial();
       //两个树结构相同时，比较叶子节点
       if(leafargu.compare_arguments((*component_ptr).arguments, (*the_component_ptr).arguments)){
@@ -520,6 +605,9 @@ DatatypeDef::Compare::Structer::get_width_res()
         width_res = false;
         return false;
       }
+      
+      // cout<<"one type: "<<decl_type_one->main_name()<<" "<<subtree_one[i]->main_name()<<endl;
+      // cout<<"two type: "<<decl_type_two->main_name()<<" "<<subtree_two[i]->main_name()<<endl;
       //情况1：递归使用自己
       if((decl_type_one->main_name()==subtree_one[i]->main_name())
        &&(decl_type_two->main_name()==subtree_two[i]->main_name())){
@@ -645,6 +733,7 @@ bool DatatypeDef::Compare::Leafargu::compare_argu_argument(Ptr<Type> one, Ptr<Ty
     //如果已经在前面的比较中出现，则不做处理，直接使用出现顺序
   }
   
+  // cout<<"argument order: "<<std::get<2>(itr_one->second)<<" "<<std::get<2>(itr_two->second)<<endl;
   //比较两个类型变量在右侧的出现顺序，不一致就退出
   if(std::get<2>(itr_one->second) != std::get<2>(itr_two->second)){
     return false;

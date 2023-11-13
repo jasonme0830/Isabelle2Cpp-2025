@@ -510,6 +510,9 @@ struct DatatypeDef : Definition
     mutable Structer structer;
     mutable Leafargu leafargu;
 
+    //存储所有规则的排列组合
+    std::vector<std::vector<Component>> components_combination;
+
   public:
     //compare DatatypeDef decl_type
     bool compare_decl_type(Ptr<Type>, Ptr<Type>);
@@ -517,8 +520,10 @@ struct DatatypeDef : Definition
     //sort the component vector by priority(argu nums)
     std::vector<Component> get_base_order_vector(std::vector<Component>&);
     //arrange the components to many vectors by priority(argu nums)
-    std::vector<std::vector<Component>> get_components_combinations(std::vector<Component>&);
-    
+    void get_components_combinations(std::vector<Component>&);
+    void recursion_arrange_component(std::vector<Component>&, int, int, std::vector<Component>);
+    void cutdown_components_combination_by_order();
+
     //compare struct component, same return true.
     bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
 
