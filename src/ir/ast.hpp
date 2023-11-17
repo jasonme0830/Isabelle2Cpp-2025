@@ -411,14 +411,17 @@ struct Definition
 
   virtual bool is_error() const { return false; }
 
-  // check the definition is pre-def of not
+  // distinguish and marks the definitions in the predef.thy base on rule-transform
   virtual bool is_predef() const { return false; }
-  /// check the def has been pre-defined or not
+  
+  /// check the def has been pre-defined or not base on rule-transform.
   virtual bool is_predefined() const { return false; }
   virtual bool is_datatype_decl() const { return false; }
   virtual bool is_function_decl() const { return false; }
 
-  // These func is code by myk.
+  // Code by myk, to cut down Coriolis complexity.
+  virtual bool judge_isomorphism() const { return false; }
+  // Isomorphism compare base on defination-transform.
   virtual bool is_isomorphism() const { return false; }
 
   virtual void gen_code(Code&) const;
@@ -517,11 +520,14 @@ struct DatatypeDef : Definition
     //compare DatatypeDef decl_type
     bool compare_decl_type(Ptr<Type>, Ptr<Type>);
 
-    //sort the component vector by priority(argu nums)
+    //sort the component vector by priority(argu nums) for global
     std::vector<Component> get_base_order_vector(std::vector<Component>&);
-    //arrange the components to many vectors by priority(argu nums)
+
+    //arrange the components to many vectors by priority(argu nums) for this datatypeDef
     void get_components_combinations(std::vector<Component>&);
+    //arrange components(n!) for this datatypeDef
     void recursion_arrange_component(std::vector<Component>&, int, int, std::vector<Component>);
+    //to cut down the num of components combination by priority
     void cutdown_components_combination_by_order();
 
     //compare struct component, same return true.
@@ -540,9 +546,14 @@ struct DatatypeDef : Definition
   bool is_predefined() const override;
   bool is_datatype_decl() const override;
   DatatypeDef clone() const;
-
-  //These func is code by myk.
   bool is_isomorphism() const override;
+
+  /*
+    Code by myk, to cut down Coriolis complexity.
+    Compare this datatypeDef with global datatypeDefs.
+    Then change the global map base on compare result.
+  */
+  bool judge_isomorphism() const override;
 
 
 public:
@@ -562,10 +573,15 @@ struct FunctionDef : Definition
 
   bool is_predefined() const override;
   bool is_function_decl() const override;
+  bool is_isomorphism() const override;
 
 public:
   void gen_code(Code&) const override;
+
+  //code by myk
   bool compare_type(Ptr<FuncType>);
+  bool judge_isomorphism() const override;
+
 };
 
 // as a special DatatypeDef

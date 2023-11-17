@@ -191,24 +191,50 @@ FunctionDef::is_predefined() const
 {
   return thePredefinedFunctions.count(name);
 }
-
-//These definition is code by myk.
+/*
+  Check the datatype is isomorphism with other datatype.
+  True if this datatype isomorphism with others.
+  False if this datatype appear firstly or alone.
+*/
 bool 
 DatatypeDef::is_isomorphism() const
+{
+  std::map<string,string>::iterator ptr = theIsomorphismDatatypeMap.find(this->def_name());
+  //在map中没有找到，没有同构
+  if(ptr == theIsomorphismDatatypeMap.end()) return false;
+  //自己与自己对应，也不同构
+  if(ptr->second == def_name()) return false;
+  else return true;
+}
+/*
+  Check the function is isomorphism with other function.
+  True if this function isomorphism with others.
+  False if this function appear firstly or alone.
+*/
+bool 
+FunctionDef::is_isomorphism() const
+{
+  return false;
+}
+
+//Code by myk.
+
+bool 
+DatatypeDef::judge_isomorphism() const
 {
   Compare compare;
   //声明一个int数组用来存储对比信息
   int index = -1;
   std::vector<DatatypeDef>::iterator decl_ptr;
+
   //提前将本定义的构造规则进行排列组合
   compare.get_components_combinations(this->components);
 
   //遍历全局已经比较完成的数据类型定义
   for(decl_ptr=theDefinedDatatypes.begin();decl_ptr!=theDefinedDatatypes.end();++decl_ptr){
-    
-    cout<<"^ two datatype name: "<<this->def_name()<<" "<<decl_ptr->def_name()<<endl;
     //等号左边的类型不同直接退出
     if(!compare.compare_decl_type(decl_type,decl_ptr->decl_type)) continue;
+
     //接着比较components内元素的数量，不一致就跳出本次循环
     if(components.size() != decl_ptr->components.size()) continue;
 
@@ -260,6 +286,7 @@ DatatypeDef::is_isomorphism() const
   }
   //与前文定义的数据类型同构，建立对应关系
   else{
+    cout<<"^ two datatype name: "<<this->def_name()<<" "<<decl_ptr->def_name()<<endl;
     if(decl_type->get_datatype() != "Func"){
       theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
                                       (decl_type->main_name(),theDefinedDatatypes[index].decl_type->main_name()));
@@ -293,9 +320,10 @@ DatatypeDef::Compare::compare_decl_type(Ptr<Type> ptr_one, Ptr<Type> ptr_two)
     std::vector<Ptr<Type>> vec_two = ptr_two->depth_traversal();
   
     //等号左边输入参数的数量不同，直接退出
+    //TODO:等号左侧输入参数数量不同也可能同构，以右侧参数数量为准
     if(vec_one.size() != vec_two.size()) return false;
     
-    // //输出
+    //输出
     // for(int i=0;i<(int)vec_one.size();i++){
     //   cout<<vec_one[i]->main_name()<<" ";
     // }
@@ -508,6 +536,8 @@ DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &th
       }
     }
   }
+
+  //只有全部规则都一一对应上，才算同构
   int res = 0;
   for(int i=0;i<(int)the_components.size();i++){
     res += the_components_res[i];
@@ -744,6 +774,13 @@ bool DatatypeDef::Compare::Leafargu::get_depth_res_both(std::vector<Ptr<Type>> &
 {
 
   return true;
+}
+
+
+bool
+FunctionDef::judge_isomorphism() const
+{
+  return false;
 }
 
 } // namespace hol2cpp
