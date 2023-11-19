@@ -88,6 +88,17 @@ Code::add_header(const string& header)
   headers_.insert(header);
 }
 
+void 
+Code::add_iso_typedef(const string& first, const string& second)
+{
+  isomorphism_typedef_[first] = second;
+}
+const std::map<std::string, std::string>&
+Code::iso_typedef() const
+{
+  return isomorphism_typedef_;
+}
+
 void
 Code::pop_datatype()
 {

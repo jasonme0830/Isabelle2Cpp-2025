@@ -621,6 +621,9 @@ struct Theory final
   std::vector<std::string> imports;
   std::vector<Ptr<Definition>> definitions;
 
+  //To generation typedef in hpp for isomorphism datatypes.
+  bool gen_isomorphism_typedef(Code&) const;
+
 public:
   Code gen_code() const;
 };

@@ -14,6 +14,11 @@ private:
   void syn_header(const Code&);
   void syn_impl(const Code&);
 
+  void syn_typedefs(const Code&);
+  void syn_single_typedef(const std::string&, const Datatype&);
+  void syn_single_typedef_template(const std::string&, const Datatype&);
+  void syn_single_typedef_definition(const std::string&, const Datatype&);
+
   void syn_class(const Datatype& datatype);
   void syn_class_template(const Datatype& datatype);
   void syn_class_definition(const Datatype& datatype);
