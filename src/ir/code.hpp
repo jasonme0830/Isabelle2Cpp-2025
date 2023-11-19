@@ -34,6 +34,9 @@ public:
 
   void add_header(const std::string& header);
 
+  void add_iso_typedef(const std::string&, const std::string&);
+  const std::map<std::string, std::string>& iso_typedef() const;
+
   void pop_datatype();
   void pop_function();
 
@@ -51,5 +54,7 @@ private:
   std::set<std::string> headers_;
 
   std::map<std::string, Ptr<ShortDef>> short_defs_;
+
+  std::map<std::string, std::string> isomorphism_typedef_;
 };
 } // namespace hol2cpp

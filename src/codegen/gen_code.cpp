@@ -17,6 +17,9 @@ Theory::gen_code() const
          shortdef_defs = 0;
   vector<string> datatype_gens, function_gens, shortdef_gens;
 
+  //Gen typedef for isomorphism datatype
+  gen_isomorphism_typedef(code);
+
   for (size_t i = 0; i < definitions.size(); ++i) {
     auto decl = definitions[i].get();
 
@@ -707,7 +710,8 @@ DatatypeDef::Compare::Leafargu::get_depth_vector(std::vector<Ptr<Type>> &args)
   }
   return typev;
 }
-bool DatatypeDef::Compare::Leafargu::compare_argu_normal(Ptr<Type> one, Ptr<Type> two)
+bool 
+DatatypeDef::Compare::Leafargu::compare_argu_normal(Ptr<Type> one, Ptr<Type> two)
 {
   //找到该类型名的同构类型名，有可能有，也可能是它自己。
   std::string iso_name_one = theIsomorphismDatatypeMap.find(one->main_name())->second;
@@ -732,7 +736,8 @@ bool DatatypeDef::Compare::Leafargu::compare_argu_normal(Ptr<Type> one, Ptr<Type
   }
   return true;
 }
-bool DatatypeDef::Compare::Leafargu::compare_argu_argument(Ptr<Type> one, Ptr<Type> two)
+bool 
+DatatypeDef::Compare::Leafargu::compare_argu_argument(Ptr<Type> one, Ptr<Type> two)
 {
   auto itr_one = decl_type_map_one.find(one->main_name());
   auto itr_two = decl_type_map_two.find(two->main_name());
@@ -770,12 +775,12 @@ bool DatatypeDef::Compare::Leafargu::compare_argu_argument(Ptr<Type> one, Ptr<Ty
   }
   return true;
 }
-bool DatatypeDef::Compare::Leafargu::get_depth_res_both(std::vector<Ptr<Type>> &one,std::vector<Ptr<Type>> &two)
+bool 
+DatatypeDef::Compare::Leafargu::get_depth_res_both(std::vector<Ptr<Type>> &one,std::vector<Ptr<Type>> &two)
 {
 
   return true;
 }
-
 
 bool
 FunctionDef::judge_isomorphism() const
@@ -783,4 +788,20 @@ FunctionDef::judge_isomorphism() const
   return false;
 }
 
+bool
+Theory::gen_isomorphism_typedef(Code& code) const
+{
+  std::map<std::string, std::string>::iterator map_ptr;
+  for(map_ptr=theIsomorphismDatatypeMap.begin();
+      map_ptr!=theIsomorphismDatatypeMap.end();
+      ++map_ptr)
+  {
+    //如果键值不等，说明是同构类型，ast中没有它的定义树
+    if(map_ptr->first != map_ptr->second){
+      code.add_iso_typedef(map_ptr->first, map_ptr->second);
+    }
+
+  }
+  return true;
+}
 } // namespace hol2cpp
