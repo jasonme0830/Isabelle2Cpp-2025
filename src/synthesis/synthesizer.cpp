@@ -47,6 +47,9 @@ Synthesizer::syn_header(const Code& code)
     syn_class(datatype);
   }
 
+  //Gen typedef for isomorphism datatype
+  syn_typedefs(code);
+
   for (auto& func : code.func_entities()) {
     // pass predefs
     if (func.get().is_predef()) {
@@ -69,9 +72,6 @@ Synthesizer::syn_impl(const Code& code)
 
   "#include \"$\"\n\n"_fs.outf(
     out_.get(), filename_.substr(filename_.rfind('/') + 1) + ".hpp");
-
-  //Gen typedef for isomorphism datatype
-  syn_typedefs(code);
 
   for (auto& func : code.func_entities()) {
     // pass predefs
