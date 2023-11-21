@@ -497,8 +497,8 @@ struct DatatypeDef : Definition
 
       //内部临时变量，每次比较归零
       bool depth_res = false;
-      std::vector<Ptr<Type>> types_one;
-      std::vector<Ptr<Type>> types_two;
+      std::vector<Ptr<Type>> types_cur;
+      std::vector<Ptr<Type>> types_glo;
 
     public:
       //compare ast leaf node
