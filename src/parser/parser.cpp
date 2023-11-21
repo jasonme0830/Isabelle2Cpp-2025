@@ -317,7 +317,7 @@ Parser::gen_datatype_definition()
     theDefinedDatatypes.push_back(*decl);
   }
   else{
-    cout<<"### isomorphism with other datatype!"<<endl;
+    // cout<<"### isomorphism with other datatype!"<<endl;
   }
 
   return decl;

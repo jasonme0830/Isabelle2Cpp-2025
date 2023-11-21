@@ -103,7 +103,7 @@ Synthesizer::syn_typedefs(const Code& code)
       }
     }
   }
-  "\n"_fs.outf(out_.get());
+  "\n\n"_fs.outf(out_.get());
 }
 
 void 

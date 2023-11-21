@@ -468,11 +468,11 @@ struct DatatypeDef : Definition
     //比较结构
     struct Structer{
       bool width_res = false;
-      std::vector<Ptr<Type>> subtree_one;
-      std::vector<Ptr<Type>> subtree_two;
+      std::vector<Ptr<Type>> subtree_cur;
+      std::vector<Ptr<Type>> subtree_glo;
       //复制等号左侧的信息，以备处理递归
-      Ptr<Type> decl_type_one;
-      Ptr<Type> decl_type_two;
+      Ptr<Type> decl_type_cur;
+      Ptr<Type> decl_type_glo;
 
     public:
       //compare ast structer
@@ -486,14 +486,14 @@ struct DatatypeDef : Definition
     //比较叶子节点的变量
     struct Leafargu{
       //tuple里面分别是输入参数的类型、等号左侧顺序、等号右侧顺序默认为0
-      std::map<std::string, std::tuple<int,int,int>> decl_type_map_one;
-      std::map<std::string, std::tuple<int,int,int>> decl_type_map_two;
+      std::map<std::string, std::tuple<int,int,int>> decl_type_map_cur;
+      std::map<std::string, std::tuple<int,int,int>> decl_type_map_glo;
       //等号右侧类型变量顺序总标记
-      int var_type_order_one = 0;
-      int var_type_order_two = 0;
+      int var_type_order_cur = 0;
+      int var_type_order_glo = 0;
       //复制等号左侧的信息，以备处理递归
-      Ptr<Type> decl_type_one;
-      Ptr<Type> decl_type_two;
+      Ptr<Type> decl_type_cur;
+      Ptr<Type> decl_type_glo;
 
       //内部临时变量，每次比较归零
       bool depth_res = false;
@@ -504,6 +504,8 @@ struct DatatypeDef : Definition
       //compare ast leaf node
       bool compare_arguments(std::vector<Ptr<Type>> &, std::vector<Ptr<Type>> &);
       std::vector<Ptr<Type>> get_depth_vector(std::vector<Ptr<Type>> &);
+      bool compare_argu_normal_decl_normal(std::string&, std::string&);
+      bool compare_argu_normal_decl_template(std::string&, std::string&);
       bool compare_argu_normal(Ptr<Type>, Ptr<Type>);
       bool compare_argu_argument(Ptr<Type>, Ptr<Type>);
       bool get_depth_res_both(std::vector<Ptr<Type>> &,std::vector<Ptr<Type>> &);
