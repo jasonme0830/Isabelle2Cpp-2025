@@ -226,6 +226,8 @@ bool
 DatatypeDef::judge_isomorphism() const
 {
   Compare compare;
+  //store the cons of the isomorphsim type
+  std::map<std::string, std::string> temp_store_cons;
   //声明一个int数组用来存储对比信息
   int index = -1;
   std::vector<DatatypeDef>::iterator decl_ptr;
@@ -269,7 +271,8 @@ DatatypeDef::judge_isomorphism() const
       if(compare.compare_components(the_base_components,(*combina_ptr))){
         //components也相同，则这两个datatypedef同构
         index = distance(theDefinedDatatypes.begin(), decl_ptr);
-        //所有的排列，对应上一个就可以
+        //所有的排列，对应上一个就可以，存储当前构造子的顺序对应关系
+        compare.store_cons_to_map(temp_store_cons,(*combina_ptr),the_base_components);
         break;
       }
     }
@@ -282,8 +285,10 @@ DatatypeDef::judge_isomorphism() const
   if(index == -1){
     //用数据类型左侧类型的类型名，functype没有类型名
     if(decl_type->get_datatype() != "Func"){
-      theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
-                                      (decl_type->main_name(),decl_type->main_name()));
+      //在全局中建立对应关系
+      theIsomorphismDatatypeMap[decl_type->main_name()] = decl_type->main_name();
+      compare.store_cons_to_map(temp_store_cons,(this->components),this->components);
+      theIsoDatatypeConsMap[decl_type->main_name()] = move(temp_store_cons);
     }
     else{
       //TODO:数据类型的定义中出现函数类型，处理方式待定
@@ -295,8 +300,10 @@ DatatypeDef::judge_isomorphism() const
   else{
     cout<<"^ two datatype name: "<<this->def_name()<<" "<<decl_ptr->def_name()<<endl;
     if(decl_type->get_datatype() != "Func"){
-      theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
-                                      (decl_type->main_name(),theDefinedDatatypes[index].decl_type->main_name()));
+      // theIsomorphismDatatypeMap.insert(pair<std::string,std::string>
+      //                                 (decl_type->main_name(),theDefinedDatatypes[index].decl_type->main_name()));
+      theIsomorphismDatatypeMap[decl_type->main_name()] = theDefinedDatatypes[index].decl_type->main_name();
+      theIsoDatatypeConsMap[decl_type->main_name()] = move(temp_store_cons);
     }
     else{
       //TODO:数据类型的定义中出现函数类型，处理方式待定
@@ -506,56 +513,39 @@ bool
 DatatypeDef::Compare::compare_components(std::vector<DatatypeDef::Component> &the_components,
                                          std::vector<DatatypeDef::Component> &this_components) const
 {
-  //用int数组存储全局比较记录
-  int the_components_res[the_components.size()] = {0};
+  //因为规则顺序是确定的，所以必须一一对应上
+  std::vector<DatatypeDef::Component>::iterator component_ptr = this_components.begin();
+  std::vector<DatatypeDef::Component>::iterator the_component_ptr = the_components.begin();
+  //本地和全局等长，一起遍历。
+  for(int i=0; i<(int)this_components.size(); i++){
 
-  //先遍历本地的
-  std::vector<DatatypeDef::Component>::iterator component_ptr;
-  for(component_ptr=this_components.begin(); component_ptr!=this_components.end(); ++component_ptr){
-    //再遍历全局的
-    std::vector<DatatypeDef::Component>::iterator the_component_ptr;
-    for(the_component_ptr=the_components.begin();
-        the_component_ptr!=the_components.end();
-        ++the_component_ptr)
-    {
-      int index = distance(the_components.begin(),the_component_ptr);
-      //如果全局定义中的这个定义，某个模式已经匹配了则可跳过
-      if(the_components_res[index] == 1) continue;
-      //都只有一个构造子，可以视为相同
-      if((*component_ptr).arguments.size()==0 && (*the_component_ptr).arguments.size()==0){
-        the_components_res[index] = 1;
-        break;        
-      }
-
-      // cout<<"^^ compare structer ^^"<<endl;
-      structer.initial();
-      // 比较两个树的结构
-      if(!structer.compare_structure((*component_ptr).arguments, (*the_component_ptr).arguments)){
-        //两个树结构不相同时，不用再比较叶子节点
-        // cout<<"^^^ structer not same ^^^"<<endl;
-        continue;
-      }
-
-      // cout<<"^^ compare leafnode ^^"<<endl;
-      leafargu.initial();
-      //两个树结构相同时，比较叶子节点
-      if(leafargu.compare_arguments((*component_ptr).arguments, (*the_component_ptr).arguments)){
-        // cout<<"## arguments same"<<endl;
-        // cout<<"^^ two argument size: "<<(*component_ptr).arguments.size()
-        //     <<" "<<(*the_component_ptr).arguments.size()<<endl;
-        the_components_res[index] = 1;
-        break;
-      }
+    //都只有一个构造子，可以视为相同
+    if((*component_ptr).arguments.size()==0 && (*the_component_ptr).arguments.size()==0){
+      continue;  
     }
+    // cout<<"^^ compare structer ^^"<<endl;
+    structer.initial();
+    // 比较两个树的结构
+    if(!structer.compare_structure((*component_ptr).arguments, (*the_component_ptr).arguments)){
+      //两个树结构不相同时，不用再比较叶子节点
+      // cout<<"^^^ structer not same ^^^"<<endl;
+      return false;
+    }
+
+    // cout<<"^^ compare leafnode ^^"<<endl;
+    leafargu.initial();
+    //两个树结构相同时，比较叶子节点
+    if(!leafargu.compare_arguments((*component_ptr).arguments, (*the_component_ptr).arguments)){
+      // cout<<"## arguments not same"<<endl;
+      // cout<<"^^ two argument size: "<<(*component_ptr).arguments.size()
+      //     <<" "<<(*the_component_ptr).arguments.size()<<endl;
+      return false;
+    }
+    component_ptr++;
+    the_component_ptr++;
   }
 
-  //只有全部规则都一一对应上，才算同构
-  int res = 0;
-  for(int i=0;i<(int)the_components.size();i++){
-    res += the_components_res[i];
-  }
-  if(res == (int)the_components.size()) return true;
-  else return false;
+  return true;
 }
 
 void
@@ -835,11 +825,85 @@ DatatypeDef::Compare::Leafargu::get_depth_res_both(std::vector<Ptr<Type>> &cur,s
 
   return true;
 }
+void
+DatatypeDef::Compare::store_cons_to_map(std::map<std::string,std::string>& cons_map,
+                                        std::vector<DatatypeDef::Component>& combination,
+                                        std::vector<DatatypeDef::Component>& the_base)
+{
+  std::vector<DatatypeDef::Component>::iterator cur_ptr = combination.begin();
+  std::vector<DatatypeDef::Component>::iterator glo_ptr = the_base.begin();
+  for(int i=0;i<(int)the_base.size();i++){
+    cons_map[cur_ptr->constructor] = glo_ptr->constructor;
+    cur_ptr++;
+    glo_ptr++;
+  }
+}
+
 
 bool
 FunctionDef::judge_isomorphism() const
 {
   return false;
+}
+bool
+FunctionDef::handle_isomorphism_datatype()
+{
+  Process handle_func_iso_type;
+  handle_func_iso_type.func_type_size = type->args_num();
+
+  //处理函数参数的数据类型，替换并返回同构的类型名数组
+  // cout<<"^ handle head ^"<<endl;
+  handle_func_iso_type.handle_head_isomor_type(type);
+
+  //处理函数等式内同构类型的构造子
+  // cout<<"^ handle body ^"<<endl;
+  handle_func_iso_type.handle_body_isomor_type(equations);
+
+  return true;
+}
+bool
+FunctionDef::Process::handle_head_isomor_type(Ptr<FuncType> type)
+{
+  std::vector<Ptr<Type>>::iterator type_ptr = type->types.begin();
+
+  for(;type_ptr!=type->types.end();++type_ptr){
+    //键值不一致说明是同构类型
+    if(theIsomorphismDatatypeMap[type_ptr->get()->main_name()] != type_ptr->get()->main_name()){
+      int index = distance(type->types.begin(), type_ptr);
+      //将同构类型的所有构造子map都存储进临时map中
+      auto& one_map = theIsoDatatypeConsMap[type_ptr->get()->main_name()] ;
+      for(auto one_cons : one_map){
+        the_all_iso_cons_map[one_cons.first] = one_cons.second;
+      }
+      //直接对函数内同构类型的名字做替换
+      type_ptr->get()->replace_name(theIsomorphismDatatypeMap[type_ptr->get()->main_name()]);
+    }
+  }
+  return true;
+}
+bool 
+FunctionDef::Process::handle_body_isomor_type(std::vector<Equation>& equations)
+{
+  for(auto equa_ptr=equations.begin();equa_ptr!=equations.end();++equa_ptr){
+    //处理等号左侧模式匹配中的构造子
+    handle_equa_pattern_iso_type_cons(equa_ptr->pattern);
+
+    //处理等号右侧表达式中的构造子
+    handle_equa_expr_iso_type_cons(equa_ptr->expr);
+  }
+  return true;
+}
+bool
+FunctionDef::Process::handle_equa_pattern_iso_type_cons(Ptr<Expr> pattern)
+{
+  pattern->traversal_replace_cons(the_all_iso_cons_map);
+  return true;
+}
+bool
+FunctionDef::Process::handle_equa_expr_iso_type_cons(Ptr<Expr> expr)
+{
+  expr->traversal_replace_cons(the_all_iso_cons_map);
+  return true;
 }
 
 bool
@@ -858,5 +922,6 @@ Theory::gen_isomorphism_typedef(Code& code) const
   }
   return true;
 }
+
 
 } // namespace hol2cpp
