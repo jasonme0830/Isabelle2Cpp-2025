@@ -261,5 +261,84 @@ int FuncType::args_num()
 {
   return this->types.size();
 }
+void NormalType::replace_name(std::string new_name)
+{
+  name = new_name;
+}
+void ArgumentType::replace_name(std::string new_name)
+{
+  name = new_name;
+}
+void TemplateType::replace_name(std::string new_name)
+{
+  name = new_name;
+}
+void FuncType::replace_name(std::string new_name)
+{
+  
+}
+
+void IntegralExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  return;
+}
+void VarExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  for(auto& one_cons : cons_map){
+    if(name == one_cons.first){
+      name = one_cons.second;
+    }
+  }
+  return;
+}
+void ConsExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  //遍历同构的构造子，进行替换
+  for(auto one_cons : cons_map){
+    if(constructor == one_cons.first){
+      constructor = one_cons.second;
+    }
+  }
+  //表达式中的参数也要递归进行替换
+  for(auto one_expr : args){
+    one_expr->traversal_replace_cons(cons_map);
+  }
+}
+void ListExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  for(auto one_expr : exprs){
+    one_expr.get()->traversal_replace_cons(cons_map);
+  }
+}
+void SetExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  for(auto one_expr : exprs){
+    one_expr.get()->traversal_replace_cons(cons_map);
+  }
+}
+void BinaryOpExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  lhs.get()->traversal_replace_cons(cons_map);
+  rhs.get()->traversal_replace_cons(cons_map);
+}
+void LetinExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  equation.pattern.get()->traversal_replace_cons(cons_map);
+  equation.expr.get()->traversal_replace_cons(cons_map);
+  expr.get()->traversal_replace_cons(cons_map);
+
+}
+void CaseExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  expr.get()->traversal_replace_cons(cons_map);
+  for(auto& one_equ : equations){
+    one_equ.pattern.get()->traversal_replace_cons(cons_map);
+    one_equ.expr.get()->traversal_replace_cons(cons_map);
+  }
+}
+void LambdaExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
+{
+  expr.get()->traversal_replace_cons(cons_map);
+}
 
 } // namespace hol2cpp

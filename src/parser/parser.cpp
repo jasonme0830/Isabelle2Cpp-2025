@@ -414,6 +414,9 @@ Parser::gen_function_definition()
     decl->equations.push_back(gen_equation());
   } while (try_eat<Token::Type::Pipe>());
 
+  //handle isomorphism datatype in func
+  decl->handle_isomorphism_datatype();
+
   return decl;
 }
 

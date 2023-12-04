@@ -33,6 +33,8 @@ inline std::set<Ptr<FunctionDef>> theDefinedFunctions;
   To establish a one-to-one correspondence between two isomorphism datatypes.
 */
 inline std::map<std::string, std::string> theIsomorphismDatatypeMap;
+//store the correspondence of constructers between two isomorphism type.
+inline std::map<std::string, std::map<std::string, std::string>> theIsoDatatypeConsMap;
 /*
   These two variable is code by myk.
   To store the declaritions for the comparation of the same name declararions.

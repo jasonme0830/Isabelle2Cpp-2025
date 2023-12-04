@@ -50,6 +50,7 @@ struct Type
   virtual std::vector<Ptr<Type>> depth_traversal() = 0;
   virtual std::vector<Ptr<Type>> width_traversal() = 0;
   virtual int args_num() = 0;
+  virtual void replace_name(std::string) = 0;
 };
 
 /**
@@ -82,6 +83,7 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
+  void replace_name(std::string) override;
 };
 
 /**
@@ -114,6 +116,7 @@ public:
   std::string main_name() const override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
+  void replace_name(std::string) override;
 };
 
 /**
@@ -151,6 +154,7 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
+  void replace_name(std::string) override;
 };
 
 // unused now
@@ -186,6 +190,7 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
+  void replace_name(std::string) override;
 };
 
 /**
@@ -224,6 +229,8 @@ struct Expr
 
   virtual void print_expr() const = 0;
   virtual void print_expr_type() const;
+
+  virtual void traversal_replace_cons(std::map<std::string,std::string>&)=0;
 };
 
 struct IntegralExpr final : Expr
@@ -238,6 +245,7 @@ public:
                             const TypeInfo& typeinfo) const override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 /**
@@ -262,6 +270,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 /**
@@ -288,6 +297,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 /**
@@ -305,6 +315,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 /**
@@ -328,6 +339,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 struct BinaryOpExpr final : Expr
@@ -344,6 +356,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 struct Equation final
@@ -370,6 +383,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 struct CaseExpr final : Expr
@@ -385,6 +399,7 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 struct LambdaExpr final : Expr
@@ -401,6 +416,7 @@ public:
                             const TypeInfo& typeinfo) const override;
 
   void print_expr() const override;
+  void traversal_replace_cons(std::map<std::string,std::string>&) override;
 };
 
 struct Definition
@@ -535,7 +551,8 @@ struct DatatypeDef : Definition
     //compare struct component, same return true.
     bool compare_components(std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&) const;
 
-
+    //store the correspondence of the cons between two isomorphism
+    void store_cons_to_map(std::map<std::string,std::string>&,std::vector<DatatypeDef::Component>&,std::vector<DatatypeDef::Component>&);
 
   };
 
@@ -564,6 +581,19 @@ public:
 
 struct FunctionDef : Definition
 {
+  //code by myk, for handle isomorphism type cons of fun.
+  struct Process
+  {
+    int func_type_size = 0;
+    std::map<std::string, std::string> the_all_iso_cons_map;
+
+  public:
+    bool handle_head_isomor_type(Ptr<FuncType> );
+    bool handle_body_isomor_type(std::vector<Equation>&);
+    bool handle_equa_pattern_iso_type_cons(Ptr<Expr>);
+    bool handle_equa_expr_iso_type_cons(Ptr<Expr>);
+  };
+
   std::string name;
   Ptr<FuncType> type;
   std::vector<Equation> equations;
@@ -576,14 +606,12 @@ struct FunctionDef : Definition
   bool is_predefined() const override;
   bool is_function_decl() const override;
   bool is_isomorphism() const override;
+  bool judge_isomorphism() const override;
 
 public:
   void gen_code(Code&) const override;
-
-  //code by myk
-  bool compare_type(Ptr<FuncType>);
-  bool judge_isomorphism() const override;
-
+  //probably use isomorphism datatype, replace
+  bool handle_isomorphism_datatype();
 };
 
 // as a special DatatypeDef
