@@ -3,6 +3,7 @@
 #include "synthesis/synthesizer.hpp"
 #include "utility/argparse.hpp"
 #include "utility/config.hpp"
+#include "isomorphism/isomorphism.hpp"
 
 #include <exception>
 #include <fstream>
@@ -50,6 +51,8 @@ main(int argc, char* argv[])
   }
 
   auto theory = Parser(fin, theConfig.input_file()).gen_theory(move(predef));
+
+  auto iso = Isomorphism(theory);
 
   auto inf = TypeInference(theory);
   inf.theory_infer();

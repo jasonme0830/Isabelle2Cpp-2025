@@ -231,6 +231,10 @@ struct Expr
   virtual void print_expr_type() const;
 
   virtual void traversal_replace_cons(std::map<std::string,std::string>&)=0;
+  virtual int trav_judge_recursive(std::string)=0;
+
+  virtual void trav_record_param(std::set<string> &) = 0;
+  virtual bool trav_check_valuecopy(std::set<string> &) = 0;
 };
 
 struct IntegralExpr final : Expr
@@ -245,7 +249,11 @@ public:
                             const TypeInfo& typeinfo) const override;
 
   void print_expr() const override;
+
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -270,7 +278,11 @@ public:
   void analyze_var_movable(std::set<std::string>& movables) override;
 
   void print_expr() const override;
+
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -298,6 +310,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -316,6 +331,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -340,6 +358,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct BinaryOpExpr final : Expr
@@ -357,6 +378,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct Equation final
@@ -365,6 +389,10 @@ struct Equation final
   Ptr<Expr> expr;
   // for helpful comment
   std::string raw_str;
+
+  //for is_valuecopy()
+  void record_pattern_param(std::set<string>&);
+  bool check_expr_param(std::set<string>&);
 
 public:
   void gen_funcentity(FuncEntity& func) const;
@@ -384,6 +412,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct CaseExpr final : Expr
@@ -400,6 +431,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct LambdaExpr final : Expr
@@ -417,6 +451,9 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+  int trav_judge_recursive(std::string) override;
+  void trav_record_param(std::set<string> &) override;
+  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct Definition
@@ -594,24 +631,28 @@ struct FunctionDef : Definition
     bool handle_equa_expr_iso_type_cons(Ptr<Expr>);
   };
 
+
   std::string name;
   Ptr<FuncType> type;
   std::vector<Equation> equations;
 
   bool nonexhaustive = false;
   bool memoize = false;
+  bool valuecopy = false;
 
   std::string def_name() const override;
 
   bool is_predefined() const override;
   bool is_function_decl() const override;
   bool is_isomorphism() const override;
-  bool judge_isomorphism() const override;
+  bool is_rescusive();
+  bool is_valuecopy();
 
 public:
   void gen_code(Code&) const override;
   //probably use isomorphism datatype, replace
   bool handle_isomorphism_datatype();
+  bool judge_isomorphism() const override;
 };
 
 // as a special DatatypeDef
