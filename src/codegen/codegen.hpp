@@ -23,26 +23,28 @@ namespace hol2cpp {
 inline std::set<std::string> thePredefinedDatatypes;
 inline std::set<std::string> thePredefinedFunctions;
 /*
-  These two variable is code by myk.
-  To store the definitions for the comparation of the isomorphism definitions.
-*/
-inline std::vector<DatatypeDef> theDefinedDatatypes;
-inline std::set<Ptr<FunctionDef>> theDefinedFunctions;
-/*
-  This variable is code by myk.
+  These variables are code by myk.
   To establish a one-to-one correspondence between two isomorphism datatypes.
+  key's num = all datatype's num; value's num = isomorphism's num.
 */
-inline std::map<std::string, std::string> theIsomorphismDatatypeMap;
+// if key=value, not isomorphism; key!=value, isomorphism.
+inline std::map<std::string, std::string> theAllDatatypeNameMap;
+
+//store all the not isomorphism datatypes.
+inline std::vector<DatatypeDef> theNotIsoDatatypes;
+
 //store the correspondence of constructers between two isomorphism type.
 inline std::map<std::string, std::map<std::string, std::string>> theIsoDatatypeConsMap;
-/*
-  These two variable is code by myk.
-  To store the declaritions for the comparation of the same name declararions.
-  Have the same use with the variable thePredefinedDatatypes.
-  Xubo's variable have some name ambiguity.
-*/
-// inline std::set<std::string> theDeclaredDatatypes;
-// inline std::set<std::string> theDeclaredFunctions;
+
+
+
+
+
+
+
+
+
+
 
 extern std::map<std::string, std::string> theNormalTypeMapping;
 extern std::map<std::string, std::string> theTemplateTypeMapping;
