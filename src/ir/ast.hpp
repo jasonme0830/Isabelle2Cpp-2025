@@ -233,8 +233,6 @@ struct Expr
   virtual void traversal_replace_cons(std::map<std::string,std::string>&)=0;
   virtual int trav_judge_recursive(std::string)=0;
 
-  virtual void trav_record_param(std::set<string> &) = 0;
-  virtual bool trav_check_valuecopy(std::set<string> &) = 0;
 };
 
 struct IntegralExpr final : Expr
@@ -252,8 +250,6 @@ public:
 
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -281,8 +277,6 @@ public:
 
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -311,8 +305,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
+
 };
 
 /**
@@ -332,8 +325,6 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 /**
@@ -359,8 +350,6 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct BinaryOpExpr final : Expr
@@ -379,8 +368,6 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct Equation final
@@ -389,10 +376,6 @@ struct Equation final
   Ptr<Expr> expr;
   // for helpful comment
   std::string raw_str;
-
-  //for is_valuecopy()
-  void record_pattern_param(std::set<string>&);
-  bool check_expr_param(std::set<string>&);
 
 public:
   void gen_funcentity(FuncEntity& func) const;
@@ -413,8 +396,6 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct CaseExpr final : Expr
@@ -432,8 +413,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
+
 };
 
 struct LambdaExpr final : Expr
@@ -452,8 +432,6 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
-  void trav_record_param(std::set<string> &) override;
-  bool trav_check_valuecopy(std::set<string> &) override;
 };
 
 struct Definition
@@ -638,15 +616,16 @@ struct FunctionDef : Definition
 
   bool nonexhaustive = false;
   bool memoize = false;
-  bool valuecopy = false;
+  //标识函数的递归类型：0非递归、1单次递归、2多次递归
+  int func_recursive_type = 0;
 
   std::string def_name() const override;
 
   bool is_predefined() const override;
   bool is_function_decl() const override;
   bool is_isomorphism() const override;
-  bool is_rescusive();
-  bool is_valuecopy();
+  //标识函数的递归类型：0非递归、1单次递归、2多次递归
+  int is_rescusive();
 
 public:
   void gen_code(Code&) const override;

@@ -90,13 +90,7 @@ void Isomorphism::find_rescusive_func(){
       //判断非pre的函数是否是递归函数
       else{
         FunctionDef &function = dynamic_cast<FunctionDef &>(*(*ptr_def));
-        if(function.is_rescusive()){
-          //查看递归函数中是否发生了值的复制
-          function.is_valuecopy();
-        }
-        else{
-          //非递归函数的情况直接不用考虑
-        }
+        function.is_rescusive();
       }
     }
   }
@@ -794,27 +788,44 @@ FunctionDef::Process::handle_equa_expr_iso_type_cons(Ptr<Expr> expr)
 
 
 
-bool
+int
 FunctionDef::is_rescusive()
 {
   std::vector<Equation>::iterator ptr_equa;
+  //用来区别非递归和递归
   int all_equa_call_num = 0;
+  //用来区别单次递归和多次递归
+  bool more_than_once_call = false;
+
   for (ptr_equa = equations.begin(); ptr_equa != equations.end(); ++ptr_equa)
   {
     int one_equa_call_num = ptr_equa->expr->trav_judge_recursive(this->name);
+    if(one_equa_call_num > 1){
+      more_than_once_call = true;
+    }
     all_equa_call_num += one_equa_call_num;
   }
 
   cout << "function: " << this->def_name()<<" ";
 
-  if(all_equa_call_num > 0){
-    cout << "true " << all_equa_call_num << endl;
-    return true;
+  if(all_equa_call_num == 0){
+    //所有equation中没有调用
+    this->func_recursive_type = 0;
+    cout << "not recursive " << all_equa_call_num << endl;
+    return 0;
   }
-  else
+  else if(more_than_once_call == false)
   {
-    cout << " false " << all_equa_call_num << endl;
-    return false;
+    //有调用但任一equation调用不超过一次
+    this->func_recursive_type = 1;
+    cout << "once recursive " << all_equa_call_num << endl;
+    return 1;
+  }
+  else{
+    //存在任一equation递归调用超过一次
+    this->func_recursive_type = 2;
+    cout<<"more recursive "<< all_equa_call_num<<endl;
+    return 2;
   }
 }
 int
@@ -881,12 +892,16 @@ BinaryOpExpr::trav_judge_recursive(std::string func_name)
 }
 int
 LetinExpr::trav_judge_recursive(std::string func_name)
-{
-  //letin表达式的equation部分，暂时不做处理
-  // int equa_call_num = equation.expr->trav_judge_recursive(func_name);
+{ 
+  //letin表达式的equation部分，按照极端情况考虑，返回所有equation的调用次数和
+  int equa_call_num_sum = equation.expr->trav_judge_recursive(func_name);
+
   // letin表达式的expr部分
   int expr_call_num = expr->trav_judge_recursive(func_name);
-  return expr_call_num;
+
+  //TODO:暂时不考虑equation中pattern和expr中的重叠问题
+
+  return expr_call_num + equa_call_num_sum;
 }
 int
 CaseExpr::trav_judge_recursive(std::string func_name)
@@ -894,14 +909,18 @@ CaseExpr::trav_judge_recursive(std::string func_name)
   //case表达式的输入部分
   int expr_call_num = expr->trav_judge_recursive(func_name);
   //case表达式的case部分
-  int equa_call_num = 0;
+  int max_equa_call_num = 0;
   std::vector<Equation>::iterator ptr_case;
   for (ptr_case = equations.begin(); ptr_case != equations.end();++ptr_case)
   {
-    equa_call_num += ptr_case->expr->trav_judge_recursive(func_name);
+    //case表达式中equation部分，应该选择其中最大的调用数量
+    int one_equa_call_num = ptr_case->expr->trav_judge_recursive(func_name);
+    if(max_equa_call_num < one_equa_call_num){
+      max_equa_call_num = one_equa_call_num;
+    }
   }
-
-  return expr_call_num+equa_call_num;
+  //返回expr和equation中最大值的和，作为case表达式的递归调用次数
+  return expr_call_num + max_equa_call_num;
 }
 int
 LambdaExpr::trav_judge_recursive(std::string func_name)
@@ -911,43 +930,8 @@ LambdaExpr::trav_judge_recursive(std::string func_name)
   //lambda表达式的函数体部分
   int expr_call_num = expr->trav_judge_recursive(func_name);
 
-  //lambda表达式的实际调用参数部分暂时不做处理
-
   return expr_call_num;
 }
 
-
-bool
-FunctionDef::is_valuecopy()
-{
-  //查看函数定义中的每一个等式
-  std::vector<Equation>::iterator ptr_equa;
-  for (ptr_equa = equations.begin(); ptr_equa != equations.end();++ptr_equa){
-    std::set<string> params;
-    ptr_equa->record_pattern_param(params);
-
-    if(ptr_equa->check_expr_param(params)){
-      break;
-    }
-  }
-
-  return false;
-}
-void
-Equation::record_pattern_param(std::set<string> &params)
-{
-
-}
-bool
-Equation::check_expr_param(std::set<string> &params)
-{
-
-  return false;
-}
-void
-IntegralExpr::trav_record_param(std::set<string>&params)
-{
-
-}
 
 }
