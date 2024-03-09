@@ -26,7 +26,7 @@ void Isomorphism::find_isomorphism_datatype(){
       DatatypeDef &datatype = dynamic_cast<DatatypeDef &>(*(*ptr_def));
       //将defs.pre中的类型添加到全局变量中
       if(datatype.is_predef() == true){
-        // theNotIsoDatatypes.push_back(datatype);
+        theNotIsoDatatypes.push_back(datatype);
         // cout << "^ insert pre datatype finished! ^" << endl;
         theAllDatatypeNameMap[datatype.decl_type->main_name()] = datatype.decl_type->main_name();
       }
