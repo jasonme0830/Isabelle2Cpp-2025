@@ -12,7 +12,7 @@ Isomorphism::Isomorphism(Theory& thy)
   // 第二次遍历，处理函数中的同构数据类型
   replace_iso_type_in_func();
   // 第三次遍历，判别函数定义中递归函数类别
-  find_rescusive_func();
+  // find_rescusive_func();
 }
 
 Isomorphism::~Isomorphism() = default;
@@ -33,17 +33,18 @@ void Isomorphism::find_isomorphism_datatype(){
       //非defs.pre中的类型进行同构比较
       else{
         // cout << "### one datatype" << endl;
-        // 全局变量全部在judge内部处理完成
         if(datatype.judge_isomorphism() == false)
         {
-          // theNotIsoDatatypes.push_back(datatype);
+          theNotIsoDatatypes.push_back(datatype);
           // cout << "^^ insert new datatype finished! ^" << endl;
+          // theAllDatatypeNameMap的处理在judge函数内部处理完成
         }
         //之前有同构的，删掉
         else{
           ptr_def = thy.definitions.erase(ptr_def);
           --ptr_def;
           // cout << "^^ delete iso datatype finished! ^" << endl;
+          // theAllDatatypeNameMap的处理在judge函数内部处理完成
         }
       }
     }

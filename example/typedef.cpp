@@ -14,6 +14,17 @@ snat add(const snat &arg1, const snat &arg2) {
     return temp0;
 }
 
+std::uint64_t natofsnat(const snat &arg1) {
+    // natofsnat sZero = 0
+    if (arg1.is_sZero()) {
+        return 0;
+    }
+
+    // natofsnat (sSucc n) = (natofsnat n) + 1
+    auto n = arg1.as_sSucc().p1();
+    return natofsnat(n) + 1;
+}
+
 snat snatofnat(const std::uint64_t &arg1) {
     // snatofnat 0 = sZero
     if (arg1 == 0) {
