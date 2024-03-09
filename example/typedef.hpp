@@ -41,33 +41,33 @@ class snat {
 };
 
 template<typename T1>
-class alsit {
+class alist {
     struct _aNil {
         bool operator<(const _aNil &) const { return false; }
     };
     struct _aCons {
         T1 p1_;
-        alist<T1> p2_;
+        std::shared_ptr<alist<T1>> p2_;
 
         const T1 &p1() const { return p1_; }
-        const alist<T1> &p2() const { return p2_; }
+        alist<T1> p2() const { return *p2_; }
 
         bool operator<(const _aCons &rhs) const {
-            return std::tie(p1_, p2_) < std::tie(rhs.p1_, rhs.p2_);
+            return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
     };
 
     std::variant<_aNil, _aCons> value_;
-    alsit(const std::variant<_aNil, _aCons> &value) : value_(value) {}
+    alist(const std::variant<_aNil, _aCons> &value) : value_(value) {}
 
   public:
-    alsit() = default;
+    alist() = default;
 
-    static alsit<T1> aNil() {
-        return alsit<T1> { _aNil {  } };
+    static alist<T1> aNil() {
+        return alist<T1> { _aNil {  } };
     }
-    static alsit<T1> aCons(const T1 &p1, const alist<T1> &p2) {
-        return alsit<T1> { _aCons { p1, p2 } };
+    static alist<T1> aCons(const T1 &p1, const alist<T1> &p2) {
+        return alist<T1> { _aCons { p1, std::make_shared<alist<T1>>(p2) } };
     }
 
     bool is_aNil() const { return std::holds_alternative<_aNil>(value_); }
@@ -75,7 +75,7 @@ class alsit {
 
     const _aCons &as_aCons() const { return std::get<_aCons>(value_); }
 
-    bool operator<(const alsit<T1> &rhs) const { return value_ < rhs.value_; }
+    bool operator<(const alist<T1> &rhs) const { return value_ < rhs.value_; }
 };
 
 template<typename T1>
@@ -119,7 +119,7 @@ class atree {
 };
 
 template<typename T1>
-using slist = alsit;
+using slist = alist;
 
 
 snat add(const snat &arg1, const snat &arg2);
@@ -155,6 +155,8 @@ std::deque<T1> rev(std::deque<T1> arg1) {
     temp0.push_front(x);
     return app(rev(std::move(xs)), std::move(temp0));
 }
+
+std::uint64_t natofsnat(const snat &arg1);
 
 snat snatofnat(const std::uint64_t &arg1);
 
