@@ -49,14 +49,12 @@ ConsExpr::analyze_var_movable(set<string>& movables)
 {
   if (constructor == "If") {
     auto origin = movables;
-
-    for (auto& arg : args) {
-      arg->analyze_var_movable(movables);
-
-      auto real = origin;
-      arg->analyze_var_movable(real);
+    for (size_t i = 1; i < 3; ++i) {
+      auto self_branch = origin;
+      args[i]->analyze_var_movable(self_branch);
+      movables.merge(self_branch);
     }
-
+    args[0]->analyze_var_movable(movables);
     return;
   }
 
@@ -100,10 +98,10 @@ CaseExpr::analyze_var_movable(set<string>& movables)
 {
   auto origin = movables;
   for (auto& equation : equations) {
-    equation.expr->analyze_var_movable(movables);
-
-    auto real = origin;
-    equation.expr->analyze_var_movable(real);
+    auto self_branch = origin;
+    equation.expr->analyze_var_movable(self_branch);
+    movables.merge(self_branch);
   }
+  expr->analyze_var_movable(movables);
 }
 } // namespace hol2cpp

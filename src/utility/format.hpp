@@ -69,7 +69,8 @@ private:
   std::string pattern_;
 };
 
-inline FormatString operator""_fs(const char* str, std::size_t)
+inline FormatString
+operator""_fs(const char* str, std::size_t)
 {
   return FormatString(str);
 }

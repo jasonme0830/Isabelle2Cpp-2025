@@ -40,7 +40,11 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::
                 }
 
                 // None \<Rightarrow> None
-                return std::optional<std::uint64_t>();
+                if (!temp6.has_value()) {
+                    return std::optional<std::uint64_t>();
+                } else { // auto-generated for -Wreturn-type
+                    std::abort();
+                }
             })();
             temp4 = temp5;
         } else {

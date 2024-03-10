@@ -1,14 +1,14 @@
-#include "binary_search.hpp"
+#include "binary_search.ud.hpp"
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2) {
-    // bs x [] = None
+std::optional<std::uint64_t> bs_ud(const std::uint64_t &arg1, const std::deque<std::uint64_t> &arg2) {
+    // bs_ud x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
     }
 
-    // bs x [y] = If (x = y) (Some 0) None
+    // bs_ud x [y] = If (x = y) (Some 0) None
     if (arg2.size() == 1) {
-        auto y = *std::next(arg2.begin(), 0);
+        auto y = arg2[0];
         std::optional<std::uint64_t> temp0;
         if (arg1 == y) {
             temp0 = std::make_optional<std::uint64_t>(0);
@@ -18,11 +18,11 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::
         return temp0;
     }
 
-    // bs x ys = (let m = (length ys) div 2 in ...
+    // bs_ud x ys = (let m = (length ys) div 2 in ...
     auto temp0 = arg2.size() / 2;
     auto m = temp0;
     auto temp2 = arg2;
-    auto temp1 = *std::next(temp2.begin(), m);
+    auto temp1 = temp2[m];
     auto y = temp1;
     std::optional<std::uint64_t> temp3;
     if (y == arg1) {
@@ -31,7 +31,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::
         std::optional<std::uint64_t> temp4;
         if (y < arg1) {
             auto temp5 = ([&] {
-                auto temp6 = bs(arg1, std::list<std::uint64_t>(std::next(arg2.begin(), m + 1), arg2.end()));
+                auto temp6 = bs_ud(arg1, std::deque<std::uint64_t>(arg2.begin() + m + 1, arg2.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp6.has_value()) {
@@ -40,11 +40,15 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::
                 }
 
                 // None \<Rightarrow> None
-                return std::optional<std::uint64_t>();
+                if (!temp6.has_value()) {
+                    return std::optional<std::uint64_t>();
+                } else { // auto-generated for -Wreturn-type
+                    std::abort();
+                }
             })();
             temp4 = temp5;
         } else {
-            temp4 = bs(arg1, std::list<std::uint64_t>(arg2.begin(), std::next(arg2.begin(), m)));
+            temp4 = bs_ud(arg1, std::deque<std::uint64_t>(arg2.begin(), arg2.begin() + m));
         }
         temp3 = temp4;
     }

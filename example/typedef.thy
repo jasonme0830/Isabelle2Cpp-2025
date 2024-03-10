@@ -4,7 +4,7 @@ begin
 
 
 datatype snat = sZero | sSucc snat
-datatype 'a alsit = aNil | aCons 'a "'a alist"
+datatype 'a alist = aNil | aCons 'a "'a alist"
 datatype 'a slist = sNil | sCons 'a "'a slist"
 datatype 'a atree = aLeaf | 
                     aNode1 "'a atree" 'a "'a atree"
@@ -20,6 +20,10 @@ fun app :: "'a list \<Rightarrow> 'a list \<Rightarrow> 'a list" where
 fun rev :: "'a list \<Rightarrow> 'a list" where
   "rev Nil = Nil" |
   "rev (Cons x xs) = app (rev xs) (Cons x Nil)"
+
+fun natofsnat :: "snat \<Rightarrow> nat" where
+  "natofsnat sZero = 0" |
+  "natofsnat (sSucc n) = (natofsnat n) + 1"
 
 fun snatofnat :: "nat \<Rightarrow> snat" where
   "snatofnat 0 = sZero" |

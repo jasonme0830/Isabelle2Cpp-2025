@@ -232,21 +232,6 @@ Parser::gen_theory(Theory theory)
     try {
       if (auto decl = gen_declaration()) {
         theory.definitions.push_back(move(decl));
-
-        // // handle datatypedef
-        // if(decl->is_datatype_decl()){
-        //   //cheak the result of isomorphism compare
-        //   if(decl->is_isomorphism()){
-        //     //同构，就不往ast中加入
-        //   }
-        //   else{
-        //     theory.definitions.push_back(move(decl));
-        //   }
-        // }
-        // //handle functiondef
-        // else{
-        //   theory.definitions.push_back(move(decl));
-        // }
       }
     } catch (const TokenizeError& e) {
       "$ after No.$ definition:\n$\n"_fs.outf(
@@ -310,17 +295,6 @@ Parser::gen_datatype_definition()
   do {
     decl->components.push_back(gen_component());
   } while (try_eat<Token::Type::Pipe>());
-
-  /*
-    This function is code by myk.
-  */
-  // if(!decl->judge_isomorphism()){
-  //   //只能进行值的拷贝，独享指针不能进行复制
-  //   theDefinedDatatypes.push_back(*decl);
-  // }
-  // else{
-  //   // cout<<"### isomorphism with other datatype!"<<endl;
-  // }
 
   return decl;
 }

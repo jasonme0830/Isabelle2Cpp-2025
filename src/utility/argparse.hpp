@@ -16,7 +16,8 @@ public:
 
   Argument()
     : action_([](const std::string& value) { return value; })
-  {}
+  {
+  }
 
   Argument& help(std::string info)
   {
@@ -69,7 +70,8 @@ public:
   ArgumentParser() = default;
   ArgumentParser(std::string program)
     : program_(std::move(program))
-  {}
+  {
+  }
 
   void parse(int argc, char* argv[])
   {

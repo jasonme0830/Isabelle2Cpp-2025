@@ -53,9 +53,17 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     typeinfo.avoid_lack(func, constructor);
     assert_true(func.args_size() == args.size());
 
-    return constructor + enclose(join(args, [&](const auto& arg) {
-             return arg->gen_expr(func);
-           }));
+    if (theConfig.move_list()) {
+      return constructor + enclose(join(args, [&](const auto& arg) {
+               auto temp = func.gen_temp();
+               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+               return move_expr(temp);
+             }));
+    } else {
+      return constructor + enclose(join(args, [&](const auto& arg) {
+               return arg->gen_expr(func);
+             }));
+    }
   }
 
   // for nat
@@ -83,7 +91,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       .add_expr("$.push_front($);", temp, x);
 
     if (theConfig.move_list()) {
-      return "std::move($)"_fs.format(temp);
+      return move_expr(temp);
     } else {
       return temp;
     }
@@ -94,8 +102,22 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     assert_true(args.size() == 2);
 
     auto n = args[0]->gen_expr(func);
-    auto xs = unmove_expr(args[1]->gen_expr(func));
+    auto xs = args[1]->gen_expr(func);
 
+    if (is_moved(xs) && theConfig.move_list()) {
+      auto temp_n = func.gen_temp();
+      auto temp_xs = func.gen_temp();
+      func.add_expr("auto $ = $;", temp_n, n);
+      func.add_expr("auto $ = $;", temp_xs, xs);
+      func.add_expr("$.erase(std::next($.begin(), $), $.end());",
+                    temp_xs,
+                    temp_xs,
+                    temp_n,
+                    temp_xs);
+      return move_expr(temp_xs);
+    }
+
+    xs = unmove_expr(xs);
     if (theConfig.use_deque()) {
       return "$($.begin(), $.begin() + $)"_fs.format(
         typeinfo.to_str(), xs, xs, n);
@@ -107,8 +129,22 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     assert_true(args.size() == 2);
 
     auto n = args[0]->gen_expr(func);
-    auto xs = unmove_expr(args[1]->gen_expr(func));
+    auto xs = args[1]->gen_expr(func);
 
+    if (is_moved(xs) && theConfig.move_list()) {
+      auto temp_n = func.gen_temp();
+      auto temp_xs = func.gen_temp();
+      func.add_expr("auto $ = $;", temp_n, n);
+      func.add_expr("auto $ = $;", temp_xs, xs);
+      func.add_expr("$.erase($.begin(), std::next($.begin(), $));",
+                    temp_xs,
+                    temp_xs,
+                    temp_xs,
+                    temp_n);
+      return move_expr(temp_xs);
+    }
+
+    xs = unmove_expr(xs);
     if (theConfig.use_deque()) {
       return "$($.begin() + $, $.end())"_fs.format(
         typeinfo.to_str(), xs, n, xs);
@@ -257,8 +293,17 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     typeinfo.avoid_lack(func, constructor);
     assert_true(other_func->args_size() == args.size());
 
-    return constructor +
-           enclose(join(args, [&](auto& arg) { return arg->gen_expr(func); }));
+    if (theConfig.move_list()) {
+      return constructor + enclose(join(args, [&](const auto& arg) {
+               auto temp = func.gen_temp();
+               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+               return move_expr(temp);
+             }));
+    } else {
+      return constructor + enclose(join(args, [&](const auto& arg) {
+               return arg->gen_expr(func);
+             }));
+    }
   }
 
   // for ShortDef

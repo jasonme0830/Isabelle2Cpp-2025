@@ -40,4 +40,4 @@ bench: $(target)
 example: $(cpp)
 
 example/%.cpp: example/%.thy $(target)
-	$(target) $< -s --move-list --reduce-cond --use-class --use-deque --predef $(BIN)/$(def)
+	$(target) $< -s --reduce-cond --use-class --predef $(BIN)/$(def)
