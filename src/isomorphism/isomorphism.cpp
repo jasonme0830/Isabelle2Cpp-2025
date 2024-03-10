@@ -96,6 +96,21 @@ void Isomorphism::find_rescusive_func(){
   }
 }
 
+void
+Isomorphism::print_theory()
+{
+  for (auto& def : thy.definitions) {
+    if (typeid(*def) == typeid(FunctionDef)) {
+      auto& def_trans = reinterpret_cast<FunctionDef&>(*def);
+      cout << def_trans.name << endl;
+      for (auto& equation : def_trans.equations) {
+        auto& expr = equation.expr;
+        expr->print_expr();
+        cout << endl;
+      }
+    }
+  }
+}
 
 bool 
 DatatypeDef::judge_isomorphism() const

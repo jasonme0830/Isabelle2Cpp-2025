@@ -10,6 +10,8 @@ public:
   Isomorphism(Theory &thy);
   ~Isomorphism();
 
+  void print_theory();
+
   void find_isomorphism_datatype();
   void replace_iso_type_in_func();
   void find_rescusive_func();
