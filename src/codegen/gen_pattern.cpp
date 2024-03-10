@@ -32,6 +32,10 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
   else if (name == "Nil") {
     func.add_pattern_cond("$.empty()", prev);
   }
+  
+  else if (name == "Zero"){
+    func.add_pattern_cond("$ == $", prev, "0");
+  }
 
   else if (name == "None") {
     func.add_pattern_cond("!$.has_value()", prev);

@@ -13,8 +13,13 @@ IntegralExpr::gen_expr_impl(FuncEntity&, const TypeInfo&) const
 string
 VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 {
+  // for nat
+  if (name == "Zero"){
+    return "0";
+  }
+
   // for `bool`
-  if (name == "True") {
+  else if (name == "True") {
     return "true";
   } else if (name == "False") {
     return "false";

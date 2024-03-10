@@ -5,79 +5,6 @@
 #include <set>
 #include <variant>
 
-class snat {
-    struct _sZero {
-        bool operator<(const _sZero &) const { return false; }
-    };
-    struct _sSucc {
-        std::shared_ptr<snat> p1_;
-
-        snat p1() const { return *p1_; }
-
-        bool operator<(const _sSucc &rhs) const {
-            return std::tie(*p1_) < std::tie(*rhs.p1_);
-        }
-    };
-
-    std::variant<_sZero, _sSucc> value_;
-    snat(const std::variant<_sZero, _sSucc> &value) : value_(value) {}
-
-  public:
-    snat() = default;
-
-    static snat sZero() {
-        return snat { _sZero {  } };
-    }
-    static snat sSucc(const snat &p1) {
-        return snat { _sSucc { std::make_shared<snat>(p1) } };
-    }
-
-    bool is_sZero() const { return std::holds_alternative<_sZero>(value_); }
-    bool is_sSucc() const { return std::holds_alternative<_sSucc>(value_); }
-
-    const _sSucc &as_sSucc() const { return std::get<_sSucc>(value_); }
-
-    bool operator<(const snat &rhs) const { return value_ < rhs.value_; }
-};
-
-template<typename T1>
-class alist {
-    struct _aNil {
-        bool operator<(const _aNil &) const { return false; }
-    };
-    struct _aCons {
-        T1 p1_;
-        std::shared_ptr<alist<T1>> p2_;
-
-        const T1 &p1() const { return p1_; }
-        alist<T1> p2() const { return *p2_; }
-
-        bool operator<(const _aCons &rhs) const {
-            return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
-        }
-    };
-
-    std::variant<_aNil, _aCons> value_;
-    alist(const std::variant<_aNil, _aCons> &value) : value_(value) {}
-
-  public:
-    alist() = default;
-
-    static alist<T1> aNil() {
-        return alist<T1> { _aNil {  } };
-    }
-    static alist<T1> aCons(const T1 &p1, const alist<T1> &p2) {
-        return alist<T1> { _aCons { p1, std::make_shared<alist<T1>>(p2) } };
-    }
-
-    bool is_aNil() const { return std::holds_alternative<_aNil>(value_); }
-    bool is_aCons() const { return std::holds_alternative<_aCons>(value_); }
-
-    const _aCons &as_aCons() const { return std::get<_aCons>(value_); }
-
-    bool operator<(const alist<T1> &rhs) const { return value_ < rhs.value_; }
-};
-
 template<typename T1>
 class atree {
     struct _aLeaf {
@@ -118,11 +45,9 @@ class atree {
     bool operator<(const atree<T1> &rhs) const { return value_ < rhs.value_; }
 };
 
-template<typename T1>
-using slist = alist;
 
 
-snat add(const snat &arg1, const snat &arg2);
+std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2);
 
 template<typename T1>
 std::deque<T1> app(std::deque<T1> arg1, std::deque<T1> arg2) {
@@ -135,9 +60,11 @@ std::deque<T1> app(std::deque<T1> arg1, std::deque<T1> arg2) {
     auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto xs = std::move(arg1);
-    auto temp0 = app(std::move(xs), std::move(arg2));
-    temp0.push_front(x);
-    return temp0;
+    auto temp0 = std::move(xs);
+    auto temp1 = std::move(arg2);
+    auto temp2 = app(std::move(temp0), std::move(temp1));
+    temp2.push_front(x);
+    return temp2;
 }
 
 template<typename T1>
@@ -151,14 +78,17 @@ std::deque<T1> rev(std::deque<T1> arg1) {
     auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto xs = std::move(arg1);
-    auto temp0 = std::deque<T1>();
-    temp0.push_front(x);
-    return app(rev(std::move(xs)), std::move(temp0));
+    auto temp1 = std::move(xs);
+    auto temp0 = rev(std::move(temp1));
+    auto temp3 = std::deque<T1>();
+    temp3.push_front(x);
+    auto temp2 = std::move(temp3);
+    return app(std::move(temp0), std::move(temp2));
 }
 
-std::uint64_t natofsnat(const snat &arg1);
+std::uint64_t natofsnat(const std::uint64_t &arg1);
 
-snat snatofnat(const std::uint64_t &arg1);
+std::uint64_t snatofnat(const std::uint64_t &arg1);
 
 template<typename T1>
 std::set<T1> testset(std::deque<T1> arg1) {
@@ -172,25 +102,27 @@ std::set<T1> testset(std::deque<T1> arg1) {
         auto x = arg1.front();
         arg1.erase(arg1.begin(), arg1.begin() + 1);
         auto xs = std::move(arg1);
-        auto temp0 = std::set<T1>{x};
-        auto temp1 = testset(std::move(xs));
-        temp0.merge(temp1);
-        return temp1;
+        auto temp0 = std::move(xs);
+        auto temp1 = std::set<T1>{x};
+        auto temp2 = testset(std::move(temp0));
+        temp1.merge(temp2);
+        return temp2;
     }
 
     // testset (x # xs) = {x} \<union> testset(xs)
     auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto xs = std::move(arg1);
-    auto temp0 = std::set<T1>{x};
-    auto temp1 = testset(std::move(xs));
-    temp0.merge(temp1);
-    return temp0;
+    auto temp0 = std::move(xs);
+    auto temp1 = std::set<T1>{x};
+    auto temp2 = testset(std::move(temp0));
+    temp1.merge(temp2);
+    return temp1;
 }
 
 std::uint64_t fib(const std::uint64_t &arg1);
 
-snat sfib(const snat &arg1);
+std::uint64_t sfib(const std::uint64_t &arg1);
 
 std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::uint64_t> arg2);
 
