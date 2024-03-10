@@ -261,22 +261,6 @@ int FuncType::args_num()
 {
   return this->types.size();
 }
-void NormalType::replace_name(std::string new_name)
-{
-  name = new_name;
-}
-void ArgumentType::replace_name(std::string new_name)
-{
-  name = new_name;
-}
-void TemplateType::replace_name(std::string new_name)
-{
-  name = new_name;
-}
-void FuncType::replace_name(std::string new_name)
-{
-  
-}
 
 void IntegralExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_map)
 {

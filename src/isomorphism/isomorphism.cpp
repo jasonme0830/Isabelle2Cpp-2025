@@ -11,6 +11,9 @@ Isomorphism::Isomorphism(Theory& thy)
   find_isomorphism_datatype();
   // 第二次遍历，处理函数中的同构数据类型
   replace_iso_type_in_func();
+
+  this->print_theory();
+
   // 第三次遍历，判别函数定义中递归函数类别
   // find_rescusive_func();
 }
@@ -41,6 +44,7 @@ void Isomorphism::find_isomorphism_datatype(){
         }
         //之前有同构的，删掉
         else{
+          theIsoDatatypes.push_back(datatype);
           ptr_def = thy.definitions.erase(ptr_def);
           --ptr_def;
           // cout << "^^ delete iso datatype finished! ^" << endl;
@@ -103,7 +107,10 @@ Isomorphism::print_theory()
   for (auto& def : thy.definitions) {
     if (typeid(*def) == typeid(FunctionDef)) {
       auto& def_trans = reinterpret_cast<FunctionDef&>(*def);
-      cout << def_trans.name << endl;
+      cout << def_trans.name ;
+      cout<<"::";
+      def_trans.type->print_type();
+      cout<<endl;
       for (auto& equation : def_trans.equations) {
         auto& pattern = equation.pattern;
         auto& expr = equation.expr;
@@ -113,6 +120,7 @@ Isomorphism::print_theory()
         cout << endl;
       }
     }
+    cout<<endl;
   }
 }
 
@@ -762,21 +770,21 @@ FunctionDef::handle_isomorphism_datatype()
 bool
 FunctionDef::Process::handle_head_isomor_type(Ptr<FuncType> type)
 {
-  std::vector<Ptr<Type>>::iterator type_ptr = type->types.begin();
-
-  for(;type_ptr!=type->types.end();++type_ptr){
-    //首先在原数据的所有数据类型中查看
-    if(theAllDatatypeNameMap[type_ptr->get()->main_name()] != type_ptr->get()->main_name()){
-      int index = distance(type->types.begin(), type_ptr);
-      //将同构类型的所有构造子map都存储进临时map中
-      auto& one_map = theIsoDatatypeConsMap[type_ptr->get()->main_name()] ;
+  std::vector<Ptr<Type>>::iterator type_ptr;
+  //遍历函数头部所有的输入输出类型
+  for(type_ptr=type->types.begin();type_ptr!=type->types.end();++type_ptr){
+    std::set<std::string> iso_types;
+    //递归查找并替换当前类型中存在的同构数据类型
+    bool iso_exist = type_ptr->get()->replace_exist_iso_type(iso_types);
+    //将当前类型存在的同构类型的构造子map提取到临时存储中
+    for(const std::string& iso_type : iso_types){
+      auto& one_map = theIsoDatatypeConsMap[iso_type] ;
       for(auto one_cons : one_map){
         the_all_iso_cons_map[one_cons.first] = one_cons.second;
       }
-      //直接对函数内同构类型的名字做替换
-      type_ptr->get()->replace_name(theAllDatatypeNameMap[type_ptr->get()->main_name()]);
     }
   }
+
   return true;
 }
 bool 
@@ -804,8 +812,46 @@ FunctionDef::Process::handle_equa_expr_iso_type_cons(Ptr<Expr> expr)
   return true;
 }
 
-
-
+bool NormalType::replace_exist_iso_type(std::set<std::string>& iso_types)
+{
+  //当前类型是同构类型，存储临时变量并进行类型名的替换
+  if(theAllDatatypeNameMap[main_name()] != main_name()){
+    iso_types.insert(main_name());
+    name = theAllDatatypeNameMap[main_name()];
+    return true;
+  }
+  else return false;
+}
+bool ArgumentType::replace_exist_iso_type(std::set<std::string>& iso_types)
+{
+  //一般情况下Argument类型不存在同构数据类型
+  return false;
+}
+bool TemplateType::replace_exist_iso_type(std::set<std::string>& iso_types)
+{
+  //首先判断自己是否是同构类型
+  if(theAllDatatypeNameMap[main_name()] != main_name()){
+    iso_types.insert(main_name());
+    //进行ast中的字符替换
+    name = theAllDatatypeNameMap[main_name()];
+  }
+  //接着判断参数内是否有同构类型
+  std::vector<Ptr<Type>>::iterator ptr_args;
+  for(ptr_args=args.begin();ptr_args!=args.end();++ptr_args){
+    //递归判断同时替换
+    ptr_args->get()->replace_exist_iso_type(iso_types);
+  }
+  return false;
+}
+bool FuncType::replace_exist_iso_type(std::set<std::string>& iso_types)
+{
+  //将函数类型内部递归遍历进行查找和替换
+  std::vector<Ptr<Type>>::iterator ptr_types;
+  for(ptr_types=types.begin();ptr_types!=types.end();++ptr_types){
+    ptr_types->get()->replace_exist_iso_type(iso_types);
+  }
+  return false;
+}
 
 int
 FunctionDef::is_rescusive()

@@ -50,7 +50,7 @@ struct Type
   virtual std::vector<Ptr<Type>> depth_traversal() = 0;
   virtual std::vector<Ptr<Type>> width_traversal() = 0;
   virtual int args_num() = 0;
-  virtual void replace_name(std::string) = 0;
+  virtual bool replace_exist_iso_type(std::set<std::string>&) = 0;
 };
 
 /**
@@ -83,7 +83,7 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  void replace_name(std::string) override;
+  bool replace_exist_iso_type(std::set<std::string>&) override;
 };
 
 /**
@@ -116,7 +116,7 @@ public:
   std::string main_name() const override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  void replace_name(std::string) override;
+  bool replace_exist_iso_type(std::set<std::string>&) override;
 };
 
 /**
@@ -154,7 +154,7 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  void replace_name(std::string) override;
+  bool replace_exist_iso_type(std::set<std::string>&) override;
 };
 
 // unused now
@@ -190,7 +190,7 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  void replace_name(std::string) override;
+  bool replace_exist_iso_type(std::set<std::string>&) override;
 };
 
 /**

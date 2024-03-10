@@ -32,8 +32,9 @@ inline std::map<std::string, std::string> theAllDatatypeNameMap;
 
 //store all the not isomorphism datatypes.
 inline std::vector<DatatypeDef> theNotIsoDatatypes;
-
-//store the correspondence of constructers between two isomorphism type.
+//store all the isomorphism datatypes
+inline std::vector<DatatypeDef> theIsoDatatypes;
+//store the correspondence of constructers between two isomorphism type. key=iso type name.
 inline std::map<std::string, std::map<std::string, std::string>> theIsoDatatypeConsMap;
 
 
