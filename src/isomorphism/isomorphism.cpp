@@ -105,7 +105,10 @@ Isomorphism::print_theory()
       auto& def_trans = reinterpret_cast<FunctionDef&>(*def);
       cout << def_trans.name << endl;
       for (auto& equation : def_trans.equations) {
+        auto& pattern = equation.pattern;
         auto& expr = equation.expr;
+        pattern->print_expr();
+        cout<<" == ";
         expr->print_expr();
         cout << endl;
       }
