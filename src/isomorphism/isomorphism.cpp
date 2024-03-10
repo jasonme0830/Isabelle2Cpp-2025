@@ -811,6 +811,8 @@ FunctionDef::is_rescusive()
   if(all_equa_call_num == 0){
     //所有equation中没有调用
     this->func_recursive_type = 0;
+    //非递归类型的函数不用记忆加速
+    this->memoize = false;
     cout << "not recursive " << all_equa_call_num << endl;
     return 0;
   }
@@ -818,12 +820,16 @@ FunctionDef::is_rescusive()
   {
     //有调用但任一equation调用不超过一次
     this->func_recursive_type = 1;
+    //单次递归类型的函数使用值复用，不用记忆加速
+    this->memoize = false;
     cout << "once recursive " << all_equa_call_num << endl;
     return 1;
   }
   else{
     //存在任一equation递归调用超过一次
     this->func_recursive_type = 2;
+    //多次递归类型的函数使用记忆加速
+    // this->memoize = true;
     cout<<"more recursive "<< all_equa_call_num<<endl;
     return 2;
   }
