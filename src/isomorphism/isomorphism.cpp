@@ -120,7 +120,6 @@ Isomorphism::print_theory()
         cout << endl;
       }
     }
-    cout<<endl;
   }
 }
 

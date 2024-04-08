@@ -188,8 +188,17 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
     if (components[i].empty()) {
       "struct _$ {\n"_fs.outf(newline(), constructors[i]);
       add_indent();
+      //默认构造函数
+      "_$() {}\n"_fs.outf(newline(), constructors[i]);
+      //移动构造函数
+      "_$(_$&& other) noexcept{ }\n"_fs.outf(
+        newline(),constructors[i], constructors[i]);
+      //重载比较运算符
       "bool operator<(const _$ &) const { return false; }\n"_fs.outf(
         newline(), constructors[i]);
+      //移动赋值运算符
+      "_$& operator=(_$&& other) noexcept { return *this; }\n"_fs.outf(
+        newline(), constructors[i], constructors[i]);
       sub_indent();
       "};\n"_fs.outf(newline());
     } else {
@@ -222,6 +231,7 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
       out_.get() << endl;
 
       // generate methods
+      //get 方法函数
       for (size_t j = 0; j < components[i].size(); ++j) {
         if (components[i][j] == self) {
           "$ p$() const { return *p$_; }\n"_fs.outf(
@@ -233,11 +243,72 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
       }
       out_.get() << endl;
 
+      //默认构造函数
+      "_$(){\n"_fs.outf(newline(), constructors[i]);
+      add_indent();
+      for(size_t j=0; j<components[i].size(); ++j) {
+        if(components[i][j] == self) {
+          "p$_ = nullptr;\n"_fs.outf(newline(), j+1);
+        }else{
+          "// $ p$_;\n"_fs.outf(newline(), components[i][j], j+1);
+        }
+      }
+      sub_indent();
+      " }\n"_fs.outf(newline());
+
+      //移动构造函数
+      "_$(_$&& other) noexcept \n"_fs.outf(newline(), constructors[i], constructors[i]);
+      add_indent();
+      for(size_t j=0; j<components[i].size(); ++j){
+        if(j==0){
+          ": "_fs.outf(newline());
+        }else{
+          ", "_fs.outf(newline());
+        }
+
+        if(components[i][j] == self){
+          "p$_(other.p$_)\n"_fs.outf(out_.get(), j+1, j+1);
+        }else{
+          "p$_(std::move(other.p$_))\n"_fs.outf(out_.get(), j+1, j+1);
+        }
+      }
+      sub_indent();
+      "{\n"_fs.outf(newline());
+      add_indent();
+      for(size_t j=0; j<components[i].size(); ++j){
+        if(components[i][j] == self){
+          "other.p$_ = nullptr;\n"_fs.outf(newline(), j+1);
+        }else{
+
+        }
+      }
+      sub_indent();
+      "}\n"_fs.outf(newline());
+      
       // generate operator<
-      "bool operator<(const _$ &rhs) const {\n"_fs.outf(newline(),
-                                                        constructors[i]);
+      "bool operator<(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
       add_indent();
       "return std::tie($) < std::tie($);\n"_fs.outf(newline(), lhs, rhs);
+      sub_indent();
+      "}\n"_fs.outf(newline());
+
+      // generate operator=
+      "_$& operator=(_$&& other) noexcept {\n"_fs.outf(newline(), constructors[i], constructors[i]);
+      add_indent();
+      "if(this != &other) {\n"_fs.outf(newline());
+      add_indent();
+      for(size_t j=0; j<components[i].size(); ++j){
+        if(components[i][j] == self){
+          "delete p$_;\n"_fs.outf(newline(), j+1);
+          "p$_ = other.p$_;\n"_fs.outf(newline(), j+1, j+1);
+          "other.p$_ = nullptr;\n"_fs.outf(newline(), j+1);
+        }else{
+          "p$_ = std::move(other.p$_);\n"_fs.outf(newline(), j+1, j+1);
+        }
+      }
+      sub_indent();
+      "}\n"_fs.outf(newline());
+      "return *this;\n"_fs.outf(newline());
       sub_indent();
       "}\n"_fs.outf(newline());
 
@@ -255,8 +326,13 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
     "public:\n"_fs.outf(newline(-2));
     "$() = default;\n\n"_fs.outf(newline(), name);
   } else {
-    "$ value_;\n\n"_fs.outf(newline(), variant.to_str());
+    "$ value_;\n"_fs.outf(newline(), variant.to_str());
   }
+
+  //移动构造函数
+  "$($&& other) noexcept :value_(other.value_){ }\n"_fs.outf(
+    newline(), name, self);
+  out_.get() << endl;
 
   // generate static constructions
   for (size_t i = 0; i < components.size(); ++i) {
@@ -324,6 +400,17 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   out_.get() << endl;
   "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
     .outf(newline(), self);
+  // generate operator=
+  "$& operator=($&& other) noexcept {\n"_fs.outf(newline(), self, self);
+  add_indent();
+  "if(this != &other){\n"_fs.outf(newline());
+  add_indent();
+  "value_ = std::move(other.value_);\n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
+  "return *this;\n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
 
   sub_indent();
   "};\n\n"_fs.outf(newline());
