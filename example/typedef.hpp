@@ -939,16 +939,16 @@ class newTree {
     };
     struct _newNode {
         std::shared_ptr<newTree<T1>> p1_;
-        zoption<T1> p2_;
+        list<T1> p2_;
         std::shared_ptr<newTree<T1>> p3_;
 
         newTree<T1> p1() const { return *p1_; }
-        const zoption<T1> &p2() const { return p2_; }
+        const list<T1> &p2() const { return p2_; }
         newTree<T1> p3() const { return *p3_; }
 
         _newNode(){
             p1_ = nullptr;
-            // zoption<T1> p2_;
+            // list<T1> p2_;
             p3_ = nullptr;
          }
         _newNode(_newNode&& other) noexcept 
@@ -975,9 +975,44 @@ class newTree {
             return *this;
         }
     };
+    struct _nawNode {
+        std::shared_ptr<newTree<T1>> p1_;
+        nat p2_;
+        Tree<new<T1>> p3_;
 
-    std::variant<_newLeaf, _newNode> value_;
-    newTree(const std::variant<_newLeaf, _newNode> &value) : value_(value) {}
+        newTree<T1> p1() const { return *p1_; }
+        const nat &p2() const { return p2_; }
+        const Tree<new<T1>> &p3() const { return p3_; }
+
+        _nawNode(){
+            p1_ = nullptr;
+            // nat p2_;
+            // Tree<new<T1>> p3_;
+         }
+        _nawNode(_nawNode&& other) noexcept 
+            : p1_(other.p1_)
+            , p2_(std::move(other.p2_))
+            , p3_(std::move(other.p3_))
+        {
+            other.p1_ = nullptr;
+        }
+        bool operator<(const _nawNode &rhs) const {
+            return std::tie(*p1_, p2_, p3_) < std::tie(*rhs.p1_, rhs.p2_, rhs.p3_);
+        }
+        _nawNode& operator=(_nawNode&& other) noexcept {
+            if(this != &other) {
+                delete p1_;
+                p1_ = other.p1_;
+                other.p1_ = nullptr;
+                p2_ = std::move(other.p2_);
+                p3_ = std::move(other.p3_);
+            }
+            return *this;
+        }
+    };
+
+    std::variant<_newLeaf, _newNode, _nawNode> value_;
+    newTree(const std::variant<_newLeaf, _newNode, _nawNode> &value) : value_(value) {}
 
   public:
     newTree() = default;
@@ -987,14 +1022,19 @@ class newTree {
     static newTree<T1> newLeaf() {
         return newTree<T1> { _newLeaf {  } };
     }
-    static newTree<T1> newNode(const newTree<T1> &p1, const zoption<T1> &p2, const newTree<T1> &p3) {
+    static newTree<T1> newNode(const newTree<T1> &p1, const list<T1> &p2, const newTree<T1> &p3) {
         return newTree<T1> { _newNode { std::make_shared<newTree<T1>>(p1), p2, std::make_shared<newTree<T1>>(p3) } };
+    }
+    static newTree<T1> nawNode(const newTree<T1> &p1, const nat &p2, const Tree<new<T1>> &p3) {
+        return newTree<T1> { _nawNode { std::make_shared<newTree<T1>>(p1), p2, p3 } };
     }
 
     bool is_newLeaf() const { return std::holds_alternative<_newLeaf>(value_); }
     bool is_newNode() const { return std::holds_alternative<_newNode>(value_); }
+    bool is_nawNode() const { return std::holds_alternative<_nawNode>(value_); }
 
     const _newNode &as_newNode() const { return std::get<_newNode>(value_); }
+    const _nawNode &as_nawNode() const { return std::get<_nawNode>(value_); }
 
     bool operator<(const newTree<T1> &rhs) const { return value_ < rhs.value_; }
     newTree<T1>& operator=(newTree<T1>&& other) noexcept {

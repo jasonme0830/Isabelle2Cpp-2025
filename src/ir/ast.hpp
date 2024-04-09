@@ -50,7 +50,8 @@ struct Type
   virtual std::vector<Ptr<Type>> depth_traversal() = 0;
   virtual std::vector<Ptr<Type>> width_traversal() = 0;
   virtual int args_num() = 0;
-  virtual bool replace_exist_iso_type(std::set<std::string>&) = 0;
+  virtual bool replace_self_iso_type(std::set<std::string>&) = 0;
+  virtual bool replace_self_iso_type() = 0;
 };
 
 /**
@@ -83,7 +84,8 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  bool replace_exist_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type() override;
 };
 
 /**
@@ -116,7 +118,8 @@ public:
   std::string main_name() const override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  bool replace_exist_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type() override;
 };
 
 /**
@@ -154,7 +157,8 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  bool replace_exist_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type() override;
 };
 
 // unused now
@@ -190,7 +194,8 @@ public:
   std::vector<Ptr<Type>> depth_traversal() override;
   std::vector<Ptr<Type>> width_traversal() override;
   int args_num() override;
-  bool replace_exist_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type(std::set<std::string>&) override;
+  bool replace_self_iso_type() override;
 };
 
 /**
@@ -588,7 +593,8 @@ struct DatatypeDef : Definition
     Then change the global map base on compare result.
   */
   bool judge_isomorphism() const override;
-
+  //probably use isomorphism datatype, replace
+  void replace_iso_type_in_data();
 
 public:
   void gen_code(Code&) const override;
