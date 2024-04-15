@@ -193,11 +193,17 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
       //移动构造函数
       "_$(_$&& other) noexcept{ }\n"_fs.outf(
         newline(),constructors[i], constructors[i]);
+      //拷贝构造函数
+      "_$(const _$& other){ }\n"_fs.outf(
+        newline(), constructors[i], constructors[i]);
       //重载比较运算符
       "bool operator<(const _$ &) const { return false; }\n"_fs.outf(
         newline(), constructors[i]);
       //移动赋值运算符
       "_$& operator=(_$&& other) noexcept { return *this; }\n"_fs.outf(
+        newline(), constructors[i], constructors[i]);
+      //拷贝赋值运算符
+      "_$& operator=(const _$& other) { return *this; }\n"_fs.outf(
         newline(), constructors[i], constructors[i]);
       sub_indent();
       "};\n"_fs.outf(newline());
@@ -241,6 +247,8 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
             newline(), components[i][j], j + 1, j + 1);
         }
       }
+      //copy 方法函数
+      
       out_.get() << endl;
 
       //默认构造函数
@@ -400,7 +408,7 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   out_.get() << endl;
   "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
     .outf(newline(), self);
-  // generate operator=
+  // generate move operator=
   "$& operator=($&& other) noexcept {\n"_fs.outf(newline(), self, self);
   add_indent();
   "if(this != &other){\n"_fs.outf(newline());
