@@ -69,7 +69,7 @@ datatype 'a htree = hNode1 "'a htree" "'a htree" 'a |
 
 datatype 'a newTree = newLeaf |
                       newNode "'a newTree" "'a slist" "'a newTree" |
-                      nawNode "'a newTree" snat "'a new Tree"
+                      nawNode "'a newTree" snat "'a newTree"
 end
 
 

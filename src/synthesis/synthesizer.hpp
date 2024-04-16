@@ -23,6 +23,25 @@ private:
   void syn_class_template(const Datatype& datatype);
   void syn_class_definition(const Datatype& datatype);
 
+  void syn_class_def_variant(const Datatype &, const TypeInfo &);
+  void syn_class_def_moveConstructor(const Datatype&);
+  void syn_class_def_staticConstructor(const Datatype &);
+  void syn_class_def_component(const Datatype &);
+  void syn_class_def_isfunction(const Datatype &);
+  void syn_class_def_asfunction(const Datatype &);
+  void syn_class_def_compareOperator(const Datatype &);
+  void syn_class_def_moveOperator(const Datatype &);
+
+  void syn_class_def_struct_empty(const Datatype &, size_t);
+  void syn_class_def_struct_members(const Datatype &, size_t, std::string &, std::string &);
+  void syn_class_def_struct_getMethod(const Datatype &, size_t);
+  void syn_class_def_struct_defaultConstuctor(const Datatype &, size_t);
+  void syn_class_def_struct_moveConstructor(const Datatype &, size_t);
+  void syn_class_def_struct_compareOperator(const Datatype &, size_t, std::string, std::string);
+  void syn_class_def_struct_moveOperator(const Datatype &, size_t);
+  void syn_class_def_struct_copyConstructor(const Datatype &, size_t);
+  void syn_class_def_struct_copyOperator(const Datatype &, size_t);
+
   void syn_func(const FuncEntity& func, bool is_impl = true);
   void syn_func_template(const FuncEntity& func);
   void syn_func_definition(const FuncEntity& func, bool is_impl);
