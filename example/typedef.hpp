@@ -33,6 +33,11 @@ class yoption {
             : p1_(std::move(other.p1_))
         {
         }
+        _ySome(const _ySome& other) 
+            : p1_(other.p1_)
+        { 
+        } 
+
         bool operator<(const _ySome &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
@@ -42,6 +47,12 @@ class yoption {
             }
             return *this;
         }
+        _ySome& operator=(const _ySome& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_yNode, _yOnce, _ySome> value_;
@@ -49,8 +60,8 @@ class yoption {
 
   public:
     yoption() = default;
-
-    yoption(yoption<T1>&& other) noexcept :value_(other.value_){ }
+    yoption(yoption<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    yoption(const yoption<T1>& other) : value_(other.value_){ } 
 
     static yoption<T1> yNode() {
         return yoption<T1> { _yNode {  } };
@@ -75,6 +86,13 @@ class yoption {
         }
         return *this;
     }
+    yoption<T1>& operator=(const yoption<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -92,6 +110,11 @@ class zoption {
             : p1_(std::move(other.p1_))
         {
         }
+        _zSome(const _zSome& other) 
+            : p1_(other.p1_)
+        { 
+        } 
+
         bool operator<(const _zSome &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
@@ -101,6 +124,12 @@ class zoption {
             }
             return *this;
         }
+        _zSome& operator=(const _zSome& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+            } 
+            return *this; 
+        } 
     };
     struct _zOnce {
         T1 p1_;
@@ -115,6 +144,11 @@ class zoption {
             : p1_(std::move(other.p1_))
         {
         }
+        _zOnce(const _zOnce& other) 
+            : p1_(other.p1_)
+        { 
+        } 
+
         bool operator<(const _zOnce &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
@@ -124,6 +158,12 @@ class zoption {
             }
             return *this;
         }
+        _zOnce& operator=(const _zOnce& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+            } 
+            return *this; 
+        } 
     };
     struct _zNode {
         _zNode() {}
@@ -139,8 +179,8 @@ class zoption {
 
   public:
     zoption() = default;
-
-    zoption(zoption<T1>&& other) noexcept :value_(other.value_){ }
+    zoption(zoption<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    zoption(const zoption<T1>& other) : value_(other.value_){ } 
 
     static zoption<T1> zSome(const T1 &p1) {
         return zoption<T1> { _zSome { p1 } };
@@ -166,6 +206,13 @@ class zoption {
         }
         return *this;
     }
+    zoption<T1>& operator=(const zoption<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -196,6 +243,12 @@ class zlist {
         {
             other.p1_ = nullptr;
         }
+        _zCons(const _zCons& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+        { 
+        } 
+
         bool operator<(const _zCons &rhs) const {
             return std::tie(*p1_, p2_) < std::tie(*rhs.p1_, rhs.p2_);
         }
@@ -208,6 +261,14 @@ class zlist {
             }
             return *this;
         }
+        _zCons& operator=(const _zCons& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_zNil, _zCons> value_;
@@ -215,8 +276,8 @@ class zlist {
 
   public:
     zlist() = default;
-
-    zlist(zlist<T1>&& other) noexcept :value_(other.value_){ }
+    zlist(zlist<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    zlist(const zlist<T1>& other) : value_(other.value_){ } 
 
     static zlist<T1> zNil() {
         return zlist<T1> { _zNil {  } };
@@ -237,6 +298,13 @@ class zlist {
         }
         return *this;
     }
+    zlist<T1>& operator=(const zlist<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -262,6 +330,11 @@ class xlist {
             : p1_(std::move(other.p1_))
         {
         }
+        _xCons(const _xCons& other) 
+            : p1_(other.p1_)
+        { 
+        } 
+
         bool operator<(const _xCons &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
@@ -271,6 +344,12 @@ class xlist {
             }
             return *this;
         }
+        _xCons& operator=(const _xCons& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+            } 
+            return *this; 
+        } 
     };
     struct _xConss {
         std::shared_ptr<xlist<T1>> p1_;
@@ -290,6 +369,12 @@ class xlist {
         {
             other.p1_ = nullptr;
         }
+        _xConss(const _xConss& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+        { 
+        } 
+
         bool operator<(const _xConss &rhs) const {
             return std::tie(*p1_, p2_) < std::tie(*rhs.p1_, rhs.p2_);
         }
@@ -302,6 +387,14 @@ class xlist {
             }
             return *this;
         }
+        _xConss& operator=(const _xConss& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_xNil, _xCons, _xConss> value_;
@@ -309,8 +402,8 @@ class xlist {
 
   public:
     xlist() = default;
-
-    xlist(xlist<T1>&& other) noexcept :value_(other.value_){ }
+    xlist(xlist<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    xlist(const xlist<T1>& other) : value_(other.value_){ } 
 
     static xlist<T1> xNil() {
         return xlist<T1> { _xNil {  } };
@@ -336,6 +429,13 @@ class xlist {
         }
         return *this;
     }
+    xlist<T1>& operator=(const xlist<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -371,6 +471,13 @@ class atree {
             other.p1_ = nullptr;
             other.p3_ = nullptr;
         }
+        _aNode1(const _aNode1& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _aNode1 &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
@@ -386,6 +493,16 @@ class atree {
             }
             return *this;
         }
+        _aNode1& operator=(const _aNode1& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+                delete p3_;
+                p3_ = other.p3_;
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_aLeaf, _aNode1> value_;
@@ -393,8 +510,8 @@ class atree {
 
   public:
     atree() = default;
-
-    atree(atree<T1>&& other) noexcept :value_(other.value_){ }
+    atree(atree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    atree(const atree<T1>& other) : value_(other.value_){ } 
 
     static atree<T1> aLeaf() {
         return atree<T1> { _aLeaf {  } };
@@ -415,6 +532,13 @@ class atree {
         }
         return *this;
     }
+    atree<T1>& operator=(const atree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -440,6 +564,11 @@ class btree {
             : p1_(std::move(other.p1_))
         {
         }
+        _bNode1(const _bNode1& other) 
+            : p1_(other.p1_)
+        { 
+        } 
+
         bool operator<(const _bNode1 &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
@@ -449,6 +578,12 @@ class btree {
             }
             return *this;
         }
+        _bNode1& operator=(const _bNode1& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+            } 
+            return *this; 
+        } 
     };
     struct _bNode2 {
         std::shared_ptr<btree<T1>> p1_;
@@ -473,6 +608,13 @@ class btree {
             other.p1_ = nullptr;
             other.p3_ = nullptr;
         }
+        _bNode2(const _bNode2& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _bNode2 &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
@@ -488,6 +630,16 @@ class btree {
             }
             return *this;
         }
+        _bNode2& operator=(const _bNode2& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+                delete p3_;
+                p3_ = other.p3_;
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_bLeaf, _bNode1, _bNode2> value_;
@@ -495,8 +647,8 @@ class btree {
 
   public:
     btree() = default;
-
-    btree(btree<T1>&& other) noexcept :value_(other.value_){ }
+    btree(btree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    btree(const btree<T1>& other) : value_(other.value_){ } 
 
     static btree<T1> bLeaf() {
         return btree<T1> { _bLeaf {  } };
@@ -522,6 +674,13 @@ class btree {
         }
         return *this;
     }
+    btree<T1>& operator=(const btree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -547,6 +706,11 @@ class dtree {
             : p1_(std::move(other.p1_))
         {
         }
+        _dNode1(const _dNode1& other) 
+            : p1_(other.p1_)
+        { 
+        } 
+
         bool operator<(const _dNode1 &rhs) const {
             return std::tie(p1_) < std::tie(rhs.p1_);
         }
@@ -556,6 +720,12 @@ class dtree {
             }
             return *this;
         }
+        _dNode1& operator=(const _dNode1& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+            } 
+            return *this; 
+        } 
     };
     struct _dNode2 {
         T1 p1_;
@@ -575,6 +745,12 @@ class dtree {
         {
             other.p2_ = nullptr;
         }
+        _dNode2(const _dNode2& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+        { 
+        } 
+
         bool operator<(const _dNode2 &rhs) const {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
@@ -587,6 +763,14 @@ class dtree {
             }
             return *this;
         }
+        _dNode2& operator=(const _dNode2& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+                delete p2_;
+                p2_ = other.p2_;
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_dLeaf, _dNode1, _dNode2> value_;
@@ -594,8 +778,8 @@ class dtree {
 
   public:
     dtree() = default;
-
-    dtree(dtree<T1>&& other) noexcept :value_(other.value_){ }
+    dtree(dtree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    dtree(const dtree<T1>& other) : value_(other.value_){ } 
 
     static dtree<T1> dLeaf() {
         return dtree<T1> { _dLeaf {  } };
@@ -621,6 +805,13 @@ class dtree {
         }
         return *this;
     }
+    dtree<T1>& operator=(const dtree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -651,6 +842,12 @@ class etree {
         {
             other.p2_ = nullptr;
         }
+        _eNode1(const _eNode1& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+        { 
+        } 
+
         bool operator<(const _eNode1 &rhs) const {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
@@ -663,6 +860,14 @@ class etree {
             }
             return *this;
         }
+        _eNode1& operator=(const _eNode1& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+                delete p2_;
+                p2_ = other.p2_;
+            } 
+            return *this; 
+        } 
     };
     struct _eNode2 {
         std::shared_ptr<etree<T1>> p1_;
@@ -687,6 +892,13 @@ class etree {
             other.p1_ = nullptr;
             other.p3_ = nullptr;
         }
+        _eNode2(const _eNode2& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _eNode2 &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
@@ -702,6 +914,16 @@ class etree {
             }
             return *this;
         }
+        _eNode2& operator=(const _eNode2& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+                delete p3_;
+                p3_ = other.p3_;
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_eLeaf, _eNode1, _eNode2> value_;
@@ -709,8 +931,8 @@ class etree {
 
   public:
     etree() = default;
-
-    etree(etree<T1>&& other) noexcept :value_(other.value_){ }
+    etree(etree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    etree(const etree<T1>& other) : value_(other.value_){ } 
 
     static etree<T1> eLeaf() {
         return etree<T1> { _eLeaf {  } };
@@ -736,6 +958,13 @@ class etree {
         }
         return *this;
     }
+    etree<T1>& operator=(const etree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -766,6 +995,12 @@ class ftree {
         {
             other.p2_ = nullptr;
         }
+        _fNode1(const _fNode1& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+        { 
+        } 
+
         bool operator<(const _fNode1 &rhs) const {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
@@ -778,6 +1013,14 @@ class ftree {
             }
             return *this;
         }
+        _fNode1& operator=(const _fNode1& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+                delete p2_;
+                p2_ = other.p2_;
+            } 
+            return *this; 
+        } 
     };
     struct _fNode2 {
         std::shared_ptr<ftree<T1>> p1_;
@@ -802,6 +1045,13 @@ class ftree {
             other.p1_ = nullptr;
             other.p2_ = nullptr;
         }
+        _fNode2(const _fNode2& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _fNode2 &rhs) const {
             return std::tie(*p1_, *p2_, p3_) < std::tie(*rhs.p1_, *rhs.p2_, rhs.p3_);
         }
@@ -817,6 +1067,16 @@ class ftree {
             }
             return *this;
         }
+        _fNode2& operator=(const _fNode2& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                delete p2_;
+                p2_ = other.p2_;
+                p3_ = other.p3_; 
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_fLeaf, _fNode1, _fNode2> value_;
@@ -824,8 +1084,8 @@ class ftree {
 
   public:
     ftree() = default;
-
-    ftree(ftree<T1>&& other) noexcept :value_(other.value_){ }
+    ftree(ftree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    ftree(const ftree<T1>& other) : value_(other.value_){ } 
 
     static ftree<T1> fLeaf() {
         return ftree<T1> { _fLeaf {  } };
@@ -851,6 +1111,13 @@ class ftree {
         }
         return *this;
     }
+    ftree<T1>& operator=(const ftree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -878,6 +1145,13 @@ class gtree {
             other.p2_ = nullptr;
             other.p3_ = nullptr;
         }
+        _gNode1(const _gNode1& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _gNode1 &rhs) const {
             return std::tie(p1_, *p2_, *p3_) < std::tie(rhs.p1_, *rhs.p2_, *rhs.p3_);
         }
@@ -893,6 +1167,16 @@ class gtree {
             }
             return *this;
         }
+        _gNode1& operator=(const _gNode1& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+                delete p2_;
+                p2_ = other.p2_;
+                delete p3_;
+                p3_ = other.p3_;
+            } 
+            return *this; 
+        } 
     };
     struct _gNode2 {
         std::shared_ptr<gtree<T1>> p1_;
@@ -912,6 +1196,12 @@ class gtree {
         {
             other.p1_ = nullptr;
         }
+        _gNode2(const _gNode2& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+        { 
+        } 
+
         bool operator<(const _gNode2 &rhs) const {
             return std::tie(*p1_, p2_) < std::tie(*rhs.p1_, rhs.p2_);
         }
@@ -924,6 +1214,14 @@ class gtree {
             }
             return *this;
         }
+        _gNode2& operator=(const _gNode2& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+            } 
+            return *this; 
+        } 
     };
     struct _gLeaf {
         _gLeaf() {}
@@ -939,8 +1237,8 @@ class gtree {
 
   public:
     gtree() = default;
-
-    gtree(gtree<T1>&& other) noexcept :value_(other.value_){ }
+    gtree(gtree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    gtree(const gtree<T1>& other) : value_(other.value_){ } 
 
     static gtree<T1> gNode1(const T1 &p1, const gtree<T1> &p2, const gtree<T1> &p3) {
         return gtree<T1> { _gNode1 { p1, std::make_shared<gtree<T1>>(p2), std::make_shared<gtree<T1>>(p3) } };
@@ -966,6 +1264,13 @@ class gtree {
         }
         return *this;
     }
+    gtree<T1>& operator=(const gtree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
@@ -1001,6 +1306,13 @@ class newTree {
             other.p1_ = nullptr;
             other.p3_ = nullptr;
         }
+        _newNode(const _newNode& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _newNode &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
@@ -1016,6 +1328,16 @@ class newTree {
             }
             return *this;
         }
+        _newNode& operator=(const _newNode& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+                delete p3_;
+                p3_ = other.p3_;
+            } 
+            return *this; 
+        } 
     };
     struct _nawNode {
         std::shared_ptr<newTree<T1>> p1_;
@@ -1040,6 +1362,13 @@ class newTree {
             other.p1_ = nullptr;
             other.p3_ = nullptr;
         }
+        _nawNode(const _nawNode& other) 
+            : p1_(other.p1_)
+            , p2_(other.p2_)
+            , p3_(other.p3_)
+        { 
+        } 
+
         bool operator<(const _nawNode &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
@@ -1055,6 +1384,16 @@ class newTree {
             }
             return *this;
         }
+        _nawNode& operator=(const _nawNode& other){ 
+            if(this != &other){ 
+                delete p1_;
+                p1_ = other.p1_;
+                p2_ = other.p2_; 
+                delete p3_;
+                p3_ = other.p3_;
+            } 
+            return *this; 
+        } 
     };
 
     std::variant<_newLeaf, _newNode, _nawNode> value_;
@@ -1062,8 +1401,8 @@ class newTree {
 
   public:
     newTree() = default;
-
-    newTree(newTree<T1>&& other) noexcept :value_(other.value_){ }
+    newTree(newTree<T1>&& other) noexcept :value_(std::move(other.value_)){ }
+    newTree(const newTree<T1>& other) : value_(other.value_){ } 
 
     static newTree<T1> newLeaf() {
         return newTree<T1> { _newLeaf {  } };
@@ -1089,6 +1428,13 @@ class newTree {
         }
         return *this;
     }
+    newTree<T1>& operator=(const newTree<T1>& other){ 
+        if(this != &other){ 
+            value_ = other.value_; 
+        } 
+        return *this; 
+    }
+
 };
 
 template<typename T1>
