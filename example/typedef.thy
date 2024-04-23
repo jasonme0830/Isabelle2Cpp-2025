@@ -1,4 +1,4 @@
-theory datatypedefs
+theory typedef
   imports Main
 begin
 
@@ -68,8 +68,8 @@ datatype 'a htree = hNode1 "'a htree" "'a htree" 'a |
 
 
 datatype 'a newTree = newLeaf |
-                      newNode "'a newTree" "'a slist" "'a newTree" |
-                      nawNode "'a newTree" snat "'a newTree"
+                      newNode "'a newTree" "'a slist" "'a newTree" 
+                      
 end
 
 

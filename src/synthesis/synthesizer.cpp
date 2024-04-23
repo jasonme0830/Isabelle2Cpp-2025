@@ -199,32 +199,23 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
       // generate methods
       syn_class_def_struct_getMethod(datatype, i);
-
-      //recursion copy 方法函数
-      // "std::shared_ptr<$> copy_method(std::shared_ptr<$>){ \n"_fs.outf(newline(), self, self);
-      // recursion delete 方法函数
       out_.get() << endl;
 
-      //默认构造函数
-      syn_class_def_struct_defaultConstuctor(datatype, i);
-
+      //参数拷贝构造函数
+      syn_class_def_struct_paramConstructor(datatype, i);
+      //深拷贝构造函数
+      syn_class_def_struct_copyConstructor(datatype, i);
       //移动构造函数
       syn_class_def_struct_moveConstructor(datatype, i);
-
-      //拷贝构造函数
-      //TODO:目前只是浅拷贝
-      syn_class_def_struct_copyConstructor(datatype, i);
       out_.get()<<endl;
       
       //重载比较运算符<
       syn_class_def_struct_compareOperator(datatype, i, lhs, rhs);
-
+      //重载拷贝赋值运算符=
+      syn_class_def_struct_copyOperator(datatype, i);
       //重载移动赋值运算符=
       syn_class_def_struct_moveOperator(datatype, i);
 
-      //重载拷贝赋值运算符=
-      //TODO：目前只是浅拷贝
-      syn_class_def_struct_copyOperator(datatype, i);
 
       sub_indent();
       "};\n"_fs.outf(newline()); 
@@ -232,30 +223,34 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   }
   out_.get() << endl;
   
-
-  // generate std::variant<_C0, ..., _Ck> value_; 和默认构造函数
+  // generate std::variant<_C0, ..., _Ck> value_;
   syn_class_def_variant(datatype, variant);
-  //移动构造函数
-  syn_class_def_moveConstructor(datatype);
+  out_.get()<<endl;
+
+  // generate std::variant<_C0, ..., _Ck> value_;
+  if (use_class) {
+    "public:\n"_fs.outf(newline(-2));
+    out_.get()<<endl;
+  } 
+  //value构造函数
+  syn_class_def_valueConstructor(datatype, variant);
   //拷贝构造函数
   syn_class_def_copyConstructor(datatype);
+  //移动构造函数
+  syn_class_def_moveConstructor(datatype);
   out_.get() << endl;
 
   // generate static constructions
   syn_class_def_staticConstructor(datatype);
-
   // generate is_Ci()
   syn_class_def_isfunction(datatype);
-
   // generate as_Ci()
   syn_class_def_asfunction(datatype);
 
   // generate operator<
   syn_class_def_compareOperator(datatype);
-
   // generate move operator=
   syn_class_def_moveOperator(datatype);
-
   //generate copy operator=
   syn_class_def_copyOperator(datatype);
 
@@ -267,44 +262,55 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
 void
 Synthesizer::syn_class_def_variant(const Datatype& datatype, const TypeInfo& variant){
-  auto use_class = theConfig.use_class();
-
-  auto& name = datatype.name();
-  auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
-
-  // generate std::variant<_C0, ..., _Ck> value_;
-  if (use_class) {
-    "$ value_;\n"_fs.outf(newline(), variant.to_str());
-    "$($value) : value_(value) {}\n\n"_fs.outf(
-      newline(), name, variant.to_str_as_arg());
-    "public:\n"_fs.outf(newline(-2));
-    "$() = default;\n"_fs.outf(newline(), name);
-  } else {
-    "$ value_;\n"_fs.outf(newline(), variant.to_str());
-  }
+  "$ value_;\n"_fs.outf(newline(), variant.to_str());
 }
 void
-Synthesizer::syn_class_def_moveConstructor(const Datatype& datatype){
+Synthesizer::syn_class_def_valueConstructor(const Datatype& datatype, const TypeInfo& variant){
   auto& name = datatype.name();
-  auto& self = datatype.self();
-  // auto& constructors = datatype.constructors();
-  // auto& components = datatype.components();
 
-  "$($&& other) noexcept :value_(std::move(other.value_)){ }\n"_fs.outf(
-    newline(), name, self);
+  "$($value) : value_(value) {}\n"_fs.outf(
+    newline(), name, variant.to_str_as_arg());
 }
 void
 Synthesizer::syn_class_def_copyConstructor(const Datatype& datatype){
 
   auto& name = datatype.name();
   auto& self = datatype.self();
-  // auto& constructors = datatype.constructors();
+  auto& constructors = datatype.constructors();
   // auto& components = datatype.components();
-
-  "$(const $& other) : value_(other.value_){ } \n"_fs.outf(
-    newline(), name, self);
+  "//深拷贝构造函数\n"_fs.outf(newline());
+  "$(const $& other) { \n"_fs.outf(newline(), name, self);
+    add_indent();
+    for(auto& constructor : constructors){
+      "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructor);
+        add_indent();
+        "const _$& other_node = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor, constructor);
+        "value_ = other_node;\n"_fs.outf(newline());
+        sub_indent();
+      "} \n"_fs.outf(newline());
+    }
+    sub_indent();
+  "} \n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_moveConstructor(const Datatype& datatype){
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  // auto& components = datatype.components();
+  "//移动构造函数\n"_fs.outf(newline());
+  "$($&& other){\n"_fs.outf(newline(), name, self);
+    add_indent();
+    for(auto& constructor : constructors){
+      "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructor);
+        add_indent();
+        "_$& other_node = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor, constructor);
+        "value_ = std::move(other_node);\n"_fs.outf(newline());
+        sub_indent();
+      "} \n"_fs.outf(newline());
+    }
+    sub_indent();
+  "}\n"_fs.outf(newline());
 }
 void
 Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
@@ -314,7 +320,7 @@ Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
   auto& components = datatype.components();
 
   for (size_t i = 0; i < components.size(); ++i) {
-    "static $ $("_fs.outf(newline(), self, constructors[i]);
+    "static $ new_$("_fs.outf(newline(), self, constructors[i]);
     for (size_t j = 0; j < components[i].size(); ++j) {
       if (j == 0) {
         "const $ &p1"_fs.outf(out_.get(), components[i][j]);
@@ -326,39 +332,24 @@ Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
     ") {\n"_fs.outf(out_.get());
     add_indent();
 
-    "return $ { _$ { "_fs.outf(newline(), self, constructors[i]);
+    "return $ ( _$ ( "_fs.outf(newline(), self, constructors[i]);
     for (size_t j = 0; j < components[i].size(); ++j) {
-      if (components[i][j] == self) {
-        if (j == 0) {
-          "std::make_shared<$>(p1)"_fs.outf(out_.get(), self);
-        } else {
-          ", std::make_shared<$>(p$)"_fs.outf(out_.get(), self, j + 1);
-        }
+      if (j == 0) {
+        "p1"_fs.outf(out_.get());
       } else {
-        if (j == 0) {
-          "p1"_fs.outf(out_.get());
-        } else {
-          ", p$"_fs.outf(out_.get(), j + 1);
-        }
+        ", p$"_fs.outf(out_.get(), j + 1);
       }
     }
-    " } };\n"_fs.outf(out_.get());
+    " ) );\n"_fs.outf(out_.get());
 
     sub_indent();
     "}\n"_fs.outf(newline());
   }
 }
 void
-Synthesizer::syn_class_def_component(const Datatype& datatype){
-
-}
-void
 Synthesizer::syn_class_def_isfunction(const Datatype& datatype){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
   auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
 
   out_.get() << endl;
   for (auto& constructor : constructors) {
@@ -369,106 +360,99 @@ Synthesizer::syn_class_def_isfunction(const Datatype& datatype){
 void
 Synthesizer::syn_class_def_asfunction(const Datatype& datatype){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
   auto& constructors = datatype.constructors();
   auto& components = datatype.components();
 
-  bool need_as_methods = false;
   for (size_t i = 0; i < components.size(); ++i) {
     if (!components[i].empty()) {
-      need_as_methods = true;
-      break;
-    }
-  }
-
-  if (need_as_methods) {
-    out_.get() << endl;
-    for (size_t i = 0; i < components.size(); ++i) {
-      if (!components[i].empty()) {
-        "const _$ &as_$() const { return std::get<_$>(value_); }\n"_fs.outf(
-          newline(), constructors[i], constructors[i], constructors[i]);
-      }
+      "const _$ &as_$() const { return std::get<_$>(value_); }\n"_fs.outf(
+        newline(), constructors[i], constructors[i], constructors[i]);
     }
   }
 }
 void
 Synthesizer::syn_class_def_compareOperator(const Datatype& datatype){
 
-  // auto& name = datatype.name();
   auto& self = datatype.self();
-  // auto& constructors = datatype.constructors();
-  // auto& components = datatype.components();
 
   out_.get() << endl;
   "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
     .outf(newline(), self);
 }
 void
-Synthesizer::syn_class_def_moveOperator(const Datatype& datatype){
-
-  // auto& name = datatype.name();
-  auto& self = datatype.self();
-  // auto& constructors = datatype.constructors();
-  // auto& components = datatype.components();
-
-  "$& operator=($&& other) noexcept {\n"_fs.outf(newline(), self, self);
-    add_indent();
-    "if(this != &other){\n"_fs.outf(newline());
-      add_indent();
-      "value_ = std::move(other.value_);\n"_fs.outf(newline());
-      sub_indent();
-    "}\n"_fs.outf(newline());
-    "return *this;\n"_fs.outf(newline());
-    sub_indent();
-  "}\n"_fs.outf(newline());
-}
-void
 Synthesizer::syn_class_def_copyOperator(const Datatype& datatype){
-  // auto& name = datatype.name();
-  auto& self = datatype.self();
-  // auto& constructors = datatype.constructors();
-  // auto& components = datatype.components();
 
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+
+  "//拷贝赋值运算符\n"_fs.outf(newline());
   "$& operator=(const $& other){ \n"_fs.outf(newline(), self, self);
     add_indent();
     "if(this != &other){ \n"_fs.outf(newline());
       add_indent();
-      "value_ = other.value_; \n"_fs.outf(newline());
+      for(auto& constructor : constructors){
+        "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructor);
+          add_indent();
+          "const _$& other_node = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor, constructor);
+          "value_ = other.value_; \n"_fs.outf(newline());
+          sub_indent();
+        "} \n"_fs.outf(newline());
+      }
       sub_indent();
     "} \n"_fs.outf(newline());
     "return *this; \n"_fs.outf(newline());
     sub_indent();
   "}\n"_fs.outf(newline());
 }
+void
+Synthesizer::syn_class_def_moveOperator(const Datatype& datatype){
 
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+
+  "$& operator=($&& other) noexcept {\n"_fs.outf(newline(), self, self);
+    add_indent();
+    "if(this != &other){\n"_fs.outf(newline());
+      add_indent();
+      for(const auto& constructor : constructors){
+        "if(std::holds_alternative<_$>(other)){\n"_fs.outf(newline(), constructor);
+          add_indent();
+          "_$& other_value = std::get<_$>(other.value_);\n"_fs.outf(newline(),constructor, constructor);
+          "value_ = std::move(other_value);\n"_fs.outf(newline());
+          sub_indent();
+        "}\n"_fs.outf(newline());
+      }
+      sub_indent();
+    "}\n"_fs.outf(newline());
+    "return *this;\n"_fs.outf(newline());
+    sub_indent();
+  "}\n"_fs.outf(newline());
+}
 
 void
-Synthesizer::syn_class_def_struct_empty(const Datatype& datatype, size_t i){
-  // auto& name = datatype.name();
-  // auto& self = datatype.self();
+Synthesizer::syn_class_def_struct_empty(
+const Datatype& datatype, size_t i){
   auto& constructors = datatype.constructors();
-  // auto& components = datatype.components();
 
   "struct _$ {\n"_fs.outf(newline(), constructors[i]);
   add_indent();
   //默认构造函数
   "_$() {}\n"_fs.outf(newline(), constructors[i]);
-  //移动构造函数
-  "_$(_$&& other) noexcept{ }\n"_fs.outf(
-    newline(),constructors[i], constructors[i]);
   //拷贝构造函数
   "_$(const _$& other){ }\n"_fs.outf(
     newline(), constructors[i], constructors[i]);
+  //移动构造函数
+  "_$(_$&& other) noexcept{ }\n"_fs.outf(
+    newline(),constructors[i], constructors[i]);
 
   //重载比较运算符
   "bool operator<(const _$ &) const { return false; }\n"_fs.outf(
     newline(), constructors[i]);
-  //移动赋值运算符
-  "_$& operator=(_$&& other) noexcept { return *this; }\n"_fs.outf(
-    newline(), constructors[i], constructors[i]);
   //拷贝赋值运算符
   "_$& operator=(const _$& other) { return *this; }\n"_fs.outf(
+    newline(), constructors[i], constructors[i]);
+  //移动赋值运算符
+  "_$& operator=(_$&& other) noexcept { return *this; }\n"_fs.outf(
     newline(), constructors[i], constructors[i]);
 
   sub_indent();
@@ -506,14 +490,12 @@ const Datatype &datatype, size_t i, string &lhs, string &rhs){
   out_.get() << endl;
 }
 void
-Synthesizer::syn_class_def_struct_getMethod(const Datatype& datatype, size_t i){
-  auto& name = datatype.name();
+Synthesizer::syn_class_def_struct_getMethod(
+const Datatype& datatype, size_t i){
   auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
   auto& components = datatype.components();
 
   // generate methods
-  //get 方法函数
   for (size_t j = 0; j < components[i].size(); ++j) {
     if (components[i][j] == self) {
       "$ p$() const { return *p$_; }\n"_fs.outf(
@@ -524,95 +506,87 @@ Synthesizer::syn_class_def_struct_getMethod(const Datatype& datatype, size_t i){
     }
   }
 
-
   out_.get()<< endl;
 }
 void
-Synthesizer::syn_class_def_struct_defaultConstuctor(
-const Datatype& datatype, size_t i){
-
+Synthesizer::syn_class_def_struct_paramConstructor(const Datatype &datatype, size_t i){
   auto& name = datatype.name();
   auto& self = datatype.self();
   auto& constructors = datatype.constructors();
   auto& components = datatype.components();
 
-  // 默认构造函数
-  "_$(){\n"_fs.outf(newline(), constructors[i]);
-  add_indent();
-  for(size_t j=0; j<components[i].size(); ++j) {
-    if(components[i][j] == self) {
-      "p$_ = nullptr;\n"_fs.outf(newline(), j+1);
-    }else{
-      "// $ p$_;\n"_fs.outf(newline(), components[i][j], j+1);
-    }
-  }
-  sub_indent();
-  " }\n"_fs.outf(newline());
-}
-void
-Synthesizer::syn_class_def_struct_moveConstructor(
-const Datatype& datatype, size_t i){
-
-  auto& name = datatype.name();
-  auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
-
-  // 移动构造函数
-  "_$(_$&& other) noexcept \n"_fs.outf(newline(), constructors[i], constructors[i]);
-  add_indent();
-  for(size_t j=0; j<components[i].size(); ++j){
-    if(j==0){
-      ": "_fs.outf(newline());
-    }else{
-      ", "_fs.outf(newline());
-    }
-
-    if(components[i][j] == self){
-      "p$_(other.p$_)\n"_fs.outf(out_.get(), j+1, j+1);
-    }else{
-      "p$_(std::move(other.p$_))\n"_fs.outf(out_.get(), j+1, j+1);
-    }
-  }
-  sub_indent();
-  "{\n"_fs.outf(newline());
-  add_indent();
-  for(size_t j=0; j<components[i].size(); ++j){
-    if(components[i][j] == self){
-      "other.p$_ = nullptr;\n"_fs.outf(newline(), j+1);
-    }
-  }
-  sub_indent();
-  "}\n"_fs.outf(newline());
-}
-void
-Synthesizer::syn_class_def_struct_copyConstructor(
-const Datatype& datatype, size_t i){
-
-  // auto& name = datatype.name();
-  auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
-
-  //拷贝构造函数
-  "_$(const _$& other) \n"_fs.outf(newline(), constructors[i], constructors[i]);
-    add_indent();
-    for(size_t j=0; j<components[i].size(); ++j){
-      if(j==0){
-        ": "_fs.outf(newline());
+  "_$("_fs.outf(newline(), constructors[i]);
+    for(size_t j=0;j<components[i].size();++j){
+      if(j< components[i].size()-1 ){
+        "const $ &p$, "_fs.outf(out_.get(), components[i][j], j+1);
       }else{
-        ", "_fs.outf(newline());
+        "const $ &p$ "_fs.outf(out_.get(), components[i][j], j+1);
+      }
+    }
+  ")\n"_fs.outf(out_.get());
+    add_indent();
+    for(size_t j=0;j<components[i].size();++j){
+      if(j==0){
+        ":"_fs.outf(newline());
+      }else{
+        ","_fs.outf(newline());
       }
 
       if(components[i][j] == self){
-        "p$_(other.p$_)\n"_fs.outf(out_.get(), j+1, j+1);
+        "p$_(std::make_shared<$>(p$))\n"_fs.outf(out_.get(), j+1, self, j+1);
+      }else{
+        "p$_(p$)\n"_fs.outf(out_.get(), j+1, j+1);
+      }
+    }
+    sub_indent();
+  "{}\n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_struct_copyConstructor(const Datatype &datatype, size_t i){
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  "_$(const _$& other)\n"_fs.outf(newline(), constructors[i], constructors[i]);
+    add_indent();
+    for(size_t j=0;j<components[i].size();++j){
+      if(j==0){
+        ":"_fs.outf(newline());
+      }else{
+        ","_fs.outf(newline());
+      }
+
+      if(components[i][j] == self){
+        "p$_(std::make_shared<$>(*other.p$_))\n"_fs.outf(out_.get(), j+1, self, j+1);
       }else{
         "p$_(other.p$_)\n"_fs.outf(out_.get(), j+1, j+1);
       }
     }
     sub_indent();
-  "{ \n"_fs.outf(newline());
-  "} \n"_fs.outf(newline());
+  "{}\n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_struct_moveConstructor(
+const Datatype& datatype, size_t i){
+
+  // auto& name = datatype.name();
+  // auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  // 移动构造函数
+  "_$(_$&& other) noexcept \n"_fs.outf(newline(), constructors[i], constructors[i]);
+    add_indent();
+    for(size_t j=0; j<components[i].size(); ++j){
+      if(j==0){
+        ":p$_(std::move(other.p$_))\n"_fs.outf(newline(), j+1, j+1);
+      }else{
+        ",p$_(std::move(other.p$_))\n"_fs.outf(newline(), j+1, j+1);
+      }
+    }
+    sub_indent();
+  "{ }\n"_fs.outf(newline());
 }
 void
 Synthesizer::syn_class_def_struct_compareOperator(
@@ -631,39 +605,10 @@ const Datatype& datatype, size_t i, string lhs, string rhs){
   "}\n"_fs.outf(newline());
 }
 void
-Synthesizer::syn_class_def_struct_moveOperator(
-const Datatype& datatype, size_t i){
-
-  auto& name = datatype.name();
-  auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
-
-  // generate move operator=
-  "_$& operator=(_$&& other) noexcept {\n"_fs.outf(newline(), constructors[i], constructors[i]);
-  add_indent();
-  "if(this != &other) {\n"_fs.outf(newline());
-  add_indent();
-  for(size_t j=0; j<components[i].size(); ++j){
-    if(components[i][j] == self){
-      "delete p$_;\n"_fs.outf(newline(), j+1);
-      "p$_ = other.p$_;\n"_fs.outf(newline(), j+1, j+1);
-      "other.p$_ = nullptr;\n"_fs.outf(newline(), j+1);
-    }else{
-      "p$_ = std::move(other.p$_);\n"_fs.outf(newline(), j+1, j+1);
-    }
-  }
-  sub_indent();
-  "}\n"_fs.outf(newline());
-  "return *this;\n"_fs.outf(newline());
-  sub_indent();
-  "}\n"_fs.outf(newline());
-}
-void
 Synthesizer::syn_class_def_struct_copyOperator(
 const Datatype& datatype, size_t i){
 
-  auto& name = datatype.name();
+  // auto& name = datatype.name();
   auto& self = datatype.self();
   auto& constructors = datatype.constructors();
   auto& components = datatype.components();
@@ -675,8 +620,8 @@ const Datatype& datatype, size_t i){
       add_indent();
       for(size_t j=0; j<components[i].size(); ++j){
         if(components[i][j] == self){
-          "delete p$_;\n"_fs.outf(newline(), j+1);
-          "p$_ = other.p$_;\n"_fs.outf(newline(), j+1, j+1);
+          "p$_.reset();\n"_fs.outf(newline(), j+1);
+          "p$_ = std::make_shared<$>(*other.p$_);\n"_fs.outf(newline(), j+1, self, j+1);
         }else{
           "p$_ = other.p$_; \n"_fs.outf(newline(), j+1, j+1);
         }
@@ -686,6 +631,29 @@ const Datatype& datatype, size_t i){
     "return *this; \n"_fs.outf(newline());
     sub_indent();
   "} \n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_struct_moveOperator(
+const Datatype& datatype, size_t i){
+
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  // generate move operator=
+  "_$& operator=(_$&& other) noexcept {\n"_fs.outf(newline(), constructors[i], constructors[i]);
+    add_indent();
+    "if(this != &other) {\n"_fs.outf(newline());
+      add_indent();
+      for(size_t j=0; j<components[i].size(); ++j){
+        "p$_ = std::move(other.p$_);\n"_fs.outf(newline(), j+1, j+1);
+      }
+      sub_indent();
+    "}\n"_fs.outf(newline());
+    "return *this;\n"_fs.outf(newline());
+    sub_indent();
+  "}\n"_fs.outf(newline());
 }
 
 

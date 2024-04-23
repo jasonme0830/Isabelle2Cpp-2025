@@ -3,6 +3,9 @@ theory datatypedefs
 begin
 
 datatype ybool = yTrue | yFalse | yMid
-datatype obool = oMid | oTrue | oFalse
+
+
+datatype 'a newTree = newLeaf |
+                      newNode "'a newTree" "'a slist" "'a newTree" 
 
 end
