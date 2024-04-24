@@ -18,15 +18,16 @@ Code::Code()
 Datatype&
 Code::entry_datatype(const string& name)
 {
+  datatypes_.emplace(name, *this);
   names_of_datatypes_.push_back(name);
-  return datatypes_[name];
+  return datatypes_.at(name);
 }
 
 Datatype*
 Code::find_datatype(const string& name)
 {
   if (datatypes_.count(name)) {
-    return &datatypes_[name];
+    return &datatypes_.at(name);
   } else {
     return nullptr;
   }
@@ -103,7 +104,7 @@ void
 Code::pop_datatype()
 {
   auto name = names_of_datatypes_.back();
-  for (auto& cons : datatypes_[name].constructors()) {
+  for (auto& cons : datatypes_.at(name).constructors()) {
     cons_types_.erase(cons);
   }
   datatypes_.erase(name);

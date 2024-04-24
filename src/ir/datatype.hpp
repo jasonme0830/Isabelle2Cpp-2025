@@ -9,6 +9,10 @@ namespace hol2cpp {
 class Datatype
 {
 public:
+
+  Datatype(Code& code);
+  Code& code();
+  
   void is_predef(bool value);
   bool is_predef() const;
 
@@ -39,6 +43,9 @@ public:
   std::vector<std::vector<Ptr<Type>>>& abstracts();
 
 private:
+
+  Code& code_;
+
   bool is_predef_;
   bool is_recuisive_;
 

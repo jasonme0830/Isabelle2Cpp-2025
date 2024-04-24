@@ -4,9 +4,19 @@ using namespace std;
 
 namespace hol2cpp {
 string
-NormalType::gen_datatype(Datatype&) const
+NormalType::gen_datatype(Datatype& type) const
 {
-  return name;
+  // return name;
+  if (theNormalTypeMapping.count(name)) {
+    if (!type.is_predef()) {
+      type.code().add_header("cstdint");
+    }
+
+    return theNormalTypeMapping.at(name);
+  } else {
+    // e.g. bool
+    return name;
+  }
 }
 
 string
@@ -18,7 +28,15 @@ ArgumentType::gen_datatype(Datatype& type) const
 string
 TemplateType::gen_datatype(Datatype& type) const
 {
-  auto res = name + '<';
+  if (!type.is_predef() && theHeaderMapping.count(name)) {
+    type.code().add_header(theHeaderMapping.at(name));
+  }
+
+  string map_name = theTemplateTypeMapping.count(name)
+                    ? theTemplateTypeMapping.at(name)
+                    : name;
+
+  auto res = map_name + '<';
   for (size_t i = 0; i < args.size(); ++i) {
     if (i == 0) {
       res += args[i]->gen_datatype(type);

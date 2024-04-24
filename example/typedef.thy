@@ -60,7 +60,7 @@ datatype 'a ftree = fLeaf |
                     fNode1 'a "'a ftree" |
                     fNode2 "'a ftree" "'a ftree" 'a 
 datatype 'a gtree = gNode1 'a "'a gtree" "'a gtree" |
-                    gNode2 "'a gtree" 'a |
+                    gNode2 "'a gtree" nat |
                     gLeaf
 datatype 'a htree = hNode1 "'a htree" "'a htree" 'a |
                     hNode2 'a "'a htree" |

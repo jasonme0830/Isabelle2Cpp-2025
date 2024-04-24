@@ -1,9 +1,8 @@
+#include <cstdint>
 #include <cstdlib>
+#include <deque>
 #include <memory>
 #include <variant>
-#include <list>
-
-using namespace std;
 
 template<typename T1>
 class yoption {
@@ -1524,13 +1523,13 @@ class gtree {
     };
     struct _gNode2 {
         std::shared_ptr<gtree<T1>> p1_;
-        T1 p2_;
+        std::uint64_t p2_;
 
         gtree<T1> p1() const { return *p1_; }
-        const T1 &p2() const { return p2_; }
+        const std::uint64_t &p2() const { return p2_; }
 
 
-        _gNode2(const gtree<T1> &p1, const T1 &p2 )
+        _gNode2(const gtree<T1> &p1, const std::uint64_t &p2 )
             :p1_(std::make_shared<gtree<T1>>(p1))
             ,p2_(p2)
         {}
@@ -1610,7 +1609,7 @@ class gtree {
     static gtree<T1> new_gNode1(const T1 &p1, const gtree<T1> &p2, const gtree<T1> &p3) {
         return gtree<T1> ( _gNode1 ( p1, p2, p3 ) );
     }
-    static gtree<T1> new_gNode2(const gtree<T1> &p1, const T1 &p2) {
+    static gtree<T1> new_gNode2(const gtree<T1> &p1, const std::uint64_t &p2) {
         return gtree<T1> ( _gNode2 ( p1, p2 ) );
     }
     static gtree<T1> new_gLeaf() {
@@ -1674,15 +1673,15 @@ class newTree {
     };
     struct _newNode {
         std::shared_ptr<newTree<T1>> p1_;
-        list<T1> p2_;
+        std::deque<T1> p2_;
         std::shared_ptr<newTree<T1>> p3_;
 
         newTree<T1> p1() const { return *p1_; }
-        const list<T1> &p2() const { return p2_; }
+        const std::deque<T1> &p2() const { return p2_; }
         newTree<T1> p3() const { return *p3_; }
 
 
-        _newNode(const newTree<T1> &p1, const list<T1> &p2, const newTree<T1> &p3 )
+        _newNode(const newTree<T1> &p1, const std::deque<T1> &p2, const newTree<T1> &p3 )
             :p1_(std::make_shared<newTree<T1>>(p1))
             ,p2_(p2)
             ,p3_(std::make_shared<newTree<T1>>(p3))
@@ -1752,7 +1751,7 @@ class newTree {
     static newTree<T1> new_newLeaf() {
         return newTree<T1> ( _newLeaf (  ) );
     }
-    static newTree<T1> new_newNode(const newTree<T1> &p1, const list<T1> &p2, const newTree<T1> &p3) {
+    static newTree<T1> new_newNode(const newTree<T1> &p1, const std::deque<T1> &p2, const newTree<T1> &p3) {
         return newTree<T1> ( _newNode ( p1, p2, p3 ) );
     }
 

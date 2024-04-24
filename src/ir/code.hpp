@@ -51,6 +51,7 @@ private:
 
   std::vector<std::string> names_of_func_entities_;
   std::map<std::string, FuncEntity> func_entities_;
+  
   std::set<std::string> headers_;
 
   std::map<std::string, Ptr<ShortDef>> short_defs_;

@@ -3,6 +3,17 @@
 using namespace std;
 
 namespace hol2cpp {
+
+Datatype::Datatype(Code& code)
+:code_(code)
+{
+
+}
+Code&
+Datatype::code()
+{
+  return code_;
+}
 void
 Datatype::is_predef(bool value)
 {
