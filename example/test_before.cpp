@@ -1,16 +1,14 @@
-#include "test_all_move.hpp"
+#include "test_before.hpp"
 
 std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2) {
-    // add sZero n = n
+    // add 0 n = n
     if (arg1 == 0) {
         return arg2;
     }
 
-    // add (sSucc m) n = sSucc (add m n)
+    // add (Suc m) n = Suc (add m n)
     auto m = arg1 - 1;
-    auto temp0 = m;
-    auto temp1 = arg2;
-    return add(std::move(temp0), std::move(temp1)) + 1;
+    return add(m, arg2) + 1;
 }
 
 bool evn(const std::uint64_t &arg1) {
@@ -28,8 +26,7 @@ bool evn(const std::uint64_t &arg1) {
 
     // evn (Suc (Suc n)) = evn n
     auto n = (arg1 - 1) - 1;
-    auto temp0 = n;
-    return evn(std::move(temp0));
+    return evn(n);
 }
 
 std::uint64_t natofsnat(const std::uint64_t &arg1) {
@@ -40,8 +37,7 @@ std::uint64_t natofsnat(const std::uint64_t &arg1) {
 
     // natofsnat (sSucc n) = (natofsnat n) + 1
     auto n = arg1 - 1;
-    auto temp0 = n;
-    return natofsnat(std::move(temp0)) + 1;
+    return natofsnat(n) + 1;
 }
 
 std::uint64_t snatofnat(const std::uint64_t &arg1) {
@@ -52,8 +48,7 @@ std::uint64_t snatofnat(const std::uint64_t &arg1) {
 
     // snatofnat (Suc n) = sSucc (snatofnat n)
     auto n = arg1 - 1;
-    auto temp0 = n;
-    return snatofnat(std::move(temp0)) + 1;
+    return snatofnat(n) + 1;
 }
 
 std::uint64_t fib(const std::uint64_t &arg1) {
@@ -70,9 +65,7 @@ std::uint64_t fib(const std::uint64_t &arg1) {
     }
 
     // fib n = (fib (n - 1)) + (fib (n - 2))
-    auto temp0 = arg1 - 2;
-    auto temp1 = arg1 - 1;
-    return fib(std::move(temp1)) + fib(std::move(temp0));
+    return fib(arg1 - 1) + fib(arg1 - 2);
 }
 
 std::uint64_t sfib(const std::uint64_t &arg1) {
@@ -90,11 +83,17 @@ std::uint64_t sfib(const std::uint64_t &arg1) {
 
     // sfib (sSucc (sSucc m)) = add (sfib (sSucc m)) (sfib m)
     auto m = (arg1 - 1) - 1;
-    auto temp1 = m + 1;
-    auto temp0 = sfib(std::move(temp1));
-    auto temp3 = m;
-    auto temp2 = sfib(std::move(temp3));
-    return add(std::move(temp0), std::move(temp2));
+    return add(sfib(m + 1), sfib(m));
+}
+
+std::uint64_t fact(const std::uint64_t &arg1) {
+    // fact 0 = 1
+    if (arg1 == 0) {
+        return 1;
+    }
+
+    // fact n = n * (fact (n - 1))
+    return arg1 * fact(arg1 - 1);
 }
 
 bool altrue(const std::uint64_t &arg1) {
@@ -102,7 +101,7 @@ bool altrue(const std::uint64_t &arg1) {
     return true;
 }
 
-std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::uint64_t> arg2) {
+std::deque<std::uint64_t> merge(const std::deque<std::uint64_t> &arg1, const std::deque<std::uint64_t> &arg2) {
     // merge xs [] = xs
     if (arg2.empty()) {
         return arg1;
@@ -115,33 +114,27 @@ std::deque<std::uint64_t> merge(std::deque<std::uint64_t> arg1, std::deque<std::
 
     // merge (x # xs) (y # ys) = If (x \<le> y) (x # (merge xs (y # ys))) (y # (merge (x # xs) ys))
     auto x = arg1.front();
-    arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(arg1);
+    auto xs = std::deque<std::uint64_t>(arg1.begin() + 1, arg1.end());
     auto y = arg2.front();
-    arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto ys = std::move(arg2);
+    auto ys = std::deque<std::uint64_t>(arg2.begin() + 1, arg2.end());
     std::deque<std::uint64_t> temp0;
     if (x <= y) {
-        auto temp1 = std::move(xs);
-        auto temp3 = std::move(ys);
-        temp3.push_front(y);
-        auto temp2 = std::move(temp3);
-        auto temp4 = merge(std::move(temp1), std::move(temp2));
-        temp4.push_front(x);
-        temp0 = std::move(temp4);
+        auto temp1 = ys;
+        temp1.push_front(y);
+        auto temp2 = merge(xs, temp1);
+        temp2.push_front(x);
+        temp0 = temp2;
     } else {
-        auto temp6 = std::move(xs);
-        temp6.push_front(x);
-        auto temp5 = std::move(temp6);
-        auto temp7 = std::move(ys);
-        auto temp8 = merge(std::move(temp5), std::move(temp7));
-        temp8.push_front(y);
-        temp0 = std::move(temp8);
+        auto temp3 = xs;
+        temp3.push_front(x);
+        auto temp4 = merge(temp3, ys);
+        temp4.push_front(y);
+        temp0 = temp4;
     }
     return temp0;
 }
 
-std::deque<std::uint64_t> merge_sort(std::deque<std::uint64_t> arg1) {
+std::deque<std::uint64_t> merge_sort(const std::deque<std::uint64_t> &arg1) {
     // merge_sort [] = []
     if (arg1.empty()) {
         return std::deque<std::uint64_t>();
@@ -154,14 +147,7 @@ std::deque<std::uint64_t> merge_sort(std::deque<std::uint64_t> arg1) {
     }
 
     // merge_sort xs = merge (merge_sort (take ((length xs) div 2) xs)) (merge_sort (drop ((length xs) div 2) xs))
-    auto temp1 = std::deque<std::uint64_t>(arg1.begin(), arg1.begin() + arg1.size() / 2);
-    auto temp0 = merge_sort(std::move(temp1));
-    auto temp4 = arg1.size() / 2;
-    auto temp5 = std::move(arg1);
-    temp5.erase(temp5.begin(), std::next(temp5.begin(), temp4));
-    auto temp3 = std::move(temp5);
-    auto temp2 = merge_sort(std::move(temp3));
-    return merge(std::move(temp0), std::move(temp2));
+    return merge(merge_sort(std::deque<std::uint64_t>(arg1.begin(), arg1.begin() + arg1.size() / 2)), merge_sort(std::deque<std::uint64_t>(arg1.begin() + arg1.size() / 2, arg1.end())));
 }
 
 // generated by HOL2Cpp

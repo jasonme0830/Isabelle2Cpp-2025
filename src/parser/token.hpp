@@ -69,9 +69,9 @@ public:
     Or,         // \<or>
     And,        // \<and>
     NotEq,      // \<noteq>
-    Le,         // \<le>
+    Le,         // \<le> <=
     Lt,         // <
-    Ge,         // \<ge>
+    Ge,         // \<ge> >=
     Gt,         // >
     SubsetEq,   // \<subseteq>
     Subset,     // \<subset>

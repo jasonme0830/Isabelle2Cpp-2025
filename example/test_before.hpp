@@ -10,9 +10,12 @@
 template<typename T1>
 class atree {
     struct _aLeaf {
+        _aLeaf() {}
+        _aLeaf(const _aLeaf& other){ }
         _aLeaf(_aLeaf&& other) noexcept{ }
         bool operator<(const _aLeaf &) const { return false; }
-        _aLeaf& operator=(_aLeaf&& other) noexcept { }
+        _aLeaf& operator=(const _aLeaf& other) { return *this; }
+        _aLeaf& operator=(_aLeaf&& other) noexcept { return *this; }
     };
     struct _aNode1 {
         std::shared_ptr<atree<T1>> p1_;
@@ -23,30 +26,114 @@ class atree {
         const T1 &p2() const { return p2_; }
         atree<T1> p3() const { return *p3_; }
 
+
+        _aNode1(const atree<T1> &p1, const T1 &p2, const atree<T1> &p3 )
+            :p1_(std::make_shared<atree<T1>>(p1))
+            ,p2_(p2)
+            ,p3_(std::make_shared<atree<T1>>(p3))
+        {}
+        _aNode1(const _aNode1& other)
+            :p1_(std::make_shared<atree<T1>>(*other.p1_))
+            ,p2_(other.p2_)
+            ,p3_(std::make_shared<atree<T1>>(*other.p3_))
+        {}
+        _aNode1(_aNode1&& other) noexcept 
+            :p1_(std::move(other.p1_))
+            ,p2_(std::move(other.p2_))
+            ,p3_(std::move(other.p3_))
+        { }
+
         bool operator<(const _aNode1 &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+        }
+        _aNode1& operator=(const _aNode1& other){ 
+            if(this != &other){ 
+                p1_.reset();
+                p1_ = std::make_shared<atree<T1>>(*other.p1_);
+                p2_ = other.p2_; 
+                p3_.reset();
+                p3_ = std::make_shared<atree<T1>>(*other.p3_);
+            } 
+            return *this; 
+        } 
+        _aNode1& operator=(_aNode1&& other) noexcept {
+            if(this != &other) {
+                p1_ = std::move(other.p1_);
+                p2_ = std::move(other.p2_);
+                p3_ = std::move(other.p3_);
+            }
+            return *this;
         }
     };
 
     std::variant<_aLeaf, _aNode1> value_;
-    atree(const std::variant<_aLeaf, _aNode1> &value) : value_(value) {}
 
   public:
-    atree() = default;
 
-    static atree<T1> aLeaf() {
-        return atree<T1> { _aLeaf {  } };
+    atree(const std::variant<_aLeaf, _aNode1> &value) : value_(value) {}
+    //深拷贝构造函数
+    atree(const atree<T1>& other) { 
+        if(std::holds_alternative<_aLeaf>(other.value_)){ 
+            const _aLeaf& other_node = std::get<_aLeaf>(other.value_); 
+            value_ = other_node;
+        } 
+        if(std::holds_alternative<_aNode1>(other.value_)){ 
+            const _aNode1& other_node = std::get<_aNode1>(other.value_); 
+            value_ = other_node;
+        } 
+    } 
+    //移动构造函数
+    atree(atree<T1>&& other){
+        if(std::holds_alternative<_aLeaf>(other.value_)){ 
+            _aLeaf& other_node = std::get<_aLeaf>(other.value_); 
+            value_ = std::move(other_node);
+        } 
+        if(std::holds_alternative<_aNode1>(other.value_)){ 
+            _aNode1& other_node = std::get<_aNode1>(other.value_); 
+            value_ = std::move(other_node);
+        } 
     }
-    static atree<T1> aNode1(const atree<T1> &p1, const T1 &p2, const atree<T1> &p3) {
-        return atree<T1> { _aNode1 { std::make_shared<atree<T1>>(p1), p2, std::make_shared<atree<T1>>(p3) } };
+
+    static atree<T1> new_aLeaf() {
+        return atree<T1> ( _aLeaf (  ) );
+    }
+    static atree<T1> new_aNode1(const atree<T1> &p1, const T1 &p2, const atree<T1> &p3) {
+        return atree<T1> ( _aNode1 ( p1, p2, p3 ) );
     }
 
     bool is_aLeaf() const { return std::holds_alternative<_aLeaf>(value_); }
     bool is_aNode1() const { return std::holds_alternative<_aNode1>(value_); }
-
     const _aNode1 &as_aNode1() const { return std::get<_aNode1>(value_); }
 
     bool operator<(const atree<T1> &rhs) const { return value_ < rhs.value_; }
+    atree<T1>& operator=(atree<T1>&& other) noexcept {
+        if(this != &other){
+            if(std::holds_alternative<_aLeaf>(other)){
+                _aLeaf& other_value = std::get<_aLeaf>(other.value_);
+                value_ = std::move(other_value);
+            }
+            if(std::holds_alternative<_aNode1>(other)){
+                _aNode1& other_value = std::get<_aNode1>(other.value_);
+                value_ = std::move(other_value);
+            }
+        }
+        return *this;
+    }
+    //拷贝赋值运算符
+    atree<T1>& operator=(const atree<T1>& other){ 
+        if(this != &other){ 
+            if(std::holds_alternative<_aLeaf>(other.value_)){ 
+                const _aLeaf& other_node = std::get<_aLeaf>(other.value_); 
+                value_ = other.value_; 
+            } 
+            if(std::holds_alternative<_aNode1>(other.value_)){ 
+                const _aNode1& other_node = std::get<_aNode1>(other.value_); 
+                value_ = other.value_; 
+            } 
+        } 
+        return *this; 
+    }
+
 };
 
 

@@ -224,14 +224,14 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   out_.get() << endl;
   
   // generate std::variant<_C0, ..., _Ck> value_;
-  syn_class_def_variant(datatype, variant);
-  out_.get()<<endl;
-
-  // generate std::variant<_C0, ..., _Ck> value_;
   if (use_class) {
     "public:\n"_fs.outf(newline(-2));
     out_.get()<<endl;
   } 
+  // generate std::variant<_C0, ..., _Ck> value_;
+  syn_class_def_variant(datatype, variant);
+  out_.get()<<endl;
+  
   //value构造函数
   syn_class_def_valueConstructor(datatype, variant);
   //拷贝构造函数
