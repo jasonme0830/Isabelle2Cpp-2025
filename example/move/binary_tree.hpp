@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <cstdlib>
 #include <deque>
 #include <memory>
@@ -186,15 +187,21 @@ tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
         return temp0;
     }
 
-    // inserttree a (Node left x right) = (if a \<le> x then inserttree a left else inserttree a right )
+    // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
     tree<T1> temp0;
     if (arg1 <= x) {
-        temp0 = inserttree(arg1, left);
+        auto temp1 = tree<T1>::Node(
+            inserttree(arg1, left), x, right
+        );
+        temp0 = temp1;
     } else {
-        temp0 = inserttree(arg1, right);
+        auto temp2 = tree<T1>::Node(
+            left, x, inserttree(arg1, right)
+        );
+        temp0 = temp2;
     }
     return temp0;
 }
@@ -220,7 +227,7 @@ std::deque<T1> transtolist(const tree<T1> &arg1) {
 
 template<typename T1>
 T1 rightest(const tree<T1> &arg1) {
-    // rightest (Node left x right) = (if right=Tip then x else (rightest right))
+    // rightest (Node left x right) = (if right=Tip then x  ...
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
     T1 temp0;
@@ -239,18 +246,14 @@ tree<T1> rightestleft(const tree<T1> &arg1) {
         return tree<T1>::Tip();
     }
 
-    // rightestleft (Node left x right) =(if right=Tip then left else (Node left x (rightestleft right)))
+    // rightestleft (Node left x right) =(if right=Tip then left  ...
     auto left = arg1.as_Node().p1();
-    auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
     tree<T1> temp0;
     if (right == tree<T1>::Tip()) {
         temp0 = left;
     } else {
-        auto temp1 = tree<T1>::Node(
-            left, x, rightestleft(right)
-        );
-        temp0 = temp1;
+        temp0 = rightestleft(right);
     }
     return temp0;
 }
@@ -290,7 +293,7 @@ tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
         return tree<T1>::Tip();
     }
 
-    // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right))else if a<x then (Node (deltree a left )x right) else (Node left x (deltree a right)) )
+    // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
@@ -319,6 +322,94 @@ tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
+tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
+    // changetree a b Tip = Tip
+    if (arg3.is_Tip()) {
+        return tree<T1>::Tip();
+    }
+
+    // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
+    auto left = arg3.as_Node().p1();
+    auto x = arg3.as_Node().p2();
+    auto right = arg3.as_Node().p3();
+    tree<T1> temp0;
+    if (arg1 == x) {
+        auto temp1 = tree<T1>::Node(
+            left, arg2, right
+        );
+        temp0 = temp1;
+    } else {
+        tree<T1> temp2;
+        if (arg1 < x) {
+            auto temp3 = tree<T1>::Node(
+                changetree(arg1, arg2, left), x, right
+            );
+            temp2 = temp3;
+        } else {
+            auto temp4 = tree<T1>::Node(
+                left, x, changetree(arg1, arg2, right)
+            );
+            temp2 = temp4;
+        }
+        temp0 = temp2;
+    }
+    return temp0;
+}
+
+template<typename T1>
+std::deque<T1> Merge(const std::deque<T1> &arg1, const std::deque<T1> &arg2) {
+    // Merge [] xs=xs
+    if (arg1.empty()) {
+        return arg2;
+    }
+
+    // Merge xs [] = xs
+    if (arg2.empty()) {
+        return arg1;
+    }
+
+    // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
+    auto x = arg1.front();
+    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
+    auto y = arg2.front();
+    auto ys = std::deque<T1>(arg2.begin() + 1, arg2.end());
+    std::deque<T1> temp0;
+    if (x <= y) {
+        auto temp1 = ys;
+        temp1.push_front(y);
+        auto temp2 = Merge(xs, temp1);
+        temp2.push_front(x);
+        temp0 = temp2;
+    } else {
+        auto temp3 = xs;
+        temp3.push_front(x);
+        auto temp4 = Merge(temp3, ys);
+        temp4.push_front(y);
+        temp0 = temp4;
+    }
+    return temp0;
+}
+
+template<typename T1>
+std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
+    // MergeSort [] = []
+    if (arg1.empty()) {
+        return std::deque<T1>();
+    }
+
+    // MergeSort (Cons a []) = [a]
+    if (!arg1.empty()) {
+        if (std::deque<T1>(arg1.begin() + 1, arg1.end()).empty()) {
+            auto a = arg1.front();
+            return std::deque<T1>{a};
+        }
+    }
+
+    // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
+    return Merge(MergeSort(std::deque<T1>(arg1.begin(), arg1.begin() + size(arg1) / 2)), MergeSort(std::deque<T1>(arg1.begin() + size(arg1) / 2, arg1.end())));
+}
+
+template<typename T1>
 std::deque<T1> sorttree(const tree<T1> &arg1) {
     // sorttree Tip = []
     if (arg1.is_Tip()) {
@@ -335,14 +426,14 @@ std::deque<T1> sorttree(const tree<T1> &arg1) {
         }
     }
 
-    // sorttree (Node left x right) =(QuickSort (transtolist (Node left x right)))
+    // sorttree (Node left x right) =(MergeSort (transtolist (Node left x right)))
     auto left = arg1.as_Node().p1();
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
     auto temp0 = tree<T1>::Node(
         left, x, right
     );
-    return QuickSort(transtolist(temp0));
+    return MergeSort(transtolist(temp0));
 }
 
 // generated by HOL2Cpp

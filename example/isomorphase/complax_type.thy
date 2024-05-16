@@ -37,11 +37,11 @@ datatype ('a,'b) klist = kNil | kCons 'a "(('a,'b)klist,'a) clist"
 
 datatype 'a etree = eLeaf | eNode 'a "'a etree option" "'a etree option"
 
-datatype ('a, 'b) fun_copy = Fun "'a ⇒ 'b"
+datatype ('a, 'b) fun_copy = Fun "'a \<Rightarrow> 'b"
 
 (*datatype 'a also_wrong = W1 | W2 "(('a also_wrong), 'a) fun_copy"*)
 
-datatype 'a ftree = FTLeaf 'a | FTNode "'a ⇒ 'a ftree"
+datatype 'a ftree = FTLeaf 'a | FTNode "'a \<Rightarrow> 'a ftree"
 
 (*datatype 'a pow_list = PNil 'a | PCons "('a ∗ 'a) pow_list"*)
 
