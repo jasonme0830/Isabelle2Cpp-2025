@@ -232,6 +232,8 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   syn_class_def_variant(datatype, variant);
   out_.get()<<endl;
   
+  //默认构造函数
+
   //value构造函数
   syn_class_def_valueConstructor(datatype, variant);
   //拷贝构造函数
@@ -265,11 +267,30 @@ Synthesizer::syn_class_def_variant(const Datatype& datatype, const TypeInfo& var
   "$ value_;\n"_fs.outf(newline(), variant.to_str());
 }
 void
+Synthesizer::syn_class_def_defaultConstructor(const Datatype& datatype, const TypeInfo& variant){
+  auto& name = datatype.name();
+  // auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  "//默认构造函数\n"_fs.outf(newline());
+  "$(){"_fs.outf(newline(), name);
+  add_indent();
+  for (size_t i = 0; i < components.size();++i)  {
+    if(components[i].size() == 0){
+      "value_ = _$();"_fs.outf(newline(), constructors[i]);
+    }
+  }
+  sub_indent();
+  "}"_fs.outf(newline());
+}
+void
 Synthesizer::syn_class_def_valueConstructor(const Datatype& datatype, const TypeInfo& variant){
   auto& name = datatype.name();
 
+  "//value构造函数\n"_fs.outf(newline());
   "$($value) : value_(value) {}\n"_fs.outf(
-    newline(), name, variant.to_str_as_arg());
+      newline(), name, variant.to_str_as_arg());
 }
 void
 Synthesizer::syn_class_def_copyConstructor(const Datatype& datatype){

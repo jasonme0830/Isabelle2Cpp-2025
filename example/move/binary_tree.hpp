@@ -63,11 +63,11 @@ class tree {
         }
     };
 
-    std::variant<_Tip, _Node> value_;
-
   public:
 
-    tree(const std::variant<_Tip, _Node> &value) : value_(value) {}
+    std::variant<_Tip, _Node> value_;
+
+    //value构造函数    tree(const std::variant<_Tip, _Node> &value) : value_(value) {}
     //深拷贝构造函数
     tree(const tree<T1>& other) { 
         if(std::holds_alternative<_Tip>(other.value_)){ 

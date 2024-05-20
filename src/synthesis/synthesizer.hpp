@@ -24,6 +24,7 @@ private:
   void syn_class_definition(const Datatype& datatype);
 
   void syn_class_def_variant(const Datatype &, const TypeInfo &);
+  void syn_class_def_defaultConstructor(const Datatype &, const TypeInfo &);
   void syn_class_def_valueConstructor(const Datatype &, const TypeInfo &);
   void syn_class_def_copyConstructor(const Datatype &);
   void syn_class_def_moveConstructor(const Datatype &);
