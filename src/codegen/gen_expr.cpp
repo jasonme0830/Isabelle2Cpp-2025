@@ -407,6 +407,7 @@ BinaryOpExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     /**
      * WARN: BE CAREFUL HERE!
      * `== Nil` is special
+     * binary_tree: "right=Tip" also special
      */
     case Token::Type::Equiv:
       if (auto val_expr = dynamic_cast<VarExpr*>(lhs.get())) {
@@ -418,6 +419,11 @@ BinaryOpExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       if (auto val_expr = dynamic_cast<VarExpr*>(rhs.get())) {
         if (val_expr->name == "Nil") {
           return "$.empty()"_fs.format(unmove_expr(lhs->gen_expr(func)));
+        }
+
+        // for binary_tree
+        if (auto datatype = func.code().find_datatype_by_cons(val_expr->name)){
+          return "$.is_$()"_fs.format(unmove_expr(lhs->gen_expr(func)), val_expr->name);
         }
       }
 

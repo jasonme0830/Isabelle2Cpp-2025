@@ -12,7 +12,7 @@ Isomorphism::Isomorphism(Theory& thy)
   // 第二次遍历，处理函数中的同构数据类型
   replace_iso_type_in_func();
 
-  this->print_theory();
+  // this->print_theory();
 
   // 第三次遍历，判别函数定义中递归函数类别
   // find_rescusive_func();

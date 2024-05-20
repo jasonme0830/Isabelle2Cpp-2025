@@ -236,7 +236,7 @@ T1 rightest(const tree<T1> &arg1) {
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
     T1 temp0;
-    if (right == tree<T1>::Tip()) {
+    if (right.is_Tip()) {
         temp0 = x;
     } else {
         temp0 = rightest(right);
@@ -255,7 +255,7 @@ tree<T1> rightestleft(const tree<T1> &arg1) {
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
     tree<T1> temp0;
-    if (right == tree<T1>::Tip()) {
+    if (right.is_Tip()) {
         temp0 = left;
     } else {
         temp0 = rightestleft(right);
@@ -274,11 +274,11 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
     tree<T1> temp0;
-    if (right == tree<T1>::Tip()) {
+    if (right.is_Tip()) {
         temp0 = left;
     } else {
         tree<T1> temp1;
-        if (left == tree<T1>::Tip()) {
+        if (left.is_Tip()) {
             temp1 = right;
         } else {
             auto temp2 = tree<T1>::Node(
