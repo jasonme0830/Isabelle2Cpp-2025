@@ -233,7 +233,7 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   out_.get()<<endl;
   
   //默认构造函数
-
+  syn_class_def_defaultConstructor(datatype, variant);
   //value构造函数
   syn_class_def_valueConstructor(datatype, variant);
   //拷贝构造函数
@@ -274,15 +274,15 @@ Synthesizer::syn_class_def_defaultConstructor(const Datatype& datatype, const Ty
   auto& components = datatype.components();
 
   "//默认构造函数\n"_fs.outf(newline());
-  "$(){"_fs.outf(newline(), name);
+  "$(){\n"_fs.outf(newline(), name);
   add_indent();
   for (size_t i = 0; i < components.size();++i)  {
     if(components[i].size() == 0){
-      "value_ = _$();"_fs.outf(newline(), constructors[i]);
+      "value_ = _$();\n"_fs.outf(newline(), constructors[i]);
     }
   }
   sub_indent();
-  "}"_fs.outf(newline());
+  "}\n"_fs.outf(newline());
 }
 void
 Synthesizer::syn_class_def_valueConstructor(const Datatype& datatype, const TypeInfo& variant){
@@ -341,7 +341,7 @@ Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
   auto& components = datatype.components();
 
   for (size_t i = 0; i < components.size(); ++i) {
-    "static $ new_$("_fs.outf(newline(), self, constructors[i]);
+    "static $ $("_fs.outf(newline(), self, constructors[i]);
     for (size_t j = 0; j < components[i].size(); ++j) {
       if (j == 0) {
         "const $ &p1"_fs.outf(out_.get(), components[i][j]);
@@ -436,7 +436,7 @@ Synthesizer::syn_class_def_moveOperator(const Datatype& datatype){
     "if(this != &other){\n"_fs.outf(newline());
       add_indent();
       for(const auto& constructor : constructors){
-        "if(std::holds_alternative<_$>(other)){\n"_fs.outf(newline(), constructor);
+        "if(std::holds_alternative<_$>(other.value_)){\n"_fs.outf(newline(), constructor);
           add_indent();
           "_$& other_value = std::get<_$>(other.value_);\n"_fs.outf(newline(),constructor, constructor);
           "value_ = std::move(other_value);\n"_fs.outf(newline());

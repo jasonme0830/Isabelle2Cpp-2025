@@ -2,61 +2,58 @@
 #include <cstdlib>
 #include <deque>
 #include <memory>
-#include <optional>
-#include <set>
-#include <utility>
 #include <variant>
 
 template<typename T1>
-class atree {
-    struct _aLeaf {
-        _aLeaf() {}
-        _aLeaf(const _aLeaf& other){ }
-        _aLeaf(_aLeaf&& other) noexcept{ }
-        bool operator<(const _aLeaf &) const { return false; }
-        _aLeaf& operator=(const _aLeaf& other) { return *this; }
-        _aLeaf& operator=(_aLeaf&& other) noexcept { return *this; }
+class tree {
+    struct _Tip {
+        _Tip() {}
+        _Tip(const _Tip& other){ }
+        _Tip(_Tip&& other) noexcept{ }
+        bool operator<(const _Tip &) const { return false; }
+        _Tip& operator=(const _Tip& other) { return *this; }
+        _Tip& operator=(_Tip&& other) noexcept { return *this; }
     };
-    struct _aNode1 {
-        std::shared_ptr<atree<T1>> p1_;
+    struct _Node {
+        std::shared_ptr<tree<T1>> p1_;
         T1 p2_;
-        std::shared_ptr<atree<T1>> p3_;
+        std::shared_ptr<tree<T1>> p3_;
 
-        atree<T1> p1() const { return *p1_; }
+        tree<T1> p1() const { return *p1_; }
         const T1 &p2() const { return p2_; }
-        atree<T1> p3() const { return *p3_; }
+        tree<T1> p3() const { return *p3_; }
 
 
-        _aNode1(const atree<T1> &p1, const T1 &p2, const atree<T1> &p3 )
-            :p1_(std::make_shared<atree<T1>>(p1))
+        _Node(const tree<T1> &p1, const T1 &p2, const tree<T1> &p3 )
+            :p1_(std::make_shared<tree<T1>>(p1))
             ,p2_(p2)
-            ,p3_(std::make_shared<atree<T1>>(p3))
+            ,p3_(std::make_shared<tree<T1>>(p3))
         {}
-        _aNode1(const _aNode1& other)
-            :p1_(std::make_shared<atree<T1>>(*other.p1_))
+        _Node(const _Node& other)
+            :p1_(std::make_shared<tree<T1>>(*other.p1_))
             ,p2_(other.p2_)
-            ,p3_(std::make_shared<atree<T1>>(*other.p3_))
+            ,p3_(std::make_shared<tree<T1>>(*other.p3_))
         {}
-        _aNode1(_aNode1&& other) noexcept 
+        _Node(_Node&& other) noexcept 
             :p1_(std::move(other.p1_))
             ,p2_(std::move(other.p2_))
             ,p3_(std::move(other.p3_))
         { }
 
-        bool operator<(const _aNode1 &rhs) const {
+        bool operator<(const _Node &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
-        _aNode1& operator=(const _aNode1& other){ 
+        _Node& operator=(const _Node& other){ 
             if(this != &other){ 
                 p1_.reset();
-                p1_ = std::make_shared<atree<T1>>(*other.p1_);
+                p1_ = std::make_shared<tree<T1>>(*other.p1_);
                 p2_ = other.p2_; 
                 p3_.reset();
-                p3_ = std::make_shared<atree<T1>>(*other.p3_);
+                p3_ = std::make_shared<tree<T1>>(*other.p3_);
             } 
             return *this; 
         } 
-        _aNode1& operator=(_aNode1&& other) noexcept {
+        _Node& operator=(_Node&& other) noexcept {
             if(this != &other) {
                 p1_ = std::move(other.p1_);
                 p2_ = std::move(other.p2_);
@@ -66,68 +63,73 @@ class atree {
         }
     };
 
-    std::variant<_aLeaf, _aNode1> value_;
-
   public:
 
-    atree(const std::variant<_aLeaf, _aNode1> &value) : value_(value) {}
+    std::variant<_Tip, _Node> value_;
+
+    //默认构造函数
+    tree(){
+        value_ = _Tip();
+    }
+    //value构造函数
+    tree(const std::variant<_Tip, _Node> &value) : value_(value) {}
     //深拷贝构造函数
-    atree(const atree<T1>& other) { 
-        if(std::holds_alternative<_aLeaf>(other.value_)){ 
-            const _aLeaf& other_node = std::get<_aLeaf>(other.value_); 
+    tree(const tree<T1>& other) { 
+        if(std::holds_alternative<_Tip>(other.value_)){ 
+            const _Tip& other_node = std::get<_Tip>(other.value_); 
             value_ = other_node;
         } 
-        if(std::holds_alternative<_aNode1>(other.value_)){ 
-            const _aNode1& other_node = std::get<_aNode1>(other.value_); 
+        if(std::holds_alternative<_Node>(other.value_)){ 
+            const _Node& other_node = std::get<_Node>(other.value_); 
             value_ = other_node;
         } 
     } 
     //移动构造函数
-    atree(atree<T1>&& other){
-        if(std::holds_alternative<_aLeaf>(other.value_)){ 
-            _aLeaf& other_node = std::get<_aLeaf>(other.value_); 
+    tree(tree<T1>&& other){
+        if(std::holds_alternative<_Tip>(other.value_)){ 
+            _Tip& other_node = std::get<_Tip>(other.value_); 
             value_ = std::move(other_node);
         } 
-        if(std::holds_alternative<_aNode1>(other.value_)){ 
-            _aNode1& other_node = std::get<_aNode1>(other.value_); 
+        if(std::holds_alternative<_Node>(other.value_)){ 
+            _Node& other_node = std::get<_Node>(other.value_); 
             value_ = std::move(other_node);
         } 
     }
 
-    static atree<T1> new_aLeaf() {
-        return atree<T1> ( _aLeaf (  ) );
+    static tree<T1> Tip() {
+        return tree<T1> ( _Tip (  ) );
     }
-    static atree<T1> new_aNode1(const atree<T1> &p1, const T1 &p2, const atree<T1> &p3) {
-        return atree<T1> ( _aNode1 ( p1, p2, p3 ) );
+    static tree<T1> Node(const tree<T1> &p1, const T1 &p2, const tree<T1> &p3) {
+        return tree<T1> ( _Node ( p1, p2, p3 ) );
     }
 
-    bool is_aLeaf() const { return std::holds_alternative<_aLeaf>(value_); }
-    bool is_aNode1() const { return std::holds_alternative<_aNode1>(value_); }
-    const _aNode1 &as_aNode1() const { return std::get<_aNode1>(value_); }
+    bool is_Tip() const { return std::holds_alternative<_Tip>(value_); }
+    bool is_Node() const { return std::holds_alternative<_Node>(value_); }
+    const _Node &as_Node() const { return std::get<_Node>(value_); }
 
-    bool operator<(const atree<T1> &rhs) const { return value_ < rhs.value_; }
-    atree<T1>& operator=(atree<T1>&& other) noexcept {
+    bool operator<(const tree<T1> &rhs) const { return value_ < rhs.value_; }
+    tree<T1>& operator=(tree<T1>&& other) noexcept {
         if(this != &other){
-            if(std::holds_alternative<_aLeaf>(other)){
-                _aLeaf& other_value = std::get<_aLeaf>(other.value_);
+            if(std::holds_alternative<_Tip>(other.value_)){
+                _Tip& other_value = std::get<_Tip>(other.value_);
                 value_ = std::move(other_value);
             }
-            if(std::holds_alternative<_aNode1>(other)){
-                _aNode1& other_value = std::get<_aNode1>(other.value_);
+            if(std::holds_alternative<_Node>(other.value_)){
+                _Node& other_value = std::get<_Node>(other.value_);
                 value_ = std::move(other_value);
             }
         }
         return *this;
     }
     //拷贝赋值运算符
-    atree<T1>& operator=(const atree<T1>& other){ 
+    tree<T1>& operator=(const tree<T1>& other){ 
         if(this != &other){ 
-            if(std::holds_alternative<_aLeaf>(other.value_)){ 
-                const _aLeaf& other_node = std::get<_aLeaf>(other.value_); 
+            if(std::holds_alternative<_Tip>(other.value_)){ 
+                const _Tip& other_node = std::get<_Tip>(other.value_); 
                 value_ = other.value_; 
             } 
-            if(std::holds_alternative<_aNode1>(other.value_)){ 
-                const _aNode1& other_node = std::get<_aNode1>(other.value_); 
+            if(std::holds_alternative<_Node>(other.value_)){ 
+                const _Node& other_node = std::get<_Node>(other.value_); 
                 value_ = other.value_; 
             } 
         } 
@@ -139,185 +141,304 @@ class atree {
 
 
 template<typename T1>
-std::uint64_t test(const std::deque<T1> &arg1) {
-    // test Nil = 0
-    if (arg1.empty()) {
-        return 0;
+bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
+    // searchtree1 a Tip=False
+    if (arg2.is_Tip()) {
+        return false;
     }
 
-    // test (Cons x xs) = length (If ((length xs) = 0) Nil xs) + 1
-    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-    std::deque<T1> temp0;
-    if (xs.size() == 0) {
-        temp0 = std::deque<T1>();
-    } else {
-        temp0 = xs;
-    }
-    return temp0.size() + 1;
+    // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return (arg1 == x) || (searchtree1(arg1, left) || searchtree1(arg1, right));
 }
 
-std::uint64_t add(const std::uint64_t &arg1, const std::uint64_t &arg2);
+template<typename T1>
+bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
+    // searchtree2 a Tip=False
+    if (arg2.is_Tip()) {
+        return false;
+    }
+
+    // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return searchtree2(arg1, left) || ((arg1 == x) || searchtree2(arg1, right));
+}
 
 template<typename T1>
-std::deque<T1> app(const std::deque<T1> &arg1, const std::deque<T1> &arg2) {
-    // app Nil ys = ys
+bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
+    // searchtree3 a Tip=False
+    if (arg2.is_Tip()) {
+        return false;
+    }
+
+    // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return searchtree3(arg1, left) || (searchtree3(arg1, right) || (arg1 == x));
+}
+
+template<typename T1>
+tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
+    // inserttree a Tip= Node Tip a Tip
+    if (arg2.is_Tip()) {
+        auto temp0 = tree<T1>::Node(
+            tree<T1>::Tip(), arg1, tree<T1>::Tip()
+        );
+        return temp0;
+    }
+
+    // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    tree<T1> temp0;
+    if (arg1 <= x) {
+        auto temp1 = tree<T1>::Node(
+            inserttree(arg1, left), x, right
+        );
+        temp0 = temp1;
+    } else {
+        auto temp2 = tree<T1>::Node(
+            left, x, inserttree(arg1, right)
+        );
+        temp0 = temp2;
+    }
+    return temp0;
+}
+
+template<typename T1>
+std::deque<T1> transtolist(const tree<T1> &arg1) {
+    // transtolist Tip=[]
+    if (arg1.is_Tip()) {
+        return std::deque<T1>();
+    }
+
+    // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
+    auto left = arg1.as_Node().p1();
+    auto a = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
+    auto temp0 = transtolist(left);
+    auto temp1 = transtolist(right);
+    temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+    auto temp2 = temp0;
+    temp2.push_front(a);
+    return temp2;
+}
+
+template<typename T1>
+T1 rightest(const tree<T1> &arg1) {
+    // rightest (Node left x right) = (if right=Tip then x  ...
+    auto x = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
+    T1 temp0;
+    if (right == tree<T1>::Tip()) {
+        temp0 = x;
+    } else {
+        temp0 = rightest(right);
+    }
+    return temp0;
+}
+
+template<typename T1>
+tree<T1> rightestleft(const tree<T1> &arg1) {
+    // rightestleft Tip=Tip
+    if (arg1.is_Tip()) {
+        return tree<T1>::Tip();
+    }
+
+    // rightestleft (Node left x right) =(if right=Tip then left  ...
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
+    tree<T1> temp0;
+    if (right == tree<T1>::Tip()) {
+        temp0 = left;
+    } else {
+        temp0 = rightestleft(right);
+    }
+    return temp0;
+}
+
+template<typename T1>
+tree<T1> deltreeroot(const tree<T1> &arg1) {
+    // deltreeroot Tip=Tip
+    if (arg1.is_Tip()) {
+        return tree<T1>::Tip();
+    }
+
+    // deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) )
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
+    tree<T1> temp0;
+    if (right == tree<T1>::Tip()) {
+        temp0 = left;
+    } else {
+        tree<T1> temp1;
+        if (left == tree<T1>::Tip()) {
+            temp1 = right;
+        } else {
+            auto temp2 = tree<T1>::Node(
+                rightestleft(left), rightest(left), right
+            );
+            temp1 = temp2;
+        }
+        temp0 = temp1;
+    }
+    return temp0;
+}
+
+template<typename T1>
+tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
+    // deltree a Tip = Tip
+    if (arg2.is_Tip()) {
+        return tree<T1>::Tip();
+    }
+
+    // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    tree<T1> temp0;
+    if (arg1 == x) {
+        auto temp1 = tree<T1>::Node(
+            left, x, right
+        );
+        temp0 = deltreeroot(temp1);
+    } else {
+        tree<T1> temp2;
+        if (arg1 < x) {
+            auto temp3 = tree<T1>::Node(
+                deltree(arg1, left), x, right
+            );
+            temp2 = temp3;
+        } else {
+            auto temp4 = tree<T1>::Node(
+                left, x, deltree(arg1, right)
+            );
+            temp2 = temp4;
+        }
+        temp0 = temp2;
+    }
+    return temp0;
+}
+
+template<typename T1>
+tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
+    // changetree a b Tip = Tip
+    if (arg3.is_Tip()) {
+        return tree<T1>::Tip();
+    }
+
+    // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
+    auto left = arg3.as_Node().p1();
+    auto x = arg3.as_Node().p2();
+    auto right = arg3.as_Node().p3();
+    tree<T1> temp0;
+    if (arg1 == x) {
+        auto temp1 = tree<T1>::Node(
+            left, arg2, right
+        );
+        temp0 = temp1;
+    } else {
+        tree<T1> temp2;
+        if (arg1 < x) {
+            auto temp3 = tree<T1>::Node(
+                changetree(arg1, arg2, left), x, right
+            );
+            temp2 = temp3;
+        } else {
+            auto temp4 = tree<T1>::Node(
+                left, x, changetree(arg1, arg2, right)
+            );
+            temp2 = temp4;
+        }
+        temp0 = temp2;
+    }
+    return temp0;
+}
+
+template<typename T1>
+std::deque<T1> Merge(const std::deque<T1> &arg1, const std::deque<T1> &arg2) {
+    // Merge [] xs=xs
     if (arg1.empty()) {
         return arg2;
     }
 
-    // app (Cons x xs) ys = Cons x (app xs ys)
+    // Merge xs [] = xs
+    if (arg2.empty()) {
+        return arg1;
+    }
+
+    // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
     auto x = arg1.front();
     auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-    auto temp0 = app(xs, arg2);
-    temp0.push_front(x);
-    return temp0;
-}
-
-template<typename T1>
-std::deque<T1> rev(const std::deque<T1> &arg1) {
-    // rev Nil = Nil
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    }
-
-    // rev (Cons x xs) = app (rev xs) (Cons x Nil)
-    auto x = arg1.front();
-    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-    auto temp0 = std::deque<T1>();
-    temp0.push_front(x);
-    return app(rev(xs), temp0);
-}
-
-template<typename T1>
-std::deque<T1> rev2(const std::deque<T1> &arg1) {
-    // rev2 Nil = Nil
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    }
-
-    // rev2 (x # xs) = (rev2 xs) @ (x # Nil)
-    auto x = arg1.front();
-    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-    auto temp0 = std::deque<T1>();
-    temp0.push_front(x);
-    auto temp1 = rev2(xs);
-    auto temp2 = temp0;
-    temp1.insert(temp1.end(), temp2.begin(), temp2.end());
-    return temp1;
-}
-
-template<typename T1>
-std::deque<T1> rev3(const std::deque<T1> &arg1) {
-    // rev3 [] = []
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    }
-
-    // rev3 (x # xs) = (rev3 xs) @ [x]
-    auto x = arg1.front();
-    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-    auto temp0 = rev3(xs);
-    auto temp1 = std::deque<T1>{x};
-    temp0.insert(temp0.end(), temp1.begin(), temp1.end());
-    return temp0;
-}
-
-template<typename T1>
-std::optional<std::deque<T1>> testoption(const std::optional<T1> &arg1) {
-    // testoption None = Some Nil
-    if (!arg1.has_value()) {
-        return std::make_optional<std::deque<T1>>(std::deque<T1>());
-    }
-
-    // testoption (Some x) = Some [x]
-    auto x = arg1.value();
-    return std::make_optional<std::deque<T1>>(std::deque<T1>{x});
-}
-
-template<typename T1>
-std::set<T1> testset(const std::deque<T1> &arg1) {
-    // testset Nil = {}
-    if (arg1.empty()) {
-        return std::set<T1>{};
-    }
-
-    // testset (x # xs) = {x} \<inter> testset(xs)
-    if (!arg1.empty()) {
-        auto x = arg1.front();
-        auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-        auto temp0 = std::set<T1>{x};
-        auto temp1 = testset(xs);
-        temp0.merge(temp1);
-        return temp1;
-    }
-
-    // testset (x # xs) = {x} \<union> testset(xs)
-    auto x = arg1.front();
-    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
-    auto temp0 = std::set<T1>{x};
-    auto temp1 = testset(xs);
-    temp0.merge(temp1);
-    return temp0;
-}
-
-template<typename T1>
-std::deque<T1> testifelse(const std::deque<T1> &arg1, const T1 &arg2) {
-    // testifelse [] n = []
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    }
-
-    // testifelse (x # xs) n = (if (x < n) then [x] else []) @ (testifelse xs n)
-    auto x = arg1.front();
-    auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
+    auto y = arg2.front();
+    auto ys = std::deque<T1>(arg2.begin() + 1, arg2.end());
     std::deque<T1> temp0;
-    if (x < arg2) {
-        temp0 = std::deque<T1>{x};
+    if (x <= y) {
+        auto temp1 = ys;
+        temp1.push_front(y);
+        auto temp2 = Merge(xs, temp1);
+        temp2.push_front(x);
+        temp0 = temp2;
     } else {
-        temp0 = std::deque<T1>();
+        auto temp3 = xs;
+        temp3.push_front(x);
+        auto temp4 = Merge(temp3, ys);
+        temp4.push_front(y);
+        temp0 = temp4;
     }
-    auto temp1 = temp0;
-    auto temp2 = testifelse(xs, arg2);
-    temp1.insert(temp1.end(), temp2.begin(), temp2.end());
-    return temp1;
+    return temp0;
 }
 
-template<typename T1, typename T2>
-std::pair<T1, T2> pair(const T1 &arg1, const T2 &arg2) {
-    // pair f s = (f, s)
-    return std::make_pair(arg1, arg2);
+template<typename T1>
+std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
+    // MergeSort [] = []
+    if (arg1.empty()) {
+        return std::deque<T1>();
+    }
+
+    // MergeSort (Cons a []) = [a]
+    if (!arg1.empty()) {
+        if (std::deque<T1>(arg1.begin() + 1, arg1.end()).empty()) {
+            auto a = arg1.front();
+            return std::deque<T1>{a};
+        }
+    }
+
+    // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
+    return Merge(MergeSort(std::deque<T1>(arg1.begin(), arg1.begin() + size(arg1) / 2)), MergeSort(std::deque<T1>(arg1.begin() + size(arg1) / 2, arg1.end())));
 }
 
-template<typename T1, typename T2>
-T1 fst(const std::pair<T1, T2> &arg1) {
-    // fst (first, second) = first
-    auto first = arg1.first;
-    return first;
+template<typename T1>
+std::deque<T1> sorttree(const tree<T1> &arg1) {
+    // sorttree Tip = []
+    if (arg1.is_Tip()) {
+        return std::deque<T1>();
+    }
+
+    // sorttree (Node Tip a Tip) =[a]
+    if (arg1.is_Node()) {
+        if (arg1.as_Node().p1().is_Tip()) {
+            if (arg1.as_Node().p3().is_Tip()) {
+                auto a = arg1.as_Node().p2();
+                return std::deque<T1>{a};
+            }
+        }
+    }
+
+    // sorttree (Node left x right) =(MergeSort (transtolist (Node left x right)))
+    auto left = arg1.as_Node().p1();
+    auto x = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
+    auto temp0 = tree<T1>::Node(
+        left, x, right
+    );
+    return MergeSort(transtolist(temp0));
 }
-
-template<typename T1, typename T2>
-T2 snd(const std::pair<T1, T2> &arg1) {
-    // snd (first, second) = second
-    auto second = arg1.second;
-    return second;
-}
-
-bool evn(const std::uint64_t &arg1);
-
-std::uint64_t natofsnat(const std::uint64_t &arg1);
-
-std::uint64_t snatofnat(const std::uint64_t &arg1);
-
-std::uint64_t fib(const std::uint64_t &arg1);
-
-std::uint64_t sfib(const std::uint64_t &arg1);
-
-std::uint64_t fact(const std::uint64_t &arg1);
-
-bool altrue(const std::uint64_t &arg1);
-
-std::deque<std::uint64_t> merge(const std::deque<std::uint64_t> &arg1, const std::deque<std::uint64_t> &arg2);
-
-std::deque<std::uint64_t> merge_sort(const std::deque<std::uint64_t> &arg1);
 
 // generated by HOL2Cpp
