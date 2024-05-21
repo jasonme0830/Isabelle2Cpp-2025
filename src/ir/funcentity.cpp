@@ -126,7 +126,8 @@ TypeInfo::args_size() const
 bool
 TypeInfo::movable() const
 {
-  return theConfig.move_list() && name == theTemplateTypeMapping["list"];
+  // return theConfig.move_list() && name == theTemplateTypeMapping["list"];
+  return theConfig.move_list();
 }
 
 const TypeInfo&

@@ -310,6 +310,9 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  int trav_judge_recursive_common(std::string);
+  int trav_judge_recursive_recuCons(std::string);
+  int trav_judge_recursive_ifexpr(std::string);
 
 };
 
@@ -631,7 +634,7 @@ struct FunctionDef : Definition
   bool is_function_decl() const override;
   bool is_isomorphism() const override;
   //标识函数的递归类型：0非递归、1单次递归、2多次递归
-  int is_rescusive();
+  int analyse_func_recu_class();
 
 public:
   void gen_code(Code&) const override;
