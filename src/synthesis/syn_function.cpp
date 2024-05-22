@@ -1,0 +1,139 @@
+#include "synthesizer.hpp"
+#include "../utility/config.hpp"
+
+using namespace std;
+
+namespace hol2cpp{
+
+void
+Synthesizer::syn_func(const FuncEntity& func, bool is_impl)
+{
+  indent_ = 0;
+  if (!func.template_args().empty()) {
+    syn_func_template(func);
+  }
+  syn_func_definition(func, is_impl);
+}
+
+void
+Synthesizer::syn_func_template(const FuncEntity& func)
+{
+  auto& template_args = func.template_args();
+  "template<"_fs.outf(newline());
+  for (size_t i = 0; i < template_args.size(); ++i) {
+    if (i == 0) {
+      "typename $"_fs.outf(out_.get(), template_args[i]);
+    } else {
+      ", typename $"_fs.outf(out_.get(), template_args[i]);
+    }
+  }
+  ">\n"_fs.outf(out_.get());
+}
+
+void
+Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
+{
+  auto params = syn_func_params(func);
+  auto result_type = func.result_typeinfo().to_str(-1);
+
+  "$ $($)"_fs.outf(newline(), result_type, func.name(), params);
+
+  if (!is_impl) {
+    ";\n\n"_fs.outf(out_.get());
+    return;
+  }
+
+  " {\n"_fs.outf(out_.get());
+  add_indent();
+  {
+    // if (func.memoize()) {
+    if(func.func_recu_class() == 2){
+      "auto impl = [&]() -> $ {\n"_fs.outf(newline(), result_type);
+      add_indent();
+    }
+
+    syn_func_body(func);
+
+    // if (func.memoize()) {
+    if(func.func_recu_class() == 2){
+      sub_indent();
+      "};\n\n"_fs.outf(newline());
+
+      auto param_types = syn_func_param_types(func);
+      auto args = syn_func_args(func);
+
+      "static std::map<std::tuple<$>, $> cache;\n"_fs.outf(
+        newline(), param_types, result_type);
+      "auto args = std::make_tuple($);\n"_fs.outf(newline(), args);
+      "auto it = cache.find(args);\n"_fs.outf(newline());
+      "return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);\n"_fs
+        .outf(newline());
+    }
+  }
+  sub_indent();
+  "}\n\n"_fs.outf(newline());
+}
+
+void
+Synthesizer::syn_func_body(const FuncEntity& func)
+{
+  auto& statements = func.statements();
+  for (size_t i = 0; i < statements.size(); ++i) {
+    if (i) {
+      "\n"_fs.outf(out_.get());
+    }
+
+    for (auto& statement : statements[i]) {
+      if (!statement.empty()) {
+        newline() << statement << endl;
+      }
+    }
+  }
+}
+
+string
+Synthesizer::syn_func_params(const FuncEntity& func)
+{
+  string params;
+  auto& types = func.typeinfos();
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i) {
+      params += ", ";
+    }
+    //根据函数的递归类型决定以什么样的方式进行代码生成优化
+    params += "$arg$"_fs.format(types[i].to_str_as_arg(func.func_recu_class()), i + 1);
+  }
+  return params;
+}
+
+string
+Synthesizer::syn_func_param_types(const FuncEntity& func)
+{
+  string param_types;
+  auto& types = func.typeinfos();
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i) {
+      param_types += ", ";
+    }
+    param_types += "$"_fs.format(types[i].to_str(func.func_recu_class()));
+  }
+  return param_types;
+}
+
+string
+Synthesizer::syn_func_args(const FuncEntity& func)
+{
+  string args;
+  auto& types = func.typeinfos();
+  for (size_t i = 0; i < types.size() - 1; ++i) {
+    if (i) {
+      args += ", ";
+    }
+    args += "arg$"_fs.format(i + 1);
+  }
+  return args;
+}
+
+
+
+}

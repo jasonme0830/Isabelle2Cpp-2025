@@ -72,7 +72,7 @@ class tree {
         value_ = _Tip();
     }
     //value构造函数
-    tree(const std::variant<_Tip, _Node> &value) : value_(value) {}
+    tree(std::variant<_Tip, _Node> value) : value_(value) {}
     //深拷贝构造函数
     tree(const tree<T1>& other) { 
         if(std::holds_alternative<_Tip>(other.value_)){ 
@@ -141,7 +141,7 @@ class tree {
 
 
 template<typename T1>
-bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
+bool searchtree1(T1 arg1, tree<T1> arg2) {
     // searchtree1 a Tip=False
     if (arg2.is_Tip()) {
         return false;
@@ -155,7 +155,7 @@ bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
-bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
+bool searchtree2(T1 arg1, tree<T1> arg2) {
     // searchtree2 a Tip=False
     if (arg2.is_Tip()) {
         return false;
@@ -169,7 +169,7 @@ bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
-bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
+bool searchtree3(T1 arg1, tree<T1> arg2) {
     // searchtree3 a Tip=False
     if (arg2.is_Tip()) {
         return false;
@@ -183,7 +183,7 @@ bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
-tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
+tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     // inserttree a Tip= Node Tip a Tip
     if (arg2.is_Tip()) {
         auto temp0 = tree<T1>::Node(
@@ -212,7 +212,7 @@ tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
-std::deque<T1> transtolist(const tree<T1> &arg1) {
+std::deque<T1> transtolist(tree<T1> arg1) {
     // transtolist Tip=[]
     if (arg1.is_Tip()) {
         return std::deque<T1>();
@@ -231,7 +231,7 @@ std::deque<T1> transtolist(const tree<T1> &arg1) {
 }
 
 template<typename T1>
-T1 rightest(const tree<T1> &arg1) {
+T1 rightest(tree<T1> arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
@@ -245,7 +245,7 @@ T1 rightest(const tree<T1> &arg1) {
 }
 
 template<typename T1>
-tree<T1> rightestleft(const tree<T1> &arg1) {
+tree<T1> rightestleft(tree<T1> arg1) {
     // rightestleft Tip=Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
@@ -264,7 +264,7 @@ tree<T1> rightestleft(const tree<T1> &arg1) {
 }
 
 template<typename T1>
-tree<T1> deltreeroot(const tree<T1> &arg1) {
+tree<T1> deltreeroot(tree<T1> arg1) {
     // deltreeroot Tip=Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
@@ -292,7 +292,7 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
 }
 
 template<typename T1>
-tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
+tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     // deltree a Tip = Tip
     if (arg2.is_Tip()) {
         return tree<T1>::Tip();
@@ -327,7 +327,7 @@ tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
-tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
+tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     // changetree a b Tip = Tip
     if (arg3.is_Tip()) {
         return tree<T1>::Tip();
@@ -362,7 +362,7 @@ tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
 }
 
 template<typename T1>
-std::deque<T1> Merge(const std::deque<T1> &arg1, const std::deque<T1> &arg2) {
+std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
         return arg2;
@@ -396,7 +396,7 @@ std::deque<T1> Merge(const std::deque<T1> &arg1, const std::deque<T1> &arg2) {
 }
 
 template<typename T1>
-std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
+std::deque<T1> MergeSort(std::deque<T1> arg1) {
     // MergeSort [] = []
     if (arg1.empty()) {
         return std::deque<T1>();
@@ -415,7 +415,7 @@ std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
 }
 
 template<typename T1>
-std::deque<T1> sorttree(const tree<T1> &arg1) {
+std::deque<T1> sorttree(tree<T1> arg1) {
     // sorttree Tip = []
     if (arg1.is_Tip()) {
         return std::deque<T1>();

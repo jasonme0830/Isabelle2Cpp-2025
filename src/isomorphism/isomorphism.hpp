@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../codegen/codegen.hpp"
+#include "../utility/config.hpp"
 
 namespace hol2cpp{
 

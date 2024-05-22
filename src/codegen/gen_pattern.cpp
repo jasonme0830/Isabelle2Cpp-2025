@@ -48,7 +48,13 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
 
   // for variables
   else {
-    func.decl_variable(name, prev);
+    if(func.func_recu_class() == 1){
+      string move_prev = "std::move("+prev+")";
+      func.decl_variable(name, move_prev);
+    }
+    else{
+      func.decl_variable(name, prev);
+    }
   }
 }
 
