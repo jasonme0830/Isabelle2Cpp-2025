@@ -138,15 +138,17 @@ FunctionDef::gen_code(Code& code) const
   func.is_predef(is_predef());
   func.nonexhaustive(nonexhaustive);
   func.memoize(memoize);
+  func.func_recu_class(func_recursive_type);
   func.name(name);
 
   type->gen_funcentity(func);
 
-  if (memoize) {
+  // if (memoize) {}
+  if(func.func_recu_class() == 2){
     assert_true(func.typeinfos().size() > 1);
     code.add_header("map");
   }
-
+  
   for (size_t i = 0; i < equations.size(); ++i) {
     func.is_last_equation(i == equations.size() - 1); // for reduce-cond
 

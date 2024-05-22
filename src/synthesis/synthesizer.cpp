@@ -264,7 +264,7 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
 void
 Synthesizer::syn_class_def_variant(const Datatype& datatype, const TypeInfo& variant){
-  "$ value_;\n"_fs.outf(newline(), variant.to_str());
+  "$ value_;\n"_fs.outf(newline(), variant.to_str(-1));
 }
 void
 Synthesizer::syn_class_def_defaultConstructor(const Datatype& datatype, const TypeInfo& variant){
@@ -290,7 +290,7 @@ Synthesizer::syn_class_def_valueConstructor(const Datatype& datatype, const Type
 
   "//value构造函数\n"_fs.outf(newline());
   "$($value) : value_(value) {}\n"_fs.outf(
-      newline(), name, variant.to_str_as_arg());
+      newline(), name, variant.to_str_as_arg(-1));
 }
 void
 Synthesizer::syn_class_def_copyConstructor(const Datatype& datatype){
@@ -707,7 +707,7 @@ void
 Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
 {
   auto params = syn_func_params(func);
-  auto result_type = func.result_typeinfo().to_str();
+  auto result_type = func.result_typeinfo().to_str(-1);
 
   "$ $($)"_fs.outf(newline(), result_type, func.name(), params);
 
@@ -719,14 +719,16 @@ Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
   " {\n"_fs.outf(out_.get());
   add_indent();
   {
-    if (func.memoize()) {
+    // if (func.memoize()) {
+    if(func.func_recu_class() == 2){
       "auto impl = [&]() -> $ {\n"_fs.outf(newline(), result_type);
       add_indent();
     }
 
     syn_func_body(func);
 
-    if (func.memoize()) {
+    // if (func.memoize()) {
+    if(func.func_recu_class() == 2){
       sub_indent();
       "};\n\n"_fs.outf(newline());
 
@@ -771,7 +773,8 @@ Synthesizer::syn_func_params(const FuncEntity& func)
     if (i) {
       params += ", ";
     }
-    params += "$arg$"_fs.format(types[i].to_str_as_arg(), i + 1);
+    //根据函数的递归类型决定以什么样的方式进行代码生成优化
+    params += "$arg$"_fs.format(types[i].to_str_as_arg(func.func_recu_class()), i + 1);
   }
   return params;
 }
@@ -785,7 +788,7 @@ Synthesizer::syn_func_param_types(const FuncEntity& func)
     if (i) {
       param_types += ", ";
     }
-    param_types += "$"_fs.format(types[i].to_str());
+    param_types += "$"_fs.format(types[i].to_str(func.func_recu_class()));
   }
   return param_types;
 }

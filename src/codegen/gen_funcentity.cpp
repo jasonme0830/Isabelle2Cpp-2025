@@ -18,7 +18,8 @@ Equation::gen_funcentity(FuncEntity& func) const
   pattern->gen_pattern(func, "");
   func.close_pattern(); // for delay declarations
 
-  if (theConfig.move_list()) {
+  // if (theConfig.move_list()) {
+  if(func.func_recu_class() > -1){
     set<string> movables;
     expr->analyze_var_movable(movables);
     func.add_expr("return $;", unmove_expr(expr->gen_expr(func)));

@@ -41,7 +41,8 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
   // for variables
   else {
     auto var = func.get_variable(name);
-    if (movable && typeinfo.movable()) {
+    // if (movable && typeinfo.movable()) 
+    if(movable && func.func_recu_class()>-1 )    {
       // movable is true only when move-list is enable
       return "std::move($)"_fs.format(var); // for move-list
     } else {
@@ -58,7 +59,8 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     typeinfo.avoid_lack(func, constructor);
     assert_true(func.args_size() == args.size());
 
-    if (theConfig.move_list()) {
+    // if (theConfig.move_list()) 
+    if(func.func_recu_class() > -1)    {
       return constructor + enclose(join(args, [&](const auto& arg) {
                auto temp = func.gen_temp();
                func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
@@ -95,7 +97,9 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     func.add_expr("auto $ = $;", temp, xs)
       .add_expr("$.push_front($);", temp, x);
 
-    if (theConfig.move_list()) {
+    // if (theConfig.move_list()) 
+    if(func.func_recu_class() > -1)
+    {
       return move_expr(temp);
     } else {
       return temp;
@@ -109,7 +113,9 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto n = args[0]->gen_expr(func);
     auto xs = args[1]->gen_expr(func);
 
-    if (is_moved(xs) && theConfig.move_list()) {
+    // if (is_moved(xs) && theConfig.move_list()) 
+    if(is_moved(xs) && func.func_recu_class()>-1)
+    {
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
@@ -136,7 +142,9 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto n = args[0]->gen_expr(func);
     auto xs = args[1]->gen_expr(func);
 
-    if (is_moved(xs) && theConfig.move_list()) {
+    // if (is_moved(xs) && theConfig.move_list()) 
+    if(is_moved(xs) && func.func_recu_class()>-1)
+    {
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
@@ -298,7 +306,9 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     typeinfo.avoid_lack(func, constructor);
     assert_true(other_func->args_size() == args.size());
 
-    if (theConfig.move_list()) {
+    // if (theConfig.move_list()) 
+    if(func.func_recu_class()>-1)
+    {
       return constructor + enclose(join(args, [&](const auto& arg) {
                auto temp = func.gen_temp();
                func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
@@ -504,7 +514,7 @@ LambdaExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     if (i != 0) {
       params += ", ";
     }
-    params += typeinfo[i].to_str_as_arg() + parameters[i];
+    params += typeinfo[i].to_str_as_arg(func.func_recu_class()) + parameters[i];
   }
 
   auto temp = func.gen_temp();

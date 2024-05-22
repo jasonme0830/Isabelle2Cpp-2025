@@ -12,15 +12,20 @@
 using namespace std;
 
 namespace hol2cpp {
-namespace {
+namespace asArg_namespace{
 string
-default_as_arg(const TypeInfo& type)
+default_as_arg(const TypeInfo& type, int func_recu_class)
 {
-  return "const " + type.to_str() + " &";
+  return type.to_str(func_recu_class)+" ";
 }
-} // namespace
+string
+const_as_arg(const TypeInfo& type, int func_recu_class)
+{
+  return "const " + type.to_str(func_recu_class) + " &";
+}
+} // namespace for gen func type argus
 
-function<string(const TypeInfo&)> TypeInfo::as_arg = default_as_arg;
+function<string(const TypeInfo&, int)> TypeInfo::as_arg = asArg_namespace::const_as_arg;
 
 TypeInfo::TypeInfo() = default;
 
@@ -49,7 +54,7 @@ TypeInfo::replace_with(string name) const
 }
 
 string
-TypeInfo::to_str() const
+TypeInfo::to_str(int func_recu_class) const
 {
   if (lack()) {
     return "UNKNOWN_TYPE";
@@ -60,12 +65,12 @@ TypeInfo::to_str() const
   }
 
   if (is_function()) {
-    auto type = name + '<' + arguments.back().to_str() + '(';
+    auto type = name + '<' + arguments.back().to_str(func_recu_class) + '(';
     for (size_t i = 0; i < arguments.size() - 1; ++i) {
       if (i == 0) {
-        type += arguments[i].to_str_as_arg();
+        type += arguments[i].to_str_as_arg(func_recu_class);
       } else {
-        type += ", " + arguments[i].to_str_as_arg();
+        type += ", " + arguments[i].to_str_as_arg(func_recu_class);
       }
     }
     return type + ")>";
@@ -73,9 +78,9 @@ TypeInfo::to_str() const
     auto type = name + '<';
     for (size_t i = 0; i < arguments.size(); ++i) {
       if (i == 0) {
-        type += arguments[i].to_str();
+        type += arguments[i].to_str(func_recu_class);
       } else {
-        type += ", " + arguments[i].to_str();
+        type += ", " + arguments[i].to_str(func_recu_class);
       }
     }
     return type + '>';
@@ -83,9 +88,25 @@ TypeInfo::to_str() const
 }
 
 string
-TypeInfo::to_str_as_arg() const
+TypeInfo::to_str_as_arg(int func_recu_class) const
 {
-  return as_arg(*this);
+  switch (func_recu_class)
+  {
+  case 0:
+    TypeInfo::as_arg = asArg_namespace::const_as_arg;
+    break;
+  case 1:
+    TypeInfo::as_arg = asArg_namespace::default_as_arg;
+    break;
+  case 2:
+    TypeInfo::as_arg = asArg_namespace::const_as_arg;
+    break;
+  default:
+    TypeInfo::as_arg = asArg_namespace::default_as_arg;
+    break;
+  }
+
+  return as_arg(*this, func_recu_class);
 }
 
 void
@@ -406,6 +427,18 @@ bool
 FuncEntity::memoize() const
 {
   return memoize_;
+}
+
+void
+FuncEntity::func_recu_class(int num)
+{
+  func_recu_class_ = num;
+}
+
+int
+FuncEntity::func_recu_class() const
+{
+  return func_recu_class_;
 }
 
 void

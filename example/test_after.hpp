@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <deque>
+#include <map>
 #include <memory>
 #include <variant>
 
@@ -72,7 +73,7 @@ class tree {
         value_ = _Tip();
     }
     //value构造函数
-    tree(const std::variant<_Tip, _Node> &value) : value_(value) {}
+    tree(std::variant<_Tip, _Node> value) : value_(value) {}
     //深拷贝构造函数
     tree(const tree<T1>& other) { 
         if(std::holds_alternative<_Tip>(other.value_)){ 
@@ -142,60 +143,81 @@ class tree {
 
 template<typename T1>
 bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
-    // searchtree1 a Tip=False
-    if (arg2.is_Tip()) {
-        return false;
-    }
+    auto impl = [&]() -> bool {
+        // searchtree1 a Tip=False
+        if (arg2.is_Tip()) {
+            return false;
+        }
 
-    // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
-    auto temp0 = std::move(arg1);
-    auto temp1 = std::move(right);
-    auto temp2 = arg1;
-    auto temp3 = std::move(left);
-    return (arg1 == std::move(x)) || (searchtree1(std::move(temp2), std::move(temp3)) || searchtree1(std::move(temp0), std::move(temp1)));
+        // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
+        auto left = arg2.as_Node().p1();
+        auto x = arg2.as_Node().p2();
+        auto right = arg2.as_Node().p3();
+        auto temp0 = std::move(arg1);
+        auto temp1 = std::move(right);
+        auto temp2 = arg1;
+        auto temp3 = std::move(left);
+        return (arg1 == std::move(x)) || (searchtree1(std::move(temp2), std::move(temp3)) || searchtree1(std::move(temp0), std::move(temp1)));
+    };
+
+    static std::map<std::tuple<T1, tree<T1>>, bool> cache;
+    auto args = std::make_tuple(arg1, arg2);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
 bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
-    // searchtree2 a Tip=False
-    if (arg2.is_Tip()) {
-        return false;
-    }
+    auto impl = [&]() -> bool {
+        // searchtree2 a Tip=False
+        if (arg2.is_Tip()) {
+            return false;
+        }
 
-    // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
-    auto temp0 = std::move(arg1);
-    auto temp1 = std::move(right);
-    auto temp2 = arg1;
-    auto temp3 = std::move(left);
-    return searchtree2(std::move(temp2), std::move(temp3)) || ((arg1 == std::move(x)) || searchtree2(std::move(temp0), std::move(temp1)));
+        // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
+        auto left = arg2.as_Node().p1();
+        auto x = arg2.as_Node().p2();
+        auto right = arg2.as_Node().p3();
+        auto temp0 = std::move(arg1);
+        auto temp1 = std::move(right);
+        auto temp2 = arg1;
+        auto temp3 = std::move(left);
+        return searchtree2(std::move(temp2), std::move(temp3)) || ((arg1 == std::move(x)) || searchtree2(std::move(temp0), std::move(temp1)));
+    };
+
+    static std::map<std::tuple<T1, tree<T1>>, bool> cache;
+    auto args = std::make_tuple(arg1, arg2);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
 bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
-    // searchtree3 a Tip=False
-    if (arg2.is_Tip()) {
-        return false;
-    }
+    auto impl = [&]() -> bool {
+        // searchtree3 a Tip=False
+        if (arg2.is_Tip()) {
+            return false;
+        }
 
-    // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
-    auto temp0 = arg1;
-    auto temp1 = std::move(right);
-    auto temp2 = arg1;
-    auto temp3 = std::move(left);
-    return searchtree3(std::move(temp2), std::move(temp3)) || (searchtree3(std::move(temp0), std::move(temp1)) || (std::move(arg1) == std::move(x)));
+        // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
+        auto left = arg2.as_Node().p1();
+        auto x = arg2.as_Node().p2();
+        auto right = arg2.as_Node().p3();
+        auto temp0 = arg1;
+        auto temp1 = std::move(right);
+        auto temp2 = arg1;
+        auto temp3 = std::move(left);
+        return searchtree3(std::move(temp2), std::move(temp3)) || (searchtree3(std::move(temp0), std::move(temp1)) || (std::move(arg1) == std::move(x)));
+    };
+
+    static std::map<std::tuple<T1, tree<T1>>, bool> cache;
+    auto args = std::make_tuple(arg1, arg2);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
-tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
+tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
     if (arg2.is_Node()) {
         auto left = arg2.as_Node().p1();
@@ -229,27 +251,34 @@ tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
 
 template<typename T1>
 std::deque<T1> transtolist(const tree<T1> &arg1) {
-    // transtolist Tip=[]
-    if (arg1.is_Tip()) {
-        return std::deque<T1>();
-    }
+    auto impl = [&]() -> std::deque<T1> {
+        // transtolist Tip=[]
+        if (arg1.is_Tip()) {
+            return std::deque<T1>();
+        }
 
-    // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
-    auto left = arg1.as_Node().p1();
-    auto a = arg1.as_Node().p2();
-    auto right = arg1.as_Node().p3();
-    auto temp0 = std::move(left);
-    auto temp1 = std::move(right);
-    auto temp2 = transtolist(std::move(temp0));
-    auto temp3 = transtolist(std::move(temp1));
-    temp2.insert(temp2.end(), temp3.begin(), temp3.end());
-    auto temp4 = temp2;
-    temp4.push_front(std::move(a));
-    return temp4;
+        // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
+        auto left = arg1.as_Node().p1();
+        auto a = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
+        auto temp0 = std::move(left);
+        auto temp1 = std::move(right);
+        auto temp2 = transtolist(std::move(temp0));
+        auto temp3 = transtolist(std::move(temp1));
+        temp2.insert(temp2.end(), temp3.begin(), temp3.end());
+        auto temp4 = temp2;
+        temp4.push_front(std::move(a));
+        return temp4;
+    };
+
+    static std::map<std::tuple<tree<T1>>, std::deque<T1>> cache;
+    auto args = std::make_tuple(arg1);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
-T1 rightest(const tree<T1> &arg1) {
+T1 rightest(tree<T1> arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
@@ -264,7 +293,7 @@ T1 rightest(const tree<T1> &arg1) {
 }
 
 template<typename T1>
-tree<T1> rightestleft(const tree<T1> &arg1) {
+tree<T1> rightestleft(tree<T1> arg1) {
     // rightestleft Tip=Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
@@ -314,7 +343,7 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
 }
 
 template<typename T1>
-tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
+tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     // deltree a Tip = Tip
     if (arg2.is_Tip()) {
         return tree<T1>::Tip();
@@ -354,7 +383,7 @@ tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
 }
 
 template<typename T1>
-tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
+tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     // changetree a b Tip = Tip
     if (arg3.is_Tip()) {
         return tree<T1>::Tip();
@@ -435,29 +464,38 @@ std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
 }
 
 template<typename T1>
-std::deque<T1> MergeSort(std::deque<T1> arg1) {
-    // MergeSort [] = []
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    }
+std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
+    auto impl = [&]() -> std::deque<T1> {
+        // MergeSort [] = []
+        if (arg1.empty()) {
+            return std::deque<T1>();
+        }
 
-    // MergeSort (Cons a []) = [a]
-    if (arg1.size() == 1) {
-        auto a = arg1.front();
-        return std::deque<T1>{std::move(a)};
-    }
+        // MergeSort (Cons a []) = [a]
+        if (!arg1.empty()) {
+            if (std::deque<T1>(arg1.begin() + 1, arg1.end()).empty()) {
+                auto a = arg1.front();
+                return std::deque<T1>{std::move(a)};
+            }
+        }
 
-    // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-    auto temp2 = arg1;
-    auto temp1 = std::deque<T1>(arg1.begin(), arg1.begin() + size(std::move(temp2)) / 2);
-    auto temp0 = MergeSort(std::move(temp1));
-    auto temp5 = arg1;
-    auto temp6 = size(std::move(temp5)) / 2;
-    auto temp7 = std::move(arg1);
-    temp7.erase(temp7.begin(), std::next(temp7.begin(), temp6));
-    auto temp4 = std::move(temp7);
-    auto temp3 = MergeSort(std::move(temp4));
-    return Merge(std::move(temp0), std::move(temp3));
+        // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
+        auto temp2 = arg1;
+        auto temp1 = std::deque<T1>(arg1.begin(), arg1.begin() + size(std::move(temp2)) / 2);
+        auto temp0 = MergeSort(std::move(temp1));
+        auto temp5 = arg1;
+        auto temp6 = size(std::move(temp5)) / 2;
+        auto temp7 = std::move(arg1);
+        temp7.erase(temp7.begin(), std::next(temp7.begin(), temp6));
+        auto temp4 = std::move(temp7);
+        auto temp3 = MergeSort(std::move(temp4));
+        return Merge(std::move(temp0), std::move(temp3));
+    };
+
+    static std::map<std::tuple<std::deque<T1>>, std::deque<T1>> cache;
+    auto args = std::make_tuple(arg1);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>

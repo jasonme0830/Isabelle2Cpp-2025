@@ -17,7 +17,7 @@ class FuncEntity;
  */
 struct TypeInfo
 {
-  static std::function<std::string(const TypeInfo&)> as_arg;
+  static std::function<std::string(const TypeInfo&, int)> as_arg;
 
 public:
   std::string name;
@@ -29,8 +29,8 @@ public:
 
   TypeInfo replace_with(std::string name) const;
 
-  std::string to_str() const;
-  std::string to_str_as_arg() const;
+  std::string to_str(int func_recu_class = -1) const;
+  std::string to_str_as_arg(int) const;
 
   // the parameters are used to print helpful error message
   void avoid_lack(FuncEntity& func, const std::string& constructor) const;
@@ -175,6 +175,9 @@ public:
   void memoize(bool is_memoize); // for memoize
   bool memoize() const;          // for memoize
 
+  void func_recu_class(int num);
+  int func_recu_class() const;
+
   void is_predef(bool value);
   bool is_predef() const;
 
@@ -202,6 +205,7 @@ private:
   bool nonexhaustive_;    // for reduce-cond
   bool is_last_equation_; // for reduce-cond
   bool memoize_;
+  int func_recu_class_;  // 方便函数优化
   bool is_predef_;
 
   std::map<std::string, TypeInfo> var_typeinfos_;

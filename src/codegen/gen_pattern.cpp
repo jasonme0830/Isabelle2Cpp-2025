@@ -85,7 +85,9 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
 
   // for List
   else if (constructor == "Cons") {
-    if (!theConfig.move_list()) {
+    // if (!theConfig.move_list()) 
+    if(func.func_recu_class() != 1)
+    {
       func.add_pattern_cond("!$.empty()", prev);
       args[0]->gen_pattern(func, prev + ".front()");
 

@@ -16,11 +16,11 @@ Config::move_list(bool enable)
   }
 
   auto origin_as_arg = TypeInfo::as_arg;
-  TypeInfo::as_arg = [=](const TypeInfo& type) {
+  TypeInfo::as_arg = [=](const TypeInfo& type, int func_recu_class) {
     if (type.name == theTemplateTypeMapping["list"]) {
-      return type.to_str() + " ";
+      return type.to_str(func_recu_class) + " ";
     } else {
-      return origin_as_arg(type);
+      return origin_as_arg(type, func_recu_class);
     }
   };
 }
