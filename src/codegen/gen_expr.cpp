@@ -56,21 +56,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 {
   // for recursive calls
   if (constructor == func.name()) {
-    typeinfo.avoid_lack(func, constructor);
-    assert_true(func.args_size() == args.size());
-
-    // if (theConfig.move_list()) 
-    if(func.func_recu_class() > -1)    {
-      return constructor + enclose(join(args, [&](const auto& arg) {
-               auto temp = func.gen_temp();
-               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-               return move_expr(temp);
-             }));
-    } else {
-      return constructor + enclose(join(args, [&](const auto& arg) {
-               return arg->gen_expr(func);
-             }));
-    }
+    return gen_expr_impl_recuCall(func, typeinfo);
   }
 
   // for nat
@@ -89,21 +75,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 
   // for list
   else if (constructor == "Cons") {
-    assert_true(args.size() == 2);
-    auto x = args[0]->gen_expr(func);
-    auto xs = args[1]->gen_expr(func);
-
-    auto temp = func.gen_temp();
-    func.add_expr("auto $ = $;", temp, xs)
-      .add_expr("$.push_front($);", temp, x);
-
-    // if (theConfig.move_list()) 
-    if(func.func_recu_class() > -1)
-    {
-      return move_expr(temp);
-    } else {
-      return temp;
-    }
+    return gen_expr_impl_listCons(func, typeinfo);
   } else if (constructor == "length") {
     assert_true(args.size() == 1);
     return unmove_expr(args[0]->gen_expr(func)) + ".size()";
@@ -246,23 +218,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 
   // for If-expression
   else if (constructor == "If") {
-    assert_true(args.size() == 3);
-
-    auto cond = args[0]->gen_expr(func);
-    auto res = func.gen_temp();
-
-    func.add_expr("$ $;", typeinfo.to_str(), res)
-      .add_expr("if ($) {", cond)
-      .add_indent()
-      .add_expr("$ = $;", res, args[1]->gen_expr(func))
-      .sub_indent()
-      .add_expr("} else {")
-      .add_indent()
-      .add_expr("$ = $;", res, args[2]->gen_expr(func))
-      .sub_indent()
-      .add_expr("}");
-
-    return res;
+    return gen_expr_impl_if(func, typeinfo);
   }
 
   // for pairs
@@ -280,55 +236,17 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 
   // for user-defined datatypes
   else if (auto datatype = func.code().find_datatype_by_cons(constructor)) {
-    typeinfo.avoid_lack(func, constructor);
-
-    vector<string> arguments;
-    for (auto& arg : args) {
-      arguments.push_back(arg->gen_expr(func));
-    }
-
-    auto temp = func.gen_temp();
-    func.add_expr("auto $ = $::$(", temp, typeinfo.to_str(), constructor)
-      .add_indent();
-    for (size_t i = 0; i < arguments.size(); ++i) {
-      if (i == 0) {
-        func.add_expr(arguments[i]);
-      } else {
-        func.app_last_stmt(", " + arguments[i]);
-      }
-    }
-    func.sub_indent().add_expr(");");
-    return temp;
+    return gen_expr_impl_datatype(func, typeinfo);
   }
 
   // for common calls
   else if (auto other_func = func.code().find_func_entity(constructor)) {
-    typeinfo.avoid_lack(func, constructor);
-    assert_true(other_func->args_size() == args.size());
-
-    // if (theConfig.move_list()) 
-    if(func.func_recu_class()>-1)
-    {
-      return constructor + enclose(join(args, [&](const auto& arg) {
-               auto temp = func.gen_temp();
-               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-               return move_expr(temp);
-             }));
-    } else {
-      return constructor + enclose(join(args, [&](const auto& arg) {
-               return arg->gen_expr(func);
-             }));
-    }
+    return gen_expr_impl_funCall(func, typeinfo);
   }
 
   // for ShortDef
   else if (auto short_def = func.code().get_short_def(constructor)) {
-    assert_true(short_def->parameters.size() == args.size());
-    for (size_t i = 0; i < args.size(); ++i) {
-      func.add_expr(
-        "auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func));
-    }
-    return short_def->expr->gen_expr(func);
+    return gen_expr_impl_shortDef(func, typeinfo);
   }
 
   // else as the common call without determined function
@@ -338,6 +256,120 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     return foo + enclose(join(
                    args, [&](auto& expr) { return expr->gen_expr(func); }));
   }
+}
+string
+ConsExpr::gen_expr_impl_recuCall(FuncEntity& func, const TypeInfo& typeinfo) const
+{
+  typeinfo.avoid_lack(func, constructor);
+  assert_true(func.args_size() == args.size());
+
+  // if (theConfig.move_list()) 
+  if(func.func_recu_class() > -1)    {
+    return constructor + enclose(join(args, [&](const auto& arg) {
+              auto temp = func.gen_temp();
+              func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+              return move_expr(temp);
+            }));
+  } else {
+    return constructor + enclose(join(args, [&](const auto& arg) {
+              return arg->gen_expr(func);
+            }));
+  }
+}
+string
+ConsExpr::gen_expr_impl_listCons(FuncEntity& func, const TypeInfo& typeinfo) const
+{
+  assert_true(args.size() == 2);
+  auto x = args[0]->gen_expr(func);
+  auto xs = args[1]->gen_expr(func);
+
+  auto temp = func.gen_temp();
+  func.add_expr("auto $ = $;", temp, xs)
+    .add_expr("$.push_front($);", temp, x);
+
+  // if (theConfig.move_list()) 
+  if(func.func_recu_class() > -1)
+  {
+    return move_expr(temp);
+  } else {
+    return temp;
+  }
+}
+string
+ConsExpr::gen_expr_impl_if(FuncEntity& func, const TypeInfo& typeinfo) const
+{
+  assert_true(args.size() == 3);
+
+  auto cond = args[0]->gen_expr(func);
+  auto res = func.gen_temp();
+
+  func.add_expr("$ $;", typeinfo.to_str(), res)
+    .add_expr("if ($) {", cond)
+    .add_indent()
+    .add_expr("$ = $;", res, args[1]->gen_expr(func))
+    .sub_indent()
+    .add_expr("} else {")
+    .add_indent()
+    .add_expr("$ = $;", res, args[2]->gen_expr(func))
+    .sub_indent()
+    .add_expr("}");
+
+  return res;
+}
+string
+ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) const
+{
+  typeinfo.avoid_lack(func, constructor);
+
+  vector<string> arguments;
+  for (auto& arg : args) {
+    arguments.push_back(arg->gen_expr(func));
+  }
+
+  auto temp = func.gen_temp();
+  func.add_expr("auto $ = $::$(", temp, typeinfo.to_str(), constructor)
+    .add_indent();
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    if (i == 0) {
+      func.add_expr(arguments[i]);
+    } else {
+      func.app_last_stmt(", " + arguments[i]);
+    }
+  }
+  func.sub_indent().add_expr(");");
+  return temp;
+}
+string
+ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) const
+{
+  auto other_func = func.code().find_func_entity(constructor);
+  typeinfo.avoid_lack(func, constructor);
+  assert_true(other_func->args_size() == args.size());
+
+  // if (theConfig.move_list()) 
+  if(func.func_recu_class()>-1)
+  {
+    return constructor + enclose(join(args, [&](const auto& arg) {
+              auto temp = func.gen_temp();
+              func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+              return move_expr(temp);
+            }));
+  } else {
+    return constructor + enclose(join(args, [&](const auto& arg) {
+              return arg->gen_expr(func);
+            }));
+  }
+}
+string
+ConsExpr::gen_expr_impl_shortDef(FuncEntity& func, const TypeInfo& typeinfo) const
+{
+  auto short_def = func.code().get_short_def(constructor);
+  assert_true(short_def->parameters.size() == args.size());
+  for (size_t i = 0; i < args.size(); ++i) {
+    func.add_expr(
+      "auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func));
+  }
+  return short_def->expr->gen_expr(func);
 }
 
 string

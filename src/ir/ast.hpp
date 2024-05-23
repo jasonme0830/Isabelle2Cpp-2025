@@ -303,9 +303,15 @@ struct ConsExpr final : Expr
 
 public:
   void gen_pattern(FuncEntity& func, const std::string& prev) const override;
-  std::string gen_expr_impl(FuncEntity& func,
-                            const TypeInfo& typeinfo) const override;
+
   void analyze_var_movable(std::set<std::string>& movables) override;
+  std::string gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const override;
+  std::string gen_expr_impl_recuCall(FuncEntity& , const TypeInfo&) const;
+  std::string gen_expr_impl_listCons(FuncEntity&, const TypeInfo&) const;
+  std::string gen_expr_impl_if(FuncEntity&, const TypeInfo&) const;
+  std::string gen_expr_impl_datatype(FuncEntity&, const TypeInfo&) const;
+  std::string gen_expr_impl_funCall(FuncEntity&, const TypeInfo&) const;
+  std::string gen_expr_impl_shortDef(FuncEntity&, const TypeInfo&) const;
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;

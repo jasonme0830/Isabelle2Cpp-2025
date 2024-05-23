@@ -251,12 +251,13 @@ FuncEntity::decl_variable(const string& var, const string& expr)
 {
   static regex arg_regex(R"(arg[1-9][0-9]*)");
 
-  if (regex_match(expr, arg_regex)) {
-    var_mapping_[var] = expr;
+  string unmove_argu = unmove_expr(expr);
+  if (regex_match(unmove_argu, arg_regex)) {
+    var_mapping_[var] = unmove_argu;
 
     // experimental
-    auto n = stoull(expr.substr(3));
-    var_typeinfos_[expr] = typeinfos_[n - 1];
+    auto n = stoull(unmove_argu.substr(3));
+    var_typeinfos_[unmove_argu] = typeinfos_[n - 1];
   } else {
     unused_var_count_[var] = delay_statements_.size();
     add_delay_statement("auto $ = $;", var, expr);
