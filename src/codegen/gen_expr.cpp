@@ -42,7 +42,7 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
   else {
     auto var = func.get_variable(name);
     // if (movable && typeinfo.movable()) 
-    if(movable && func.func_recu_class()>-1 )    {
+    if(movable && func.func_recu_class() > -1 )    {
       // movable is true only when move-list is enable
       return "std::move($)"_fs.format(var); // for move-list
     } else {
@@ -264,7 +264,7 @@ ConsExpr::gen_expr_impl_recuCall(FuncEntity& func, const TypeInfo& typeinfo) con
   assert_true(func.args_size() == args.size());
 
   // if (theConfig.move_list()) 
-  if(func.func_recu_class() > -1)    {
+  if(func.func_recu_class() == 3)    {
     return constructor + enclose(join(args, [&](const auto& arg) {
               auto temp = func.gen_temp();
               func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
@@ -333,7 +333,8 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
     if (i == 0) {
       func.add_expr(arguments[i]);
     } else {
-      func.app_last_stmt(", " + arguments[i]);
+      func.app_last_stmt(",");
+      func.add_expr(arguments[i]);
     }
   }
   func.sub_indent().add_expr(");");
