@@ -304,17 +304,22 @@ ConsExpr::gen_expr_impl_if(FuncEntity& func, const TypeInfo& typeinfo) const
   auto res = func.gen_temp();
 
   func.add_expr("$ $;", typeinfo.to_str(), res)
-    .add_expr("if ($) {", cond)
-    .add_indent()
-    .add_expr("$ = $;", res, args[1]->gen_expr(func))
-    .sub_indent()
-    .add_expr("} else {")
-    .add_indent()
-    .add_expr("$ = $;", res, args[2]->gen_expr(func))
-    .sub_indent()
-    .add_expr("}");
+  .add_expr("if ($) {", cond)
+  .add_indent()
+  .add_expr("$ = $;", res, args[1]->gen_expr(func))
+  .sub_indent()
+  .add_expr("} else {")
+  .add_indent()
+  .add_expr("$ = $;", res, args[2]->gen_expr(func))
+  .sub_indent()
+  .add_expr("}");
 
-  return res;
+  if(func.func_recu_class() == -1){
+    return res;
+  }
+  else{
+    return move_expr(res);
+  }
 }
 string
 ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) const
@@ -338,7 +343,12 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
     }
   }
   func.sub_indent().add_expr(");");
-  return temp;
+  if(func.func_recu_class() == -1){
+    return temp;
+  }
+  else{
+    return move_expr(temp);
+  }
 }
 string
 ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) const
