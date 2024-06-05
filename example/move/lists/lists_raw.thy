@@ -95,4 +95,9 @@ fun bs :: "nat \<Rightarrow> nat list \<Rightarrow> nat option" where
       )
   )"
 
+fun fib :: "nat \<Rightarrow> nat" where
+  "fib 0 = 1" |
+  "fib (Suc 0) = 1" |
+  "fib n = (fib (n - 1)) + (fib (n - 2))"
+
 end
