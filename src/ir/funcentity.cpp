@@ -250,14 +250,30 @@ void
 FuncEntity::decl_variable(const string& var, const string& expr)
 {
   static regex arg_regex(R"(arg[1-9][0-9]*)");
+  if (regex_match(expr, arg_regex)) {
+    /* 这些可以省略不必要的解包复制，但是牺牲了代码的可读性，暂时放弃 */
+    // var_mapping_[var] = expr;
+    // // experimental
+    // auto n = stoull(expr.substr(3));
+    // var_typeinfos_[expr] = typeinfos_[n - 1];
 
-  string unmove_argu = unmove_expr(expr);
-  if (regex_match(unmove_argu, arg_regex)) {
-    var_mapping_[var] = unmove_argu;
-
-    // experimental
-    auto n = stoull(unmove_argu.substr(3));
-    var_typeinfos_[unmove_argu] = typeinfos_[n - 1];
+    // code by myk
+    unused_var_count_[var] = delay_statements_.size();
+    switch (func_recu_class())
+    {
+    case 2:
+      add_delay_statement("auto $ = $;", var, expr);
+      break;
+    case 1:
+      add_delay_statement("auto $ = $;", var, move_expr(expr));
+      break;
+    case 0:
+      add_delay_statement("auto $ = $;", var, expr);
+      break;
+    default:
+      add_delay_statement("auto $ = $;", var, expr);
+      break;
+    }
   } else {
     unused_var_count_[var] = delay_statements_.size();
     add_delay_statement("auto $ = $;", var, expr);

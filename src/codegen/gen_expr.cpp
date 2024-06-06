@@ -263,18 +263,33 @@ ConsExpr::gen_expr_impl_recuCall(FuncEntity& func, const TypeInfo& typeinfo) con
   typeinfo.avoid_lack(func, constructor);
   assert_true(func.args_size() == args.size());
 
-  // if (theConfig.move_list()) 
-  if(func.func_recu_class() == 3)    {
-    return constructor + enclose(join(args, [&](const auto& arg) {
-              auto temp = func.gen_temp();
-              func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-              return move_expr(temp);
-            }));
-  } else {
-    return constructor + enclose(join(args, [&](const auto& arg) {
-              return arg->gen_expr(func);
-            }));
+  string content;
+  for(const Ptr<Expr> arg:args){
+    //用if找出所有不用生成temp的情况
+    if(arg->get_expr_class() == "Integral"){
+      content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
+      continue;
+    }
+    if(arg->get_expr_class() == "Var"){
+      // content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
+      // continue;      
+    }
+    if(arg->get_expr_class() == "Cons"){ 
+      //进行强制类型转换
+      Ptr<const ConsExpr> copy_arg = std::dynamic_pointer_cast<const ConsExpr>(arg);
+      if(!copy_arg->get_genTempOrNot(func, typeinfo, arg)){
+        content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
+        continue;
+      }
+    }
+    //除上述的所有情况，全部生成temp处理
+    content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
   }
+
+  content.pop_back();
+  content.pop_back();
+  return constructor+enclose(content);
+ 
 }
 string
 ConsExpr::gen_expr_impl_listCons(FuncEntity& func, const TypeInfo& typeinfo) const
@@ -357,19 +372,32 @@ ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) cons
   typeinfo.avoid_lack(func, constructor);
   assert_true(other_func->args_size() == args.size());
 
-  // if (theConfig.move_list()) 
-  if(func.func_recu_class()>-1)
-  {
-    return constructor + enclose(join(args, [&](const auto& arg) {
-              auto temp = func.gen_temp();
-              func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-              return move_expr(temp);
-            }));
-  } else {
-    return constructor + enclose(join(args, [&](const auto& arg) {
-              return arg->gen_expr(func);
-            }));
+  string content;
+  for(const Ptr<Expr> arg:args){
+    //用if找出所有不用生成temp的情况
+    if(arg->get_expr_class() == "Integral"){
+      content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
+      continue;
+    }
+    if(arg->get_expr_class() == "Var"){
+      // content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
+      // continue;      
+    }
+    if(arg->get_expr_class() == "Cons"){ 
+      //进行强制类型转换
+      Ptr<const ConsExpr> copy_arg = std::dynamic_pointer_cast<const ConsExpr>(arg);
+      if(!copy_arg->get_genTempOrNot(func, typeinfo, arg)){
+        content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
+        continue;
+      }
+    }
+    //除上述的所有情况，全部生成temp处理
+    content += gen_expr_impl_funCall_Temp(func, typeinfo, arg);
   }
+
+  content.pop_back();
+  content.pop_back();
+  return constructor+enclose(content);
 }
 string
 ConsExpr::gen_expr_impl_shortDef(FuncEntity& func, const TypeInfo& typeinfo) const
@@ -381,6 +409,166 @@ ConsExpr::gen_expr_impl_shortDef(FuncEntity& func, const TypeInfo& typeinfo) con
       "auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func));
   }
   return short_def->expr->gen_expr(func);
+}
+bool 
+ConsExpr::get_genTempOrNot(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
+{
+  Ptr<const ConsExpr> copy_arg = std::dynamic_pointer_cast<const ConsExpr>(arg);
+  std::string arg_cons = copy_arg->get_constructor();
+  // for recursive calls
+  if (arg_cons == func.name()) {
+    return true;
+  }  else if (arg_cons == "Suc") {
+    return false;
+  }  else if (arg_cons == "Some") {
+    assert_true(args.size() == 1);
+    return true;
+  }
+  else if (arg_cons == "Cons") {
+    return true;
+  } else if (arg_cons == "length") {
+    assert_true(args.size() == 1);
+    return true;
+  } else if (arg_cons == "take") {
+    assert_true(args.size() == 2);
+    return true;
+  } else if (arg_cons == "drop") {
+    assert_true(args.size() == 2);
+    return true;
+  } else if (arg_cons == "append") {
+    assert_true(args.size() == 2);
+    return true;
+  } else if (arg_cons == "nth") {
+    assert_true(args.size() == 2);
+    return true;
+  } else if (arg_cons == "upto") {
+    return true;
+  } else if (arg_cons == "upt") {
+    return true;
+  } else if (arg_cons == "set") {
+    assert_true(args.size() == 1);
+    return true;
+  }  else if (arg_cons == "If") {
+    return true;
+  } else if (arg_cons == "Pair") {
+    assert_true(args.size() == 2);
+    return true;
+  } else if (arg_cons == "fst") {
+    assert_true(args.size() == 1);
+    return true;
+  } else if (arg_cons == "snd") {
+    assert_true(args.size() == 1);
+    return true;
+  }
+
+  // for user-defined datatypes
+  else if (auto datatype = func.code().find_datatype_by_cons(arg_cons)) {
+    return false;
+  }
+
+  // for common calls
+  else if (auto other_func = func.code().find_func_entity(arg_cons)) {
+    return true;
+  }
+
+  // for ShortDef
+  else if (auto short_def = func.code().get_short_def(arg_cons)) {
+    return true;
+  }
+
+  // else as the common call without determined function
+  else {
+    return true;
+  }
+}
+std::string
+ConsExpr::gen_expr_impl_recuCall_noTemp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
+{
+  std::string one_param = arg->gen_expr(func);
+  switch (func.func_recu_class())
+  {
+  case 2:
+    break;
+  case 1:
+    one_param = move_expr(one_param);
+    break;
+  case 0:
+    break;
+  default:
+    break;
+  }
+  return one_param+", ";
+}
+std::string
+ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
+{
+  if(func.func_recu_class() == -1){
+    return arg->gen_expr(func)+", ";
+  }
+
+  auto temp = func.gen_temp();
+  func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+  switch (func.func_recu_class())
+  {
+  case 2:
+    break;
+  case 1:
+    temp = move_expr(temp);
+    break;
+  case 0:
+    break;
+  default:
+    break;
+  }
+  return temp+", ";
+}
+std::string
+ConsExpr::gen_expr_impl_funCall_noTemp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
+{
+  std::string one_param = arg->gen_expr(func);
+  switch (func.func_recu_class())
+  {
+  case 2:
+    break;
+  case 1:
+    one_param = move_expr(one_param);
+    break;
+  case 0:
+    break;
+  default:
+    break;
+  }
+  return one_param+", ";
+}
+std::string
+ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
+{
+  if(func.func_recu_class() == -1){
+    return arg->gen_expr(func)+", ";
+  }
+
+  auto temp = func.gen_temp();
+  func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+  switch (func.func_recu_class())
+  {
+  case 2:
+    temp = move_expr(temp);
+    break;
+  case 1:
+    temp = move_expr(temp);
+    break;
+  case 0:
+    temp = move_expr(temp);
+    break;
+  default:
+    break;
+  }
+  return temp+", ";
+}
+
+std::string
+ConsExpr::get_constructor()const{
+  return constructor;
 }
 
 string

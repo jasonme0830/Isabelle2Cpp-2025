@@ -68,7 +68,7 @@ FunctionDef::analyse_func_recu_class()
     cout<<func_recursive_type<<endl;
   }
 
-  func_recursive_type = 0;
+  // func_recursive_type = 0;
 
   return func_recursive_type; 
 }

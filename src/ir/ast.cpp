@@ -325,4 +325,41 @@ void LambdaExpr::traversal_replace_cons(std::map<std::string,std::string>& cons_
   expr.get()->traversal_replace_cons(cons_map);
 }
 
+std::string IntegralExpr::get_expr_class()
+{
+  return "Integral";
+}
+std::string VarExpr::get_expr_class()
+{
+  return "Var";
+}
+std::string ConsExpr::get_expr_class()
+{
+  return "Cons";
+}
+std::string ListExpr::get_expr_class()
+{
+  return "List";
+}
+std::string SetExpr::get_expr_class()
+{
+  return "Set";
+}
+std::string BinaryOpExpr::get_expr_class()
+{
+  return "BinaryOp";
+}
+std::string LetinExpr::get_expr_class()
+{
+  return "Letin";
+}
+std::string CaseExpr::get_expr_class()
+{
+  return "Case";
+}
+std::string LambdaExpr::get_expr_class()
+{
+  return "Lambda";
+}
+
 } // namespace hol2cpp

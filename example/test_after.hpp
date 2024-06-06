@@ -150,10 +150,11 @@ bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
         }
 
         // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
+        auto a = arg1;
         auto left = arg2.as_Node().p1();
         auto x = arg2.as_Node().p2();
         auto right = arg2.as_Node().p3();
-        return (arg1 == std::move(x)) || (searchtree1(arg1, std::move(left)) || searchtree1(std::move(arg1), std::move(right)));
+        return (a == std::move(x)) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
     };
 
     static std::map<std::tuple<T1, tree<T1>>, bool> cache;
@@ -171,10 +172,11 @@ bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
         }
 
         // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
+        auto a = arg1;
         auto left = arg2.as_Node().p1();
         auto x = arg2.as_Node().p2();
         auto right = arg2.as_Node().p3();
-        return searchtree2(arg1, std::move(left)) || ((arg1 == std::move(x)) || searchtree2(std::move(arg1), std::move(right)));
+        return searchtree2(a, std::move(left)) || ((a == std::move(x)) || searchtree2(std::move(a), std::move(right)));
     };
 
     static std::map<std::tuple<T1, tree<T1>>, bool> cache;
@@ -192,10 +194,11 @@ bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
         }
 
         // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
+        auto a = arg1;
         auto left = arg2.as_Node().p1();
         auto x = arg2.as_Node().p2();
         auto right = arg2.as_Node().p3();
-        return searchtree3(arg1, std::move(left)) || (searchtree3(arg1, std::move(right)) || (std::move(arg1) == std::move(x)));
+        return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (std::move(a) == std::move(x)));
     };
 
     static std::map<std::tuple<T1, tree<T1>>, bool> cache;
@@ -206,36 +209,38 @@ bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
 
 template<typename T1>
 tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
-    // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
-    if (arg2.is_Node()) {
-        auto left = std::move(arg2.as_Node().p1());
-        auto x = std::move(arg2.as_Node().p2());
-        auto right = std::move(arg2.as_Node().p3());
-        tree<T1> temp0;
-        if (arg1 <= x) {
-            auto temp1 = tree<T1>::Node(
-                inserttree(std::move(arg1), std::move(left)),
-                std::move(x),
-                std::move(right)
-            );
-            temp0 = temp1;
-        } else {
-            auto temp2 = tree<T1>::Node(
-                std::move(left),
-                std::move(x),
-                inserttree(std::move(arg1), std::move(right))
-            );
-            temp0 = temp2;
-        }
+    // inserttree a Tip= Node Tip a Tip
+    if (arg2.is_Tip()) {
+        auto a = std::move(arg1);
+        auto temp0 = tree<T1>::Node(
+            tree<T1>::Tip(),
+            std::move(a),
+            tree<T1>::Tip()
+        );
         return temp0;
     }
 
-    // inserttree a Tip= Node Tip a Tip
-    auto temp0 = tree<T1>::Node(
-        tree<T1>::Tip(),
-        std::move(arg1),
-        tree<T1>::Tip()
-    );
+    // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
+    auto a = std::move(arg1);
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    tree<T1> temp0;
+    if (a <= x) {
+        auto temp1 = tree<T1>::Node(
+            inserttree(std::move(a), std::move(left)),
+            std::move(x),
+            std::move(right)
+        );
+        temp0 = std::move(temp1);
+    } else {
+        auto temp2 = tree<T1>::Node(
+            std::move(left),
+            std::move(x),
+            inserttree(std::move(a), std::move(right))
+        );
+        temp0 = std::move(temp2);
+    }
     return temp0;
 }
 
@@ -268,8 +273,8 @@ std::deque<T1> transtolist(const tree<T1> &arg1) {
 template<typename T1>
 T1 rightest(tree<T1> arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
-    auto x = std::move(arg1.as_Node().p2());
-    auto right = std::move(arg1.as_Node().p3());
+    auto x = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
     T1 temp0;
     if (right.is_Tip()) {
         temp0 = std::move(x);
@@ -287,8 +292,8 @@ tree<T1> rightestleft(tree<T1> arg1) {
     }
 
     // rightestleft (Node left x right) =(if right=Tip then left  ...
-    auto left = std::move(arg1.as_Node().p1());
-    auto right = std::move(arg1.as_Node().p3());
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
     tree<T1> temp0;
     if (right.is_Tip()) {
         temp0 = std::move(left);
@@ -323,9 +328,9 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
                 rightest(std::move(temp3)),
                 std::move(right)
             );
-            temp1 = temp4;
+            temp1 = std::move(temp4);
         }
-        temp0 = temp1;
+        temp0 = std::move(temp1);
     }
     return temp0;
 }
@@ -338,36 +343,36 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     }
 
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
-    auto left = std::move(arg2.as_Node().p1());
-    auto x = std::move(arg2.as_Node().p2());
-    auto right = std::move(arg2.as_Node().p3());
+    auto a = std::move(arg1);
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
     tree<T1> temp0;
-    if (arg1 == x) {
-        auto temp2 = tree<T1>::Node(
+    if (a == x) {
+        auto temp1 = tree<T1>::Node(
             std::move(left),
             std::move(x),
             std::move(right)
         );
-        auto temp1 = temp2;
         temp0 = deltreeroot(std::move(temp1));
     } else {
-        tree<T1> temp3;
-        if (arg1 < x) {
-            auto temp4 = tree<T1>::Node(
-                deltree(std::move(arg1), std::move(left)),
+        tree<T1> temp2;
+        if (a < x) {
+            auto temp3 = tree<T1>::Node(
+                deltree(std::move(a), std::move(left)),
                 std::move(x),
                 std::move(right)
             );
-            temp3 = temp4;
+            temp2 = std::move(temp3);
         } else {
-            auto temp5 = tree<T1>::Node(
+            auto temp4 = tree<T1>::Node(
                 std::move(left),
                 std::move(x),
-                deltree(std::move(arg1), std::move(right))
+                deltree(std::move(a), std::move(right))
             );
-            temp3 = temp5;
+            temp2 = std::move(temp4);
         }
-        temp0 = temp3;
+        temp0 = std::move(temp2);
     }
     return temp0;
 }
@@ -380,35 +385,37 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     }
 
     // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
-    auto left = std::move(arg3.as_Node().p1());
-    auto x = std::move(arg3.as_Node().p2());
-    auto right = std::move(arg3.as_Node().p3());
+    auto a = std::move(arg1);
+    auto b = std::move(arg2);
+    auto left = arg3.as_Node().p1();
+    auto x = arg3.as_Node().p2();
+    auto right = arg3.as_Node().p3();
     tree<T1> temp0;
-    if (arg1 == x) {
+    if (a == x) {
         auto temp1 = tree<T1>::Node(
             std::move(left),
-            std::move(arg2),
+            std::move(b),
             std::move(right)
         );
-        temp0 = temp1;
+        temp0 = std::move(temp1);
     } else {
         tree<T1> temp2;
-        if (arg1 < x) {
+        if (a < x) {
             auto temp3 = tree<T1>::Node(
-                changetree(std::move(arg1), std::move(arg2), std::move(left)),
+                changetree(std::move(a), std::move(b), std::move(left)),
                 std::move(x),
                 std::move(right)
             );
-            temp2 = temp3;
+            temp2 = std::move(temp3);
         } else {
             auto temp4 = tree<T1>::Node(
                 std::move(left),
                 std::move(x),
-                changetree(std::move(arg1), std::move(arg2), std::move(right))
+                changetree(std::move(a), std::move(b), std::move(right))
             );
-            temp2 = temp4;
+            temp2 = std::move(temp4);
         }
-        temp0 = temp2;
+        temp0 = std::move(temp2);
     }
     return temp0;
 }
@@ -417,21 +424,23 @@ template<typename T1>
 std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
-        return arg2;
+        auto xs = std::move(arg2);
+        return xs;
     }
 
     // Merge xs [] = xs
     if (arg2.empty()) {
-        return arg1;
+        auto xs = std::move(arg1);
+        return xs;
     }
 
     // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
-    auto x = std::move(arg1.front());
+    auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(std::move(arg1));
-    auto y = std::move(arg2.front());
+    auto xs = std::move(arg1);
+    auto y = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto ys = std::move(std::move(arg2));
+    auto ys = std::move(arg2);
     std::deque<T1> temp0;
     if (x <= y) {
         auto temp1 = std::move(ys);
@@ -466,11 +475,12 @@ std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
         }
 
         // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-        auto temp1 = arg1;
-        auto temp0 = MergeSort(std::deque<T1>(arg1.begin(), arg1.begin() + size(std::move(temp1)) / 2));
-        auto temp3 = arg1;
+        auto xs = arg1;
+        auto temp1 = xs;
+        auto temp0 = MergeSort(std::deque<T1>(xs.begin(), xs.begin() + size(std::move(temp1)) / 2));
+        auto temp3 = xs;
         auto temp4 = size(std::move(temp3)) / 2;
-        auto temp5 = std::move(arg1);
+        auto temp5 = std::move(xs);
         temp5.erase(temp5.begin(), std::next(temp5.begin(), temp4));
         auto temp2 = MergeSort(std::move(temp5));
         return Merge(std::move(temp0), std::move(temp2));
@@ -503,12 +513,11 @@ std::deque<T1> sorttree(const tree<T1> &arg1) {
     auto left = arg1.as_Node().p1();
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
-    auto temp2 = tree<T1>::Node(
+    auto temp1 = tree<T1>::Node(
         std::move(left),
         std::move(x),
         std::move(right)
     );
-    auto temp1 = temp2;
     auto temp0 = transtolist(std::move(temp1));
     return MergeSort(std::move(temp0));
 }

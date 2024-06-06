@@ -237,6 +237,7 @@ struct Expr
 
   virtual void traversal_replace_cons(std::map<std::string,std::string>&)=0;
   virtual int trav_judge_recursive(std::string)=0;
+  virtual std::string get_expr_class()=0;
 
 };
 
@@ -255,6 +256,7 @@ public:
 
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 /**
@@ -282,6 +284,7 @@ public:
 
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 /**
@@ -313,13 +316,20 @@ public:
   std::string gen_expr_impl_funCall(FuncEntity&, const TypeInfo&) const;
   std::string gen_expr_impl_shortDef(FuncEntity&, const TypeInfo&) const;
 
+  bool get_genTempOrNot(FuncEntity&, const TypeInfo&, const Ptr<Expr>) const;
+  std::string gen_expr_impl_recuCall_Temp(FuncEntity&, const TypeInfo&, const Ptr<Expr>) const;
+  std::string gen_expr_impl_recuCall_noTemp(FuncEntity&, const TypeInfo&, const Ptr<Expr>) const;
+  std::string gen_expr_impl_funCall_Temp(FuncEntity&, const TypeInfo&, const Ptr<Expr>) const;
+  std::string gen_expr_impl_funCall_noTemp(FuncEntity&, const TypeInfo&, const Ptr<Expr>) const;
+
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
   int trav_judge_recursive_common(std::string);
   int trav_judge_recursive_recuCons(std::string);
   int trav_judge_recursive_ifexpr(std::string);
-
+  std::string get_expr_class() override;
+  std::string get_constructor() const;
 };
 
 /**
@@ -339,6 +349,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 /**
@@ -364,6 +375,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 struct BinaryOpExpr final : Expr
@@ -382,6 +394,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 struct Equation final
@@ -410,6 +423,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 struct CaseExpr final : Expr
@@ -427,6 +441,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 
 };
 
@@ -446,6 +461,7 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  std::string get_expr_class() override;
 };
 
 struct Definition

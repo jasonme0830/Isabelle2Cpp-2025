@@ -17,9 +17,9 @@ fun searchtree3::"'a=>'a tree=>bool " where
 "searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) ) "
 
 fun inserttree::"'a::ord=> 'a tree => 'a tree " where
+"inserttree a Tip= Node Tip a Tip"|
 "inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right) 
-                                     else (Node left x (inserttree a right) ) )" |
-"inserttree a Tip= Node Tip a Tip"
+                                     else (Node left x (inserttree a right) ) )"
 
 fun transtolist:: "'a tree =>'a list " where
 "transtolist Tip=[] "|
