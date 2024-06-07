@@ -153,7 +153,12 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     } else {
       func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
     }
-    return temp0;
+
+    if(func.func_recu_class()>-1){
+      return move_expr(temp0);
+    } else {
+      return temp0;
+    }
   } else if (constructor == "nth") {
     assert_true(args.size() == 2);
 

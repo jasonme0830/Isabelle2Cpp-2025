@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <cstdlib>
 #include <deque>
 #include <map>
@@ -142,70 +141,26 @@ class tree {
 
 
 template<typename T1>
-std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
-    // Merge [] xs=xs
-    if (arg1.empty()) {
-        auto xs = std::move(arg2);
-        return xs;
-    }
-
-    // Merge xs [] = xs
-    if (arg2.empty()) {
-        auto xs = std::move(arg1);
-        return xs;
-    }
-
-    // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
-    auto x = arg1.front();
-    arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(arg1);
-    auto y = arg2.front();
-    arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto ys = std::move(arg2);
-    std::deque<T1> temp0;
-    if (x <= y) {
-        auto temp1 = std::move(ys);
-        temp1.push_front(std::move(y));
-        auto temp2 = Merge(std::move(xs), std::move(temp1));
-        temp2.push_front(std::move(x));
-        temp0 = std::move(temp2);
-    } else {
-        auto temp3 = std::move(xs);
-        temp3.push_front(std::move(x));
-        auto temp4 = Merge(std::move(temp3), std::move(ys));
-        temp4.push_front(std::move(y));
-        temp0 = std::move(temp4);
-    }
-    return temp0;
-}
-
-template<typename T1>
-std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
+std::deque<T1> transtolist(const tree<T1> &arg1) {
     auto impl = [&]() -> std::deque<T1> {
-        // MergeSort [] = []
-        if (arg1.empty()) {
+        // transtolist Tip=[]
+        if (arg1.is_Tip()) {
             return std::deque<T1>();
         }
 
-        // MergeSort (Cons a []) = [a]
-        if (!arg1.empty()) {
-            if (std::deque<T1>(arg1.begin() + 1, arg1.end()).empty()) {
-                auto a = arg1.front();
-                return std::deque<T1>{std::move(a)};
-            }
-        }
-
-        // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-        auto xs = arg1;
-        auto temp0 = MergeSort(std::deque<T1>(xs.begin(), xs.begin() + size(xs) / 2));
-        auto temp2 = size(xs) / 2;
-        auto temp3 = std::move(xs);
-        temp3.erase(temp3.begin(), std::next(temp3.begin(), temp2));
-        auto temp1 = MergeSort(std::move(temp3));
-        return Merge(temp0, temp1);
+        // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
+        auto left = arg1.as_Node().p1();
+        auto a = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
+        auto temp0 = transtolist(std::move(left));
+        auto temp1 = transtolist(std::move(right));
+        temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+        auto temp2 = std::move(temp0);
+        temp2.push_front(std::move(a));
+        return temp2;
     };
 
-    static std::map<std::tuple<std::deque<T1>>, std::deque<T1>> cache;
+    static std::map<std::tuple<tree<T1>>, std::deque<T1>> cache;
     auto args = std::make_tuple(arg1);
     auto it = cache.find(args);
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);

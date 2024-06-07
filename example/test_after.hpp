@@ -259,7 +259,7 @@ std::deque<T1> transtolist(const tree<T1> &arg1) {
         auto temp0 = transtolist(std::move(left));
         auto temp1 = transtolist(std::move(right));
         temp0.insert(temp0.end(), temp1.begin(), temp1.end());
-        auto temp2 = temp0;
+        auto temp2 = std::move(temp0);
         temp2.push_front(std::move(a));
         return temp2;
     };
