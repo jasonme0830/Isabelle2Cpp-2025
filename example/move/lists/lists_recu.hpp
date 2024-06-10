@@ -10,8 +10,10 @@
 template<typename T1>
 std::deque<T1> AddListHead(const T1 &arg1, const std::deque<T1> &arg2) {
     // AddListHead a xs =a # xs
-    auto temp0 = std::move(arg2);
-    temp0.push_front(std::move(arg1));
+    auto a = arg1;
+    auto xs = arg2;
+    auto temp0 = std::move(xs);
+    temp0.push_front(std::move(a));
     return temp0;
 }
 
@@ -19,16 +21,18 @@ template<typename T1>
 std::deque<T1> AddListTail(T1 arg1, std::deque<T1> arg2) {
     // AddListTail a [] =Cons a []
     if (arg2.empty()) {
+        auto a = std::move(arg1);
         auto temp0 = std::deque<T1>();
-        temp0.push_front(std::move(arg1));
+        temp0.push_front(std::move(a));
         return temp0;
     }
 
     // AddListTail a (x#xs) = x # (AddListTail a xs )
-    auto x = std::move(arg2.front());
+    auto a = std::move(arg1);
+    auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto xs = std::move(std::move(arg2));
-    auto temp0 = AddListTail(std::move(arg1), std::move(xs));
+    auto xs = std::move(arg2);
+    auto temp0 = AddListTail(std::move(a), std::move(xs));
     temp0.push_front(std::move(x));
     return temp0;
 }
@@ -37,18 +41,20 @@ template<typename T1>
 std::deque<T1> AddListI(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     // AddListI i a [] = Cons a []
     if (arg3.empty()) {
+        auto a = std::move(arg2);
         auto temp0 = std::deque<T1>();
-        temp0.push_front(std::move(arg2));
+        temp0.push_front(std::move(a));
         return temp0;
     }
 
     // AddListI 0 a (x#xs) = AddListHead a (x#xs)
     if (arg1 == 0) {
         if (arg3.size() >= 1) {
-            auto x = std::move(arg3.front());
+            auto a = std::move(arg2);
+            auto x = arg3.front();
             arg3.erase(arg3.begin(), arg3.begin() + 1);
-            auto xs = std::move(std::move(arg3));
-            auto temp0 = std::move(arg2);
+            auto xs = std::move(arg3);
+            auto temp0 = std::move(a);
             auto temp2 = std::move(xs);
             temp2.push_front(std::move(x));
             auto temp1 = std::move(temp2);
@@ -57,11 +63,12 @@ std::deque<T1> AddListI(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     }
 
     // AddListI (Suc i) a (x#xs) = x # (AddListI i a xs)
-    auto i = std::move(arg1 - 1);
-    auto x = std::move(arg3.front());
+    auto i = arg1 - 1;
+    auto a = std::move(arg2);
+    auto x = arg3.front();
     arg3.erase(arg3.begin(), arg3.begin() + 1);
-    auto xs = std::move(std::move(arg3));
-    auto temp0 = AddListI(std::move(i), std::move(arg2), std::move(xs));
+    auto xs = std::move(arg3);
+    auto temp0 = AddListI(std::move(i), std::move(a), std::move(xs));
     temp0.push_front(std::move(x));
     return temp0;
 }
@@ -91,9 +98,9 @@ std::deque<T1> DelListTail(std::deque<T1> arg1) {
     }
 
     // DelListTail (x#xs) =  Cons x (DelListTail xs)
-    auto x = std::move(arg1.front());
+    auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(std::move(arg1));
+    auto xs = std::move(arg1);
     auto temp0 = DelListTail(std::move(xs));
     temp0.push_front(std::move(x));
     return temp0;
@@ -114,9 +121,9 @@ std::deque<T1> DelListI(std::uint64_t arg1, std::deque<T1> arg2) {
     // DelListI 0 (x#xs) = DelListHead (x#xs)
     if (arg1 == 0) {
         if (arg2.size() >= 1) {
-            auto x = std::move(arg2.front());
+            auto x = arg2.front();
             arg2.erase(arg2.begin(), arg2.begin() + 1);
-            auto xs = std::move(std::move(arg2));
+            auto xs = std::move(arg2);
             auto temp1 = std::move(xs);
             temp1.push_front(std::move(x));
             auto temp0 = std::move(temp1);
@@ -125,10 +132,10 @@ std::deque<T1> DelListI(std::uint64_t arg1, std::deque<T1> arg2) {
     }
 
     // DelListI (Suc i) (x#xs) = x # (DelListI i xs)
-    auto i = std::move(arg1 - 1);
-    auto x = std::move(arg2.front());
+    auto i = arg1 - 1;
+    auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto xs = std::move(std::move(arg2));
+    auto xs = std::move(arg2);
     auto temp0 = DelListI(std::move(i), std::move(xs));
     temp0.push_front(std::move(x));
     return temp0;
@@ -142,14 +149,15 @@ bool SearchList(T1 arg1, std::deque<T1> arg2) {
     }
 
     // SearchList a (x#xs) = (if a=x then True else (SearchList a xs))
-    auto x = std::move(arg2.front());
+    auto a = std::move(arg1);
+    auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto xs = std::move(std::move(arg2));
+    auto xs = std::move(arg2);
     bool temp0;
-    if (arg1 == std::move(x)) {
+    if (a == std::move(x)) {
         temp0 = true;
     } else {
-        temp0 = SearchList(std::move(arg1), std::move(xs));
+        temp0 = SearchList(std::move(a), std::move(xs));
     }
     return temp0;
 }
@@ -162,16 +170,18 @@ std::deque<T1> Modify1(T1 arg1, T1 arg2, std::deque<T1> arg3) {
     }
 
     // Modify1 a b (x#xs) = (if x=a then b#(Modify1 a b xs) else x#(Modify1 a b xs))
-    auto x = std::move(arg3.front());
+    auto a = std::move(arg1);
+    auto b = std::move(arg2);
+    auto x = arg3.front();
     arg3.erase(arg3.begin(), arg3.begin() + 1);
-    auto xs = std::move(std::move(arg3));
+    auto xs = std::move(arg3);
     std::deque<T1> temp0;
-    if (x == arg1) {
-        auto temp1 = Modify1(std::move(arg1), std::move(arg2), std::move(xs));
-        temp1.push_front(arg2);
+    if (x == a) {
+        auto temp1 = Modify1(std::move(a), std::move(b), std::move(xs));
+        temp1.push_front(b);
         temp0 = std::move(temp1);
     } else {
-        auto temp2 = Modify1(std::move(arg1), std::move(arg2), std::move(xs));
+        auto temp2 = Modify1(std::move(a), std::move(b), std::move(xs));
         temp2.push_front(std::move(x));
         temp0 = std::move(temp2);
     }
@@ -188,20 +198,22 @@ std::deque<T1> Modify2(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     // Modify2 0 b (x#xs) =(b#xs)
     if (arg1 == 0) {
         if (arg3.size() >= 1) {
+            auto b = std::move(arg2);
             arg3.erase(arg3.begin(), arg3.begin() + 1);
-            auto xs = std::move(std::move(arg3));
+            auto xs = std::move(arg3);
             auto temp0 = std::move(xs);
-            temp0.push_front(std::move(arg2));
+            temp0.push_front(std::move(b));
             return temp0;
         }
     }
 
     // Modify2 (Suc n) b (x#xs) = (x#(Modify2 n b xs))
-    auto n = std::move(arg1 - 1);
-    auto x = std::move(arg3.front());
+    auto n = arg1 - 1;
+    auto b = std::move(arg2);
+    auto x = arg3.front();
     arg3.erase(arg3.begin(), arg3.begin() + 1);
-    auto xs = std::move(std::move(arg3));
-    auto temp0 = Modify2(std::move(n), std::move(arg2), std::move(xs));
+    auto xs = std::move(arg3);
+    auto temp0 = Modify2(std::move(n), std::move(b), std::move(xs));
     temp0.push_front(std::move(x));
     return temp0;
 }
@@ -214,16 +226,17 @@ std::deque<T1> ffilter(std::function<bool(T1 )> arg1, std::deque<T1> arg2) {
     }
 
     // ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))
-    auto x = std::move(arg2.front());
+    auto f = std::move(arg1);
+    auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto xs = std::move(std::move(arg2));
+    auto xs = std::move(arg2);
     std::deque<T1> temp0;
-    if (arg1(x)) {
-        auto temp1 = ffilter(std::move(arg1), std::move(xs));
+    if (f(x)) {
+        auto temp1 = ffilter(std::move(f), std::move(xs));
         temp1.push_front(std::move(x));
         temp0 = std::move(temp1);
     } else {
-        temp0 = ffilter(std::move(arg1), std::move(xs));
+        temp0 = ffilter(std::move(f), std::move(xs));
     }
     return temp0;
 }
@@ -237,16 +250,16 @@ std::deque<T1> Reverse2(std::deque<T1> arg1) {
 
     // Reverse2 (Cons a []) =Cons a []
     if (arg1.size() == 1) {
-        auto a = std::move(arg1.front());
+        auto a = arg1.front();
         auto temp0 = std::deque<T1>();
         temp0.push_front(std::move(a));
         return temp0;
     }
 
     // Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil)
-    auto x = std::move(arg1.front());
+    auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(std::move(arg1));
+    auto xs = std::move(arg1);
     auto temp0 = std::deque<T1>();
     temp0.push_front(std::move(x));
     auto temp1 = Reverse2(std::move(xs));
@@ -259,14 +272,16 @@ template<typename T1>
 std::deque<T1> app(std::deque<T1> arg1, std::deque<T1> arg2) {
     // app Nil as =as
     if (arg1.empty()) {
-        return arg2;
+        auto as = std::move(arg2);
+        return as;
     }
 
     // app(Cons a as )bs= Cons a (app as bs)
-    auto a = std::move(arg1.front());
+    auto a = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto as = std::move(std::move(arg1));
-    auto temp0 = app(std::move(as), std::move(arg2));
+    auto as = std::move(arg1);
+    auto bs = std::move(arg2);
+    auto temp0 = app(std::move(as), std::move(bs));
     temp0.push_front(std::move(a));
     return temp0;
 }
@@ -279,9 +294,9 @@ std::deque<T1> Reverse(std::deque<T1> arg1) {
     }
 
     // Reverse (Cons a as) = app(Reverse as)(Cons a Nil)
-    auto a = std::move(arg1.front());
+    auto a = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto as = std::move(std::move(arg1));
+    auto as = std::move(arg1);
     auto temp0 = Reverse(std::move(as));
     auto temp2 = std::deque<T1>();
     temp2.push_front(std::move(a));
@@ -293,24 +308,26 @@ template<typename T1>
 std::deque<T1> Insert(T1 arg1, std::deque<T1> arg2) {
     // Insert a [] =Cons a []
     if (arg2.empty()) {
+        auto a = std::move(arg1);
         auto temp0 = std::deque<T1>();
-        temp0.push_front(std::move(arg1));
+        temp0.push_front(std::move(a));
         return temp0;
     }
 
     // Insert a (x#xs) =(if a \<le> x then a#x#xs else x#(Insert a xs))
-    auto x = std::move(arg2.front());
+    auto a = std::move(arg1);
+    auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto xs = std::move(std::move(arg2));
+    auto xs = std::move(arg2);
     std::deque<T1> temp0;
-    if (arg1 <= x) {
+    if (a <= x) {
         auto temp1 = std::move(xs);
         temp1.push_front(std::move(x));
         auto temp2 = std::move(temp1);
-        temp2.push_front(std::move(arg1));
+        temp2.push_front(std::move(a));
         temp0 = std::move(temp2);
     } else {
-        auto temp3 = Insert(std::move(arg1), std::move(xs));
+        auto temp3 = Insert(std::move(a), std::move(xs));
         temp3.push_front(std::move(x));
         temp0 = std::move(temp3);
     }
@@ -321,22 +338,25 @@ template<typename T1>
 std::deque<T1> InsertSortPart(std::deque<T1> arg1, std::deque<T1> arg2) {
     // InsertSortPart [] ys=ys
     if (arg1.empty()) {
-        return arg2;
+        auto ys = std::move(arg2);
+        return ys;
     }
 
     // InsertSortPart (x#xs) ys=InsertSortPart xs (Insert x ys)
-    auto x = std::move(arg1.front());
+    auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(std::move(arg1));
+    auto xs = std::move(arg1);
+    auto ys = std::move(arg2);
     auto temp0 = std::move(x);
-    auto temp1 = std::move(arg2);
-    return InsertSortPart(std::move(xs), Insert(std::move(temp0), std::move(temp1)));
+    auto temp1 = std::move(ys);
+    return InsertSortPart(std::move(xs), std::move(Insert(std::move(temp0), std::move(temp1))));
 }
 
 template<typename T1>
 std::deque<T1> InsertSort(const std::deque<T1> &arg1) {
     // InsertSort xs = InsertSortPart xs Nil
-    auto temp0 = std::move(arg1);
+    auto xs = arg1;
+    auto temp0 = std::move(xs);
     auto temp1 = std::deque<T1>();
     return InsertSortPart(std::move(temp0), std::move(temp1));
 }
@@ -345,21 +365,23 @@ template<typename T1>
 std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
-        return arg2;
+        auto xs = std::move(arg2);
+        return xs;
     }
 
     // Merge xs [] = xs
     if (arg2.empty()) {
-        return arg1;
+        auto xs = std::move(arg1);
+        return xs;
     }
 
     // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
-    auto x = std::move(arg1.front());
+    auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
-    auto xs = std::move(std::move(arg1));
-    auto y = std::move(arg2.front());
+    auto xs = std::move(arg1);
+    auto y = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
-    auto ys = std::move(std::move(arg2));
+    auto ys = std::move(arg2);
     std::deque<T1> temp0;
     if (x <= y) {
         auto temp1 = std::move(ys);
@@ -394,11 +416,12 @@ std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
         }
 
         // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-        auto temp1 = arg1;
-        auto temp0 = MergeSort(std::deque<T1>(arg1.begin(), arg1.begin() + size(std::move(temp1)) / 2));
-        auto temp3 = arg1;
+        auto xs = arg1;
+        auto temp1 = xs;
+        auto temp0 = MergeSort(std::deque<T1>(xs.begin(), xs.begin() + size(std::move(temp1)) / 2));
+        auto temp3 = xs;
         auto temp4 = size(std::move(temp3)) / 2;
-        auto temp5 = std::move(arg1);
+        auto temp5 = std::move(xs);
         temp5.erase(temp5.begin(), std::next(temp5.begin(), temp4));
         auto temp2 = MergeSort(std::move(temp5));
         return Merge(std::move(temp0), std::move(temp2));

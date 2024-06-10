@@ -148,10 +148,11 @@ bool searchtree1(T1 arg1, tree<T1> arg2) {
     }
 
     // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    return (arg1 == x) || (searchtree1(arg1, left) || searchtree1(arg1, right));
+    return (a == x) || (searchtree1(a, left) || searchtree1(a, right));
 }
 
 template<typename T1>
@@ -162,10 +163,11 @@ bool searchtree2(T1 arg1, tree<T1> arg2) {
     }
 
     // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    return searchtree2(arg1, left) || ((arg1 == x) || searchtree2(arg1, right));
+    return searchtree2(a, left) || ((a == x) || searchtree2(a, right));
 }
 
 template<typename T1>
@@ -176,32 +178,35 @@ bool searchtree3(T1 arg1, tree<T1> arg2) {
     }
 
     // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    return searchtree3(arg1, left) || (searchtree3(arg1, right) || (arg1 == x));
+    return searchtree3(a, left) || (searchtree3(a, right) || (a == x));
 }
 
 template<typename T1>
 tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     // inserttree a Tip= Node Tip a Tip
     if (arg2.is_Tip()) {
+        auto a = arg1;
         auto temp0 = tree<T1>::Node(
             tree<T1>::Tip(),
-            arg1,
+            a,
             tree<T1>::Tip()
         );
         return temp0;
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
     tree<T1> temp0;
-    if (arg1 <= x) {
+    if (a <= x) {
         auto temp1 = tree<T1>::Node(
-            inserttree(arg1, left),
+            inserttree(a, left),
             x,
             right
         );
@@ -210,7 +215,7 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
         auto temp2 = tree<T1>::Node(
             left,
             x,
-            inserttree(arg1, right)
+            inserttree(a, right)
         );
         temp0 = temp2;
     }
@@ -307,11 +312,12 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     }
 
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
     tree<T1> temp0;
-    if (arg1 == x) {
+    if (a == x) {
         auto temp1 = tree<T1>::Node(
             left,
             x,
@@ -320,9 +326,9 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
         temp0 = deltreeroot(temp1);
     } else {
         tree<T1> temp2;
-        if (arg1 < x) {
+        if (a < x) {
             auto temp3 = tree<T1>::Node(
-                deltree(arg1, left),
+                deltree(a, left),
                 x,
                 right
             );
@@ -331,7 +337,7 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
             auto temp4 = tree<T1>::Node(
                 left,
                 x,
-                deltree(arg1, right)
+                deltree(a, right)
             );
             temp2 = temp4;
         }
@@ -348,22 +354,24 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     }
 
     // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
+    auto a = arg1;
+    auto b = arg2;
     auto left = arg3.as_Node().p1();
     auto x = arg3.as_Node().p2();
     auto right = arg3.as_Node().p3();
     tree<T1> temp0;
-    if (arg1 == x) {
+    if (a == x) {
         auto temp1 = tree<T1>::Node(
             left,
-            arg2,
+            b,
             right
         );
         temp0 = temp1;
     } else {
         tree<T1> temp2;
-        if (arg1 < x) {
+        if (a < x) {
             auto temp3 = tree<T1>::Node(
-                changetree(arg1, arg2, left),
+                changetree(a, b, left),
                 x,
                 right
             );
@@ -372,7 +380,7 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
             auto temp4 = tree<T1>::Node(
                 left,
                 x,
-                changetree(arg1, arg2, right)
+                changetree(a, b, right)
             );
             temp2 = temp4;
         }
@@ -385,12 +393,14 @@ template<typename T1>
 std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
-        return arg2;
+        auto xs = arg2;
+        return xs;
     }
 
     // Merge xs [] = xs
     if (arg2.empty()) {
-        return arg1;
+        auto xs = arg1;
+        return xs;
     }
 
     // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
@@ -431,7 +441,8 @@ std::deque<T1> MergeSort(std::deque<T1> arg1) {
     }
 
     // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-    return Merge(MergeSort(std::deque<T1>(arg1.begin(), arg1.begin() + size(arg1) / 2)), MergeSort(std::deque<T1>(arg1.begin() + size(arg1) / 2, arg1.end())));
+    auto xs = arg1;
+    return Merge(MergeSort(std::deque<T1>(xs.begin(), xs.begin() + size(xs) / 2)), MergeSort(std::deque<T1>(xs.begin() + size(xs) / 2, xs.end())));
 }
 
 template<typename T1>
