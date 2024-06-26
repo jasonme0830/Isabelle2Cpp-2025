@@ -34,7 +34,7 @@ void Isomorphism::analyse_func_recu_class()
 int
 FunctionDef::analyse_func_recu_class()
 {
-  if(theConfig.move_list()){
+  if(theConfig.close_move()){
     func_recursive_type = -1;
     return func_recursive_type;
   }

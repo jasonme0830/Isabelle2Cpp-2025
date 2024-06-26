@@ -7,13 +7,13 @@ using namespace std;
 
 namespace hol2cpp {
 void
-Config::move_list(bool enable)
+Config::close_move(bool enable)
 {
-  move_list_ = enable;
+  close_move_ = enable;
 
-  if (!enable) {
-    return;
-  }
+  // if (!enable) {
+  //   return;
+  // }
 
   // auto origin_as_arg = TypeInfo::as_arg;
   // TypeInfo::as_arg = [=](const TypeInfo& type, int func_recu_class) {

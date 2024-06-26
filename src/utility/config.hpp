@@ -12,12 +12,14 @@ public:
   bool print_type() const { return print_type_; }
 
   // move list as much as possible
-  bool move_list() const { return move_list_; }
+  bool close_move() const { return close_move_; }
   // removes the conditions for the last pattern for total
   // functions (not use option `nonexhaustive`)
   bool reduce_cond() const { return reduce_cond_; }
   // use std::deque instead of std::list as the target type for list
   bool use_deque() const { return use_deque_; }
+  // to close the isomor datatype based on rule
+  bool close_isomor() const { return close_isomor_; }
 
   // generates classes instead of structs for datatypes
   bool use_class() const { return use_class_; }
@@ -31,11 +33,12 @@ public:
   void predef_file(std::string predef_file) { predef_file_ = predef_file; }
   void print_type(bool enable) { print_type_ = enable; }
 
-  void move_list(bool enable); // implemented in src/optimization/move_list.cpp
+  void close_move(bool enable); // implemented in src/optimization/move_list.cpp
   void reduce_cond(bool enable) { reduce_cond_ = enable; }
   void use_deque(bool enable); // implemented in src/optimization/use_deque.cpp
+  void close_isomor(bool enable) {close_isomor_ = enable; };
 
-  void use_class(bool enable) { use_class_ = enable; }
+  void use_class(bool enable) { use_class_ = !enable; }
   void uncurry(bool enable) { uncurry_ = enable; }
 
 private:
@@ -46,9 +49,10 @@ private:
   bool print_type_;
 
   // optimization options
-  bool move_list_;
+  bool close_move_;
   bool reduce_cond_;
   bool use_deque_;
+  bool close_isomor_;
 
   // experimental options that do not improve performance
   bool use_class_;

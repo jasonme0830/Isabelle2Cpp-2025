@@ -169,10 +169,25 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
     func.add_pattern_cond("$.is_$()", prev, constructor);
     auto pos = datatype->pos_of_cons(constructor);
     for (size_t i = 0; i < args.size(); ++i) {
-      args[i]->gen_pattern(func,
-                           "$.as_$().p$()"_fs.format(prev, constructor, i + 1));
+      switch (func.func_recu_class())
+      {
+      case 0:
+        args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        break;
+      case 1:
+        args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        break;
+      case 2:
+        args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        break;
+      default:
+        args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));
+        break;
+      }
     }
-  } else {
+  } 
+  
+  else {
     throw CodegenError("failed call VarExpr::gen_pattern(...): no such name: " +
                        constructor);
   }

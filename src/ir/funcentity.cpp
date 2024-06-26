@@ -148,7 +148,7 @@ bool
 TypeInfo::movable() const
 {
   // return theConfig.move_list() && name == theTemplateTypeMapping["list"];
-  return theConfig.move_list();
+  return !theConfig.close_move();
 }
 
 const TypeInfo&

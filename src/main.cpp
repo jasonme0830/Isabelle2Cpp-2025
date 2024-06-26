@@ -104,12 +104,13 @@ parse_config(int argc, char* argv[])
   theConfig.print_type(arg_parser.get<bool>("print-type"));
 
   // set optimizer options
-  theConfig.move_list(arg_parser.get<bool>("move-list"));
+  theConfig.close_move(arg_parser.get<bool>("close-move"));
   theConfig.reduce_cond(arg_parser.get<bool>("reduce-cond"));
   theConfig.use_deque(arg_parser.get<bool>("use-deque"));
+  theConfig.close_isomor(arg_parser.get<bool>("close-isomor"));
 
   // set experimental options
-  theConfig.use_class(arg_parser.get<bool>("use-class"));
+  theConfig.use_class(arg_parser.get<bool>("close-class"));
   theConfig.uncurry(arg_parser.get<bool>("uncurry"));
 }
 
@@ -139,8 +140,8 @@ build_parser()
     .default_value(false)
     .implict_value(true);
 
-  arg_parser.add_argument("--move-list")
-    .help("enable move-list")
+  arg_parser.add_argument("--close-move")
+    .help("enable close-move")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--reduce-cond")
@@ -151,9 +152,13 @@ build_parser()
     .help("enable use-deque")
     .default_value(false)
     .implict_value(true);
+  arg_parser.add_argument("--close-isomor")
+    .help("enable isomor")
+    .default_value(false)
+    .implict_value(true);
 
-  arg_parser.add_argument("--use-class")
-    .help("generate class instead struct for a datatype")
+  arg_parser.add_argument("--close-class")
+    .help("close generate class instead struct for a datatype")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--uncurry")
