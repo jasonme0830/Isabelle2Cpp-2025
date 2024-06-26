@@ -172,13 +172,13 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
       switch (func.func_recu_class())
       {
       case 0:
-        args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         break;
       case 1:
-        args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         break;
       case 2:
-        args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         break;
       default:
         args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));
