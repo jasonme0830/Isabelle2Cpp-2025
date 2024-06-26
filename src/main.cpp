@@ -105,8 +105,9 @@ parse_config(int argc, char* argv[])
 
   // set optimizer options
   theConfig.close_move(arg_parser.get<bool>("close-move"));
-  theConfig.reduce_cond(arg_parser.get<bool>("reduce-cond"));
-  theConfig.use_deque(arg_parser.get<bool>("use-deque"));
+  theConfig.close_recu(arg_parser.get<bool>("close-recu"));
+  theConfig.reduce_cond(arg_parser.get<bool>("close-reduceCond"));
+  theConfig.use_deque(arg_parser.get<bool>("close-deque"));
   theConfig.close_isomor(arg_parser.get<bool>("close-isomor"));
 
   // set experimental options
@@ -144,12 +145,16 @@ build_parser()
     .help("enable close-move")
     .default_value(false)
     .implict_value(true);
-  arg_parser.add_argument("--reduce-cond")
-    .help("enable reduce-cond")
+  arg_parser.add_argument("--close-recu")
+    .help("enable close-recu")
     .default_value(false)
     .implict_value(true);
-  arg_parser.add_argument("--use-deque")
-    .help("enable use-deque")
+  arg_parser.add_argument("--close-reduceCond")
+    .help("enable close-reduceCond")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--close-deque")
+    .help("enable close-deque")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--close-isomor")
