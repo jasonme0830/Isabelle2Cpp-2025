@@ -7,7 +7,7 @@ std::uint64_t natofsnat(const snat &arg1) {
     }
 
     // natofsnat (sSuc n) = (natofsnat n) + 1
-    auto n = std::move(arg1.as_sSuc().p1_);
+    auto n = arg1.as_sSuc().p1();
     return natofsnat(std::move(n)) + 1;
 }
 

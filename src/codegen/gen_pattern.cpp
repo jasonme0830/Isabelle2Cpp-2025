@@ -168,6 +168,8 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
   else if (auto datatype = func.code().find_datatype_by_cons(constructor)) {
     func.add_pattern_cond("$.is_$()", prev, constructor);
     auto pos = datatype->pos_of_cons(constructor);
+    auto& self = datatype->self();
+    auto& components = datatype->components();
     for (size_t i = 0; i < args.size(); ++i) {
       switch (func.func_recu_class())
       {
@@ -175,7 +177,11 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
         args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));
         break;
       case 1:
-        args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        if(components[pos][i] == self){
+          args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
+        }else{
+          args[i]->gen_pattern(func,"std::move($.as_$().p$())"_fs.format(prev, constructor, i + 1));
+        }
         break;
       case 2:
         args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));

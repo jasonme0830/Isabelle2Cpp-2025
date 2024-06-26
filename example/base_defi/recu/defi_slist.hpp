@@ -279,8 +279,8 @@ slist<T1> AddListTail(T1 arg1, slist<T1> arg2) {
 
     // AddListTail a (sCons x xs) = sCons x  (AddListTail a xs )
     auto a = std::move(arg1);
-    auto x = std::move(arg2.as_sCons().p1_);
-    auto xs = std::move(arg2.as_sCons().p2_);
+    auto x = std::move(arg2.as_sCons().p1());
+    auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
         AddListTail(std::move(a), std::move(xs))
@@ -304,8 +304,8 @@ slist<T1> AddListI(snat arg1, T1 arg2, slist<T1> arg3) {
     if (arg1.is_sZero()) {
         if (arg3.is_sCons()) {
             auto a = std::move(arg2);
-            auto x = std::move(arg3.as_sCons().p1_);
-            auto xs = std::move(arg3.as_sCons().p2_);
+            auto x = std::move(arg3.as_sCons().p1());
+            auto xs = std::move(*arg3.as_sCons().p2_);
             auto temp0 = std::move(a);
             auto temp1 = slist<T1>::sCons(
                 std::move(x),
@@ -316,10 +316,10 @@ slist<T1> AddListI(snat arg1, T1 arg2, slist<T1> arg3) {
     }
 
     // AddListI (sSuc i) a (sCons x xs) = sCons x  (AddListI i a xs)
-    auto i = std::move(arg1.as_sSuc().p1_);
+    auto i = std::move(*arg1.as_sSuc().p1_);
     auto a = std::move(arg2);
-    auto x = std::move(arg3.as_sCons().p1_);
-    auto xs = std::move(arg3.as_sCons().p2_);
+    auto x = std::move(arg3.as_sCons().p1());
+    auto xs = std::move(*arg3.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
         AddListI(std::move(i), std::move(a), std::move(xs))
@@ -331,7 +331,7 @@ template<typename T1>
 slist<T1> DelListHead(const slist<T1> &arg1) {
     // DelListHead (sCons x xs) = xs
     if (arg1.is_sCons()) {
-        auto xs = std::move(arg1.as_sCons().p2_);
+        auto xs = arg1.as_sCons().p2();
         return xs;
     }
 
@@ -348,14 +348,14 @@ slist<T1> DelListTail(slist<T1> arg1) {
 
     // DelListTail (sCons a sNil) = sNil
     if (arg1.is_sCons()) {
-        if (std::move(arg1.as_sCons().p2_).is_sNil()) {
+        if (std::move(*arg1.as_sCons().p2_).is_sNil()) {
             return slist<T1>::sNil();
         }
     }
 
     // DelListTail (sCons x xs) =  sCons x (DelListTail xs)
-    auto x = std::move(arg1.as_sCons().p1_);
-    auto xs = std::move(arg1.as_sCons().p2_);
+    auto x = std::move(arg1.as_sCons().p1());
+    auto xs = std::move(*arg1.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
         DelListTail(std::move(xs))
@@ -372,7 +372,7 @@ slist<T1> DelListI(snat arg1, slist<T1> arg2) {
 
     // DelListI i (sCons a sNil) = sNil
     if (arg2.is_sCons()) {
-        if (std::move(arg2.as_sCons().p2_).is_sNil()) {
+        if (std::move(*arg2.as_sCons().p2_).is_sNil()) {
             return slist<T1>::sNil();
         }
     }
@@ -380,8 +380,8 @@ slist<T1> DelListI(snat arg1, slist<T1> arg2) {
     // DelListI sZero (sCons x xs) = DelListHead (sCons x xs)
     if (arg1.is_sZero()) {
         if (arg2.is_sCons()) {
-            auto x = std::move(arg2.as_sCons().p1_);
-            auto xs = std::move(arg2.as_sCons().p2_);
+            auto x = std::move(arg2.as_sCons().p1());
+            auto xs = std::move(*arg2.as_sCons().p2_);
             auto temp0 = slist<T1>::sCons(
                 std::move(x),
                 std::move(xs)
@@ -391,9 +391,9 @@ slist<T1> DelListI(snat arg1, slist<T1> arg2) {
     }
 
     // DelListI (sSuc i) (sCons x xs) = sCons x  (DelListI i xs)
-    auto i = std::move(arg1.as_sSuc().p1_);
-    auto x = std::move(arg2.as_sCons().p1_);
-    auto xs = std::move(arg2.as_sCons().p2_);
+    auto i = std::move(*arg1.as_sSuc().p1_);
+    auto x = std::move(arg2.as_sCons().p1());
+    auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
         DelListI(std::move(i), std::move(xs))
@@ -411,8 +411,8 @@ slist<T1> Modify1(T1 arg1, T1 arg2, slist<T1> arg3) {
     // Modify1 a b (sCons x xs) = (if x=a then (sCons b (Modify1 a b xs)) else (sCons x (Modify1 a b xs)))
     auto a = std::move(arg1);
     auto b = std::move(arg2);
-    auto x = std::move(arg3.as_sCons().p1_);
-    auto xs = std::move(arg3.as_sCons().p2_);
+    auto x = std::move(arg3.as_sCons().p1());
+    auto xs = std::move(*arg3.as_sCons().p2_);
     slist<T1> temp0;
     if (x == a) {
         auto temp1 = slist<T1>::sCons(
@@ -441,7 +441,7 @@ slist<T1> Modify2(snat arg1, T1 arg2, slist<T1> arg3) {
     if (arg1.is_sZero()) {
         if (arg3.is_sCons()) {
             auto b = std::move(arg2);
-            auto xs = std::move(arg3.as_sCons().p2_);
+            auto xs = std::move(*arg3.as_sCons().p2_);
             auto temp0 = slist<T1>::sCons(
                 std::move(b),
                 std::move(xs)
@@ -451,10 +451,10 @@ slist<T1> Modify2(snat arg1, T1 arg2, slist<T1> arg3) {
     }
 
     // Modify2 (sSuc n) b (sCons x xs) = (sCons x (Modify2 n b xs))
-    auto n = std::move(arg1.as_sSuc().p1_);
+    auto n = std::move(*arg1.as_sSuc().p1_);
     auto b = std::move(arg2);
-    auto x = std::move(arg3.as_sCons().p1_);
-    auto xs = std::move(arg3.as_sCons().p2_);
+    auto x = std::move(arg3.as_sCons().p1());
+    auto xs = std::move(*arg3.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
         Modify2(std::move(n), std::move(b), std::move(xs))
@@ -471,8 +471,8 @@ bool SearchList(T1 arg1, slist<T1> arg2) {
 
     // SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))
     auto a = std::move(arg1);
-    auto x = std::move(arg2.as_sCons().p1_);
-    auto xs = std::move(arg2.as_sCons().p2_);
+    auto x = std::move(arg2.as_sCons().p1());
+    auto xs = std::move(*arg2.as_sCons().p2_);
     bool temp0;
     if (a == std::move(x)) {
         temp0 = true;
@@ -491,8 +491,8 @@ slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
     }
 
     // app(sCons a as ) bs= sCons a (app as bs)
-    auto a = std::move(arg1.as_sCons().p1_);
-    auto as = std::move(arg1.as_sCons().p2_);
+    auto a = std::move(arg1.as_sCons().p1());
+    auto as = std::move(*arg1.as_sCons().p2_);
     auto bs = std::move(arg2);
     auto temp0 = slist<T1>::sCons(
         std::move(a),
@@ -509,8 +509,8 @@ slist<T1> Reverse(slist<T1> arg1) {
     }
 
     // Reverse (sCons a as) = app(Reverse as)(sCons a sNil)
-    auto a = std::move(arg1.as_sCons().p1_);
-    auto as = std::move(arg1.as_sCons().p2_);
+    auto a = std::move(arg1.as_sCons().p1());
+    auto as = std::move(*arg1.as_sCons().p2_);
     auto temp0 = Reverse(std::move(as));
     auto temp1 = slist<T1>::sCons(
         std::move(a),
