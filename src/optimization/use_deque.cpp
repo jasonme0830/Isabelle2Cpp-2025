@@ -7,7 +7,7 @@ namespace hol2cpp {
 void
 Config::use_deque(bool enable)
 {
-  use_deque_ = enable;
+  use_deque_ = !enable;
 
   if (!enable) {
     return;

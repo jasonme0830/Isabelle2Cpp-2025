@@ -38,6 +38,10 @@ FunctionDef::analyse_func_recu_class()
     func_recursive_type = -1;
     return func_recursive_type;
   }
+  if(theConfig.close_recu()){
+    func_recursive_type = 0;
+    return func_recursive_type;
+  }
 
 
   std::vector<Equation>::iterator ptr_equa;
@@ -67,8 +71,6 @@ FunctionDef::analyse_func_recu_class()
     func_recursive_type = 0;
     cout<<func_recursive_type<<endl;
   }
-
-  // func_recursive_type = 0;
 
   return func_recursive_type; 
 }

@@ -1,4 +1,4 @@
-theory binary_tree
+theory rule_tree
   imports Main
 begin
 

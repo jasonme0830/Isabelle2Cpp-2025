@@ -1,4 +1,4 @@
-theory lists
+theory rule_list
   imports Main
 begin
 
