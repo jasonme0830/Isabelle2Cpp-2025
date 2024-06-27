@@ -180,7 +180,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
         if(components[pos][i] == self){
           args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         }else{
-          args[i]->gen_pattern(func,"std::move($.as_$().p$())"_fs.format(prev, constructor, i + 1));
+          args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         }
         break;
       case 2:
