@@ -41,11 +41,14 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
   // for variables
   else {
     auto var = func.get_variable(name);
+    cout<<var<<" "<<movable<<" ";
     // if (movable && typeinfo.movable()) 
     if(movable && func.func_recu_class() > -1 )    {
       // movable is true only when move-list is enable
+      cout<<"std::move($)"_fs.format(var)<<endl;
       return "std::move($)"_fs.format(var); // for move-list
     } else {
+      cout<<var<<endl;
       return var;
     }
   }
@@ -346,6 +349,12 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
 {
   typeinfo.avoid_lack(func, constructor);
 
+  //将类型构造规则内的重复变量标记为不可移动
+  set<std::string> reuse_var;
+  for(auto& arg : args){
+    arg->remark_reuse_var_movable(reuse_var);
+  }
+
   vector<string> arguments;
   for (auto& arg : args) {
     arguments.push_back(arg->gen_expr(func));
@@ -415,6 +424,7 @@ ConsExpr::gen_expr_impl_shortDef(FuncEntity& func, const TypeInfo& typeinfo) con
   }
   return short_def->expr->gen_expr(func);
 }
+
 bool 
 ConsExpr::get_genTempOrNot(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
@@ -495,7 +505,6 @@ ConsExpr::gen_expr_impl_recuCall_noTemp(FuncEntity& func, const TypeInfo& typein
   case 2:
     break;
   case 1:
-    one_param = move_expr(one_param);
     break;
   case 0:
     break;
@@ -536,7 +545,6 @@ ConsExpr::gen_expr_impl_funCall_noTemp(FuncEntity& func, const TypeInfo& typeinf
   case 2:
     break;
   case 1:
-    one_param = move_expr(one_param);
     break;
   case 0:
     break;

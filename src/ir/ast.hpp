@@ -229,8 +229,8 @@ struct Expr
   virtual std::string gen_expr_impl(FuncEntity& func,
                                     const TypeInfo& typeinfo) const = 0;
 
-  virtual void analyze_var_movable(
-    std::set<std::string>& movables); // for move-list
+  virtual void analyze_var_movable(std::set<std::string>& movables); // for move
+  virtual void remark_reuse_var_movable(std::set<std::string>& reuse);
 
   virtual void print_expr() const = 0;
   virtual void print_expr_type() const;
@@ -279,6 +279,7 @@ public:
   std::string gen_expr_impl(FuncEntity& func,
                             const TypeInfo& typeinfo) const override;
   void analyze_var_movable(std::set<std::string>& movables) override;
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
 
   void print_expr() const override;
 
@@ -308,6 +309,8 @@ public:
   void gen_pattern(FuncEntity& func, const std::string& prev) const override;
 
   void analyze_var_movable(std::set<std::string>& movables) override;
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
+
   std::string gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const override;
   std::string gen_expr_impl_recuCall(FuncEntity& , const TypeInfo&) const;
   std::string gen_expr_impl_listCons(FuncEntity&, const TypeInfo&) const;
@@ -345,6 +348,7 @@ public:
   std::string gen_expr_impl(FuncEntity& func,
                             const TypeInfo& typeinfo) const override;
   void analyze_var_movable(std::set<std::string>& movables) override;
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
@@ -371,6 +375,7 @@ public:
   std::string gen_expr_impl(FuncEntity& func,
                             const TypeInfo& typeinfo) const override;
   void analyze_var_movable(std::set<std::string>& movables) override;
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
@@ -390,6 +395,7 @@ public:
   std::string gen_expr_impl(FuncEntity& func,
                             const TypeInfo& typeinfo) const override;
   void analyze_var_movable(std::set<std::string>& movables) override;
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
@@ -419,6 +425,7 @@ public:
   std::string gen_expr_impl(FuncEntity& func,
                             const TypeInfo& typeinfo) const override;
   void analyze_var_movable(std::set<std::string>& movables) override;
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
@@ -437,7 +444,8 @@ public:
   std::string gen_expr_impl(FuncEntity& func,
                             const TypeInfo& typeinfo) const override;
   void analyze_var_movable(std::set<std::string>& movables) override;
-
+  void remark_reuse_var_movable(std::set<std::string>& reuse) override;
+  
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;

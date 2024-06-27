@@ -10,6 +10,7 @@ class snat {
         _sZero(const _sZero& other){ }
         _sZero(_sZero&& other) noexcept{ }
         bool operator<(const _sZero &) const { return false; }
+        bool operator==(const _sZero &) const { return true; }
         _sZero& operator=(const _sZero& other) { return *this; }
         _sZero& operator=(_sZero&& other) noexcept { return *this; }
     };
@@ -31,6 +32,16 @@ class snat {
 
         bool operator<(const _sSuc &rhs) const {
             return std::tie(*p1_) < std::tie(*rhs.p1_);
+        }
+        bool operator==(const _sZero &rhs) const {
+            return false;
+        }
+        bool operator==(const _sSuc &rhs) const {
+            if(std::tie(*p1_) < std::tie(*rhs.p1_)){
+                return false;
+            }else{
+                return std::tie(*p1_) == std::tie(*rhs.p1_);
+            }
         }
         _sSuc& operator=(const _sSuc& other){ 
             if(this != &other){ 
@@ -92,6 +103,8 @@ class snat {
     const _sSuc &as_sSuc() const { return std::get<_sSuc>(value_); }
 
     bool operator<(const snat &rhs) const { return value_ < rhs.value_; }
+
+    bool operator==(const snat &rhs) const { return value_ == rhs.value_; }
     snat& operator=(snat&& other) noexcept {
         if(this != &other){
             if(std::holds_alternative<_sZero>(other.value_)){
@@ -129,6 +142,7 @@ class tree {
         _Tip(const _Tip& other){ }
         _Tip(_Tip&& other) noexcept{ }
         bool operator<(const _Tip &) const { return false; }
+        bool operator==(const _Tip &) const { return true; }
         _Tip& operator=(const _Tip& other) { return *this; }
         _Tip& operator=(_Tip&& other) noexcept { return *this; }
     };
@@ -160,6 +174,16 @@ class tree {
 
         bool operator<(const _Node &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+        }
+        bool operator==(const _Tip &rhs) const {
+            return false;
+        }
+        bool operator==(const _Node &rhs) const {
+            if(std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_)){
+                return false;
+            }else{
+                return std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+            }
         }
         _Node& operator=(const _Node& other){ 
             if(this != &other){ 
@@ -226,6 +250,8 @@ class tree {
     const _Node &as_Node() const { return std::get<_Node>(value_); }
 
     bool operator<(const tree<T1> &rhs) const { return value_ < rhs.value_; }
+
+    bool operator==(const tree<T1> &rhs) const { return value_ == rhs.value_; }
     tree<T1>& operator=(tree<T1>&& other) noexcept {
         if(this != &other){
             if(std::holds_alternative<_Tip>(other.value_)){
@@ -275,7 +301,7 @@ bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
         auto left = arg2.as_Node().p1();
         auto x = arg2.as_Node().p2();
         auto right = arg2.as_Node().p3();
-        return (a == std::move(x)) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
+        return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
     };
 
     static std::map<std::tuple<T1, tree<T1>>, bool> cache;
@@ -297,7 +323,7 @@ bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
         auto left = arg2.as_Node().p1();
         auto x = arg2.as_Node().p2();
         auto right = arg2.as_Node().p3();
-        return searchtree2(a, std::move(left)) || ((a == std::move(x)) || searchtree2(std::move(a), std::move(right)));
+        return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
     };
 
     static std::map<std::tuple<T1, tree<T1>>, bool> cache;
@@ -319,7 +345,7 @@ bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
         auto left = arg2.as_Node().p1();
         auto x = arg2.as_Node().p2();
         auto right = arg2.as_Node().p3();
-        return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (std::move(a) == std::move(x)));
+        return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
     };
 
     static std::map<std::tuple<T1, tree<T1>>, bool> cache;
