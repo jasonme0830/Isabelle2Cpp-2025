@@ -676,9 +676,9 @@ BinaryOpExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     default: {
       assert_true(bop_mapping.count(op.type));
 
-      return "$ $ $"_fs.format(enclose_if_needed(lhs->gen_expr(func)),
+      return "$ $ $"_fs.format(enclose_if_needed(unmove_expr(lhs->gen_expr(func))),
                                bop_mapping.at(op.type),
-                               enclose_if_needed(rhs->gen_expr(func)));
+                               enclose_if_needed(unmove_expr(rhs->gen_expr(func))));
     }
   }
   throw CodegenError(

@@ -32,6 +32,7 @@ private:
   void syn_class_def_isfunction(const Datatype &);
   void syn_class_def_asfunction(const Datatype &);
   void syn_class_def_compareOperator(const Datatype &);
+  void syn_class_def_equivOperator(const Datatype &);
   void syn_class_def_moveOperator(const Datatype &);
   void syn_class_def_copyOperator(const Datatype &);
 
@@ -42,6 +43,7 @@ private:
   void syn_class_def_struct_copyConstructor(const Datatype &, size_t);
   void syn_class_def_struct_moveConstructor(const Datatype &, size_t);
   void syn_class_def_struct_compareOperator(const Datatype &, size_t, std::string, std::string);
+  void syn_class_def_struct_equivOperator(const Datatype &, size_t, std::string, std::string);
   void syn_class_def_struct_copyOperator(const Datatype &, size_t);
   void syn_class_def_struct_moveOperator(const Datatype &, size_t);
 

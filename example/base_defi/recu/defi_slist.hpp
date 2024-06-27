@@ -9,6 +9,7 @@ class snat {
         _sZero(const _sZero& other){ }
         _sZero(_sZero&& other) noexcept{ }
         bool operator<(const _sZero &) const { return false; }
+        bool operator==(const _sZero &) const { return true; }
         _sZero& operator=(const _sZero& other) { return *this; }
         _sZero& operator=(_sZero&& other) noexcept { return *this; }
     };
@@ -30,6 +31,16 @@ class snat {
 
         bool operator<(const _sSuc &rhs) const {
             return std::tie(*p1_) < std::tie(*rhs.p1_);
+        }
+        bool operator==(const _sZero &rhs) const {
+            return false;
+        }
+        bool operator==(const _sSuc &rhs) const {
+            if(std::tie(*p1_) < std::tie(*rhs.p1_)){
+                return false;
+            }else{
+                return std::tie(*p1_) == std::tie(*rhs.p1_);
+            }
         }
         _sSuc& operator=(const _sSuc& other){ 
             if(this != &other){ 
@@ -91,6 +102,8 @@ class snat {
     const _sSuc &as_sSuc() const { return std::get<_sSuc>(value_); }
 
     bool operator<(const snat &rhs) const { return value_ < rhs.value_; }
+
+    bool operator==(const snat &rhs) const { return value_ == rhs.value_; }
     snat& operator=(snat&& other) noexcept {
         if(this != &other){
             if(std::holds_alternative<_sZero>(other.value_)){
@@ -128,6 +141,7 @@ class slist {
         _sNil(const _sNil& other){ }
         _sNil(_sNil&& other) noexcept{ }
         bool operator<(const _sNil &) const { return false; }
+        bool operator==(const _sNil &) const { return true; }
         _sNil& operator=(const _sNil& other) { return *this; }
         _sNil& operator=(_sNil&& other) noexcept { return *this; }
     };
@@ -154,6 +168,16 @@ class slist {
 
         bool operator<(const _sCons &rhs) const {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
+        }
+        bool operator==(const _sNil &rhs) const {
+            return false;
+        }
+        bool operator==(const _sCons &rhs) const {
+            if(std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_)){
+                return false;
+            }else{
+                return std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_);
+            }
         }
         _sCons& operator=(const _sCons& other){ 
             if(this != &other){ 
@@ -217,6 +241,8 @@ class slist {
     const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
 
     bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
+
+    bool operator==(const slist<T1> &rhs) const { return value_ == rhs.value_; }
     slist<T1>& operator=(slist<T1>&& other) noexcept {
         if(this != &other){
             if(std::holds_alternative<_sNil>(other.value_)){
@@ -279,7 +305,7 @@ slist<T1> AddListTail(T1 arg1, slist<T1> arg2) {
 
     // AddListTail a (sCons x xs) = sCons x  (AddListTail a xs )
     auto a = std::move(arg1);
-    auto x = std::move(arg2.as_sCons().p1());
+    auto x = std::move(arg2.as_sCons().p1_);
     auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
@@ -304,7 +330,7 @@ slist<T1> AddListI(snat arg1, T1 arg2, slist<T1> arg3) {
     if (arg1.is_sZero()) {
         if (arg3.is_sCons()) {
             auto a = std::move(arg2);
-            auto x = std::move(arg3.as_sCons().p1());
+            auto x = std::move(arg3.as_sCons().p1_);
             auto xs = std::move(*arg3.as_sCons().p2_);
             auto temp0 = std::move(a);
             auto temp1 = slist<T1>::sCons(
@@ -318,7 +344,7 @@ slist<T1> AddListI(snat arg1, T1 arg2, slist<T1> arg3) {
     // AddListI (sSuc i) a (sCons x xs) = sCons x  (AddListI i a xs)
     auto i = std::move(*arg1.as_sSuc().p1_);
     auto a = std::move(arg2);
-    auto x = std::move(arg3.as_sCons().p1());
+    auto x = std::move(arg3.as_sCons().p1_);
     auto xs = std::move(*arg3.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
@@ -354,7 +380,7 @@ slist<T1> DelListTail(slist<T1> arg1) {
     }
 
     // DelListTail (sCons x xs) =  sCons x (DelListTail xs)
-    auto x = std::move(arg1.as_sCons().p1());
+    auto x = std::move(arg1.as_sCons().p1_);
     auto xs = std::move(*arg1.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
@@ -380,7 +406,7 @@ slist<T1> DelListI(snat arg1, slist<T1> arg2) {
     // DelListI sZero (sCons x xs) = DelListHead (sCons x xs)
     if (arg1.is_sZero()) {
         if (arg2.is_sCons()) {
-            auto x = std::move(arg2.as_sCons().p1());
+            auto x = std::move(arg2.as_sCons().p1_);
             auto xs = std::move(*arg2.as_sCons().p2_);
             auto temp0 = slist<T1>::sCons(
                 std::move(x),
@@ -392,7 +418,7 @@ slist<T1> DelListI(snat arg1, slist<T1> arg2) {
 
     // DelListI (sSuc i) (sCons x xs) = sCons x  (DelListI i xs)
     auto i = std::move(*arg1.as_sSuc().p1_);
-    auto x = std::move(arg2.as_sCons().p1());
+    auto x = std::move(arg2.as_sCons().p1_);
     auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
@@ -411,7 +437,7 @@ slist<T1> Modify1(T1 arg1, T1 arg2, slist<T1> arg3) {
     // Modify1 a b (sCons x xs) = (if x=a then (sCons b (Modify1 a b xs)) else (sCons x (Modify1 a b xs)))
     auto a = std::move(arg1);
     auto b = std::move(arg2);
-    auto x = std::move(arg3.as_sCons().p1());
+    auto x = std::move(arg3.as_sCons().p1_);
     auto xs = std::move(*arg3.as_sCons().p2_);
     slist<T1> temp0;
     if (x == a) {
@@ -453,7 +479,7 @@ slist<T1> Modify2(snat arg1, T1 arg2, slist<T1> arg3) {
     // Modify2 (sSuc n) b (sCons x xs) = (sCons x (Modify2 n b xs))
     auto n = std::move(*arg1.as_sSuc().p1_);
     auto b = std::move(arg2);
-    auto x = std::move(arg3.as_sCons().p1());
+    auto x = std::move(arg3.as_sCons().p1_);
     auto xs = std::move(*arg3.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
@@ -471,10 +497,10 @@ bool SearchList(T1 arg1, slist<T1> arg2) {
 
     // SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))
     auto a = std::move(arg1);
-    auto x = std::move(arg2.as_sCons().p1());
+    auto x = std::move(arg2.as_sCons().p1_);
     auto xs = std::move(*arg2.as_sCons().p2_);
     bool temp0;
-    if (a == std::move(x)) {
+    if (a == x) {
         temp0 = true;
     } else {
         temp0 = SearchList(std::move(a), std::move(xs));
@@ -491,7 +517,7 @@ slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
     }
 
     // app(sCons a as ) bs= sCons a (app as bs)
-    auto a = std::move(arg1.as_sCons().p1());
+    auto a = std::move(arg1.as_sCons().p1_);
     auto as = std::move(*arg1.as_sCons().p2_);
     auto bs = std::move(arg2);
     auto temp0 = slist<T1>::sCons(
@@ -509,7 +535,7 @@ slist<T1> Reverse(slist<T1> arg1) {
     }
 
     // Reverse (sCons a as) = app(Reverse as)(sCons a sNil)
-    auto a = std::move(arg1.as_sCons().p1());
+    auto a = std::move(arg1.as_sCons().p1_);
     auto as = std::move(*arg1.as_sCons().p2_);
     auto temp0 = Reverse(std::move(as));
     auto temp1 = slist<T1>::sCons(

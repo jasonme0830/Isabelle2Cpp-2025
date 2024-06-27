@@ -344,7 +344,7 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
     auto a = std::move(arg1);
     auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2());
+    auto x = std::move(arg2.as_Node().p2_);
     auto right = std::move(*arg2.as_Node().p3_);
     tree<T1> temp0;
     if (a <= x) {
@@ -368,7 +368,7 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
 template<typename T1>
 T1 rightest(tree<T1> arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
-    auto x = std::move(arg1.as_Node().p2());
+    auto x = std::move(arg1.as_Node().p2_);
     auto right = std::move(*arg1.as_Node().p3_);
     T1 temp0;
     if (right.is_Tip()) {
@@ -440,7 +440,7 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
     auto a = std::move(arg1);
     auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2());
+    auto x = std::move(arg2.as_Node().p2_);
     auto right = std::move(*arg2.as_Node().p3_);
     tree<T1> temp0;
     if (a == x) {
@@ -483,7 +483,7 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     auto a = std::move(arg1);
     auto b = std::move(arg2);
     auto left = std::move(*arg3.as_Node().p1_);
-    auto x = std::move(arg3.as_Node().p2());
+    auto x = std::move(arg3.as_Node().p2_);
     auto right = std::move(*arg3.as_Node().p3_);
     tree<T1> temp0;
     if (a == x) {
