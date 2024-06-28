@@ -77,16 +77,21 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
       //移动构造函数
       syn_class_def_struct_moveConstructor(datatype, i);
       out_.get()<<endl;
-      
-      //重载比较运算符<
-      syn_class_def_struct_compareOperator(datatype, i, lhs, rhs);
-      //重载相等运算符==
-      syn_class_def_struct_equivOperator(datatype, i, lhs, rhs);
+
       //重载拷贝赋值运算符=
       syn_class_def_struct_copyOperator(datatype, i);
       //重载移动赋值运算符=
       syn_class_def_struct_moveOperator(datatype, i);
-
+      //重载运算符==
+      syn_class_def_struct_equivOperator(datatype, i, lhs, rhs);
+      //重载运算符<
+      syn_class_def_struct_ltOperator(datatype, i, lhs, rhs);
+      //重载运算符>
+      syn_class_def_struct_gtOperator(datatype, i, lhs, rhs);
+      //重载运算符<=
+      syn_class_def_struct_leOperator(datatype, i, lhs, rhs);
+      //重载运算符>=
+      syn_class_def_struct_geOperator(datatype, i, lhs, rhs);
 
       sub_indent();
       "};\n"_fs.outf(newline()); 
@@ -120,14 +125,20 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   // generate as_Ci()
   syn_class_def_asfunction(datatype);
 
-  // generate operator<
-  syn_class_def_compareOperator(datatype);
-  // generate operator==
-  syn_class_def_equivOperator(datatype);
   // generate move operator=
   syn_class_def_moveOperator(datatype);
   //generate copy operator=
   syn_class_def_copyOperator(datatype);
+  // generate operator==
+  syn_class_def_equivOperator(datatype);
+  // generate operator<
+  syn_class_def_ltOperator(datatype);
+  // generate operator>
+  syn_class_def_gtOperator(datatype);
+  // generate operator<=
+  syn_class_def_leOperator(datatype);
+  // generate operator>=
+  syn_class_def_geOperator(datatype);
 
   out_.get()<<endl;
 
@@ -265,23 +276,6 @@ Synthesizer::syn_class_def_asfunction(const Datatype& datatype){
   }
 }
 void
-Synthesizer::syn_class_def_compareOperator(const Datatype& datatype){
-
-  auto& self = datatype.self();
-
-  out_.get() << endl;
-  "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
-    .outf(newline(), self);
-}
-void
-Synthesizer::syn_class_def_equivOperator(const Datatype& datatype){
-  auto& self = datatype.self();
-
-  out_.get() << endl;
-  "bool operator==(const $ &rhs) const { return value_ == rhs.value_; }\n"_fs
-    .outf(newline(), self);
-}
-void
 Synthesizer::syn_class_def_copyOperator(const Datatype& datatype){
 
   auto& self = datatype.self();
@@ -330,6 +324,50 @@ Synthesizer::syn_class_def_moveOperator(const Datatype& datatype){
     sub_indent();
   "}\n"_fs.outf(newline());
 }
+void
+Synthesizer::syn_class_def_equivOperator(const Datatype& datatype){
+  auto& self = datatype.self();
+
+  out_.get() << endl;
+  "bool operator==(const $ &rhs) const { return value_ == rhs.value_; }\n"_fs
+    .outf(newline(), self);
+}
+void
+Synthesizer::syn_class_def_ltOperator(const Datatype& datatype){
+
+  auto& self = datatype.self();
+
+  out_.get() << endl;
+  "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
+    .outf(newline(), self);
+}
+void
+Synthesizer::syn_class_def_gtOperator(const Datatype& datatype){
+
+  auto& self = datatype.self();
+
+  out_.get() << endl;
+  "bool operator>(const $ &rhs) const { return value_ > rhs.value_; }\n"_fs
+    .outf(newline(), self);
+}
+void
+Synthesizer::syn_class_def_leOperator(const Datatype& datatype){
+
+  auto& self = datatype.self();
+
+  out_.get() << endl;
+  "bool operator<=(const $ &rhs) const { return value_ <= rhs.value_; }\n"_fs
+    .outf(newline(), self);
+}
+void
+Synthesizer::syn_class_def_geOperator(const Datatype& datatype){
+
+  auto& self = datatype.self();
+
+  out_.get() << endl;
+  "bool operator>=(const $ &rhs) const { return value_ >= rhs.value_; }\n"_fs
+    .outf(newline(), self);
+}
 
 void
 Synthesizer::syn_class_def_struct_empty(
@@ -347,18 +385,27 @@ const Datatype& datatype, size_t i){
   "_$(_$&& other) noexcept{ }\n"_fs.outf(
     newline(),constructors[i], constructors[i]);
 
-  //重载小于运算符
-  "bool operator<(const _$ &) const { return false; }\n"_fs.outf(
-    newline(), constructors[i]);
-  //重载相等运算符
-  "bool operator==(const _$ &) const { return true; }\n"_fs.outf(
-    newline(), constructors[i]);
   //拷贝赋值运算符
   "_$& operator=(const _$& other) { return *this; }\n"_fs.outf(
     newline(), constructors[i], constructors[i]);
   //移动赋值运算符
   "_$& operator=(_$&& other) noexcept { return *this; }\n"_fs.outf(
     newline(), constructors[i], constructors[i]);
+  //重载运算符==
+  "bool operator==(const _$ &) const { return true; }\n"_fs.outf(
+    newline(), constructors[i]);
+  //重载运算符<
+  "bool operator<(const _$ &) const { return false; }\n"_fs.outf(
+    newline(), constructors[i]);
+  //重载运算符>
+  "bool operator>(const _$ &) const { return false; }\n"_fs.outf(
+    newline(), constructors[i]);
+  //重载运算符<=
+  "bool operator<=(const _$ &) const { return true; }\n"_fs.outf(
+    newline(), constructors[i]);
+  //重载运算符>=
+  "bool operator>=(const _$ &) const { return true; }\n"_fs.outf(
+    newline(), constructors[i]);
 
   sub_indent();
   "};\n"_fs.outf(newline());
@@ -494,55 +541,6 @@ const Datatype& datatype, size_t i){
   "{ }\n"_fs.outf(newline());
 }
 void
-Synthesizer::syn_class_def_struct_compareOperator(
-const Datatype& datatype, size_t i, string lhs, string rhs){
-
-  auto& name = datatype.name();
-  auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
-
-  // generate operator<
-  "bool operator<(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
-  add_indent();
-  "return std::tie($) < std::tie($);\n"_fs.outf(newline(), lhs, rhs);
-  sub_indent();
-  "}\n"_fs.outf(newline());
-}
-void
-Synthesizer::syn_class_def_struct_equivOperator(
-const Datatype& datatype, size_t i, string lhs, string rhs){
-
-  auto& name = datatype.name();
-  auto& self = datatype.self();
-  auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
-
-  for(size_t j=0; j<constructors.size(); j++){
-    if(i == j){
-      "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
-      add_indent();
-        "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(), lhs, rhs);
-        add_indent();
-          "return false;\n"_fs.outf(newline());
-        sub_indent();
-        "}else{\n"_fs.outf(newline());
-        add_indent();
-          "return std::tie($) == std::tie($);\n"_fs.outf(newline(), lhs, rhs);
-        sub_indent();
-        "}\n"_fs.outf(newline());
-      sub_indent();
-      "}\n"_fs.outf(newline());
-    }else{
-      "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[j]);
-      add_indent();
-        "return false;\n"_fs.outf(newline(), lhs, rhs);
-      sub_indent();
-      "}\n"_fs.outf(newline());
-    }
-  }
-}
-void
 Synthesizer::syn_class_def_struct_copyOperator(
 const Datatype& datatype, size_t i){
 
@@ -593,7 +591,127 @@ const Datatype& datatype, size_t i){
     sub_indent();
   "}\n"_fs.outf(newline());
 }
+void
+Synthesizer::syn_class_def_struct_equivOperator(
+const Datatype& datatype, size_t i, string lhs, string rhs){
 
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
 
+  for(size_t j=0; j<constructors.size(); j++){
+    if(i == j){
+      "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
+      add_indent();
+        "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(), lhs, rhs);
+        add_indent();
+          "return false;\n"_fs.outf(newline());
+        sub_indent();
+        "}else{\n"_fs.outf(newline());
+        add_indent();
+          "return std::tie($) == std::tie($);\n"_fs.outf(newline(), lhs, rhs);
+        sub_indent();
+        "}\n"_fs.outf(newline());
+      sub_indent();
+      "}\n"_fs.outf(newline());
+    }else{
+      "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[j]);
+      add_indent();
+        "return false;\n"_fs.outf(newline(), lhs, rhs);
+      sub_indent();
+      "}\n"_fs.outf(newline());
+    }
+  }
+}
+void
+Synthesizer::syn_class_def_struct_ltOperator(
+const Datatype& datatype, size_t i, string lhs, string rhs){
+
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  // generate operator<
+  "bool operator<(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
+  add_indent();
+  "return std::tie($) < std::tie($);\n"_fs.outf(newline(), lhs, rhs);
+  sub_indent();
+  "}\n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_struct_gtOperator(
+const Datatype& datatype, size_t i, string lhs, string rhs){
+
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  // generate operator>
+  "bool operator>(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
+  add_indent();
+  // 利用已经定义好的<
+  "return std::tie($) < std::tie($);\n"_fs.outf(newline(), rhs, lhs);
+  sub_indent();
+  "}\n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_struct_leOperator(
+const Datatype& datatype, size_t i, string lhs, string rhs){
+
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  // generate operator<=
+  "bool operator<=(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
+  add_indent();
+    "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
+    add_indent();
+      "return true;\n"_fs.outf(newline());
+    sub_indent();
+    "}else if(std::tie($) == std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
+    add_indent();
+      "return true;\n"_fs.outf(newline());
+    sub_indent();
+    "}else{\n"_fs.outf(newline());
+    add_indent();
+      "return false;\n"_fs.outf(newline());
+    sub_indent();
+    "}\n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
+}
+void
+Synthesizer::syn_class_def_struct_geOperator(
+const Datatype& datatype, size_t i, string lhs, string rhs){
+
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+
+  // generate operator<=
+  "bool operator>=(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
+  add_indent();
+    "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
+    add_indent();
+      "return false;\n"_fs.outf(newline());
+    sub_indent();
+    "}else if(std::tie($) == std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
+    add_indent();
+      "return true;\n"_fs.outf(newline());
+    sub_indent();
+    "}else{\n"_fs.outf(newline());
+    add_indent();
+      "return true;\n"_fs.outf(newline());
+    sub_indent();
+    "}\n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
+}
 
 }
