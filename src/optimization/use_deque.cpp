@@ -9,7 +9,7 @@ Config::use_deque(bool enable)
 {
   use_deque_ = !enable;
 
-  if (!enable) {
+  if (enable) {
     return;
   }
 
