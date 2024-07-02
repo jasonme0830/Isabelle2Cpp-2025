@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <cstdlib>
+#include <deque>
 #include <functional>
-#include <list>
 #include <map>
 #include <memory>
 #include <optional>
@@ -187,7 +187,7 @@ class tree {
 
 
 template<typename T1>
-std::list<T1> AddListHead(const T1 &arg1, const std::list<T1> &arg2) {
+std::deque<T1> AddListHead(const T1 &arg1, const std::deque<T1> &arg2) {
     // AddListHead a xs =a # xs
     auto a = arg1;
     auto xs = arg2;
@@ -197,11 +197,11 @@ std::list<T1> AddListHead(const T1 &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1>
-std::list<T1> AddListTail(T1 arg1, std::list<T1> arg2) {
+std::deque<T1> AddListTail(T1 arg1, std::deque<T1> arg2) {
     // AddListTail a [] =Cons a []
     if (arg2.empty()) {
         auto a = std::move(arg1);
-        auto temp0 = std::list<T1>();
+        auto temp0 = std::deque<T1>();
         temp0.push_front(std::move(a));
         return temp0;
     }
@@ -217,11 +217,11 @@ std::list<T1> AddListTail(T1 arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> AddListI(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
+std::deque<T1> AddListI(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     // AddListI i a [] = Cons a []
     if (arg3.empty()) {
         auto a = std::move(arg2);
-        auto temp0 = std::list<T1>();
+        auto temp0 = std::deque<T1>();
         temp0.push_front(std::move(a));
         return temp0;
     }
@@ -253,27 +253,27 @@ std::list<T1> AddListI(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
 }
 
 template<typename T1>
-std::list<T1> DelListHead(const std::list<T1> &arg1) {
+std::deque<T1> DelListHead(const std::deque<T1> &arg1) {
     // DelListHead (x#xs) = xs
     if (!arg1.empty()) {
-        auto xs = std::list<T1>(arg1.begin() + 1, arg1.end());
+        auto xs = std::deque<T1>(arg1.begin() + 1, arg1.end());
         return xs;
     }
 
     // DelListHead [] = []
-    return std::list<T1>();
+    return std::deque<T1>();
 }
 
 template<typename T1>
-std::list<T1> DelListTail(std::list<T1> arg1) {
+std::deque<T1> DelListTail(std::deque<T1> arg1) {
     // DelListTail [] = []
     if (arg1.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // DelListTail (Cons a []) = []
     if (arg1.size() == 1) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // DelListTail (x#xs) =  Cons x (DelListTail xs)
@@ -286,15 +286,15 @@ std::list<T1> DelListTail(std::list<T1> arg1) {
 }
 
 template<typename T1>
-std::list<T1> DelListI(std::uint64_t arg1, std::list<T1> arg2) {
+std::deque<T1> DelListI(std::uint64_t arg1, std::deque<T1> arg2) {
     // DelListI i [] = []
     if (arg2.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // DelListI i (Cons a []) = []
     if (arg2.size() == 1) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // DelListI 0 (x#xs) = DelListHead (x#xs)
@@ -321,7 +321,7 @@ std::list<T1> DelListI(std::uint64_t arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-bool SearchList(T1 arg1, std::list<T1> arg2) {
+bool SearchList(T1 arg1, std::deque<T1> arg2) {
     // SearchList a [] = False
     if (arg2.empty()) {
         return false;
@@ -342,10 +342,10 @@ bool SearchList(T1 arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> Modify1(T1 arg1, T1 arg2, std::list<T1> arg3) {
+std::deque<T1> Modify1(T1 arg1, T1 arg2, std::deque<T1> arg3) {
     // Modify1 a b [] = []
     if (arg3.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // Modify1 a b (x#xs) = (if x=a then b#(Modify1 a b xs) else x#(Modify1 a b xs))
@@ -354,7 +354,7 @@ std::list<T1> Modify1(T1 arg1, T1 arg2, std::list<T1> arg3) {
     auto x = arg3.front();
     arg3.erase(arg3.begin(), arg3.begin() + 1);
     auto xs = std::move(arg3);
-    std::list<T1> temp0;
+    std::deque<T1> temp0;
     if (x == a) {
         auto temp1 = Modify1(std::move(a), std::move(b), std::move(xs));
         temp1.push_front(b);
@@ -368,10 +368,10 @@ std::list<T1> Modify1(T1 arg1, T1 arg2, std::list<T1> arg3) {
 }
 
 template<typename T1>
-std::list<T1> Modify2(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
+std::deque<T1> Modify2(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     // Modify2 n b [] = []
     if (arg3.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // Modify2 0 b (x#xs) =(b#xs)
@@ -398,10 +398,10 @@ std::list<T1> Modify2(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
 }
 
 template<typename T1>
-std::list<T1> ffilter(std::function<bool(T1 )> arg1, std::list<T1> arg2) {
+std::deque<T1> ffilter(std::function<bool(T1 )> arg1, std::deque<T1> arg2) {
     // ffilter f [] = []
     if (arg2.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))
@@ -409,7 +409,7 @@ std::list<T1> ffilter(std::function<bool(T1 )> arg1, std::list<T1> arg2) {
     auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
     auto xs = std::move(arg2);
-    std::list<T1> temp0;
+    std::deque<T1> temp0;
     if (f(x)) {
         auto temp1 = ffilter(std::move(f), std::move(xs));
         temp1.push_front(std::move(x));
@@ -421,16 +421,16 @@ std::list<T1> ffilter(std::function<bool(T1 )> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> Reverse2(std::list<T1> arg1) {
+std::deque<T1> Reverse2(std::deque<T1> arg1) {
     // Reverse2 [] = []
     if (arg1.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // Reverse2 (Cons a []) =Cons a []
     if (arg1.size() == 1) {
         auto a = arg1.front();
-        auto temp0 = std::list<T1>();
+        auto temp0 = std::deque<T1>();
         temp0.push_front(std::move(a));
         return temp0;
     }
@@ -439,7 +439,7 @@ std::list<T1> Reverse2(std::list<T1> arg1) {
     auto x = arg1.front();
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto xs = std::move(arg1);
-    auto temp0 = std::list<T1>();
+    auto temp0 = std::deque<T1>();
     temp0.push_front(std::move(x));
     auto temp1 = Reverse2(std::move(xs));
     auto temp2 = std::move(temp0);
@@ -448,7 +448,7 @@ std::list<T1> Reverse2(std::list<T1> arg1) {
 }
 
 template<typename T1>
-std::list<T1> app(std::list<T1> arg1, std::list<T1> arg2) {
+std::deque<T1> app(std::deque<T1> arg1, std::deque<T1> arg2) {
     // app Nil as =as
     if (arg1.empty()) {
         auto as = std::move(arg2);
@@ -466,10 +466,10 @@ std::list<T1> app(std::list<T1> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> Reverse(std::list<T1> arg1) {
+std::deque<T1> Reverse(std::deque<T1> arg1) {
     // Reverse Nil =Nil
     if (arg1.empty()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // Reverse (Cons a as) = app(Reverse as)(Cons a Nil)
@@ -477,18 +477,18 @@ std::list<T1> Reverse(std::list<T1> arg1) {
     arg1.erase(arg1.begin(), arg1.begin() + 1);
     auto as = std::move(arg1);
     auto temp0 = Reverse(std::move(as));
-    auto temp2 = std::list<T1>();
+    auto temp2 = std::deque<T1>();
     temp2.push_front(std::move(a));
     auto temp1 = std::move(temp2);
     return app(std::move(temp0), std::move(temp1));
 }
 
 template<typename T1>
-std::list<T1> Insert(T1 arg1, std::list<T1> arg2) {
+std::deque<T1> Insert(T1 arg1, std::deque<T1> arg2) {
     // Insert a [] =Cons a []
     if (arg2.empty()) {
         auto a = std::move(arg1);
-        auto temp0 = std::list<T1>();
+        auto temp0 = std::deque<T1>();
         temp0.push_front(std::move(a));
         return temp0;
     }
@@ -498,7 +498,7 @@ std::list<T1> Insert(T1 arg1, std::list<T1> arg2) {
     auto x = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
     auto xs = std::move(arg2);
-    std::list<T1> temp0;
+    std::deque<T1> temp0;
     if (a <= x) {
         auto temp1 = std::move(xs);
         temp1.push_front(std::move(x));
@@ -514,7 +514,7 @@ std::list<T1> Insert(T1 arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> InsertSortPart(std::list<T1> arg1, std::list<T1> arg2) {
+std::deque<T1> InsertSortPart(std::deque<T1> arg1, std::deque<T1> arg2) {
     // InsertSortPart [] ys=ys
     if (arg1.empty()) {
         auto ys = std::move(arg2);
@@ -532,16 +532,16 @@ std::list<T1> InsertSortPart(std::list<T1> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> InsertSort(const std::list<T1> &arg1) {
+std::deque<T1> InsertSort(const std::deque<T1> &arg1) {
     // InsertSort xs = InsertSortPart xs Nil
     auto xs = arg1;
     auto temp0 = std::move(xs);
-    auto temp1 = std::list<T1>();
+    auto temp1 = std::deque<T1>();
     return InsertSortPart(std::move(temp0), std::move(temp1));
 }
 
 template<typename T1>
-std::list<T1> Merge(std::list<T1> arg1, std::list<T1> arg2) {
+std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
         auto xs = std::move(arg2);
@@ -561,7 +561,7 @@ std::list<T1> Merge(std::list<T1> arg1, std::list<T1> arg2) {
     auto y = arg2.front();
     arg2.erase(arg2.begin(), arg2.begin() + 1);
     auto ys = std::move(arg2);
-    std::list<T1> temp0;
+    std::deque<T1> temp0;
     if (x <= y) {
         auto temp1 = std::move(ys);
         temp1.push_front(std::move(y));
@@ -579,25 +579,25 @@ std::list<T1> Merge(std::list<T1> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> MergeSort(const std::list<T1> &arg1) {
-    auto impl = [&]() -> std::list<T1> {
+std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
+    auto impl = [&]() -> std::deque<T1> {
         // MergeSort [] = []
         if (arg1.empty()) {
-            return std::list<T1>();
+            return std::deque<T1>();
         }
 
         // MergeSort (Cons a []) = [a]
         if (!arg1.empty()) {
-            if (std::list<T1>(arg1.begin() + 1, arg1.end()).empty()) {
+            if (std::deque<T1>(arg1.begin() + 1, arg1.end()).empty()) {
                 auto a = arg1.front();
-                return std::list<T1>{std::move(a)};
+                return std::deque<T1>{std::move(a)};
             }
         }
 
         // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
         auto xs = arg1;
         auto temp1 = xs;
-        auto temp0 = MergeSort(std::list<T1>(xs.begin(), xs.begin() + size(std::move(temp1)) / 2));
+        auto temp0 = MergeSort(std::deque<T1>(xs.begin(), xs.begin() + size(std::move(temp1)) / 2));
         auto temp3 = xs;
         auto temp4 = size(std::move(temp3)) / 2;
         auto temp5 = std::move(xs);
@@ -606,13 +606,13 @@ std::list<T1> MergeSort(const std::list<T1> &arg1) {
         return Merge(std::move(temp0), std::move(temp2));
     };
 
-    static std::map<std::tuple<std::list<T1>>, std::list<T1>> cache;
+    static std::map<std::tuple<std::deque<T1>>, std::deque<T1>> cache;
     auto args = std::make_tuple(arg1);
     auto it = cache.find(args);
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2);
+std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2);
 
 std::uint64_t fib(const std::uint64_t &arg1);
 
@@ -720,11 +720,11 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> transtolist(const tree<T1> &arg1) {
-    auto impl = [&]() -> std::list<T1> {
+std::deque<T1> transtolist(const tree<T1> &arg1) {
+    auto impl = [&]() -> std::deque<T1> {
         // transtolist Tip=[]
         if (arg1.is_Tip()) {
-            return std::list<T1>();
+            return std::deque<T1>();
         }
 
         // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
@@ -739,7 +739,7 @@ std::list<T1> transtolist(const tree<T1> &arg1) {
         return temp2;
     };
 
-    static std::map<std::tuple<tree<T1>>, std::list<T1>> cache;
+    static std::map<std::tuple<tree<T1>>, std::deque<T1>> cache;
     auto args = std::make_tuple(arg1);
     auto it = cache.find(args);
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
@@ -896,10 +896,10 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
 }
 
 template<typename T1>
-std::list<T1> sorttree(const tree<T1> &arg1) {
+std::deque<T1> sorttree(const tree<T1> &arg1) {
     // sorttree Tip = []
     if (arg1.is_Tip()) {
-        return std::list<T1>();
+        return std::deque<T1>();
     }
 
     // sorttree (Node Tip a Tip) =[a]
@@ -907,7 +907,7 @@ std::list<T1> sorttree(const tree<T1> &arg1) {
         if (arg1.as_Node().p1().is_Tip()) {
             if (arg1.as_Node().p3().is_Tip()) {
                 auto a = arg1.as_Node().p2();
-                return std::list<T1>{std::move(a)};
+                return std::deque<T1>{std::move(a)};
             }
         }
     }

@@ -45,39 +45,20 @@ class snat {
             }
             return *this;
         }
-        bool operator==(const _sZero &rhs) const {
-            return false;
-        }
         bool operator==(const _sSuc &rhs) const {
-            if(std::tie(*p1_) < std::tie(*rhs.p1_)){
-                return false;
-            }else{
-                return std::tie(*p1_) == std::tie(*rhs.p1_);
-            }
+            return std::tie(*p1_) == std::tie(*rhs.p1_);
         }
         bool operator<(const _sSuc &rhs) const {
             return std::tie(*p1_) < std::tie(*rhs.p1_);
         }
         bool operator>(const _sSuc &rhs) const {
-            return std::tie(*rhs.p1_) < std::tie(*p1_);
+            return std::tie(*p1_) > std::tie(*rhs.p1_);
         }
         bool operator<=(const _sSuc &rhs) const {
-            if(std::tie(*p1_) < std::tie(*rhs.p1_)){
-                return true;
-            }else if(std::tie(*p1_) == std::tie(*rhs.p1_)){
-                return true;
-            }else{
-                return false;
-            }
+            return std::tie(*p1_) <= std::tie(*rhs.p1_);
         }
         bool operator>=(const _sSuc &rhs) const {
-            if(std::tie(*p1_) < std::tie(*rhs.p1_)){
-                return false;
-            }else if(std::tie(*p1_) == std::tie(*rhs.p1_)){
-                return true;
-            }else{
-                return true;
-            }
+            return std::tie(*p1_) >= std::tie(*rhs.p1_);
         }
     };
 
@@ -152,15 +133,33 @@ class snat {
         return *this; 
     }
 
-    bool operator==(const snat &rhs) const { return value_ == rhs.value_; }
+    bool operator==(const snat &rhs) const {
+        if(value_.index() == rhs.value_.index()){
+             return value_ == rhs.value_;
+        }else{
+            return false;
+        }
+    }
 
-    bool operator<(const snat &rhs) const { return value_ < rhs.value_; }
+    bool operator<(const snat &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ < rhs.value_; 
+    }
 
-    bool operator>(const snat &rhs) const { return value_ > rhs.value_; }
+    bool operator>(const snat &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ > rhs.value_; 
+    }
 
-    bool operator<=(const snat &rhs) const { return value_ <= rhs.value_; }
+    bool operator<=(const snat &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ < rhs.value_; 
+    }
 
-    bool operator>=(const snat &rhs) const { return value_ >= rhs.value_; }
+    bool operator>=(const snat &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ > rhs.value_; 
+    }
 
 };
 
@@ -214,39 +213,20 @@ class slist {
             }
             return *this;
         }
-        bool operator==(const _sNil &rhs) const {
-            return false;
-        }
         bool operator==(const _sCons &rhs) const {
-            if(std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_)){
-                return false;
-            }else{
-                return std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_);
-            }
+            return std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_);
         }
         bool operator<(const _sCons &rhs) const {
             return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
         }
         bool operator>(const _sCons &rhs) const {
-            return std::tie(rhs.p1_, *rhs.p2_) < std::tie(p1_, *p2_);
+            return std::tie(p1_, *p2_) > std::tie(rhs.p1_, *rhs.p2_);
         }
         bool operator<=(const _sCons &rhs) const {
-            if(std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_)){
-                return true;
-            }else if(std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_)){
-                return true;
-            }else{
-                return false;
-            }
+            return std::tie(p1_, *p2_) <= std::tie(rhs.p1_, *rhs.p2_);
         }
         bool operator>=(const _sCons &rhs) const {
-            if(std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_)){
-                return false;
-            }else if(std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_)){
-                return true;
-            }else{
-                return true;
-            }
+            return std::tie(p1_, *p2_) >= std::tie(rhs.p1_, *rhs.p2_);
         }
     };
 
@@ -321,15 +301,33 @@ class slist {
         return *this; 
     }
 
-    bool operator==(const slist<T1> &rhs) const { return value_ == rhs.value_; }
+    bool operator==(const slist<T1> &rhs) const {
+        if(value_.index() == rhs.value_.index()){
+             return value_ == rhs.value_;
+        }else{
+            return false;
+        }
+    }
 
-    bool operator<(const slist<T1> &rhs) const { return value_ < rhs.value_; }
+    bool operator<(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ < rhs.value_; 
+    }
 
-    bool operator>(const slist<T1> &rhs) const { return value_ > rhs.value_; }
+    bool operator>(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ > rhs.value_; 
+    }
 
-    bool operator<=(const slist<T1> &rhs) const { return value_ <= rhs.value_; }
+    bool operator<=(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ < rhs.value_; 
+    }
 
-    bool operator>=(const slist<T1> &rhs) const { return value_ >= rhs.value_; }
+    bool operator>=(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ > rhs.value_; 
+    }
 
 };
 
@@ -391,39 +389,20 @@ class stree {
             }
             return *this;
         }
-        bool operator==(const _sTip &rhs) const {
-            return false;
-        }
         bool operator==(const _sNode &rhs) const {
-            if(std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_)){
-                return false;
-            }else{
-                return std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
-            }
+            return std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
         bool operator<(const _sNode &rhs) const {
             return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
         bool operator>(const _sNode &rhs) const {
-            return std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_) < std::tie(*p1_, p2_, *p3_);
+            return std::tie(*p1_, p2_, *p3_) > std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
         bool operator<=(const _sNode &rhs) const {
-            if(std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_)){
-                return true;
-            }else if(std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_)){
-                return true;
-            }else{
-                return false;
-            }
+            return std::tie(*p1_, p2_, *p3_) <= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
         bool operator>=(const _sNode &rhs) const {
-            if(std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_)){
-                return false;
-            }else if(std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_)){
-                return true;
-            }else{
-                return true;
-            }
+            return std::tie(*p1_, p2_, *p3_) >= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
         }
     };
 
@@ -498,15 +477,33 @@ class stree {
         return *this; 
     }
 
-    bool operator==(const stree<T1> &rhs) const { return value_ == rhs.value_; }
+    bool operator==(const stree<T1> &rhs) const {
+        if(value_.index() == rhs.value_.index()){
+             return value_ == rhs.value_;
+        }else{
+            return false;
+        }
+    }
 
-    bool operator<(const stree<T1> &rhs) const { return value_ < rhs.value_; }
+    bool operator<(const stree<T1> &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ < rhs.value_; 
+    }
 
-    bool operator>(const stree<T1> &rhs) const { return value_ > rhs.value_; }
+    bool operator>(const stree<T1> &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ > rhs.value_; 
+    }
 
-    bool operator<=(const stree<T1> &rhs) const { return value_ <= rhs.value_; }
+    bool operator<=(const stree<T1> &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ < rhs.value_; 
+    }
 
-    bool operator>=(const stree<T1> &rhs) const { return value_ >= rhs.value_; }
+    bool operator>=(const stree<T1> &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ > rhs.value_; 
+    }
 
 };
 

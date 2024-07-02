@@ -1,6 +1,6 @@
 #include "rule_type.hpp"
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2) {
+std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
@@ -34,7 +34,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg
         std::optional<std::uint64_t> temp4;
         if (y < x) {
             auto temp5 = ([&] {
-                auto temp6 = bs(x, std::list<std::uint64_t>(ys.begin() + m + 1, ys.end()));
+                auto temp6 = bs(x, std::deque<std::uint64_t>(ys.begin() + m + 1, ys.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp6.has_value()) {
@@ -47,7 +47,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg
             })();
             temp4 = temp5;
         } else {
-            temp4 = bs(x, std::list<std::uint64_t>(ys.begin(), ys.begin() + m));
+            temp4 = bs(x, std::deque<std::uint64_t>(ys.begin(), ys.begin() + m));
         }
         temp3 = temp4;
     }

@@ -1,6 +1,6 @@
 #include "rule_type.hpp"
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2) {
+std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();

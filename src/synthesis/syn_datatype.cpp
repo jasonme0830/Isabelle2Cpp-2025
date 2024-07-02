@@ -329,8 +329,20 @@ Synthesizer::syn_class_def_equivOperator(const Datatype& datatype){
   auto& self = datatype.self();
 
   out_.get() << endl;
-  "bool operator==(const $ &rhs) const { return value_ == rhs.value_; }\n"_fs
-    .outf(newline(), self);
+  "bool operator==(const $ &rhs) const {\n"_fs.outf(newline(), self);
+  add_indent();
+    "if(value_.index() == rhs.value_.index()){\n"_fs.outf(newline());
+    add_indent();
+      " return value_ == rhs.value_;\n"_fs.outf(newline());
+    sub_indent();
+    "}else{\n"_fs.outf(newline());
+    add_indent();
+      "return false;\n"_fs.outf(newline());
+    sub_indent();
+    "}\n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline(), self);
+
 }
 void
 Synthesizer::syn_class_def_ltOperator(const Datatype& datatype){
@@ -338,8 +350,12 @@ Synthesizer::syn_class_def_ltOperator(const Datatype& datatype){
   auto& self = datatype.self();
 
   out_.get() << endl;
-  "bool operator<(const $ &rhs) const { return value_ < rhs.value_; }\n"_fs
-    .outf(newline(), self);
+  "bool operator<(const $ &rhs) const {\n"_fs.outf(newline(), self);
+  add_indent();
+    "if(value_ == rhs.value_) return false;\n"_fs.outf(newline());
+     "return value_ < rhs.value_; \n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
 }
 void
 Synthesizer::syn_class_def_gtOperator(const Datatype& datatype){
@@ -347,8 +363,12 @@ Synthesizer::syn_class_def_gtOperator(const Datatype& datatype){
   auto& self = datatype.self();
 
   out_.get() << endl;
-  "bool operator>(const $ &rhs) const { return value_ > rhs.value_; }\n"_fs
-    .outf(newline(), self);
+  "bool operator>(const $ &rhs) const {\n"_fs.outf(newline(), self);
+  add_indent();
+    "if(value_ == rhs.value_) return false;\n"_fs.outf(newline());
+     "return value_ > rhs.value_; \n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
 }
 void
 Synthesizer::syn_class_def_leOperator(const Datatype& datatype){
@@ -356,8 +376,12 @@ Synthesizer::syn_class_def_leOperator(const Datatype& datatype){
   auto& self = datatype.self();
 
   out_.get() << endl;
-  "bool operator<=(const $ &rhs) const { return value_ <= rhs.value_; }\n"_fs
-    .outf(newline(), self);
+  "bool operator<=(const $ &rhs) const {\n"_fs.outf(newline(), self);
+  add_indent();
+    "if(value_ == rhs.value_) return true;\n"_fs.outf(newline());
+     "return value_ < rhs.value_; \n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
 }
 void
 Synthesizer::syn_class_def_geOperator(const Datatype& datatype){
@@ -365,8 +389,12 @@ Synthesizer::syn_class_def_geOperator(const Datatype& datatype){
   auto& self = datatype.self();
 
   out_.get() << endl;
-  "bool operator>=(const $ &rhs) const { return value_ >= rhs.value_; }\n"_fs
-    .outf(newline(), self);
+  "bool operator>=(const $ &rhs) const {\n"_fs.outf(newline(), self);
+  add_indent();
+    "if(value_ == rhs.value_) return true;\n"_fs.outf(newline());
+     "return value_ > rhs.value_; \n"_fs.outf(newline());
+  sub_indent();
+  "}\n"_fs.outf(newline());
 }
 
 void
@@ -595,48 +623,31 @@ void
 Synthesizer::syn_class_def_struct_equivOperator(
 const Datatype& datatype, size_t i, string lhs, string rhs){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
+  // auto& name = datatype.name();
+  // auto& self = datatype.self();
   auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
+  // auto& components = datatype.components();
 
-  for(size_t j=0; j<constructors.size(); j++){
-    if(i == j){
-      "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
-      add_indent();
-        "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(), lhs, rhs);
-        add_indent();
-          "return false;\n"_fs.outf(newline());
-        sub_indent();
-        "}else{\n"_fs.outf(newline());
-        add_indent();
-          "return std::tie($) == std::tie($);\n"_fs.outf(newline(), lhs, rhs);
-        sub_indent();
-        "}\n"_fs.outf(newline());
-      sub_indent();
-      "}\n"_fs.outf(newline());
-    }else{
-      "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[j]);
-      add_indent();
-        "return false;\n"_fs.outf(newline(), lhs, rhs);
-      sub_indent();
-      "}\n"_fs.outf(newline());
-    }
-  }
+  "bool operator==(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
+  add_indent();
+    "return (std::tie($) == std::tie($));\n"_fs.outf(newline(), lhs, rhs);
+  sub_indent();
+  "}\n"_fs.outf(newline());
+
 }
 void
 Synthesizer::syn_class_def_struct_ltOperator(
 const Datatype& datatype, size_t i, string lhs, string rhs){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
+  // auto& name = datatype.name();
+  // auto& self = datatype.self();
   auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
+  // auto& components = datatype.components();
 
   // generate operator<
   "bool operator<(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
   add_indent();
-  "return std::tie($) < std::tie($);\n"_fs.outf(newline(), lhs, rhs);
+    "return (std::tie($) < std::tie($));\n"_fs.outf(newline(), lhs, rhs);
   sub_indent();
   "}\n"_fs.outf(newline());
 }
@@ -644,16 +655,15 @@ void
 Synthesizer::syn_class_def_struct_gtOperator(
 const Datatype& datatype, size_t i, string lhs, string rhs){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
+  // auto& name = datatype.name();
+  // auto& self = datatype.self();
   auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
+  // auto& components = datatype.components();
 
   // generate operator>
   "bool operator>(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
   add_indent();
-  // 利用已经定义好的<
-  "return std::tie($) < std::tie($);\n"_fs.outf(newline(), rhs, lhs);
+    "return (std::tie($) > std::tie($));\n"_fs.outf(newline(), lhs, rhs);
   sub_indent();
   "}\n"_fs.outf(newline());
 }
@@ -661,27 +671,15 @@ void
 Synthesizer::syn_class_def_struct_leOperator(
 const Datatype& datatype, size_t i, string lhs, string rhs){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
+  // auto& name = datatype.name();
+  // auto& self = datatype.self();
   auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
+  // auto& components = datatype.components();
 
   // generate operator<=
   "bool operator<=(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
   add_indent();
-    "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
-    add_indent();
-      "return true;\n"_fs.outf(newline());
-    sub_indent();
-    "}else if(std::tie($) == std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
-    add_indent();
-      "return true;\n"_fs.outf(newline());
-    sub_indent();
-    "}else{\n"_fs.outf(newline());
-    add_indent();
-      "return false;\n"_fs.outf(newline());
-    sub_indent();
-    "}\n"_fs.outf(newline());
+    "return (std::tie($) <= std::tie($));\n"_fs.outf(newline(), lhs, rhs);
   sub_indent();
   "}\n"_fs.outf(newline());
 }
@@ -689,27 +687,15 @@ void
 Synthesizer::syn_class_def_struct_geOperator(
 const Datatype& datatype, size_t i, string lhs, string rhs){
 
-  auto& name = datatype.name();
-  auto& self = datatype.self();
+  // auto& name = datatype.name();
+  // auto& self = datatype.self();
   auto& constructors = datatype.constructors();
-  auto& components = datatype.components();
+  // auto& components = datatype.components();
 
-  // generate operator<=
+  // generate operator>=
   "bool operator>=(const _$ &rhs) const {\n"_fs.outf(newline(), constructors[i]);
   add_indent();
-    "if(std::tie($) < std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
-    add_indent();
-      "return false;\n"_fs.outf(newline());
-    sub_indent();
-    "}else if(std::tie($) == std::tie($)){\n"_fs.outf(newline(),lhs, rhs);
-    add_indent();
-      "return true;\n"_fs.outf(newline());
-    sub_indent();
-    "}else{\n"_fs.outf(newline());
-    add_indent();
-      "return true;\n"_fs.outf(newline());
-    sub_indent();
-    "}\n"_fs.outf(newline());
+    "return (std::tie($) >= std::tie($));\n"_fs.outf(newline(), lhs, rhs);
   sub_indent();
   "}\n"_fs.outf(newline());
 }
