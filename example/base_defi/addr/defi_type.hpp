@@ -3,166 +3,6 @@
 #include <memory>
 #include <variant>
 
-class snat {
-    struct _sZero {
-        _sZero() {}
-        _sZero(const _sZero& other){ }
-        _sZero(_sZero&& other) noexcept{ }
-        _sZero& operator=(const _sZero& other) { return *this; }
-        _sZero& operator=(_sZero&& other) noexcept { return *this; }
-        bool operator==(const _sZero &) const { return true; }
-        bool operator<(const _sZero &) const { return false; }
-        bool operator>(const _sZero &) const { return false; }
-        bool operator<=(const _sZero &) const { return true; }
-        bool operator>=(const _sZero &) const { return true; }
-    };
-    struct _sSuc {
-        std::shared_ptr<snat> p1_;
-
-        snat p1() const { return *p1_; }
-
-
-        _sSuc(const snat &p1 )
-            :p1_(std::make_shared<snat>(p1))
-        {}
-        _sSuc(const _sSuc& other)
-            :p1_(std::make_shared<snat>(*other.p1_))
-        {}
-        _sSuc(_sSuc&& other) noexcept 
-            :p1_(std::move(other.p1_))
-        { }
-
-        _sSuc& operator=(const _sSuc& other){ 
-            if(this != &other){ 
-                p1_.reset();
-                p1_ = std::make_shared<snat>(*other.p1_);
-            } 
-            return *this; 
-        } 
-        _sSuc& operator=(_sSuc&& other) noexcept {
-            if(this != &other) {
-                p1_ = std::move(other.p1_);
-            }
-            return *this;
-        }
-        bool operator==(const _sSuc &rhs) const {
-            return std::tie(*p1_) == std::tie(*rhs.p1_);
-        }
-        bool operator<(const _sSuc &rhs) const {
-            return std::tie(*p1_) < std::tie(*rhs.p1_);
-        }
-        bool operator>(const _sSuc &rhs) const {
-            return std::tie(*p1_) > std::tie(*rhs.p1_);
-        }
-        bool operator<=(const _sSuc &rhs) const {
-            return std::tie(*p1_) <= std::tie(*rhs.p1_);
-        }
-        bool operator>=(const _sSuc &rhs) const {
-            return std::tie(*p1_) >= std::tie(*rhs.p1_);
-        }
-    };
-
-  public:
-
-    std::variant<_sZero, _sSuc> value_;
-
-    //默认构造函数
-    snat(){
-        value_ = _sZero();
-    }
-    //value构造函数
-    snat(std::variant<_sZero, _sSuc> value) : value_(value) {}
-    //深拷贝构造函数
-    snat(const snat& other) { 
-        if(std::holds_alternative<_sZero>(other.value_)){ 
-            const _sZero& other_node = std::get<_sZero>(other.value_); 
-            value_ = other_node;
-        } 
-        if(std::holds_alternative<_sSuc>(other.value_)){ 
-            const _sSuc& other_node = std::get<_sSuc>(other.value_); 
-            value_ = other_node;
-        } 
-    } 
-    //移动构造函数
-    snat(snat&& other){
-        if(std::holds_alternative<_sZero>(other.value_)){ 
-            _sZero& other_node = std::get<_sZero>(other.value_); 
-            value_ = std::move(other_node);
-        } 
-        if(std::holds_alternative<_sSuc>(other.value_)){ 
-            _sSuc& other_node = std::get<_sSuc>(other.value_); 
-            value_ = std::move(other_node);
-        } 
-    }
-
-    static snat sZero() {
-        return snat ( _sZero (  ) );
-    }
-    static snat sSuc(const snat &p1) {
-        return snat ( _sSuc ( p1 ) );
-    }
-
-    bool is_sZero() const { return std::holds_alternative<_sZero>(value_); }
-    bool is_sSuc() const { return std::holds_alternative<_sSuc>(value_); }
-    const _sSuc &as_sSuc() const { return std::get<_sSuc>(value_); }
-    snat& operator=(snat&& other) noexcept {
-        if(this != &other){
-            if(std::holds_alternative<_sZero>(other.value_)){
-                _sZero& other_value = std::get<_sZero>(other.value_);
-                value_ = std::move(other_value);
-            }
-            if(std::holds_alternative<_sSuc>(other.value_)){
-                _sSuc& other_value = std::get<_sSuc>(other.value_);
-                value_ = std::move(other_value);
-            }
-        }
-        return *this;
-    }
-    //拷贝赋值运算符
-    snat& operator=(const snat& other){ 
-        if(this != &other){ 
-            if(std::holds_alternative<_sZero>(other.value_)){ 
-                const _sZero& other_node = std::get<_sZero>(other.value_); 
-                value_ = other.value_; 
-            } 
-            if(std::holds_alternative<_sSuc>(other.value_)){ 
-                const _sSuc& other_node = std::get<_sSuc>(other.value_); 
-                value_ = other.value_; 
-            } 
-        } 
-        return *this; 
-    }
-
-    bool operator==(const snat &rhs) const {
-        if(value_.index() == rhs.value_.index()){
-             return value_ == rhs.value_;
-        }else{
-            return false;
-        }
-    }
-
-    bool operator<(const snat &rhs) const {
-        if(value_ == rhs.value_) return false;
-        return value_ < rhs.value_; 
-    }
-
-    bool operator>(const snat &rhs) const {
-        if(value_ == rhs.value_) return false;
-        return value_ > rhs.value_; 
-    }
-
-    bool operator<=(const snat &rhs) const {
-        if(value_ == rhs.value_) return true;
-        return value_ < rhs.value_; 
-    }
-
-    bool operator>=(const snat &rhs) const {
-        if(value_ == rhs.value_) return true;
-        return value_ > rhs.value_; 
-    }
-
-};
-
 template<typename T1>
 class slist {
     struct _sNil {
@@ -509,10 +349,6 @@ class stree {
 
 
 
-std::uint64_t natofsnat(const snat &arg1);
-
-snat snatofnat(const std::uint64_t &arg1);
-
 template<typename T1>
 slist<T1> AddListHead(const T1 &arg1, const slist<T1> &arg2) {
     // AddListHead a xs = sCons a  xs
@@ -549,7 +385,7 @@ slist<T1> AddListTail(const T1 &arg1, const slist<T1> &arg2) {
 }
 
 template<typename T1>
-slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
+slist<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &arg3) {
     // AddListI i a sNil = sCons a sNil
     if (arg3.is_sNil()) {
         auto a = arg2;
@@ -560,8 +396,8 @@ slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
         return temp0;
     }
 
-    // AddListI sZero a (sCons x xs) = AddListHead a (sCons x xs)
-    if (arg1.is_sZero()) {
+    // AddListI Zero a (sCons x xs) = AddListHead a (sCons x xs)
+    if (arg1 == 0) {
         if (arg3.is_sCons()) {
             auto a = arg2;
             auto x = arg3.as_sCons().p1();
@@ -575,8 +411,8 @@ slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
         }
     }
 
-    // AddListI (sSuc i) a (sCons x xs) = sCons x  (AddListI i a xs)
-    auto i = arg1.as_sSuc().p1();
+    // AddListI (Suc i) a (sCons x xs) = sCons x  (AddListI i a xs)
+    auto i = arg1 - 1;
     auto a = arg2;
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
@@ -624,7 +460,7 @@ slist<T1> DelListTail(const slist<T1> &arg1) {
 }
 
 template<typename T1>
-slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
+slist<T1> DelListI(const std::uint64_t &arg1, const slist<T1> &arg2) {
     // DelListI i sNil = sNil
     if (arg2.is_sNil()) {
         return slist<T1>::sNil();
@@ -637,8 +473,8 @@ slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
         }
     }
 
-    // DelListI sZero (sCons x xs) = DelListHead (sCons x xs)
-    if (arg1.is_sZero()) {
+    // DelListI Zero (sCons x xs) = DelListHead (sCons x xs)
+    if (arg1 == 0) {
         if (arg2.is_sCons()) {
             auto x = arg2.as_sCons().p1();
             auto xs = arg2.as_sCons().p2();
@@ -650,8 +486,8 @@ slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
         }
     }
 
-    // DelListI (sSuc i) (sCons x xs) = sCons x  (DelListI i xs)
-    auto i = arg1.as_sSuc().p1();
+    // DelListI (Suc i) (sCons x xs) = sCons x  (DelListI i xs)
+    auto i = arg1 - 1;
     auto x = arg2.as_sCons().p1();
     auto xs = arg2.as_sCons().p2();
     auto temp0 = slist<T1>::sCons(
@@ -691,14 +527,14 @@ slist<T1> Modify1(const T1 &arg1, const T1 &arg2, const slist<T1> &arg3) {
 }
 
 template<typename T1>
-slist<T1> Modify2(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
+slist<T1> Modify2(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &arg3) {
     // Modify2 n b sNil = sNil
     if (arg3.is_sNil()) {
         return slist<T1>::sNil();
     }
 
-    // Modify2 sZero b (sCons x xs) =(sCons b xs)
-    if (arg1.is_sZero()) {
+    // Modify2 Zero b (sCons x xs) =(sCons b xs)
+    if (arg1 == 0) {
         if (arg3.is_sCons()) {
             auto b = arg2;
             auto xs = arg3.as_sCons().p2();
@@ -710,8 +546,8 @@ slist<T1> Modify2(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
         }
     }
 
-    // Modify2 (sSuc n) b (sCons x xs) = (sCons x (Modify2 n b xs))
-    auto n = arg1.as_sSuc().p1();
+    // Modify2 (Suc n) b (sCons x xs) = (sCons x (Modify2 n b xs))
+    auto n = arg1 - 1;
     auto b = arg2;
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
