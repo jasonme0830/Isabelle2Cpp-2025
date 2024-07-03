@@ -1,3 +1,10 @@
+bin/hol2cpp example/baseAsnat/raw/snat_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
+
+bin/hol2cpp example/baseAsnat/addr/snat_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
+
+bin/hol2cpp example/baseAsnat/recu/snat_type.thy -s --close-isomor  --predef bin/defs.pre
+
+defi
 bin/hol2cpp example/base_defi/raw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
 
 bin/hol2cpp example/base_defi/addr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
