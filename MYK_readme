@@ -1,22 +1,22 @@
-bin/hol2cpp example/baseAsnat/raw/snat_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/baseAsnat/Araw/snat_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
 
-bin/hol2cpp example/baseAsnat/addr/snat_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/baseAsnat/Baddr/snat_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
 
-bin/hol2cpp example/baseAsnat/recu/snat_type.thy -s --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/baseAsnat/Crecu/snat_type.thy -s --close-isomor  --predef bin/defs.pre
 
 defi
-bin/hol2cpp example/base_defi/raw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/baseBdefi/Araw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
 
-bin/hol2cpp example/base_defi/addr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/baseBdefi/Baddr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
 
-bin/hol2cpp example/base_defi/recu/defi_type.thy -s --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/baseBdefi/Crecu/defi_type.thy -s --close-isomor  --predef bin/defs.pre
 
 rule
-bin/hol2cpp example/base_rule/raw/rule_type.thy -s --close-move  --predef bin/defs.pre
+bin/hol2cpp example/baseCrule/Araw/rule_type.thy -s --close-move  --predef bin/defs.pre
 
-bin/hol2cpp example/base_rule/addr/rule_type.thy -s --close-recu  --predef bin/defs.pre
+bin/hol2cpp example/baseCrule/Baddr/rule_type.thy -s --close-recu  --predef bin/defs.pre
 
-bin/hol2cpp example/base_rule/recu/rule_type.thy -s  --predef bin/defs.pre
+bin/hol2cpp example/baseCrule/Crecu/rule_type.thy -s  --predef bin/defs.pre
 
 --close-move  
 --close-recu
