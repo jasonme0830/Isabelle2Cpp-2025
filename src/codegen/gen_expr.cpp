@@ -41,14 +41,11 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
   // for variables
   else {
     auto var = func.get_variable(name);
-    cout<<var<<" "<<movable<<" ";
     // if (movable && typeinfo.movable()) 
     if(movable && func.func_recu_class() > -1 )    {
       // movable is true only when move-list is enable
-      cout<<"std::move($)"_fs.format(var)<<endl;
       return "std::move($)"_fs.format(var); // for move-list
     } else {
-      cout<<var<<endl;
       return var;
     }
   }
