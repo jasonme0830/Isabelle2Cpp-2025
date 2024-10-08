@@ -102,8 +102,33 @@ fun fib :: "nat \<Rightarrow> nat" where
   "fib (Suc 0) = 1" |
   "fib n = (fib (n - 1)) + (fib (n - 2))"
 
+fun slength :: "'a list => nat" where  
+  "slength [] = 0" |  
+  "slength (x # xs) = 1 + slength xs"
+
+fun stake :: "nat => 'a list => 'a list" where  
+  "stake 0 xs = []" |  
+  "stake (Suc n) [] = []" |  
+  "stake (Suc n) (x # xs) = x # stake n xs" 
+
+fun sdrop :: "nat => 'a list => 'a list" where  
+  "sdrop 0 xs = xs" |  
+  "sdrop (Suc n) [] = []" |  
+  "sdrop (Suc n) (x # xs) = sdrop n xs" 
+
+fun supto :: "nat => nat => nat list" where  
+  "supto i j = (if i \<ge> j then [] else i # supto (i + 1) j)"
+
+fun snth :: "'a list => nat => 'a" where  
+  "snth [] n = 0" |  
+  "snth (x#xs) 0 = x" |  
+  "snth (x#xs) (Suc n) = snth xs n" 
 
 
+
+fun copy_tree::"'a tree \<Rightarrow> 'a tree" where
+"copy_tree (Node left x right) = Node (copy_tree left) x (copy_tree right)" |
+"copy_tree Tip = Tip" 
 
 fun searchtree1::"'a=>'a tree=>bool " where
 "searchtree1 a Tip=False "|

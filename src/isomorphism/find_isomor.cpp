@@ -16,6 +16,7 @@ void Isomorphism::find_isomorphism_datatype(){
         theNotIsoDatatypes.push_back(datatype);
         // cout << "^ insert pre datatype finished! ^" << endl;
         theAllDatatypeNameMap[datatype.decl_type->main_name()] = datatype.decl_type->main_name();
+        // cout << "insert all datatype:" << datatype.decl_type->main_name() << endl;
       }
       //非defs.pre中的类型进行同构比较
       else{

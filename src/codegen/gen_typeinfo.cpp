@@ -28,7 +28,6 @@ NormalType::gen_typeinfo(FuncEntity& func) const
     if (!func.is_predef()) {
       func.code().add_header("cstdint");
     }
-
     return TypeInfo(theNormalTypeMapping.at(name));
   } else {
     // e.g. bool

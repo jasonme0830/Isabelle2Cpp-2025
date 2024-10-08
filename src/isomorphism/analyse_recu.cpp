@@ -34,12 +34,13 @@ void Isomorphism::analyse_func_recu_class()
 int
 FunctionDef::analyse_func_recu_class()
 {
+  //0:&  1:move  2:memory
   if(theConfig.close_move()){
-    func_recursive_type = -1;
+    func_recursive_type = 0;
     return func_recursive_type;
   }
   if(theConfig.close_recu()){
-    func_recursive_type = 0;
+    func_recursive_type = 1;
     return func_recursive_type;
   }
 

@@ -1,6 +1,6 @@
 #include "defi_type.hpp"
 
-std::uint64_t natofsnat(const snat &arg1) {
+std::uint64_t natofsnat(snat arg1) {
     // natofsnat sZero = 0
     if (arg1.is_sZero()) {
         return 0;
@@ -8,10 +8,10 @@ std::uint64_t natofsnat(const snat &arg1) {
 
     // natofsnat (sSuc n) = (natofsnat n) + 1
     auto n = arg1.as_sSuc().p1();
-    return natofsnat(std::move(n)) + 1;
+    return natofsnat(n) + 1;
 }
 
-snat snatofnat(const std::uint64_t &arg1) {
+snat snatofnat(std::uint64_t arg1) {
     // snatofnat 0 = sZero
     if (arg1 == 0) {
         return snat::sZero();
@@ -20,7 +20,7 @@ snat snatofnat(const std::uint64_t &arg1) {
     // snatofnat (Suc n) = sSuc (snatofnat n)
     auto n = arg1 - 1;
     auto temp0 = snat::sSuc(
-        snatofnat(std::move(n))
+        snatofnat(n)
     );
     return temp0;
 }

@@ -46,19 +46,19 @@ class snat {
             return *this;
         }
         bool operator==(const _sSuc &rhs) const {
-            return std::tie(*p1_) == std::tie(*rhs.p1_);
+            return (std::tie(*p1_) == std::tie(*rhs.p1_));
         }
         bool operator<(const _sSuc &rhs) const {
-            return std::tie(*p1_) < std::tie(*rhs.p1_);
+            return (std::tie(*p1_) < std::tie(*rhs.p1_));
         }
         bool operator>(const _sSuc &rhs) const {
-            return std::tie(*p1_) > std::tie(*rhs.p1_);
+            return (std::tie(*p1_) > std::tie(*rhs.p1_));
         }
         bool operator<=(const _sSuc &rhs) const {
-            return std::tie(*p1_) <= std::tie(*rhs.p1_);
+            return (std::tie(*p1_) <= std::tie(*rhs.p1_));
         }
         bool operator>=(const _sSuc &rhs) const {
-            return std::tie(*p1_) >= std::tie(*rhs.p1_);
+            return (std::tie(*p1_) >= std::tie(*rhs.p1_));
         }
     };
 
@@ -214,19 +214,19 @@ class slist {
             return *this;
         }
         bool operator==(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_);
+            return (std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_));
         }
         bool operator<(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_);
+            return (std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_));
         }
         bool operator>(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) > std::tie(rhs.p1_, *rhs.p2_);
+            return (std::tie(p1_, *p2_) > std::tie(rhs.p1_, *rhs.p2_));
         }
         bool operator<=(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) <= std::tie(rhs.p1_, *rhs.p2_);
+            return (std::tie(p1_, *p2_) <= std::tie(rhs.p1_, *rhs.p2_));
         }
         bool operator>=(const _sCons &rhs) const {
-            return std::tie(p1_, *p2_) >= std::tie(rhs.p1_, *rhs.p2_);
+            return (std::tie(p1_, *p2_) >= std::tie(rhs.p1_, *rhs.p2_));
         }
     };
 
@@ -390,19 +390,19 @@ class stree {
             return *this;
         }
         bool operator==(const _sNode &rhs) const {
-            return std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+            return (std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
         bool operator<(const _sNode &rhs) const {
-            return std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+            return (std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
         bool operator>(const _sNode &rhs) const {
-            return std::tie(*p1_, p2_, *p3_) > std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+            return (std::tie(*p1_, p2_, *p3_) > std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
         bool operator<=(const _sNode &rhs) const {
-            return std::tie(*p1_, p2_, *p3_) <= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+            return (std::tie(*p1_, p2_, *p3_) <= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
         bool operator>=(const _sNode &rhs) const {
-            return std::tie(*p1_, p2_, *p3_) >= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_);
+            return (std::tie(*p1_, p2_, *p3_) >= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
     };
 
@@ -509,29 +509,29 @@ class stree {
 
 
 
-std::uint64_t natofsnat(const snat &arg1);
+std::uint64_t natofsnat(snat arg1);
 
-snat snatofnat(const std::uint64_t &arg1);
+snat snatofnat(std::uint64_t arg1);
 
 template<typename T1>
-slist<T1> AddListHead(const T1 &arg1, const slist<T1> &arg2) {
+slist<T1> AddListHead(T1 arg1, slist<T1> arg2) {
     // AddListHead a xs = sCons a  xs
     auto a = arg1;
     auto xs = arg2;
     auto temp0 = slist<T1>::sCons(
-        std::move(a),
-        std::move(xs)
+        a,
+        xs
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> AddListTail(const T1 &arg1, const slist<T1> &arg2) {
+slist<T1> AddListTail(T1 arg1, slist<T1> arg2) {
     // AddListTail a sNil =sCons a sNil
     if (arg2.is_sNil()) {
         auto a = arg1;
         auto temp0 = slist<T1>::sCons(
-            std::move(a),
+            a,
             slist<T1>::sNil()
         );
         return temp0;
@@ -542,19 +542,19 @@ slist<T1> AddListTail(const T1 &arg1, const slist<T1> &arg2) {
     auto x = arg2.as_sCons().p1();
     auto xs = arg2.as_sCons().p2();
     auto temp0 = slist<T1>::sCons(
-        std::move(x),
-        AddListTail(std::move(a), std::move(xs))
+        x,
+        AddListTail(a, xs)
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
+slist<T1> AddListI(snat arg1, T1 arg2, slist<T1> arg3) {
     // AddListI i a sNil = sCons a sNil
     if (arg3.is_sNil()) {
         auto a = arg2;
         auto temp0 = slist<T1>::sCons(
-            std::move(a),
+            a,
             slist<T1>::sNil()
         );
         return temp0;
@@ -566,12 +566,11 @@ slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
             auto a = arg2;
             auto x = arg3.as_sCons().p1();
             auto xs = arg3.as_sCons().p2();
-            auto temp0 = std::move(a);
-            auto temp1 = slist<T1>::sCons(
-                std::move(x),
-                std::move(xs)
+            auto temp0 = slist<T1>::sCons(
+                x,
+                xs
             );
-            return AddListHead(std::move(temp0), std::move(temp1));
+            return AddListHead(a, temp0);
         }
     }
 
@@ -581,14 +580,14 @@ slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
     auto temp0 = slist<T1>::sCons(
-        std::move(x),
-        AddListI(std::move(i), std::move(a), std::move(xs))
+        x,
+        AddListI(i, a, xs)
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> DelListHead(const slist<T1> &arg1) {
+slist<T1> DelListHead(slist<T1> arg1) {
     // DelListHead (sCons x xs) = xs
     if (arg1.is_sCons()) {
         auto xs = arg1.as_sCons().p2();
@@ -600,7 +599,7 @@ slist<T1> DelListHead(const slist<T1> &arg1) {
 }
 
 template<typename T1>
-slist<T1> DelListTail(const slist<T1> &arg1) {
+slist<T1> DelListTail(slist<T1> arg1) {
     // DelListTail sNil = sNil
     if (arg1.is_sNil()) {
         return slist<T1>::sNil();
@@ -617,14 +616,14 @@ slist<T1> DelListTail(const slist<T1> &arg1) {
     auto x = arg1.as_sCons().p1();
     auto xs = arg1.as_sCons().p2();
     auto temp0 = slist<T1>::sCons(
-        std::move(x),
-        DelListTail(std::move(xs))
+        x,
+        DelListTail(xs)
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
+slist<T1> DelListI(snat arg1, slist<T1> arg2) {
     // DelListI i sNil = sNil
     if (arg2.is_sNil()) {
         return slist<T1>::sNil();
@@ -643,10 +642,10 @@ slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
             auto x = arg2.as_sCons().p1();
             auto xs = arg2.as_sCons().p2();
             auto temp0 = slist<T1>::sCons(
-                std::move(x),
-                std::move(xs)
+                x,
+                xs
             );
-            return DelListHead(std::move(temp0));
+            return DelListHead(temp0);
         }
     }
 
@@ -655,14 +654,14 @@ slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
     auto x = arg2.as_sCons().p1();
     auto xs = arg2.as_sCons().p2();
     auto temp0 = slist<T1>::sCons(
-        std::move(x),
-        DelListI(std::move(i), std::move(xs))
+        x,
+        DelListI(i, xs)
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> Modify1(const T1 &arg1, const T1 &arg2, const slist<T1> &arg3) {
+slist<T1> Modify1(T1 arg1, T1 arg2, slist<T1> arg3) {
     // Modify1 a b sNil = sNil
     if (arg3.is_sNil()) {
         return slist<T1>::sNil();
@@ -677,21 +676,21 @@ slist<T1> Modify1(const T1 &arg1, const T1 &arg2, const slist<T1> &arg3) {
     if (x == a) {
         auto temp1 = slist<T1>::sCons(
             b,
-            Modify1(std::move(a), b, std::move(xs))
+            Modify1(a, b, xs)
         );
-        temp0 = std::move(temp1);
+        temp0 = temp1;
     } else {
         auto temp2 = slist<T1>::sCons(
-            std::move(x),
-            Modify1(std::move(a), std::move(b), std::move(xs))
+            x,
+            Modify1(a, b, xs)
         );
-        temp0 = std::move(temp2);
+        temp0 = temp2;
     }
     return temp0;
 }
 
 template<typename T1>
-slist<T1> Modify2(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
+slist<T1> Modify2(snat arg1, T1 arg2, slist<T1> arg3) {
     // Modify2 n b sNil = sNil
     if (arg3.is_sNil()) {
         return slist<T1>::sNil();
@@ -703,8 +702,8 @@ slist<T1> Modify2(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
             auto b = arg2;
             auto xs = arg3.as_sCons().p2();
             auto temp0 = slist<T1>::sCons(
-                std::move(b),
-                std::move(xs)
+                b,
+                xs
             );
             return temp0;
         }
@@ -716,14 +715,14 @@ slist<T1> Modify2(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
     auto temp0 = slist<T1>::sCons(
-        std::move(x),
-        Modify2(std::move(n), std::move(b), std::move(xs))
+        x,
+        Modify2(n, b, xs)
     );
     return temp0;
 }
 
 template<typename T1>
-bool SearchList(const T1 &arg1, const slist<T1> &arg2) {
+bool SearchList(T1 arg1, slist<T1> arg2) {
     // SearchList a sNil = False
     if (arg2.is_sNil()) {
         return false;
@@ -737,13 +736,13 @@ bool SearchList(const T1 &arg1, const slist<T1> &arg2) {
     if (a == x) {
         temp0 = true;
     } else {
-        temp0 = SearchList(std::move(a), std::move(xs));
+        temp0 = SearchList(a, xs);
     }
     return temp0;
 }
 
 template<typename T1>
-slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
+slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
     // app sNil as =as
     if (arg1.is_sNil()) {
         auto as = arg2;
@@ -755,14 +754,14 @@ slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
     auto as = arg1.as_sCons().p2();
     auto bs = arg2;
     auto temp0 = slist<T1>::sCons(
-        std::move(a),
-        app(std::move(as), std::move(bs))
+        a,
+        app(as, bs)
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> Reverse(const slist<T1> &arg1) {
+slist<T1> Reverse(slist<T1> arg1) {
     // Reverse sNil = sNil
     if (arg1.is_sNil()) {
         return slist<T1>::sNil();
@@ -771,16 +770,34 @@ slist<T1> Reverse(const slist<T1> &arg1) {
     // Reverse (sCons a as) = app(Reverse as)(sCons a sNil)
     auto a = arg1.as_sCons().p1();
     auto as = arg1.as_sCons().p2();
-    auto temp0 = Reverse(std::move(as));
-    auto temp1 = slist<T1>::sCons(
-        std::move(a),
+    auto temp0 = slist<T1>::sCons(
+        a,
         slist<T1>::sNil()
     );
-    return app(std::move(temp0), std::move(temp1));
+    return app(Reverse(as), temp0);
 }
 
 template<typename T1>
-bool searchtree1(const T1 &arg1, const stree<T1> &arg2) {
+stree<T1> copy_tree(stree<T1> arg1) {
+    // copy_tree (sNode left x right) = sNode (copy_tree left) x (copy_tree right)
+    if (arg1.is_sNode()) {
+        auto left = arg1.as_sNode().p1();
+        auto x = arg1.as_sNode().p2();
+        auto right = arg1.as_sNode().p3();
+        auto temp0 = stree<T1>::sNode(
+            copy_tree(left),
+            x,
+            copy_tree(right)
+        );
+        return temp0;
+    }
+
+    // copy_tree sTip = sTip
+    return stree<T1>::sTip();
+}
+
+template<typename T1>
+bool searchtree1(T1 arg1, stree<T1> arg2) {
     // searchtree1 a sTip=False
     if (arg2.is_sTip()) {
         return false;
@@ -791,11 +808,11 @@ bool searchtree1(const T1 &arg1, const stree<T1> &arg2) {
     auto left = arg2.as_sNode().p1();
     auto x = arg2.as_sNode().p2();
     auto right = arg2.as_sNode().p3();
-    return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
+    return (a == x) || (searchtree1(a, left) || searchtree1(a, right));
 }
 
 template<typename T1>
-bool searchtree2(const T1 &arg1, const stree<T1> &arg2) {
+bool searchtree2(T1 arg1, stree<T1> arg2) {
     // searchtree2 a sTip=False
     if (arg2.is_sTip()) {
         return false;
@@ -806,11 +823,11 @@ bool searchtree2(const T1 &arg1, const stree<T1> &arg2) {
     auto left = arg2.as_sNode().p1();
     auto x = arg2.as_sNode().p2();
     auto right = arg2.as_sNode().p3();
-    return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
+    return searchtree2(a, left) || ((a == x) || searchtree2(a, right));
 }
 
 template<typename T1>
-bool searchtree3(const T1 &arg1, const stree<T1> &arg2) {
+bool searchtree3(T1 arg1, stree<T1> arg2) {
     // searchtree3 a sTip=False
     if (arg2.is_sTip()) {
         return false;
@@ -821,17 +838,17 @@ bool searchtree3(const T1 &arg1, const stree<T1> &arg2) {
     auto left = arg2.as_sNode().p1();
     auto x = arg2.as_sNode().p2();
     auto right = arg2.as_sNode().p3();
-    return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
+    return searchtree3(a, left) || (searchtree3(a, right) || (a == x));
 }
 
 template<typename T1>
-stree<T1> inserttree(const T1 &arg1, const stree<T1> &arg2) {
+stree<T1> inserttree(T1 arg1, stree<T1> arg2) {
     // inserttree a sTip= sNode sTip a sTip
     if (arg2.is_sTip()) {
         auto a = arg1;
         auto temp0 = stree<T1>::sNode(
             stree<T1>::sTip(),
-            std::move(a),
+            a,
             stree<T1>::sTip()
         );
         return temp0;
@@ -845,38 +862,38 @@ stree<T1> inserttree(const T1 &arg1, const stree<T1> &arg2) {
     stree<T1> temp0;
     if (a <= x) {
         auto temp1 = stree<T1>::sNode(
-            inserttree(std::move(a), std::move(left)),
-            std::move(x),
-            std::move(right)
+            inserttree(a, left),
+            x,
+            right
         );
-        temp0 = std::move(temp1);
+        temp0 = temp1;
     } else {
         auto temp2 = stree<T1>::sNode(
-            std::move(left),
-            std::move(x),
-            inserttree(std::move(a), std::move(right))
+            left,
+            x,
+            inserttree(a, right)
         );
-        temp0 = std::move(temp2);
+        temp0 = temp2;
     }
     return temp0;
 }
 
 template<typename T1>
-T1 rightest(const stree<T1> &arg1) {
+T1 rightest(stree<T1> arg1) {
     // rightest ( sNode left x right) = (if right= sTip then x  ...
     auto x = arg1.as_sNode().p2();
     auto right = arg1.as_sNode().p3();
     T1 temp0;
     if (right.is_sTip()) {
-        temp0 = std::move(x);
+        temp0 = x;
     } else {
-        temp0 = rightest(std::move(right));
+        temp0 = rightest(right);
     }
     return temp0;
 }
 
 template<typename T1>
-stree<T1> rightestleft(const stree<T1> &arg1) {
+stree<T1> rightestleft(stree<T1> arg1) {
     // rightestleft sTip= sTip
     if (arg1.is_sTip()) {
         return stree<T1>::sTip();
@@ -887,15 +904,15 @@ stree<T1> rightestleft(const stree<T1> &arg1) {
     auto right = arg1.as_sNode().p3();
     stree<T1> temp0;
     if (right.is_sTip()) {
-        temp0 = std::move(left);
+        temp0 = left;
     } else {
-        temp0 = rightestleft(std::move(right));
+        temp0 = rightestleft(right);
     }
     return temp0;
 }
 
 template<typename T1>
-stree<T1> deltreeroot(const stree<T1> &arg1) {
+stree<T1> deltreeroot(stree<T1> arg1) {
     // deltreeroot sTip= sTip
     if (arg1.is_sTip()) {
         return stree<T1>::sTip();
@@ -906,28 +923,26 @@ stree<T1> deltreeroot(const stree<T1> &arg1) {
     auto right = arg1.as_sNode().p3();
     stree<T1> temp0;
     if (right.is_sTip()) {
-        temp0 = std::move(left);
+        temp0 = left;
     } else {
         stree<T1> temp1;
         if (left.is_sTip()) {
-            temp1 = std::move(right);
+            temp1 = right;
         } else {
-            auto temp2 = left;
-            auto temp3 = left;
-            auto temp4 = stree<T1>::sNode(
-                rightestleft(std::move(temp2)),
-                rightest(std::move(temp3)),
-                std::move(right)
+            auto temp2 = stree<T1>::sNode(
+                rightestleft(left),
+                rightest(left),
+                right
             );
-            temp1 = std::move(temp4);
+            temp1 = temp2;
         }
-        temp0 = std::move(temp1);
+        temp0 = temp1;
     }
     return temp0;
 }
 
 template<typename T1>
-stree<T1> deltree(const T1 &arg1, const stree<T1> &arg2) {
+stree<T1> deltree(T1 arg1, stree<T1> arg2) {
     // deltree a sTip = sTip
     if (arg2.is_sTip()) {
         return stree<T1>::sTip();
@@ -941,35 +956,35 @@ stree<T1> deltree(const T1 &arg1, const stree<T1> &arg2) {
     stree<T1> temp0;
     if (a == x) {
         auto temp1 = stree<T1>::sNode(
-            std::move(left),
-            std::move(x),
-            std::move(right)
+            left,
+            x,
+            right
         );
-        temp0 = deltreeroot(std::move(temp1));
+        temp0 = deltreeroot(temp1);
     } else {
         stree<T1> temp2;
         if (a < x) {
             auto temp3 = stree<T1>::sNode(
-                deltree(std::move(a), std::move(left)),
-                std::move(x),
-                std::move(right)
+                deltree(a, left),
+                x,
+                right
             );
-            temp2 = std::move(temp3);
+            temp2 = temp3;
         } else {
             auto temp4 = stree<T1>::sNode(
-                std::move(left),
-                std::move(x),
-                deltree(std::move(a), std::move(right))
+                left,
+                x,
+                deltree(a, right)
             );
-            temp2 = std::move(temp4);
+            temp2 = temp4;
         }
-        temp0 = std::move(temp2);
+        temp0 = temp2;
     }
     return temp0;
 }
 
 template<typename T1>
-stree<T1> changetree(const T1 &arg1, const T1 &arg2, const stree<T1> &arg3) {
+stree<T1> changetree(T1 arg1, T1 arg2, stree<T1> arg3) {
     // changetree a b sTip = sTip
     if (arg3.is_sTip()) {
         return stree<T1>::sTip();
@@ -984,29 +999,29 @@ stree<T1> changetree(const T1 &arg1, const T1 &arg2, const stree<T1> &arg3) {
     stree<T1> temp0;
     if (a == x) {
         auto temp1 = stree<T1>::sNode(
-            std::move(left),
-            std::move(b),
-            std::move(right)
+            left,
+            b,
+            right
         );
-        temp0 = std::move(temp1);
+        temp0 = temp1;
     } else {
         stree<T1> temp2;
         if (a < x) {
             auto temp3 = stree<T1>::sNode(
-                changetree(std::move(a), std::move(b), std::move(left)),
-                std::move(x),
-                std::move(right)
+                changetree(a, b, left),
+                x,
+                right
             );
-            temp2 = std::move(temp3);
+            temp2 = temp3;
         } else {
             auto temp4 = stree<T1>::sNode(
-                std::move(left),
-                std::move(x),
-                changetree(std::move(a), std::move(b), std::move(right))
+                left,
+                x,
+                changetree(a, b, right)
             );
-            temp2 = std::move(temp4);
+            temp2 = temp4;
         }
-        temp0 = std::move(temp2);
+        temp0 = temp2;
     }
     return temp0;
 }

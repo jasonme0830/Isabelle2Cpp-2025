@@ -1,15 +1,15 @@
-bin/hol2cpp example/base_defi/raw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/base_defi/Araw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
 
-bin/hol2cpp example/base_defi/addr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/base_defi/Baddr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
 
-bin/hol2cpp example/base_defi/recu/defi_type.thy -s --close-isomor  --predef bin/defs.pre
+bin/hol2cpp example/base_defi/Crecu/defi_type.thy -s --close-isomor  --predef bin/defs.pre
 
 rule
-bin/hol2cpp example/base_rule/raw/rule_type.thy -s --close-move  --predef bin/defs.pre
+bin/hol2cpp example/base_rule/Araw/rule_type.thy -s --close-move  --predef bin/defs.pre
 
-bin/hol2cpp example/base_rule/addr/rule_type.thy -s --close-recu  --predef bin/defs.pre
+bin/hol2cpp example/base_rule/Baddr/rule_type.thy -s --close-recu  --predef bin/defs.pre
 
-bin/hol2cpp example/base_rule/recu/rule_type.thy -s  --predef bin/defs.pre
+bin/hol2cpp example/base_rule/Crecu/rule_type.thy -s  --predef bin/defs.pre
 
 --close-move  
 --close-recu

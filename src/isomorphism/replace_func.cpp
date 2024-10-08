@@ -154,7 +154,10 @@ FunctionDef::Process::handle_equa_expr_iso_type_cons(Ptr<Expr> expr)
 
 bool NormalType::replace_self_iso_type(std::set<std::string>& iso_types)
 {
-  //当前类型是同构类型，存储临时变量并进行类型名的替换
+  if(theAllDatatypeNameMap.find(main_name()) == theAllDatatypeNameMap.end()){
+    return false;
+  }
+  // 当前类型是同构类型，存储临时变量并进行类型名的替换
   if(theAllDatatypeNameMap[main_name()] != main_name()){
     iso_types.insert(main_name());
     name = theAllDatatypeNameMap[main_name()];
