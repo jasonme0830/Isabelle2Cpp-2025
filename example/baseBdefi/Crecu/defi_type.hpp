@@ -1,172 +1,10 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <map>
 #include <memory>
 #include <variant>
 
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-class snat {
-    struct _sZero {
-        _sZero() {}
-        _sZero(const _sZero& other){ }
-        _sZero(_sZero&& other) noexcept{ }
-        _sZero& operator=(const _sZero& other) { return *this; }
-        _sZero& operator=(_sZero&& other) noexcept { return *this; }
-        bool operator==(const _sZero &) const { return true; }
-        bool operator<(const _sZero &) const { return false; }
-        bool operator>(const _sZero &) const { return false; }
-        bool operator<=(const _sZero &) const { return true; }
-        bool operator>=(const _sZero &) const { return true; }
-    };
-    struct _sSuc {
-        std::shared_ptr<snat> p1_;
-
-        snat p1() const { return *p1_; }
-
-
-        _sSuc(const snat &p1 )
-            :p1_(std::make_shared<snat>(p1))
-        {}
-        _sSuc(const _sSuc& other)
-            :p1_(std::make_shared<snat>(*other.p1_))
-        {}
-        _sSuc(_sSuc&& other) noexcept 
-            :p1_(std::move(other.p1_))
-        { }
-
-        _sSuc& operator=(const _sSuc& other){ 
-            if(this != &other){ 
-                p1_.reset();
-                p1_ = std::make_shared<snat>(*other.p1_);
-            } 
-            return *this; 
-        } 
-        _sSuc& operator=(_sSuc&& other) noexcept {
-            if(this != &other) {
-                p1_ = std::move(other.p1_);
-            }
-            return *this;
-        }
-        bool operator==(const _sSuc &rhs) const {
-            return (std::tie(*p1_) == std::tie(*rhs.p1_));
-        }
-        bool operator<(const _sSuc &rhs) const {
-            return (std::tie(*p1_) < std::tie(*rhs.p1_));
-        }
-        bool operator>(const _sSuc &rhs) const {
-            return (std::tie(*p1_) > std::tie(*rhs.p1_));
-        }
-        bool operator<=(const _sSuc &rhs) const {
-            return (std::tie(*p1_) <= std::tie(*rhs.p1_));
-        }
-        bool operator>=(const _sSuc &rhs) const {
-            return (std::tie(*p1_) >= std::tie(*rhs.p1_));
-        }
-    };
-
-  public:
-
-    std::variant<_sZero, _sSuc> value_;
-
-    //默认构造函数
-    snat(){
-        value_ = _sZero();
-    }
-    //value构造函数
-    snat(std::variant<_sZero, _sSuc> value) : value_(value) {}
-    //深拷贝构造函数
-    snat(const snat& other) { 
-        if(std::holds_alternative<_sZero>(other.value_)){ 
-            const _sZero& other_node = std::get<_sZero>(other.value_); 
-            value_ = other_node;
-        } 
-        if(std::holds_alternative<_sSuc>(other.value_)){ 
-            const _sSuc& other_node = std::get<_sSuc>(other.value_); 
-            value_ = other_node;
-        } 
-    } 
-    //移动构造函数
-    snat(snat&& other){
-        if(std::holds_alternative<_sZero>(other.value_)){ 
-            _sZero& other_node = std::get<_sZero>(other.value_); 
-            value_ = std::move(other_node);
-        } 
-        if(std::holds_alternative<_sSuc>(other.value_)){ 
-            _sSuc& other_node = std::get<_sSuc>(other.value_); 
-            value_ = std::move(other_node);
-        } 
-    }
-
-    static snat sZero() {
-        return snat ( _sZero (  ) );
-    }
-    static snat sSuc(const snat &p1) {
-        return snat ( _sSuc ( p1 ) );
-    }
-
-    bool is_sZero() const { return std::holds_alternative<_sZero>(value_); }
-    bool is_sSuc() const { return std::holds_alternative<_sSuc>(value_); }
-    const _sSuc &as_sSuc() const { return std::get<_sSuc>(value_); }
-    snat& operator=(snat&& other) noexcept {
-        if(this != &other){
-            if(std::holds_alternative<_sZero>(other.value_)){
-                _sZero& other_value = std::get<_sZero>(other.value_);
-                value_ = std::move(other_value);
-            }
-            if(std::holds_alternative<_sSuc>(other.value_)){
-                _sSuc& other_value = std::get<_sSuc>(other.value_);
-                value_ = std::move(other_value);
-            }
-        }
-        return *this;
-    }
-    //拷贝赋值运算符
-    snat& operator=(const snat& other){ 
-        if(this != &other){ 
-            if(std::holds_alternative<_sZero>(other.value_)){ 
-                const _sZero& other_node = std::get<_sZero>(other.value_); 
-                value_ = other.value_; 
-            } 
-            if(std::holds_alternative<_sSuc>(other.value_)){ 
-                const _sSuc& other_node = std::get<_sSuc>(other.value_); 
-                value_ = other.value_; 
-            } 
-        } 
-        return *this; 
-    }
-
-    bool operator==(const snat &rhs) const {
-        if(value_.index() == rhs.value_.index()){
-             return value_ == rhs.value_;
-        }else{
-            return false;
-        }
-    }
-
-    bool operator<(const snat &rhs) const {
-        if(value_ == rhs.value_) return false;
-        return value_ < rhs.value_; 
-    }
-
-    bool operator>(const snat &rhs) const {
-        if(value_ == rhs.value_) return false;
-        return value_ > rhs.value_; 
-    }
-
-    bool operator<=(const snat &rhs) const {
-        if(value_ == rhs.value_) return true;
-        return value_ < rhs.value_; 
-    }
-
-    bool operator>=(const snat &rhs) const {
-        if(value_ == rhs.value_) return true;
-        return value_ > rhs.value_; 
-    }
-
-};
-
-=======
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
 template<typename T1>
 class slist {
     struct _sNil {
@@ -393,21 +231,6 @@ class tree {
             }
             return *this;
         }
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-        bool operator==(const _sNode &rhs) const {
-            return (std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
-        }
-        bool operator<(const _sNode &rhs) const {
-            return (std::tie(*p1_, p2_, *p3_) < std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
-        }
-        bool operator>(const _sNode &rhs) const {
-            return (std::tie(*p1_, p2_, *p3_) > std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
-        }
-        bool operator<=(const _sNode &rhs) const {
-            return (std::tie(*p1_, p2_, *p3_) <= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
-        }
-        bool operator>=(const _sNode &rhs) const {
-=======
         bool operator==(const _Node &rhs) const {
             return (std::tie(*p1_, p2_, *p3_) == std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
@@ -421,7 +244,6 @@ class tree {
             return (std::tie(*p1_, p2_, *p3_) <= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
         bool operator>=(const _Node &rhs) const {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
             return (std::tie(*p1_, p2_, *p3_) >= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
     };
@@ -529,24 +351,14 @@ class tree {
 
 
 
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-std::uint64_t natofsnat(snat arg1);
-
-snat snatofnat(std::uint64_t arg1);
-
-template<typename T1>
-slist<T1> AddListHead(T1 arg1, slist<T1> arg2) {
-    // AddListHead a xs = sCons a  xs
-=======
 template<typename T1>
 slist<T1> AddListHead(const T1 &arg1, const slist<T1> &arg2) {
     // AddListHead a xs = sCons a xs
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     auto a = arg1;
     auto xs = arg2;
     auto temp0 = slist<T1>::sCons(
-        a,
-        xs
+        std::move(a),
+        std::move(xs)
     );
     return temp0;
 }
@@ -555,36 +367,32 @@ template<typename T1>
 slist<T1> AddListTail(T1 arg1, slist<T1> arg2) {
     // AddListTail a sNil =sCons a sNil
     if (arg2.is_sNil()) {
-        auto a = arg1;
+        auto a = std::move(arg1);
         auto temp0 = slist<T1>::sCons(
-            a,
+            std::move(a),
             slist<T1>::sNil()
         );
         return temp0;
     }
 
     // AddListTail a (sCons x xs) = sCons x (AddListTail a xs )
-    auto a = arg1;
-    auto x = arg2.as_sCons().p1();
-    auto xs = arg2.as_sCons().p2();
+    auto a = std::move(arg1);
+    auto x = std::move(arg2.as_sCons().p1_);
+    auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
-        x,
-        AddListTail(a, xs)
+        std::move(x),
+        AddListTail(std::move(a), std::move(xs))
     );
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-slist<T1> AddListI(snat arg1, T1 arg2, slist<T1> arg3) {
-=======
-slist<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &arg3) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
+slist<T1> AddListI(std::uint64_t arg1, T1 arg2, slist<T1> arg3) {
     // AddListI i a sNil = sCons a sNil
     if (arg3.is_sNil()) {
-        auto a = arg2;
+        auto a = std::move(arg2);
         auto temp0 = slist<T1>::sCons(
-            a,
+            std::move(a),
             slist<T1>::sNil()
         );
         return temp0;
@@ -593,31 +401,32 @@ slist<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &a
     // AddListI 0 a (sCons x xs) = AddListHead a (sCons x xs)
     if (arg1 == 0) {
         if (arg3.is_sCons()) {
-            auto a = arg2;
-            auto x = arg3.as_sCons().p1();
-            auto xs = arg3.as_sCons().p2();
-            auto temp0 = slist<T1>::sCons(
-                x,
-                xs
+            auto a = std::move(arg2);
+            auto x = std::move(arg3.as_sCons().p1_);
+            auto xs = std::move(*arg3.as_sCons().p2_);
+            auto temp0 = std::move(a);
+            auto temp1 = slist<T1>::sCons(
+                std::move(x),
+                std::move(xs)
             );
-            return AddListHead(a, temp0);
+            return AddListHead(std::move(temp0), std::move(temp1));
         }
     }
 
     // AddListI (Suc i) a (sCons x xs) = sCons x (AddListI i a xs)
     auto i = arg1 - 1;
-    auto a = arg2;
-    auto x = arg3.as_sCons().p1();
-    auto xs = arg3.as_sCons().p2();
+    auto a = std::move(arg2);
+    auto x = std::move(arg3.as_sCons().p1_);
+    auto xs = std::move(*arg3.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
-        x,
-        AddListI(i, a, xs)
+        std::move(x),
+        AddListI(std::move(i), std::move(a), std::move(xs))
     );
     return temp0;
 }
 
 template<typename T1>
-slist<T1> DelListHead(slist<T1> arg1) {
+slist<T1> DelListHead(const slist<T1> &arg1) {
     // DelListHead (sCons x xs) = xs
     if (arg1.is_sCons()) {
         auto xs = arg1.as_sCons().p2();
@@ -637,27 +446,23 @@ slist<T1> DelListTail(slist<T1> arg1) {
 
     // DelListTail (sCons a sNil) = sNil
     if (arg1.is_sCons()) {
-        if (arg1.as_sCons().p2().is_sNil()) {
+        if (std::move(*arg1.as_sCons().p2_).is_sNil()) {
             return slist<T1>::sNil();
         }
     }
 
     // DelListTail (sCons x xs) =  sCons x (DelListTail xs)
-    auto x = arg1.as_sCons().p1();
-    auto xs = arg1.as_sCons().p2();
+    auto x = std::move(arg1.as_sCons().p1_);
+    auto xs = std::move(*arg1.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
-        x,
-        DelListTail(xs)
+        std::move(x),
+        DelListTail(std::move(xs))
     );
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-slist<T1> DelListI(snat arg1, slist<T1> arg2) {
-=======
-slist<T1> DelListI(const std::uint64_t &arg1, const slist<T1> &arg2) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
+slist<T1> DelListI(std::uint64_t arg1, slist<T1> arg2) {
     // DelListI i sNil = sNil
     if (arg2.is_sNil()) {
         return slist<T1>::sNil();
@@ -665,7 +470,7 @@ slist<T1> DelListI(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // DelListI i (sCons a sNil) = sNil
     if (arg2.is_sCons()) {
-        if (arg2.as_sCons().p2().is_sNil()) {
+        if (std::move(*arg2.as_sCons().p2_).is_sNil()) {
             return slist<T1>::sNil();
         }
     }
@@ -673,41 +478,38 @@ slist<T1> DelListI(const std::uint64_t &arg1, const slist<T1> &arg2) {
     // DelListI 0 (sCons x xs) = DelListHead (sCons x xs)
     if (arg1 == 0) {
         if (arg2.is_sCons()) {
-            auto x = arg2.as_sCons().p1();
-            auto xs = arg2.as_sCons().p2();
+            auto x = std::move(arg2.as_sCons().p1_);
+            auto xs = std::move(*arg2.as_sCons().p2_);
             auto temp0 = slist<T1>::sCons(
-                x,
-                xs
+                std::move(x),
+                std::move(xs)
             );
-            return DelListHead(temp0);
+            return DelListHead(std::move(temp0));
         }
     }
 
     // DelListI (Suc i) (sCons x xs) = sCons x (DelListI i xs)
     auto i = arg1 - 1;
-    auto x = arg2.as_sCons().p1();
-    auto xs = arg2.as_sCons().p2();
+    auto x = std::move(arg2.as_sCons().p1_);
+    auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
-        x,
-        DelListI(i, xs)
+        std::move(x),
+        DelListI(std::move(i), std::move(xs))
     );
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-slist<T1> Modify1(T1 arg1, T1 arg2, slist<T1> arg3) {
-=======
-bool SearchList(const T1 &arg1, const slist<T1> &arg2) {
+bool SearchList(T1 arg1, slist<T1> arg2) {
     // SearchList a sNil = False
     if (arg2.is_sNil()) {
         return false;
     }
 
     // SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))
-    auto a = arg1;
-    auto x = arg2.as_sCons().p1();
-    auto xs = arg2.as_sCons().p2();
+    auto a = std::move(arg1);
+    auto x = std::move(arg2.as_sCons().p1_);
+    auto xs = std::move(*arg2.as_sCons().p2_);
     bool temp0;
     if (a == x) {
         temp0 = true;
@@ -718,41 +520,36 @@ bool SearchList(const T1 &arg1, const slist<T1> &arg2) {
 }
 
 template<typename T1>
-slist<T1> Modify1(const T1 &arg1, const T1 &arg2, const slist<T1> &arg3) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
+slist<T1> Modify1(T1 arg1, T1 arg2, slist<T1> arg3) {
     // Modify1 a b sNil = sNil
     if (arg3.is_sNil()) {
         return slist<T1>::sNil();
     }
 
     // Modify1 a b (sCons x xs) = (if x=a then sCons b (Modify1 a b xs) else sCons x (Modify1 a b xs))
-    auto a = arg1;
-    auto b = arg2;
-    auto x = arg3.as_sCons().p1();
-    auto xs = arg3.as_sCons().p2();
+    auto a = std::move(arg1);
+    auto b = std::move(arg2);
+    auto x = std::move(arg3.as_sCons().p1_);
+    auto xs = std::move(*arg3.as_sCons().p2_);
     slist<T1> temp0;
     if (x == a) {
         auto temp1 = slist<T1>::sCons(
             b,
-            Modify1(a, b, xs)
+            Modify1(std::move(a), b, std::move(xs))
         );
-        temp0 = temp1;
+        temp0 = std::move(temp1);
     } else {
         auto temp2 = slist<T1>::sCons(
-            x,
-            Modify1(a, b, xs)
+            std::move(x),
+            Modify1(std::move(a), std::move(b), std::move(xs))
         );
-        temp0 = temp2;
+        temp0 = std::move(temp2);
     }
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-slist<T1> Modify2(snat arg1, T1 arg2, slist<T1> arg3) {
-=======
-slist<T1> Modify2(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &arg3) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
+slist<T1> Modify2(std::uint64_t arg1, T1 arg2, slist<T1> arg3) {
     // Modify2 n b sNil = sNil
     if (arg3.is_sNil()) {
         return slist<T1>::sNil();
@@ -761,11 +558,11 @@ slist<T1> Modify2(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &ar
     // Modify2 0 b (sCons x xs) =(sCons b xs)
     if (arg1 == 0) {
         if (arg3.is_sCons()) {
-            auto b = arg2;
-            auto xs = arg3.as_sCons().p2();
+            auto b = std::move(arg2);
+            auto xs = std::move(*arg3.as_sCons().p2_);
             auto temp0 = slist<T1>::sCons(
-                b,
-                xs
+                std::move(b),
+                std::move(xs)
             );
             return temp0;
         }
@@ -773,32 +570,27 @@ slist<T1> Modify2(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &ar
 
     // Modify2 (Suc n) b (sCons x xs) = (sCons x (Modify2 n b xs))
     auto n = arg1 - 1;
-    auto b = arg2;
-    auto x = arg3.as_sCons().p1();
-    auto xs = arg3.as_sCons().p2();
+    auto b = std::move(arg2);
+    auto x = std::move(arg3.as_sCons().p1_);
+    auto xs = std::move(*arg3.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
-        x,
-        Modify2(n, b, xs)
+        std::move(x),
+        Modify2(std::move(n), std::move(b), std::move(xs))
     );
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-bool SearchList(T1 arg1, slist<T1> arg2) {
-    // SearchList a sNil = False
-=======
-slist<T1> ffilter(const std::function<bool(const T1 &)> &arg1, const slist<T1> &arg2) {
+slist<T1> ffilter(std::function<bool(T1 )> arg1, slist<T1> arg2) {
     // ffilter f sNil = sNil
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     if (arg2.is_sNil()) {
         return slist<T1>::sNil();
     }
 
     // ffilter f(sCons x xs) = (if (f x) then (sCons x (ffilter f xs))else(ffilter f xs ))
-    auto f = arg1;
-    auto x = arg2.as_sCons().p1();
-    auto xs = arg2.as_sCons().p2();
+    auto f = std::move(arg1);
+    auto x = std::move(arg2.as_sCons().p1_);
+    auto xs = std::move(*arg2.as_sCons().p2_);
     slist<T1> temp0;
     if (f(x)) {
         auto temp1 = slist<T1>::sCons(
@@ -807,11 +599,7 @@ slist<T1> ffilter(const std::function<bool(const T1 &)> &arg1, const slist<T1> &
         );
         temp0 = std::move(temp1);
     } else {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-        temp0 = SearchList(a, xs);
-=======
         temp0 = ffilter(std::move(f), std::move(xs));
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     }
     return temp0;
 }
@@ -820,69 +608,41 @@ template<typename T1>
 slist<T1> app(slist<T1> arg1, slist<T1> arg2) {
     // app sNil as =as
     if (arg1.is_sNil()) {
-        auto as = arg2;
+        auto as = std::move(arg2);
         return as;
     }
 
     // app(sCons a as )bs= sCons a (app as bs)
-    auto a = arg1.as_sCons().p1();
-    auto as = arg1.as_sCons().p2();
-    auto bs = arg2;
+    auto a = std::move(arg1.as_sCons().p1_);
+    auto as = std::move(*arg1.as_sCons().p2_);
+    auto bs = std::move(arg2);
     auto temp0 = slist<T1>::sCons(
-        a,
-        app(as, bs)
+        std::move(a),
+        app(std::move(as), std::move(bs))
     );
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
 slist<T1> Reverse(slist<T1> arg1) {
-    // Reverse sNil = sNil
-=======
-slist<T1> Reverse(const slist<T1> &arg1) {
     // Reverse sNil =sNil
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     if (arg1.is_sNil()) {
         return slist<T1>::sNil();
     }
 
     // Reverse (sCons a as) = app(Reverse as)(sCons a sNil)
-    auto a = arg1.as_sCons().p1();
-    auto as = arg1.as_sCons().p2();
-    auto temp0 = slist<T1>::sCons(
-        a,
+    auto a = std::move(arg1.as_sCons().p1_);
+    auto as = std::move(*arg1.as_sCons().p2_);
+    auto temp0 = Reverse(std::move(as));
+    auto temp1 = slist<T1>::sCons(
+        std::move(a),
         slist<T1>::sNil()
     );
-    return app(Reverse(as), temp0);
+    return app(std::move(temp0), std::move(temp1));
 }
 
 template<typename T1>
-stree<T1> copy_tree(stree<T1> arg1) {
-    // copy_tree (sNode left x right) = sNode (copy_tree left) x (copy_tree right)
-    if (arg1.is_sNode()) {
-        auto left = arg1.as_sNode().p1();
-        auto x = arg1.as_sNode().p2();
-        auto right = arg1.as_sNode().p3();
-        auto temp0 = stree<T1>::sNode(
-            copy_tree(left),
-            x,
-            copy_tree(right)
-        );
-        return temp0;
-    }
-
-    // copy_tree sTip = sTip
-    return stree<T1>::sTip();
-}
-
-template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-bool searchtree1(T1 arg1, stree<T1> arg2) {
-    // searchtree1 a sTip=False
-    if (arg2.is_sTip()) {
-=======
-slist<T1> Reverse2(const slist<T1> &arg1) {
+slist<T1> Reverse2(slist<T1> arg1) {
     // Reverse2 sNil = sNil
     if (arg1.is_sNil()) {
         return slist<T1>::sNil();
@@ -890,8 +650,8 @@ slist<T1> Reverse2(const slist<T1> &arg1) {
 
     // Reverse2 (sCons a sNil) =sCons a sNil
     if (arg1.is_sCons()) {
-        if (arg1.as_sCons().p2().is_sNil()) {
-            auto a = arg1.as_sCons().p1();
+        if (std::move(*arg1.as_sCons().p2_).is_sNil()) {
+            auto a = std::move(arg1.as_sCons().p1_);
             auto temp0 = slist<T1>::sCons(
                 std::move(a),
                 slist<T1>::sNil()
@@ -901,8 +661,8 @@ slist<T1> Reverse2(const slist<T1> &arg1) {
     }
 
     // Reverse2 (sCons x xs) = app ( Reverse2 xs) (sCons x sNil)
-    auto x = arg1.as_sCons().p1();
-    auto xs = arg1.as_sCons().p2();
+    auto x = std::move(arg1.as_sCons().p1_);
+    auto xs = std::move(*arg1.as_sCons().p2_);
     auto temp0 = Reverse2(std::move(xs));
     auto temp1 = slist<T1>::sCons(
         std::move(x),
@@ -912,10 +672,10 @@ slist<T1> Reverse2(const slist<T1> &arg1) {
 }
 
 template<typename T1>
-slist<T1> Insert(const T1 &arg1, const slist<T1> &arg2) {
+slist<T1> Insert(T1 arg1, slist<T1> arg2) {
     // Insert a sNil =sCons a sNil
     if (arg2.is_sNil()) {
-        auto a = arg1;
+        auto a = std::move(arg1);
         auto temp0 = slist<T1>::sCons(
             std::move(a),
             slist<T1>::sNil()
@@ -924,9 +684,9 @@ slist<T1> Insert(const T1 &arg1, const slist<T1> &arg2) {
     }
 
     // Insert a (sCons x xs) =(if a \<le> x then sCons a (sCons x xs) else sCons x (Insert a xs))
-    auto a = arg1;
-    auto x = arg2.as_sCons().p1();
-    auto xs = arg2.as_sCons().p2();
+    auto a = std::move(arg1);
+    auto x = std::move(arg2.as_sCons().p1_);
+    auto xs = std::move(*arg2.as_sCons().p2_);
     slist<T1> temp0;
     if (a <= x) {
         auto temp1 = slist<T1>::sCons(
@@ -949,17 +709,17 @@ slist<T1> Insert(const T1 &arg1, const slist<T1> &arg2) {
 }
 
 template<typename T1>
-slist<T1> InsertSortPart(const slist<T1> &arg1, const slist<T1> &arg2) {
+slist<T1> InsertSortPart(slist<T1> arg1, slist<T1> arg2) {
     // InsertSortPart sNil ys = ys
     if (arg1.is_sNil()) {
-        auto ys = arg2;
+        auto ys = std::move(arg2);
         return ys;
     }
 
     // InsertSortPart (sCons x xs) ys = InsertSortPart xs (Insert x ys)
-    auto x = arg1.as_sCons().p1();
-    auto xs = arg1.as_sCons().p2();
-    auto ys = arg2;
+    auto x = std::move(arg1.as_sCons().p1_);
+    auto xs = std::move(*arg1.as_sCons().p2_);
+    auto ys = std::move(arg2);
     auto temp0 = std::move(x);
     auto temp1 = std::move(ys);
     return InsertSortPart(std::move(xs), Insert(std::move(temp0), std::move(temp1)));
@@ -975,7 +735,7 @@ slist<T1> InsertSort(const slist<T1> &arg1) {
 }
 
 template<typename T1>
-std::uint64_t ssize(const slist<T1> &arg1) {
+std::uint64_t ssize(slist<T1> arg1) {
     // ssize sNil = 0
     if (arg1.is_sNil()) {
         return 0;
@@ -983,18 +743,18 @@ std::uint64_t ssize(const slist<T1> &arg1) {
 
     // ssize (sCons x sNil) = (Suc 0)
     if (arg1.is_sCons()) {
-        if (arg1.as_sCons().p2().is_sNil()) {
+        if (std::move(*arg1.as_sCons().p2_).is_sNil()) {
             return 0 + 1;
         }
     }
 
     // ssize (sCons x xs) = Suc (ssize xs)
-    auto xs = arg1.as_sCons().p2();
+    auto xs = std::move(*arg1.as_sCons().p2_);
     return ssize(std::move(xs)) + 1;
 }
 
 template<typename T1>
-std::uint64_t slength(const slist<T1> &arg1) {
+std::uint64_t slength(slist<T1> arg1) {
     // slength sNil = 0
     if (arg1.is_sNil()) {
         return 0;
@@ -1002,18 +762,18 @@ std::uint64_t slength(const slist<T1> &arg1) {
 
     // slength (sCons x sNil) = (Suc 0)
     if (arg1.is_sCons()) {
-        if (arg1.as_sCons().p2().is_sNil()) {
+        if (std::move(*arg1.as_sCons().p2_).is_sNil()) {
             return 0 + 1;
         }
     }
 
     // slength (sCons x xs) = (Suc (slength xs))
-    auto xs = arg1.as_sCons().p2();
+    auto xs = std::move(*arg1.as_sCons().p2_);
     return slength(std::move(xs)) + 1;
 }
 
 template<typename T1>
-slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
+slist<T1> stake(std::uint64_t arg1, slist<T1> arg2) {
     // stake 0 xs = sNil
     if (arg1 == 0) {
         return slist<T1>::sNil();
@@ -1028,8 +788,8 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // stake (Suc n) (sCons x xs) =(sCons x (stake n xs))
     auto n = arg1 - 1;
-    auto x = arg2.as_sCons().p1();
-    auto xs = arg2.as_sCons().p2();
+    auto x = std::move(arg2.as_sCons().p1_);
+    auto xs = std::move(*arg2.as_sCons().p2_);
     auto temp0 = slist<T1>::sCons(
         std::move(x),
         stake(std::move(n), std::move(xs))
@@ -1038,10 +798,10 @@ slist<T1> stake(const std::uint64_t &arg1, const slist<T1> &arg2) {
 }
 
 template<typename T1>
-slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
+slist<T1> sdrop(std::uint64_t arg1, slist<T1> arg2) {
     // sdrop 0 xs = xs
     if (arg1 == 0) {
-        auto xs = arg2;
+        auto xs = std::move(arg2);
         return xs;
     }
 
@@ -1054,29 +814,29 @@ slist<T1> sdrop(const std::uint64_t &arg1, const slist<T1> &arg2) {
 
     // sdrop (Suc n) (sCons x xs) = (sdrop n xs)
     auto n = arg1 - 1;
-    auto xs = arg2.as_sCons().p2();
+    auto xs = std::move(*arg2.as_sCons().p2_);
     return sdrop(std::move(n), std::move(xs));
 }
 
 template<typename T1>
-slist<T1> Merge(const slist<T1> &arg1, const slist<T1> &arg2) {
+slist<T1> Merge(slist<T1> arg1, slist<T1> arg2) {
     // Merge sNil xs = xs
     if (arg1.is_sNil()) {
-        auto xs = arg2;
+        auto xs = std::move(arg2);
         return xs;
     }
 
     // Merge xs sNil = xs
     if (arg2.is_sNil()) {
-        auto xs = arg1;
+        auto xs = std::move(arg1);
         return xs;
     }
 
     // Merge (sCons x xs)(sCons y ys) = (if x\<le>y then (sCons x (Merge xs (sCons y ys)) ) ...
-    auto x = arg1.as_sCons().p1();
-    auto xs = arg1.as_sCons().p2();
-    auto y = arg2.as_sCons().p1();
-    auto ys = arg2.as_sCons().p2();
+    auto x = std::move(arg1.as_sCons().p1_);
+    auto xs = std::move(*arg1.as_sCons().p2_);
+    auto y = std::move(arg2.as_sCons().p1_);
+    auto ys = std::move(*arg2.as_sCons().p2_);
     slist<T1> temp0;
     if (x <= y) {
         auto temp1 = slist<T1>::sCons(
@@ -1104,247 +864,168 @@ slist<T1> Merge(const slist<T1> &arg1, const slist<T1> &arg2) {
 
 template<typename T1>
 bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
-    // searchtree1 a Tip = False
-    if (arg2.is_Tip()) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
-        return false;
-    }
+    auto impl = [&]() -> bool {
+        // searchtree1 a Tip = False
+        if (arg2.is_Tip()) {
+            return false;
+        }
 
-    // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
-    auto a = arg1;
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-    auto left = arg2.as_sNode().p1();
-    auto x = arg2.as_sNode().p2();
-    auto right = arg2.as_sNode().p3();
-    return (a == x) || (searchtree1(a, left) || searchtree1(a, right));
-}
+        // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
+        auto a = arg1;
+        auto left = arg2.as_Node().p1();
+        auto x = arg2.as_Node().p2();
+        auto right = arg2.as_Node().p3();
+        return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
+    };
 
-template<typename T1>
-bool searchtree2(T1 arg1, stree<T1> arg2) {
-    // searchtree2 a sTip=False
-    if (arg2.is_sTip()) {
-=======
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
-    return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
+    static std::map<std::tuple<T1, tree<T1>>, bool> cache;
+    auto args = std::make_tuple(arg1, arg2);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
 bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
-    // searchtree2 a Tip = False
-    if (arg2.is_Tip()) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
-        return false;
-    }
+    auto impl = [&]() -> bool {
+        // searchtree2 a Tip = False
+        if (arg2.is_Tip()) {
+            return false;
+        }
 
-    // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
-    auto a = arg1;
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-    auto left = arg2.as_sNode().p1();
-    auto x = arg2.as_sNode().p2();
-    auto right = arg2.as_sNode().p3();
-    return searchtree2(a, left) || ((a == x) || searchtree2(a, right));
-}
+        // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
+        auto a = arg1;
+        auto left = arg2.as_Node().p1();
+        auto x = arg2.as_Node().p2();
+        auto right = arg2.as_Node().p3();
+        return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
+    };
 
-template<typename T1>
-bool searchtree3(T1 arg1, stree<T1> arg2) {
-    // searchtree3 a sTip=False
-    if (arg2.is_sTip()) {
-=======
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
-    return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
+    static std::map<std::tuple<T1, tree<T1>>, bool> cache;
+    auto args = std::make_tuple(arg1, arg2);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
 bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
-    // searchtree3 a Tip = False
-    if (arg2.is_Tip()) {
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
-        return false;
-    }
+    auto impl = [&]() -> bool {
+        // searchtree3 a Tip = False
+        if (arg2.is_Tip()) {
+            return false;
+        }
 
-    // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
-    auto a = arg1;
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-    auto left = arg2.as_sNode().p1();
-    auto x = arg2.as_sNode().p2();
-    auto right = arg2.as_sNode().p3();
-    return searchtree3(a, left) || (searchtree3(a, right) || (a == x));
-}
-
-template<typename T1>
-stree<T1> inserttree(T1 arg1, stree<T1> arg2) {
-    // inserttree a sTip= sNode sTip a sTip
-    if (arg2.is_sTip()) {
+        // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
         auto a = arg1;
-        auto temp0 = stree<T1>::sNode(
-            stree<T1>::sTip(),
-            a,
-            stree<T1>::sTip()
-=======
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
-    return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
+        auto left = arg2.as_Node().p1();
+        auto x = arg2.as_Node().p2();
+        auto right = arg2.as_Node().p3();
+        return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
+    };
+
+    static std::map<std::tuple<T1, tree<T1>>, bool> cache;
+    auto args = std::make_tuple(arg1, arg2);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
-tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
+tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     // inserttree a Tip = Node Tip a Tip
     if (arg2.is_Tip()) {
-        auto a = arg1;
+        auto a = std::move(arg1);
         auto temp0 = tree<T1>::Node(
             tree<T1>::Tip(),
             std::move(a),
             tree<T1>::Tip()
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
         );
         return temp0;
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
-    auto a = arg1;
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
+    auto a = std::move(arg1);
+    auto left = std::move(*arg2.as_Node().p1_);
+    auto x = std::move(arg2.as_Node().p2_);
+    auto right = std::move(*arg2.as_Node().p3_);
     tree<T1> temp0;
     if (a <= x) {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-        auto temp1 = stree<T1>::sNode(
-            inserttree(a, left),
-            x,
-            right
-=======
         auto temp1 = tree<T1>::Node(
             inserttree(std::move(a), std::move(left)),
             std::move(x),
             std::move(right)
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
         );
-        temp0 = temp1;
+        temp0 = std::move(temp1);
     } else {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-        auto temp2 = stree<T1>::sNode(
-            left,
-            x,
-            inserttree(a, right)
-=======
         auto temp2 = tree<T1>::Node(
             std::move(left),
             std::move(x),
             inserttree(std::move(a), std::move(right))
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
         );
-        temp0 = temp2;
+        temp0 = std::move(temp2);
     }
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-T1 rightest(stree<T1> arg1) {
-    // rightest ( sNode left x right) = (if right= sTip then x  ...
-    auto x = arg1.as_sNode().p2();
-    auto right = arg1.as_sNode().p3();
-    T1 temp0;
-    if (right.is_sTip()) {
-        temp0 = x;
-=======
 slist<T1> transtolist(const tree<T1> &arg1) {
-    // transtolist Tip = sNil
-    if (arg1.is_Tip()) {
-        return slist<T1>::sNil();
-    }
+    auto impl = [&]() -> slist<T1> {
+        // transtolist Tip = sNil
+        if (arg1.is_Tip()) {
+            return slist<T1>::sNil();
+        }
 
-    // transtolist (Node left a right) =(sCons a (app (transtolist left) (transtolist right)))
-    auto left = arg1.as_Node().p1();
-    auto a = arg1.as_Node().p2();
-    auto right = arg1.as_Node().p3();
-    auto temp0 = transtolist(std::move(left));
-    auto temp1 = transtolist(std::move(right));
-    auto temp2 = slist<T1>::sCons(
-        std::move(a),
-        app(std::move(temp0), std::move(temp1))
-    );
-    return temp2;
+        // transtolist (Node left a right) =(sCons a (app (transtolist left) (transtolist right)))
+        auto left = arg1.as_Node().p1();
+        auto a = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
+        auto temp0 = transtolist(std::move(left));
+        auto temp1 = transtolist(std::move(right));
+        auto temp2 = slist<T1>::sCons(
+            std::move(a),
+            app(std::move(temp0), std::move(temp1))
+        );
+        return temp2;
+    };
+
+    static std::map<std::tuple<tree<T1>>, slist<T1>> cache;
+    auto args = std::make_tuple(arg1);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
 template<typename T1>
-T1 rightest(const tree<T1> &arg1) {
+T1 rightest(tree<T1> arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
-    auto x = arg1.as_Node().p2();
-    auto right = arg1.as_Node().p3();
+    auto x = std::move(arg1.as_Node().p2_);
+    auto right = std::move(*arg1.as_Node().p3_);
     T1 temp0;
     if (right.is_Tip()) {
         temp0 = std::move(x);
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     } else {
-        temp0 = rightest(right);
+        temp0 = rightest(std::move(right));
     }
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-stree<T1> rightestleft(stree<T1> arg1) {
-    // rightestleft sTip= sTip
-    if (arg1.is_sTip()) {
-        return stree<T1>::sTip();
-    }
-
-    // rightestleft ( sNode left x right) =(if right= sTip then left  ...
-    auto left = arg1.as_sNode().p1();
-    auto right = arg1.as_sNode().p3();
-    stree<T1> temp0;
-    if (right.is_sTip()) {
-        temp0 = left;
-=======
-tree<T1> rightestleft(const tree<T1> &arg1) {
+tree<T1> rightestleft(tree<T1> arg1) {
     // rightestleft Tip = Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
     }
 
     // rightestleft (Node left x right) =(if right=Tip then left  ...
-    auto left = arg1.as_Node().p1();
-    auto right = arg1.as_Node().p3();
+    auto left = std::move(*arg1.as_Node().p1_);
+    auto right = std::move(*arg1.as_Node().p3_);
     tree<T1> temp0;
     if (right.is_Tip()) {
         temp0 = std::move(left);
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     } else {
-        temp0 = rightestleft(right);
+        temp0 = rightestleft(std::move(right));
     }
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-stree<T1> deltreeroot(stree<T1> arg1) {
-    // deltreeroot sTip= sTip
-    if (arg1.is_sTip()) {
-        return stree<T1>::sTip();
-    }
-
-    // deltreeroot ( sNode left x right) =(if right= sTip then left else if left= sTip then right else( sNode (rightestleft left)(rightest left)right ) )
-    auto left = arg1.as_sNode().p1();
-    auto right = arg1.as_sNode().p3();
-    stree<T1> temp0;
-    if (right.is_sTip()) {
-        temp0 = left;
-    } else {
-        stree<T1> temp1;
-        if (left.is_sTip()) {
-            temp1 = right;
-        } else {
-            auto temp2 = stree<T1>::sNode(
-                rightestleft(left),
-                rightest(left),
-                right
-=======
 tree<T1> deltreeroot(const tree<T1> &arg1) {
     // deltreeroot Tip = Tip
     if (arg1.is_Tip()) {
@@ -1368,152 +1049,95 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
                 rightestleft(std::move(temp2)),
                 rightest(std::move(temp3)),
                 std::move(right)
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
             );
-            temp1 = temp2;
+            temp1 = std::move(temp4);
         }
-        temp0 = temp1;
+        temp0 = std::move(temp1);
     }
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-stree<T1> deltree(T1 arg1, stree<T1> arg2) {
-    // deltree a sTip = sTip
-    if (arg2.is_sTip()) {
-        return stree<T1>::sTip();
-=======
-tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
+tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     // deltree a Tip = Tip
     if (arg2.is_Tip()) {
         return tree<T1>::Tip();
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     }
 
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
-    auto a = arg1;
-    auto left = arg2.as_Node().p1();
-    auto x = arg2.as_Node().p2();
-    auto right = arg2.as_Node().p3();
+    auto a = std::move(arg1);
+    auto left = std::move(*arg2.as_Node().p1_);
+    auto x = std::move(arg2.as_Node().p2_);
+    auto right = std::move(*arg2.as_Node().p3_);
     tree<T1> temp0;
     if (a == x) {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-        auto temp1 = stree<T1>::sNode(
-            left,
-            x,
-            right
-=======
         auto temp1 = tree<T1>::Node(
             std::move(left),
             std::move(x),
             std::move(right)
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
         );
-        temp0 = deltreeroot(temp1);
+        temp0 = deltreeroot(std::move(temp1));
     } else {
         tree<T1> temp2;
         if (a < x) {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-            auto temp3 = stree<T1>::sNode(
-                deltree(a, left),
-                x,
-                right
-=======
             auto temp3 = tree<T1>::Node(
                 deltree(std::move(a), std::move(left)),
                 std::move(x),
                 std::move(right)
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
             );
-            temp2 = temp3;
+            temp2 = std::move(temp3);
         } else {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-            auto temp4 = stree<T1>::sNode(
-                left,
-                x,
-                deltree(a, right)
-=======
             auto temp4 = tree<T1>::Node(
                 std::move(left),
                 std::move(x),
                 deltree(std::move(a), std::move(right))
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
             );
-            temp2 = temp4;
+            temp2 = std::move(temp4);
         }
-        temp0 = temp2;
+        temp0 = std::move(temp2);
     }
     return temp0;
 }
 
 template<typename T1>
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-stree<T1> changetree(T1 arg1, T1 arg2, stree<T1> arg3) {
-    // changetree a b sTip = sTip
-    if (arg3.is_sTip()) {
-        return stree<T1>::sTip();
-=======
-tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
+tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     // changetree a b Tip = Tip
     if (arg3.is_Tip()) {
         return tree<T1>::Tip();
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
     }
 
     // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
-    auto a = arg1;
-    auto b = arg2;
-    auto left = arg3.as_Node().p1();
-    auto x = arg3.as_Node().p2();
-    auto right = arg3.as_Node().p3();
+    auto a = std::move(arg1);
+    auto b = std::move(arg2);
+    auto left = std::move(*arg3.as_Node().p1_);
+    auto x = std::move(arg3.as_Node().p2_);
+    auto right = std::move(*arg3.as_Node().p3_);
     tree<T1> temp0;
     if (a == x) {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-        auto temp1 = stree<T1>::sNode(
-            left,
-            b,
-            right
-=======
         auto temp1 = tree<T1>::Node(
             std::move(left),
             std::move(b),
             std::move(right)
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
         );
-        temp0 = temp1;
+        temp0 = std::move(temp1);
     } else {
         tree<T1> temp2;
         if (a < x) {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-            auto temp3 = stree<T1>::sNode(
-                changetree(a, b, left),
-                x,
-                right
-=======
             auto temp3 = tree<T1>::Node(
                 changetree(std::move(a), std::move(b), std::move(left)),
                 std::move(x),
                 std::move(right)
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
             );
-            temp2 = temp3;
+            temp2 = std::move(temp3);
         } else {
-<<<<<<< HEAD:example/base_defi/Araw/defi_type.hpp
-            auto temp4 = stree<T1>::sNode(
-                left,
-                x,
-                changetree(a, b, right)
-=======
             auto temp4 = tree<T1>::Node(
                 std::move(left),
                 std::move(x),
                 changetree(std::move(a), std::move(b), std::move(right))
->>>>>>> 699689603789408c6659b72d2034aa585442a5a3:example/baseBdefi/Baddr/defi_type.hpp
             );
-            temp2 = temp4;
+            temp2 = std::move(temp4);
         }
-        temp0 = temp2;
+        temp0 = std::move(temp2);
     }
     return temp0;
 }

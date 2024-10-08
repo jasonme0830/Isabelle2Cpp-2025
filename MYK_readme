@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 bin/hol2cpp example/base_defi/Araw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
 
 bin/hol2cpp example/base_defi/Baddr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
@@ -10,6 +11,27 @@ bin/hol2cpp example/base_rule/Araw/rule_type.thy -s --close-move  --predef bin/d
 bin/hol2cpp example/base_rule/Baddr/rule_type.thy -s --close-recu  --predef bin/defs.pre
 
 bin/hol2cpp example/base_rule/Crecu/rule_type.thy -s  --predef bin/defs.pre
+=======
+bin/hol2cpp example/baseAsnat/Araw/snat_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
+
+bin/hol2cpp example/baseAsnat/Baddr/snat_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
+
+bin/hol2cpp example/baseAsnat/Crecu/snat_type.thy -s --close-isomor  --predef bin/defs.pre
+
+defi
+bin/hol2cpp example/baseBdefi/Araw/defi_type.thy -s --close-move --close-isomor  --predef bin/defs.pre
+
+bin/hol2cpp example/baseBdefi/Baddr/defi_type.thy -s --close-recu --close-isomor  --predef bin/defs.pre
+
+bin/hol2cpp example/baseBdefi/Crecu/defi_type.thy -s --close-isomor  --predef bin/defs.pre
+
+rule
+bin/hol2cpp example/baseCrule/Araw/rule_type.thy -s --close-move  --predef bin/defs.pre
+
+bin/hol2cpp example/baseCrule/Baddr/rule_type.thy -s --close-recu  --predef bin/defs.pre
+
+bin/hol2cpp example/baseCrule/Crecu/rule_type.thy -s  --predef bin/defs.pre
+>>>>>>> 699689603789408c6659b72d2034aa585442a5a3
 
 --close-move  
 --close-recu
