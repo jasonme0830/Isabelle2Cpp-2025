@@ -34,7 +34,10 @@ string
 unmove_expr(string expr)
 {
   if (expr.substr(0, 9) == "std::move") {
-    return expr.substr(10, expr.size() - 11);
+    size_t start = expr.find_first_of(")");
+    string temp = expr.substr(10, start-10);
+    temp += expr.substr(start + 1);
+    return temp;
   } else {
     return expr;
   }

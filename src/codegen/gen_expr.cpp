@@ -45,10 +45,10 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     // if (movable && typeinfo.movable()) 
     if(movable && func.func_recu_class() > -1 )    {
       // movable is true only when move-list is enable
-      // cout<<"std::move($)"_fs.format(var)<<endl;
+      // cout<<"var: std::move($)"_fs.format(var)<<endl;
       return "std::move($)"_fs.format(var); // for move-list
     } else {
-      // cout<<var<<endl;
+      // cout<<"var: " << var<<endl;
       return var;
     }
   }
