@@ -1,17 +1,17 @@
-#include "defi_type.hpp"
+#include "defi.hpp"
 
-std::uint64_t natofsnat(snat arg1) {
+std::uint64_t natofsnat(const snat &arg1) {
     // natofsnat sZero = 0
     if (arg1.is_sZero()) {
         return 0;
     }
 
     // natofsnat (sSuc n) = (natofsnat n) + 1
-    auto n = std::move(*arg1.as_sSuc().p1_);
+    auto n = arg1.as_sSuc().p1();
     return natofsnat(std::move(n)) + 1;
 }
 
-snat snatofnat(std::uint64_t arg1) {
+snat snatofnat(const std::uint64_t &arg1) {
     // snatofnat 0 = sZero
     if (arg1 == 0) {
         return snat::sZero();
@@ -25,7 +25,7 @@ snat snatofnat(std::uint64_t arg1) {
     return temp0;
 }
 
-std::optional<snat> bs(snat arg1, slist<snat> arg2) {
+std::optional<snat> bs(const snat &arg1, const slist<snat> &arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<snat>();
@@ -33,7 +33,7 @@ std::optional<snat> bs(snat arg1, slist<snat> arg2) {
 
     // bs x [y] = If (x = y) (Some sZero) None
     if (arg2.size() == 1) {
-        auto x = std::move(arg1);
+        auto x = arg1;
         auto y = arg2[0];
         std::optional<snat> temp0;
         if (x == y) {
@@ -45,8 +45,8 @@ std::optional<snat> bs(snat arg1, slist<snat> arg2) {
     }
 
     // bs x ys = (let m = (length ys) div 2 in ...
-    auto x = std::move(arg1);
-    auto ys = std::move(arg2);
+    auto x = arg1;
+    auto ys = arg2;
     auto temp0 = ys.size() / 2;
     auto m = temp0;
     auto temp2 = ys;
@@ -85,7 +85,7 @@ std::optional<snat> bs(snat arg1, slist<snat> arg2) {
     return temp3;
 }
 
-snat fib(snat arg1) {
+snat fib(const snat &arg1) {
     // fib sZero = (Suc sZero)
     if (arg1.is_sZero()) {
         return snat::sZero() + 1;
@@ -99,14 +99,14 @@ snat fib(snat arg1) {
     }
 
     // fib n = (fib (n - (Suc sZero))) + (fib (n - (Suc(Suc sZero))))
-    auto n = std::move(arg1);
+    auto n = arg1;
     return fib(n - (snat::sZero() + 1)) + fib(n - ((snat::sZero() + 1) + 1));
 }
 
-slist<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
+slist<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2) {
     // supto i j = (if i \<ge> j then sNil else i # supto (i + 1) j)
-    auto i = std::move(arg1);
-    auto j = std::move(arg2);
+    auto i = arg1;
+    auto j = arg2;
     slist<std::uint64_t> temp0;
     if (i >= j) {
         temp0 = slist<std::uint64_t>::sNil();

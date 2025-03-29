@@ -5,9 +5,18 @@ begin
 datatype snat = sZero | sSuc snat
 datatype 'a slist = sNil | sCons 'a "'a slist"
 
-fun Modify1::"'a=>'a=> 'a slist =>'a slist"where
-"Modify1 a b sNil = sNil "|
-"Modify1 a b (sCons x xs) = (if x=a then (sCons b (Modify1 a b xs)) else (sCons x (Modify1 a b xs))) "
-
+fun bs :: "snat \<Rightarrow> snat slist \<Rightarrow> snat option" where
+  "bs x [] = None" |
+  "bs x [y] = If (x = y) (Some sZero) None" |
+  "bs x ys = (let m = (length ys) div 2 in
+      let y = ys ! m in
+        If (y = x)
+          (Some m)
+          (If (y < x)
+            (case bs x (drop (m + 1) ys) of Some n \<Rightarrow> Some (m + n + 1) | None \<Rightarrow> None)
+            (bs x (take m ys)
+          )
+      )
+  )"
 
 end

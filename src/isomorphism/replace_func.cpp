@@ -73,7 +73,8 @@ bool TemplateType::replace_self_iso_type(){
   std::vector<Ptr<Type>>::iterator ptr_args;
   for(ptr_args=args.begin();ptr_args!=args.end();++ptr_args){
     //递归判断同时替换
-    result = result || ptr_args->get()->replace_self_iso_type();
+    bool temp = ptr_args->get()->replace_self_iso_type();
+    result = result || temp;
   }
   return result;
 }
@@ -168,7 +169,17 @@ bool NormalType::replace_self_iso_type(std::set<std::string>& iso_types)
 bool ArgumentType::replace_self_iso_type(std::set<std::string>& iso_types)
 {
   //一般情况下Argument类型不存在同构数据类型
-  return false;
+  //但是如果模版类型里面的参数不是类型变量而是normal，就需要检查了
+  if(theAllDatatypeNameMap.find(main_name()) == theAllDatatypeNameMap.end()){
+    return false;
+  }
+  // 当前类型是同构类型，存储临时变量并进行类型名的替换
+  if(theAllDatatypeNameMap[main_name()] != main_name()){
+    iso_types.insert(main_name());
+    name = theAllDatatypeNameMap[main_name()];
+    return true;
+  }
+  else return false;
 }
 bool TemplateType::replace_self_iso_type(std::set<std::string>& iso_types)
 {
@@ -184,7 +195,8 @@ bool TemplateType::replace_self_iso_type(std::set<std::string>& iso_types)
   std::vector<Ptr<Type>>::iterator ptr_args;
   for(ptr_args=args.begin();ptr_args!=args.end();++ptr_args){
     //递归判断同时替换
-    result = result || ptr_args->get()->replace_self_iso_type(iso_types);
+    bool temp = ptr_args->get()->replace_self_iso_type(iso_types);
+    result = result || temp;
   }
   return result;
 }

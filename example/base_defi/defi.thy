@@ -1,4 +1,4 @@
-theory snat_type
+theory defi
   imports Main
 begin
 
