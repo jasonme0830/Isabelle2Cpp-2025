@@ -18,3 +18,5 @@ bin/hol2cpp example/base_rule/Crecu/rule_type.thy -s  --predef bin/defs.pre
 --close-isomor  
 --close-class
 --close-reduceCond
+
+This message for reclone program from gitee
