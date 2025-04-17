@@ -12,9 +12,9 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
         auto y = arg2[0];
         std::optional<std::uint64_t> temp0;
         if (x == y) {
-            temp0 = std::make_optional<std::uint64_t>(0);
+            temp0 = std::make_optional<std::uint64_t>(std::move(sZero));
         } else {
-            temp0 = std::optional<std::uint64_t>();
+            temp0 = std::optional<UNKNOWN_TYPE>();
         }
         return temp0;
     }

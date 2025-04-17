@@ -68,7 +68,6 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
       // generate methods
       syn_class_def_struct_getMethod(datatype, i);
-      out_.get() << endl;
 
       //参数拷贝构造函数
       syn_class_def_struct_paramConstructor(datatype, i);
@@ -125,10 +124,11 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   // generate as_Ci()
   syn_class_def_asfunction(datatype);
 
-  // generate move operator=
-  syn_class_def_moveOperator(datatype);
   //generate copy operator=
   syn_class_def_copyOperator(datatype);
+  // generate move operator=
+  syn_class_def_moveOperator(datatype);
+
   // generate operator==
   syn_class_def_equivOperator(datatype);
   // generate operator<
@@ -148,7 +148,7 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
 void
 Synthesizer::syn_class_def_variant(const Datatype& datatype, const TypeInfo& variant){
-  "$ value_;\n"_fs.outf(newline(), variant.to_str(-1));
+  "$ value_;\n"_fs.outf(out_.get(), variant.to_str(-1));
 }
 void
 Synthesizer::syn_class_def_defaultConstructor(const Datatype& datatype, const TypeInfo& variant){
@@ -173,7 +173,7 @@ Synthesizer::syn_class_def_valueConstructor(const Datatype& datatype, const Type
   auto& name = datatype.name();
 
   "//value构造函数\n"_fs.outf(newline());
-  "$($value) : value_(value) {}\n"_fs.outf(
+  "$($value) : value_(std::move(value)) {}\n"_fs.outf(
       newline(), name, variant.to_str_as_arg(-1));
 }
 void
@@ -189,8 +189,7 @@ Synthesizer::syn_class_def_copyConstructor(const Datatype& datatype){
     for(auto& constructor : constructors){
       "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructor);
         add_indent();
-        "const _$& other_node = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor, constructor);
-        "value_ = other_node;\n"_fs.outf(newline());
+        "value_ = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor);
         sub_indent();
       "} \n"_fs.outf(newline());
     }
@@ -209,8 +208,7 @@ Synthesizer::syn_class_def_moveConstructor(const Datatype& datatype){
     for(auto& constructor : constructors){
       "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructor);
         add_indent();
-        "_$& other_node = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor, constructor);
-        "value_ = std::move(other_node);\n"_fs.outf(newline());
+        "value_ = std::move(std::get<_$>(other.value_)); \n"_fs.outf(newline(), constructor);
         sub_indent();
       "} \n"_fs.outf(newline());
     }
@@ -228,24 +226,33 @@ Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
     "static $ $("_fs.outf(newline(), self, constructors[i]);
     for (size_t j = 0; j < components[i].size(); ++j) {
       if (j == 0) {
-        "const $ &p1"_fs.outf(out_.get(), components[i][j]);
+        "$ p1"_fs.outf(out_.get(), components[i][j]);
         ;
       } else {
-        ", const $ &p$"_fs.outf(out_.get(), components[i][j], j + 1);
+        ", $ p$"_fs.outf(out_.get(), components[i][j], j + 1);
       }
     }
     ") {\n"_fs.outf(out_.get());
     add_indent();
 
     "return $ ( _$ ( "_fs.outf(newline(), self, constructors[i]);
-    for (size_t j = 0; j < components[i].size(); ++j) {
-      if (j == 0) {
-        "p1"_fs.outf(out_.get());
-      } else {
-        ", p$"_fs.outf(out_.get(), j + 1);
+      add_indent();
+      for (size_t j = 0; j < components[i].size(); ++j) {
+        out_.get() << endl;
+        if (j != 0) {
+          ", "_fs.outf(newline());
+        }else{
+          ""_fs.outf(newline());
+        }
+
+        if(components[i][j] == self){
+          "std::make_shared<$>(std::move(p$))"_fs.outf(out_.get(), self, j+1);
+        }else{
+          "std::move(p$)"_fs.outf(out_.get(), j+1);
+        }
       }
-    }
-    " ) );\n"_fs.outf(out_.get());
+      sub_indent();
+    "));\n"_fs.outf(out_.get());
 
     sub_indent();
     "}\n"_fs.outf(newline());
@@ -289,8 +296,7 @@ Synthesizer::syn_class_def_copyOperator(const Datatype& datatype){
       for(auto& constructor : constructors){
         "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructor);
           add_indent();
-          "const _$& other_node = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor, constructor);
-          "value_ = other.value_; \n"_fs.outf(newline());
+          "value_ = std::get<_$>(other.value_); \n"_fs.outf(newline(), constructor);
           sub_indent();
         "} \n"_fs.outf(newline());
       }
@@ -313,8 +319,7 @@ Synthesizer::syn_class_def_moveOperator(const Datatype& datatype){
       for(const auto& constructor : constructors){
         "if(std::holds_alternative<_$>(other.value_)){\n"_fs.outf(newline(), constructor);
           add_indent();
-          "_$& other_value = std::get<_$>(other.value_);\n"_fs.outf(newline(),constructor, constructor);
-          "value_ = std::move(other_value);\n"_fs.outf(newline());
+          "value_ = std::move(std::get<_$>(other.value_)); \n"_fs.outf(newline(), constructor);
           sub_indent();
         "}\n"_fs.outf(newline());
       }
@@ -333,7 +338,7 @@ Synthesizer::syn_class_def_equivOperator(const Datatype& datatype){
   add_indent();
     "if(value_.index() == rhs.value_.index()){\n"_fs.outf(newline());
     add_indent();
-      " return value_ == rhs.value_;\n"_fs.outf(newline());
+      "return value_ == rhs.value_;\n"_fs.outf(newline());
     sub_indent();
     "}else{\n"_fs.outf(newline());
     add_indent();
@@ -349,7 +354,6 @@ Synthesizer::syn_class_def_ltOperator(const Datatype& datatype){
 
   auto& self = datatype.self();
 
-  out_.get() << endl;
   "bool operator<(const $ &rhs) const {\n"_fs.outf(newline(), self);
   add_indent();
     "if(value_ == rhs.value_) return false;\n"_fs.outf(newline());
@@ -362,7 +366,6 @@ Synthesizer::syn_class_def_gtOperator(const Datatype& datatype){
 
   auto& self = datatype.self();
 
-  out_.get() << endl;
   "bool operator>(const $ &rhs) const {\n"_fs.outf(newline(), self);
   add_indent();
     "if(value_ == rhs.value_) return false;\n"_fs.outf(newline());
@@ -375,7 +378,6 @@ Synthesizer::syn_class_def_leOperator(const Datatype& datatype){
 
   auto& self = datatype.self();
 
-  out_.get() << endl;
   "bool operator<=(const $ &rhs) const {\n"_fs.outf(newline(), self);
   add_indent();
     "if(value_ == rhs.value_) return true;\n"_fs.outf(newline());
@@ -388,7 +390,6 @@ Synthesizer::syn_class_def_geOperator(const Datatype& datatype){
 
   auto& self = datatype.self();
 
-  out_.get() << endl;
   "bool operator>=(const $ &rhs) const {\n"_fs.outf(newline(), self);
   add_indent();
     "if(value_ == rhs.value_) return true;\n"_fs.outf(newline());
@@ -497,10 +498,13 @@ Synthesizer::syn_class_def_struct_paramConstructor(const Datatype &datatype, siz
 
   "_$("_fs.outf(newline(), constructors[i]);
     for(size_t j=0;j<components[i].size();++j){
-      if(j< components[i].size()-1 ){
-        "const $ &p$, "_fs.outf(out_.get(), components[i][j], j+1);
+      if(components[i][j] == self){
+        "std::shared_ptr<$> p$"_fs.outf(out_.get(), components[i][j], j+1);
       }else{
-        "const $ &p$ "_fs.outf(out_.get(), components[i][j], j+1);
+        "$ p$"_fs.outf(out_.get(), components[i][j], j+1);
+      }
+      if(j< components[i].size()-1 ){
+        ", "_fs.outf(out_.get());
       }
     }
   ")\n"_fs.outf(out_.get());
@@ -512,11 +516,7 @@ Synthesizer::syn_class_def_struct_paramConstructor(const Datatype &datatype, siz
         ","_fs.outf(newline());
       }
 
-      if(components[i][j] == self){
-        "p$_(std::make_shared<$>(p$))\n"_fs.outf(out_.get(), j+1, self, j+1);
-      }else{
-        "p$_(p$)\n"_fs.outf(out_.get(), j+1, j+1);
-      }
+      "p$_(std::move(p$))\n"_fs.outf(out_.get(), j+1, j+1);
     }
     sub_indent();
   "{}\n"_fs.outf(newline());

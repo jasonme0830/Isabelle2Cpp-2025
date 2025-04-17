@@ -2,10 +2,10 @@ theory binary_tree
   imports Main
 begin
 
-datatype snat = sZero | sSuc snat
 datatype 'a slist = sNil | sCons 'a "'a slist"
+datatype 'a tree = Tip | Node "'a tree " 'a "'a tree " 
 
-fun bs :: "snat \<Rightarrow> snat slist \<Rightarrow> snat option" where
+fun bs :: "nat \<Rightarrow> nat slist \<Rightarrow> nat option" where
   "bs x [] = None" |
   "bs x [y] = If (x = y) (Some sZero) None" |
   "bs x ys = (let m = (length ys) div 2 in
