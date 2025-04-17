@@ -93,7 +93,7 @@ TypeInfo::to_str_as_arg(int func_recu_class) const
   switch (func_recu_class)
   {
   case 0:
-    TypeInfo::as_arg = asArg_namespace::const_as_arg;
+    TypeInfo::as_arg = asArg_namespace::default_as_arg;
     break;
   case 1:
     TypeInfo::as_arg = asArg_namespace::default_as_arg;

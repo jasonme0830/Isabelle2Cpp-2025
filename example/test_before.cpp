@@ -6,15 +6,15 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
         return std::optional<std::uint64_t>();
     }
 
-    // bs x [y] = If (x = y) (Some sZero) None
+    // bs x [y] = If (x = y) (Some Zero) None
     if (arg2.size() == 1) {
         auto x = std::move(arg1);
         auto y = arg2[0];
         std::optional<std::uint64_t> temp0;
         if (x == y) {
-            temp0 = std::make_optional<std::uint64_t>(std::move(sZero));
+            temp0 = std::make_optional<std::uint64_t>(0);
         } else {
-            temp0 = std::optional<UNKNOWN_TYPE>();
+            temp0 = std::optional<std::uint64_t>();
         }
         return temp0;
     }

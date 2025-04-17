@@ -43,7 +43,7 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto var = func.get_variable(name);
     // cout<<var<<" "<<movable<<" ";
     // if (movable && typeinfo.movable()) 
-    if(movable && func.func_recu_class() > -1 )    {
+    if(movable && func.func_recu_class() > 0 )    {
       // movable is true only when move-list is enable
       // cout<<"var: std::move($)"_fs.format(var)<<endl;
       return "std::move($)"_fs.format(var); // for move-list
@@ -89,8 +89,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto xs = args[1]->gen_expr(func);
 
     // if (is_moved(xs) && theConfig.move_list()) 
-    if(is_moved(xs) && func.func_recu_class()>-1)
-    {
+    if(is_moved(xs) && func.func_recu_class()>0){
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
@@ -118,7 +117,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto xs = args[1]->gen_expr(func);
 
     // if (is_moved(xs) && theConfig.move_list()) 
-    if(is_moved(xs) && func.func_recu_class()>-1)
+    if(is_moved(xs) && func.func_recu_class()>0)
     {
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
@@ -157,7 +156,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
     }
 
-    if(func.func_recu_class()>-1){
+    if(func.func_recu_class()>0){
       return move_expr(temp0);
     } else {
       return temp0;
@@ -311,7 +310,7 @@ ConsExpr::gen_expr_impl_listCons(FuncEntity& func, const TypeInfo& typeinfo) con
     .add_expr("$.push_front($);", temp, x);
 
   // if (theConfig.move_list()) 
-  if(func.func_recu_class() > -1)
+  if(func.func_recu_class() > 0)
   {
     return move_expr(temp);
   } else {
@@ -337,7 +336,7 @@ ConsExpr::gen_expr_impl_if(FuncEntity& func, const TypeInfo& typeinfo) const
   .sub_indent()
   .add_expr("}");
 
-  if(func.func_recu_class() == -1){
+  if(func.func_recu_class() == 0){
     return res;
   }
   else{
@@ -372,7 +371,7 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
     }
   }
   func.sub_indent().add_expr(");");
-  if(func.func_recu_class() == -1){
+  if(func.func_recu_class() == 0){
     return temp;
   }
   else{
@@ -516,7 +515,7 @@ ConsExpr::gen_expr_impl_recuCall_noTemp(FuncEntity& func, const TypeInfo& typein
 std::string
 ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
-  if(func.func_recu_class() == -1){
+  if(func.func_recu_class() == 0){
     return arg->gen_expr(func)+", ";
   }
 
@@ -556,7 +555,7 @@ ConsExpr::gen_expr_impl_funCall_noTemp(FuncEntity& func, const TypeInfo& typeinf
 std::string
 ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
-  if(func.func_recu_class() == -1){
+  if(func.func_recu_class() == 0){
     return arg->gen_expr(func)+", ";
   }
 
@@ -571,7 +570,6 @@ ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo,
     temp = move_expr(temp);
     break;
   case 0:
-    temp = move_expr(temp);
     break;
   default:
     break;
