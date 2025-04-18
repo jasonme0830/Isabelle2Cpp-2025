@@ -14,6 +14,7 @@ public:
   // move list as much as possible
   bool close_move() const { return close_move_; }
   bool close_recu() const { return close_recu_; }
+  bool close_memo() const { return close_memo_; }
   // removes the conditions for the last pattern for total
   // functions (not use option `nonexhaustive`)
   bool reduce_cond() const { return reduce_cond_; }
@@ -36,6 +37,7 @@ public:
 
   void close_move(bool enable); // implemented in src/optimization/move_list.cpp
   void close_recu(bool enable) { close_recu_ = enable; }
+  void close_memo(bool enable) { close_memo_ = enable; }
   void reduce_cond(bool enable) { reduce_cond_ = !enable; }
   void use_deque(bool enable); // implemented in src/optimization/use_deque.cpp
   void close_isomor(bool enable) {close_isomor_ = enable; };
@@ -53,6 +55,7 @@ private:
   // optimization options
   bool close_move_;
   bool close_recu_;
+  bool close_memo_;
   bool reduce_cond_;
   bool use_deque_;
   bool close_isomor_;

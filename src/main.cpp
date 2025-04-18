@@ -106,6 +106,7 @@ parse_config(int argc, char* argv[])
   // set optimizer options
   theConfig.close_move(arg_parser.get<bool>("close-move"));
   theConfig.close_recu(arg_parser.get<bool>("close-recu"));
+  theConfig.close_memo(arg_parser.get<bool>("close-memo"));
   theConfig.reduce_cond(arg_parser.get<bool>("close-reduceCond"));
   theConfig.use_deque(arg_parser.get<bool>("close-deque"));
   theConfig.close_isomor(arg_parser.get<bool>("close-isomor"));
@@ -147,6 +148,10 @@ build_parser()
     .implict_value(true);
   arg_parser.add_argument("--close-recu")
     .help("enable close-recu")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--close-memo")
+    .help("enable close-memo")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--close-reduceCond")

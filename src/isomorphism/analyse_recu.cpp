@@ -20,7 +20,7 @@ void Isomorphism::analyse_func_recu_class()
       else{
         //只检查新加入进来的函数定义
         FunctionDef &function = dynamic_cast<FunctionDef &>(*(*ptr_def));
-        // cout << "* one function " << endl;
+        cout << "* one function: " << function.func_recursive_type << endl;
         function.analyse_func_recu_class();
       }
     }
@@ -34,6 +34,7 @@ void Isomorphism::analyse_func_recu_class()
 int
 FunctionDef::analyse_func_recu_class()
 {
+  cout << "memo: " << theConfig.close_memo() << endl;
   //0:&  1:move  2:memory
   if(theConfig.close_move()){
     func_recursive_type = 0;
