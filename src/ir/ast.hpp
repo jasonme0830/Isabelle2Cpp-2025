@@ -657,6 +657,9 @@ struct FunctionDef : Definition
   bool memoize = false;
   //标识函数的递归类型：0非递归、1单次递归、2多次递归
   int func_recursive_type = 0;
+  int func_recu_mode = 0;
+  int func_memo_mode = 0;
+  int func_gen_mode = 0;
 
   std::string def_name() const override;
 

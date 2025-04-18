@@ -1,4 +1,5 @@
 #include "isomorphism.hpp"
+#include <typeinfo>
 
 using namespace std;
 
@@ -20,8 +21,13 @@ void Isomorphism::analyse_func_recu_class()
       else{
         //只检查新加入进来的函数定义
         FunctionDef &function = dynamic_cast<FunctionDef &>(*(*ptr_def));
-        cout << "* one function: " << function.func_recursive_type << endl;
+        cout << "* one function: " << function.func_memo_mode << endl;
+        cout << "typeinfo: " << typeid(function.func_memo_mode).name() << endl;
         function.analyse_func_recu_class();
+        cout << "memo: " << theConfig.close_memo() << endl;
+        cout << "## recu_mode: " << function.func_recu_mode << endl;
+        cout << "## gen_mode: " << function.func_gen_mode << endl;
+        cout << "## memo_mode: " << function.func_memo_mode << endl;
       }
     }
     else{
@@ -34,7 +40,10 @@ void Isomorphism::analyse_func_recu_class()
 int
 FunctionDef::analyse_func_recu_class()
 {
-  cout << "memo: " << theConfig.close_memo() << endl;
+  func_gen_mode = 1;
+  func_recu_mode = 1;
+  func_memo_mode = 1;
+
   //0:&  1:move  2:memory
   if(theConfig.close_move()){
     func_recursive_type = 0;
@@ -42,6 +51,9 @@ FunctionDef::analyse_func_recu_class()
   }
   if(theConfig.close_recu()){
     func_recursive_type = 1;
+    func_gen_mode = 2;
+    func_recu_mode = 2;
+    func_memo_mode = 2;
     return func_recursive_type;
   }
 
