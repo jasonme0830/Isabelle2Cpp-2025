@@ -86,7 +86,8 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
   // for List
   else if (constructor == "Cons") {
     // if (!theConfig.move_list()) 
-    if(func.func_recu_class() != 1)
+    // if(func.func_recu_class() != 1)
+    if(func.func_gen_mode() == 0)
     {
       func.add_pattern_cond("!$.empty()", prev);
       args[0]->gen_pattern(func, prev + ".front()");
@@ -171,7 +172,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
     auto& self = datatype->self();
     auto& components = datatype->components();
     for (size_t i = 0; i < args.size(); ++i) {
-      switch (func.func_recu_class())
+      switch (func.func_gen_mode())
       {
       case 0:
         args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));

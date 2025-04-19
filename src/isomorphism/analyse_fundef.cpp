@@ -21,18 +21,17 @@ void Isomorphism::analyse_functionDef()
       else{
         //只检查新加入进来的函数定义
         FunctionDef &function = dynamic_cast<FunctionDef &>(*(*ptr_def));
-        cout <<"$ "<<function.name<<endl;
+        // cout <<"$ "<<function.name<<endl;
         
         function.judge_func_gen_mode();
         function.analyse_func_recu_class();
         function.judge_func_mem_mode();
 
         // cout << "typeinfo: " << typeid(function.func_memo_mode).name() << endl;
-        // cout << "## recu_class: " << function.func_recursive_type << endl;
-        // cout << "## recu_mode: " << function.func_recu_mode << endl;
         // cout << "## gen_mode: " << function.func_gen_mode << endl;
-        cout << "## mem_mode: " << function.func_mem_mode << endl;
-        cout << endl;
+        // cout << "## recu_class: " << function.func_recu_class << endl;
+        // cout << "## mem_mode: " << function.func_mem_mode << endl;
+        // cout << endl;
       }
     }
     else{
@@ -94,7 +93,7 @@ FunctionDef::judge_func_mem_mode()
   }else if(func_recu_class == 2){
     //函数本身是否发生重复计算优先级最低
     int input_arg_num = type->types.size() - 1;
-    cout << "---functype num: " << input_arg_num << endl;
+    // cout << "---functype num: " << input_arg_num << endl;
 
     std::vector<Equation>::iterator ptr_equa;
     for (ptr_equa = equations.begin(); ptr_equa != equations.end(); ++ptr_equa){
@@ -107,7 +106,7 @@ FunctionDef::judge_func_mem_mode()
       for(int i=0; i<input_arg_num; i++){
         var_map.push_back(pattern_var);
       }
-      cout << "---cons rule map size: " << var_map.size() << endl;
+      // cout << "---cons rule map size: " << var_map.size() << endl;
 
       //统计expression中的递归调用参数内变量出现的次数
       ptr_equa->expr->trav_count_expr_var(name, var_map, -1);

@@ -14,14 +14,14 @@ using namespace std;
 namespace hol2cpp {
 namespace asArg_namespace{
 string
-default_as_arg(const TypeInfo& type, int func_recu_class)
+default_as_arg(const TypeInfo& type, int arg_gen_mode)
 {
-  return type.to_str(func_recu_class)+" ";
+  return type.to_str(arg_gen_mode)+" ";
 }
 string
-const_as_arg(const TypeInfo& type, int func_recu_class)
+const_as_arg(const TypeInfo& type, int arg_gen_mode)
 {
-  return "const " + type.to_str(func_recu_class) + " &";
+  return "const " + type.to_str(arg_gen_mode) + " &";
 }
 } // namespace for gen func type argus
 
@@ -54,7 +54,7 @@ TypeInfo::replace_with(string name) const
 }
 
 string
-TypeInfo::to_str(int func_recu_class) const
+TypeInfo::to_str(int arg_gen_mode) const
 {
   if (lack()) {
     return "UNKNOWN_TYPE";
@@ -65,12 +65,12 @@ TypeInfo::to_str(int func_recu_class) const
   }
 
   if (is_function()) {
-    auto type = name + '<' + arguments.back().to_str(func_recu_class) + '(';
+    auto type = name + '<' + arguments.back().to_str(arg_gen_mode) + '(';
     for (size_t i = 0; i < arguments.size() - 1; ++i) {
       if (i == 0) {
-        type += arguments[i].to_str_as_arg(func_recu_class);
+        type += arguments[i].to_str_as_arg(arg_gen_mode);
       } else {
-        type += ", " + arguments[i].to_str_as_arg(func_recu_class);
+        type += ", " + arguments[i].to_str_as_arg(arg_gen_mode);
       }
     }
     return type + ")>";
@@ -78,9 +78,9 @@ TypeInfo::to_str(int func_recu_class) const
     auto type = name + '<';
     for (size_t i = 0; i < arguments.size(); ++i) {
       if (i == 0) {
-        type += arguments[i].to_str(func_recu_class);
+        type += arguments[i].to_str(arg_gen_mode);
       } else {
-        type += ", " + arguments[i].to_str(func_recu_class);
+        type += ", " + arguments[i].to_str(arg_gen_mode);
       }
     }
     return type + '>';
@@ -88,9 +88,9 @@ TypeInfo::to_str(int func_recu_class) const
 }
 
 string
-TypeInfo::to_str_as_arg(int func_recu_class) const
+TypeInfo::to_str_as_arg(int arg_gen_mode) const
 {
-  switch (func_recu_class)
+  switch (arg_gen_mode)
   {
   case 0:
     TypeInfo::as_arg = asArg_namespace::default_as_arg;
@@ -106,7 +106,7 @@ TypeInfo::to_str_as_arg(int func_recu_class) const
     break;
   }
 
-  return as_arg(*this, func_recu_class);
+  return as_arg(*this, arg_gen_mode);
 }
 
 void
@@ -259,7 +259,7 @@ FuncEntity::decl_variable(const string& var, const string& expr)
 
     // code by myk
     unused_var_count_[var] = delay_statements_.size();
-    switch (func_recu_class())
+    switch (func_gen_mode())
     {
     case 2:
       add_delay_statement("auto $ = $;", var, expr);

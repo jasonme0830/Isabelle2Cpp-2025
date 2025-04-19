@@ -138,7 +138,7 @@ FunctionDef::gen_code(Code& code) const
   func.is_predef(is_predef());
   func.nonexhaustive(nonexhaustive);
   func.func_gen_mode(func_gen_mode);
-  func.func_recu_class(func_recursive_type);
+  func.func_recu_class(func_recu_class);
   func.func_mem_mode(func_mem_mode);
   func.name(name);
 

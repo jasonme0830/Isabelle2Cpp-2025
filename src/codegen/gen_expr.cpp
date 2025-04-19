@@ -43,8 +43,7 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto var = func.get_variable(name);
     // cout<<var<<" "<<movable<<" ";
     // if (movable && typeinfo.movable()) 
-    if(movable && func.func_recu_class() > 0 )    {
-      // movable is true only when move-list is enable
+    if(movable && func.func_gen_mode() == 1)    {
       // cout<<"var: std::move($)"_fs.format(var)<<endl;
       return "std::move($)"_fs.format(var); // for move-list
     } else {
@@ -89,7 +88,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto xs = args[1]->gen_expr(func);
 
     // if (is_moved(xs) && theConfig.move_list()) 
-    if(is_moved(xs) && func.func_recu_class()>0){
+    if(is_moved(xs) && func.func_gen_mode() == 1){
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
@@ -117,7 +116,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto xs = args[1]->gen_expr(func);
 
     // if (is_moved(xs) && theConfig.move_list()) 
-    if(is_moved(xs) && func.func_recu_class()>0)
+    if(is_moved(xs) && func.func_gen_mode() == 1)
     {
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
@@ -156,7 +155,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
     }
 
-    if(func.func_recu_class()>0){
+    if(func.func_gen_mode() == 1){
       return move_expr(temp0);
     } else {
       return temp0;
@@ -310,7 +309,7 @@ ConsExpr::gen_expr_impl_listCons(FuncEntity& func, const TypeInfo& typeinfo) con
     .add_expr("$.push_front($);", temp, x);
 
   // if (theConfig.move_list()) 
-  if(func.func_recu_class() > 0)
+  if(func.func_gen_mode() == 1)
   {
     return move_expr(temp);
   } else {
@@ -336,7 +335,7 @@ ConsExpr::gen_expr_impl_if(FuncEntity& func, const TypeInfo& typeinfo) const
   .sub_indent()
   .add_expr("}");
 
-  if(func.func_recu_class() == 0){
+  if(func.func_gen_mode() == 0){
     return res;
   }
   else{
@@ -371,10 +370,14 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
     }
   }
   func.sub_indent().add_expr(");");
-  if(func.func_recu_class() == 0){
+
+  switch (func.func_gen_mode())
+  {
+  case 0:
     return temp;
-  }
-  else{
+  case 1:
+    return move_expr(temp);
+  default:
     return move_expr(temp);
   }
 }
@@ -499,7 +502,7 @@ std::string
 ConsExpr::gen_expr_impl_recuCall_noTemp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
   std::string one_param = arg->gen_expr(func);
-  switch (func.func_recu_class())
+  switch (func.func_gen_mode())
   {
   case 2:
     break;
@@ -515,13 +518,13 @@ ConsExpr::gen_expr_impl_recuCall_noTemp(FuncEntity& func, const TypeInfo& typein
 std::string
 ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
-  if(func.func_recu_class() == 0){
+  if(func.func_gen_mode() == 0){
     return arg->gen_expr(func)+", ";
   }
 
   auto temp = func.gen_temp();
   func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-  switch (func.func_recu_class())
+  switch (func.func_gen_mode())
   {
   case 2:
     break;
@@ -539,7 +542,7 @@ std::string
 ConsExpr::gen_expr_impl_funCall_noTemp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
   std::string one_param = arg->gen_expr(func);
-  switch (func.func_recu_class())
+  switch (func.func_gen_mode())
   {
   case 2:
     break;
@@ -555,13 +558,13 @@ ConsExpr::gen_expr_impl_funCall_noTemp(FuncEntity& func, const TypeInfo& typeinf
 std::string
 ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo, const Ptr<Expr> arg) const
 {
-  if(func.func_recu_class() == 0){
+  if(func.func_gen_mode() == 0){
     return arg->gen_expr(func)+", ";
   }
 
   auto temp = func.gen_temp();
   func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-  switch (func.func_recu_class())
+  switch (func.func_gen_mode())
   {
   case 2:
     temp = move_expr(temp);
@@ -756,7 +759,7 @@ LambdaExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     if (i != 0) {
       params += ", ";
     }
-    params += typeinfo[i].to_str_as_arg(func.func_recu_class()) + parameters[i];
+    params += typeinfo[i].to_str_as_arg(func.func_gen_mode()) + parameters[i];
   }
 
   auto temp = func.gen_temp();
