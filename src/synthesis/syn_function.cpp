@@ -46,16 +46,14 @@ Synthesizer::syn_func_definition(const FuncEntity& func, bool is_impl)
   " {\n"_fs.outf(out_.get());
   add_indent();
   {
-    if (func.memoize()) {
-    // if(func.func_recu_class() == 2){
+    if(func.func_mem_mode() == 1){
       "auto impl = [&]() -> $ {\n"_fs.outf(newline(), result_type);
       add_indent();
     }
 
     syn_func_body(func);
 
-    if (func.memoize()) {
-    // if(func.func_recu_class() == 2){
+    if(func.func_mem_mode() == 1){
       sub_indent();
       "};\n\n"_fs.outf(newline());
 

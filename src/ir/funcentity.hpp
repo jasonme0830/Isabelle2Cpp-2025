@@ -166,17 +166,26 @@ public:
 
   const std::vector<std::string>& delay_declarations() const;
 
-  void nonexhaustive(bool is_nonexhaustive); // for reduce-cond
-  bool nonexhaustive() const;                // for reduce-cond
+  // for reduce-cond
+  void nonexhaustive(bool is_nonexhaustive); 
+  // for reduce-cond
+  bool nonexhaustive() const;                
 
   void is_last_equation(bool is_last); // for reduce-cond
   bool is_last_equation() const;       // for reduce-cond
 
-  void memoize(bool is_memoize); // for memoize
-  bool memoize() const;          // for memoize
-
+  // 标志生成模式：0值传递、1move优化、2未定义的优化
+  void func_gen_mode(int num);
+  // 标志生成模式：0值传递、1move优化、2未定义的优化
+  int func_gen_mode() const;
+  // 标志函数的递归类别：0非递归、1单词递归、2多次递归
   void func_recu_class(int num);
+  // 标志函数的递归类别：0非递归、1单词递归、2多次递归
   int func_recu_class() const;
+  // 标志是否启用记忆化：0禁用、1使用
+  void func_mem_mode(int num);
+  // 标志是否启用记忆化：0禁用、1使用
+  int func_mem_mode() const;
 
   void is_predef(bool value);
   bool is_predef() const;
@@ -204,9 +213,10 @@ private:
 
   bool nonexhaustive_;    // for reduce-cond
   bool is_last_equation_; // for reduce-cond
-  bool memoize_;
-  int func_recu_class_;  // 方便函数优化
-  bool is_predef_;
+  int func_gen_mode_;     // 标志生成模式：0值传递、1move优化、2未定义的优化
+  int func_recu_class_;   // 标志函数的递归类别：0非递归、1单词递归、2多次递归
+  int func_mem_mode_;     // 标志是否启用记忆化：0禁用、1使用
+  bool is_predef_;        // 标志是否为预定义添加
 
   std::map<std::string, TypeInfo> var_typeinfos_;
 };

@@ -435,15 +435,15 @@ FuncEntity::is_last_equation() const
 }
 
 void
-FuncEntity::memoize(bool memoize)
+FuncEntity::func_gen_mode(int num)
 {
-  memoize_ = memoize;
+  func_gen_mode_ = num;
 }
 
-bool
-FuncEntity::memoize() const
+int
+FuncEntity::func_gen_mode() const
 {
-  return memoize_;
+  return func_gen_mode_;
 }
 
 void
@@ -456,6 +456,18 @@ int
 FuncEntity::func_recu_class() const
 {
   return func_recu_class_;
+}
+
+void
+FuncEntity::func_mem_mode(int num)
+{
+  func_mem_mode_ = num;
+}
+
+int
+FuncEntity::func_mem_mode() const
+{
+  return func_mem_mode_;
 }
 
 void
