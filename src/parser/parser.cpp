@@ -321,15 +321,11 @@ Ptr<Definition>
 Parser::gen_function_definition()
 {
   auto decl = make_unique<FunctionDef>();
-  /* 在判断生成模式和记忆化时竟然发生参数初始化失败的情况，因此添加初始化 */
-  decl->func_recursive_type = 0;
-  decl->func_gen_mode = 0;
-  decl->func_recu_mode = 0;
-  decl->func_memo_mode = 0;
-  // cout << "** decl->recu_class: " << decl->func_recursive_type << endl;
-  // cout << "** decl->recu_mode: " << decl->func_recu_mode << endl;
-  // cout << "** decl->gen_mode: " << decl->func_gen_mode << endl;
-  // cout << "** decl->memo_mode: " << decl->func_memo_mode << endl;
+  // 在判断生成模式和记忆化时竟然发生参数初始化失败的情况，因此添加初始化 
+  // decl->func_recursive_type = 0;
+  // decl->func_gen_mode = 0;
+  // decl->func_recu_mode = 0;
+  // decl->func_mem_mode = 0;
 
   eat<Token::Type::Function>("expected token Function");
 

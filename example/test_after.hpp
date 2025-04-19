@@ -2,12 +2,13 @@
 #include <cstdlib>
 #include <deque>
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 #include <variant>
 
 template<typename T1>
-struct tree {
+class tree {
     struct _Tip {
         _Tip() {}
         _Tip(const _Tip& other){ }
@@ -79,6 +80,8 @@ struct tree {
             return (std::tie(*p1_, p2_, *p3_) >= std::tie(*rhs.p1_, rhs.p2_, *rhs.p3_));
         }
     };
+
+  public:
 
 std::variant<_Tip, _Node> value_;
 
@@ -193,17 +196,13 @@ std::deque<T1> AddListTail(T1 arg1, std::deque<T1> arg2) {
     }
 
     // AddListTail a (x#xs) = x # (AddListTail a xs )
-    if (arg2.size() >= 1) {
-        auto a = std::move(arg1);
-        auto x = arg2.front();
-        arg2.erase(arg2.begin(), arg2.begin() + 1);
-        auto xs = std::move(arg2);
-        auto temp0 = AddListTail(std::move(a), std::move(xs));
-        temp0.push_front(std::move(x));
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto a = std::move(arg1);
+    auto x = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    auto temp0 = AddListTail(std::move(a), std::move(xs));
+    temp0.push_front(std::move(x));
+    return temp0;
 }
 
 template<typename T1>
@@ -232,20 +231,14 @@ std::deque<T1> AddListI(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     }
 
     // AddListI (Suc i) a (x#xs) = x # (AddListI i a xs)
-    if (arg1 != 0) {
-        if (arg3.size() >= 1) {
-            auto i = arg1 - 1;
-            auto a = std::move(arg2);
-            auto x = arg3.front();
-            arg3.erase(arg3.begin(), arg3.begin() + 1);
-            auto xs = std::move(arg3);
-            auto temp0 = AddListI(std::move(i), std::move(a), std::move(xs));
-            temp0.push_front(std::move(x));
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto i = arg1 - 1;
+    auto a = std::move(arg2);
+    auto x = arg3.front();
+    arg3.erase(arg3.begin(), arg3.begin() + 1);
+    auto xs = std::move(arg3);
+    auto temp0 = AddListI(std::move(i), std::move(a), std::move(xs));
+    temp0.push_front(std::move(x));
+    return temp0;
 }
 
 template<typename T1>
@@ -258,11 +251,7 @@ std::deque<T1> DelListHead(std::deque<T1> arg1) {
     }
 
     // DelListHead [] = []
-    if (arg1.empty()) {
-        return std::deque<T1>();
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    return std::deque<T1>();
 }
 
 template<typename T1>
@@ -278,16 +267,12 @@ std::deque<T1> DelListTail(std::deque<T1> arg1) {
     }
 
     // DelListTail (x#xs) =  Cons x (DelListTail xs)
-    if (arg1.size() >= 1) {
-        auto x = arg1.front();
-        arg1.erase(arg1.begin(), arg1.begin() + 1);
-        auto xs = std::move(arg1);
-        auto temp0 = DelListTail(std::move(xs));
-        temp0.push_front(std::move(x));
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = arg1.front();
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto xs = std::move(arg1);
+    auto temp0 = DelListTail(std::move(xs));
+    temp0.push_front(std::move(x));
+    return temp0;
 }
 
 template<typename T1>
@@ -316,19 +301,13 @@ std::deque<T1> DelListI(std::uint64_t arg1, std::deque<T1> arg2) {
     }
 
     // DelListI (Suc i) (x#xs) = x # (DelListI i xs)
-    if (arg1 != 0) {
-        if (arg2.size() >= 1) {
-            auto i = arg1 - 1;
-            auto x = arg2.front();
-            arg2.erase(arg2.begin(), arg2.begin() + 1);
-            auto xs = std::move(arg2);
-            auto temp0 = DelListI(std::move(i), std::move(xs));
-            temp0.push_front(std::move(x));
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto i = arg1 - 1;
+    auto x = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    auto temp0 = DelListI(std::move(i), std::move(xs));
+    temp0.push_front(std::move(x));
+    return temp0;
 }
 
 template<typename T1>
@@ -339,21 +318,17 @@ bool SearchList(T1 arg1, std::deque<T1> arg2) {
     }
 
     // SearchList a (x#xs) = (if a=x then True else (SearchList a xs))
-    if (arg2.size() >= 1) {
-        auto a = std::move(arg1);
-        auto x = arg2.front();
-        arg2.erase(arg2.begin(), arg2.begin() + 1);
-        auto xs = std::move(arg2);
-        bool temp0;
-        if (a == x) {
-            temp0 = true;
-        } else {
-            temp0 = SearchList(std::move(a), std::move(xs));
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto a = std::move(arg1);
+    auto x = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    bool temp0;
+    if (a == x) {
+        temp0 = true;
+    } else {
+        temp0 = SearchList(std::move(a), std::move(xs));
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -364,26 +339,22 @@ std::deque<T1> ModifyValue(T1 arg1, T1 arg2, std::deque<T1> arg3) {
     }
 
     // ModifyValue a b (x#xs) = (if x=a then b#(ModifyValue a b xs) else x#(ModifyValue a b xs))
-    if (arg3.size() >= 1) {
-        auto a = std::move(arg1);
-        auto b = std::move(arg2);
-        auto x = arg3.front();
-        arg3.erase(arg3.begin(), arg3.begin() + 1);
-        auto xs = std::move(arg3);
-        std::deque<T1> temp0;
-        if (x == a) {
-            auto temp1 = ModifyValue(std::move(a), std::move(b), std::move(xs));
-            temp1.push_front(b);
-            temp0 = std::move(temp1);
-        } else {
-            auto temp2 = ModifyValue(std::move(a), std::move(b), std::move(xs));
-            temp2.push_front(std::move(x));
-            temp0 = std::move(temp2);
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto a = std::move(arg1);
+    auto b = std::move(arg2);
+    auto x = arg3.front();
+    arg3.erase(arg3.begin(), arg3.begin() + 1);
+    auto xs = std::move(arg3);
+    std::deque<T1> temp0;
+    if (x == a) {
+        auto temp1 = ModifyValue(std::move(a), std::move(b), std::move(xs));
+        temp1.push_front(b);
+        temp0 = std::move(temp1);
+    } else {
+        auto temp2 = ModifyValue(std::move(a), std::move(b), std::move(xs));
+        temp2.push_front(std::move(x));
+        temp0 = std::move(temp2);
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -406,20 +377,14 @@ std::deque<T1> ModifyIndex(std::uint64_t arg1, T1 arg2, std::deque<T1> arg3) {
     }
 
     // ModifyIndex (Suc n) b (x#xs) = (x#(ModifyIndex n b xs))
-    if (arg1 != 0) {
-        if (arg3.size() >= 1) {
-            auto n = arg1 - 1;
-            auto b = std::move(arg2);
-            auto x = arg3.front();
-            arg3.erase(arg3.begin(), arg3.begin() + 1);
-            auto xs = std::move(arg3);
-            auto temp0 = ModifyIndex(std::move(n), std::move(b), std::move(xs));
-            temp0.push_front(std::move(x));
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = arg1 - 1;
+    auto b = std::move(arg2);
+    auto x = arg3.front();
+    arg3.erase(arg3.begin(), arg3.begin() + 1);
+    auto xs = std::move(arg3);
+    auto temp0 = ModifyIndex(std::move(n), std::move(b), std::move(xs));
+    temp0.push_front(std::move(x));
+    return temp0;
 }
 
 template<typename T1>
@@ -430,23 +395,19 @@ std::deque<T1> ffilter(std::function<bool(T1 )> arg1, std::deque<T1> arg2) {
     }
 
     // ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))
-    if (arg2.size() >= 1) {
-        auto f = std::move(arg1);
-        auto x = arg2.front();
-        arg2.erase(arg2.begin(), arg2.begin() + 1);
-        auto xs = std::move(arg2);
-        std::deque<T1> temp0;
-        if (f(x)) {
-            auto temp1 = ffilter(std::move(f), std::move(xs));
-            temp1.push_front(std::move(x));
-            temp0 = std::move(temp1);
-        } else {
-            temp0 = ffilter(std::move(f), std::move(xs));
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto f = std::move(arg1);
+    auto x = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    std::deque<T1> temp0;
+    if (f(x)) {
+        auto temp1 = ffilter(std::move(f), std::move(xs));
+        temp1.push_front(std::move(x));
+        temp0 = std::move(temp1);
+    } else {
+        temp0 = ffilter(std::move(f), std::move(xs));
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -458,17 +419,13 @@ std::deque<T1> app(std::deque<T1> arg1, std::deque<T1> arg2) {
     }
 
     // app(Cons a as )bs= Cons a (app as bs)
-    if (arg1.size() >= 1) {
-        auto a = arg1.front();
-        arg1.erase(arg1.begin(), arg1.begin() + 1);
-        auto as = std::move(arg1);
-        auto bs = std::move(arg2);
-        auto temp0 = app(std::move(as), std::move(bs));
-        temp0.push_front(std::move(a));
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto a = arg1.front();
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto as = std::move(arg1);
+    auto bs = std::move(arg2);
+    auto temp0 = app(std::move(as), std::move(bs));
+    temp0.push_front(std::move(a));
+    return temp0;
 }
 
 template<typename T1>
@@ -479,18 +436,14 @@ std::deque<T1> Reverse(std::deque<T1> arg1) {
     }
 
     // Reverse (Cons a as) = app(Reverse as)(Cons a Nil)
-    if (arg1.size() >= 1) {
-        auto a = arg1.front();
-        arg1.erase(arg1.begin(), arg1.begin() + 1);
-        auto as = std::move(arg1);
-        auto temp0 = Reverse(std::move(as));
-        auto temp2 = std::deque<T1>();
-        temp2.push_front(std::move(a));
-        auto temp1 = std::move(temp2);
-        return app(std::move(temp0), std::move(temp1));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto a = arg1.front();
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto as = std::move(arg1);
+    auto temp0 = Reverse(std::move(as));
+    auto temp2 = std::deque<T1>();
+    temp2.push_front(std::move(a));
+    auto temp1 = std::move(temp2);
+    return app(std::move(temp0), std::move(temp1));
 }
 
 template<typename T1>
@@ -509,19 +462,15 @@ std::deque<T1> Reverse2(std::deque<T1> arg1) {
     }
 
     // Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil)
-    if (arg1.size() >= 1) {
-        auto x = arg1.front();
-        arg1.erase(arg1.begin(), arg1.begin() + 1);
-        auto xs = std::move(arg1);
-        auto temp0 = std::deque<T1>();
-        temp0.push_front(std::move(x));
-        auto temp1 = Reverse2(std::move(xs));
-        auto temp2 = std::move(temp0);
-        temp1.insert(temp1.end(), temp2.begin(), temp2.end());
-        return temp1;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = arg1.front();
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto xs = std::move(arg1);
+    auto temp0 = std::deque<T1>();
+    temp0.push_front(std::move(x));
+    auto temp1 = Reverse2(std::move(xs));
+    auto temp2 = std::move(temp0);
+    temp1.insert(temp1.end(), temp2.begin(), temp2.end());
+    return temp1;
 }
 
 template<typename T1>
@@ -535,27 +484,23 @@ std::deque<T1> Insert(T1 arg1, std::deque<T1> arg2) {
     }
 
     // Insert a (x#xs) =(if a \<le> x then a#x#xs else x#(Insert a xs))
-    if (arg2.size() >= 1) {
-        auto a = std::move(arg1);
-        auto x = arg2.front();
-        arg2.erase(arg2.begin(), arg2.begin() + 1);
-        auto xs = std::move(arg2);
-        std::deque<T1> temp0;
-        if (a <= x) {
-            auto temp1 = std::move(xs);
-            temp1.push_front(std::move(x));
-            auto temp2 = std::move(temp1);
-            temp2.push_front(std::move(a));
-            temp0 = std::move(temp2);
-        } else {
-            auto temp3 = Insert(std::move(a), std::move(xs));
-            temp3.push_front(std::move(x));
-            temp0 = std::move(temp3);
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto a = std::move(arg1);
+    auto x = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    std::deque<T1> temp0;
+    if (a <= x) {
+        auto temp1 = std::move(xs);
+        temp1.push_front(std::move(x));
+        auto temp2 = std::move(temp1);
+        temp2.push_front(std::move(a));
+        temp0 = std::move(temp2);
+    } else {
+        auto temp3 = Insert(std::move(a), std::move(xs));
+        temp3.push_front(std::move(x));
+        temp0 = std::move(temp3);
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -567,17 +512,13 @@ std::deque<T1> InsertSortPart(std::deque<T1> arg1, std::deque<T1> arg2) {
     }
 
     // InsertSortPart (x#xs) ys=InsertSortPart xs (Insert x ys)
-    if (arg1.size() >= 1) {
-        auto x = arg1.front();
-        arg1.erase(arg1.begin(), arg1.begin() + 1);
-        auto xs = std::move(arg1);
-        auto ys = std::move(arg2);
-        auto temp0 = std::move(x);
-        auto temp1 = std::move(ys);
-        return InsertSortPart(std::move(xs), Insert(std::move(temp0), std::move(temp1)));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = arg1.front();
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto xs = std::move(arg1);
+    auto ys = std::move(arg2);
+    auto temp0 = std::move(x);
+    auto temp1 = std::move(ys);
+    return InsertSortPart(std::move(xs), Insert(std::move(temp0), std::move(temp1)));
 }
 
 template<typename T1>
@@ -604,50 +545,46 @@ std::deque<T1> Merge(std::deque<T1> arg1, std::deque<T1> arg2) {
     }
 
     // Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys))
-    if (arg1.size() >= 1) {
-        if (arg2.size() >= 1) {
-            auto x = arg1.front();
-            arg1.erase(arg1.begin(), arg1.begin() + 1);
-            auto xs = std::move(arg1);
-            auto y = arg2.front();
-            arg2.erase(arg2.begin(), arg2.begin() + 1);
-            auto ys = std::move(arg2);
-            std::deque<T1> temp0;
-            if (x <= y) {
-                auto temp1 = std::move(ys);
-                temp1.push_front(std::move(y));
-                auto temp2 = Merge(std::move(xs), std::move(temp1));
-                temp2.push_front(std::move(x));
-                temp0 = std::move(temp2);
-            } else {
-                auto temp3 = std::move(xs);
-                temp3.push_front(std::move(x));
-                auto temp4 = Merge(std::move(temp3), std::move(ys));
-                temp4.push_front(std::move(y));
-                temp0 = std::move(temp4);
-            }
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto x = arg1.front();
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto xs = std::move(arg1);
+    auto y = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto ys = std::move(arg2);
+    std::deque<T1> temp0;
+    if (x <= y) {
+        auto temp1 = std::move(ys);
+        temp1.push_front(std::move(y));
+        auto temp2 = Merge(std::move(xs), std::move(temp1));
+        temp2.push_front(std::move(x));
+        temp0 = std::move(temp2);
+    } else {
+        auto temp3 = std::move(xs);
+        temp3.push_front(std::move(x));
+        auto temp4 = Merge(std::move(temp3), std::move(ys));
+        temp4.push_front(std::move(y));
+        temp0 = std::move(temp4);
     }
+    return temp0;
 }
 
 template<typename T1>
-std::deque<T1> MergeSort(std::deque<T1> arg1) {
+std::deque<T1> MergeSort(const std::deque<T1> &arg1) {
     // MergeSort [] = []
     if (arg1.empty()) {
         return std::deque<T1>();
     }
 
     // MergeSort (Cons a []) = [a]
-    if (arg1.size() == 1) {
-        auto a = arg1.front();
-        return std::deque<T1>{std::move(a)};
+    if (!arg1.empty()) {
+        if (std::deque<T1>(arg1.begin() + 1, arg1.end()).empty()) {
+            auto a = arg1.front();
+            return std::deque<T1>{std::move(a)};
+        }
     }
 
     // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-    auto xs = std::move(arg1);
+    auto xs = arg1;
     auto temp1 = xs;
     auto temp0 = MergeSort(std::deque<T1>(xs.begin(), xs.begin() + size(std::move(temp1)) / 2));
     auto temp3 = xs;
@@ -660,23 +597,23 @@ std::deque<T1> MergeSort(std::deque<T1> arg1) {
 
 std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2);
 
-std::uint64_t two_fib(std::uint64_t arg1);
+std::uint64_t two_fib(const std::uint64_t &arg1);
 
-std::uint64_t three_fib(std::uint64_t arg1);
+std::uint64_t three_fib(const std::uint64_t &arg1);
 
-std::uint64_t four_fib(std::uint64_t arg1);
+std::uint64_t four_fib(const std::uint64_t &arg1);
 
-std::uint64_t Jacobsthal(std::uint64_t arg1);
+std::uint64_t Jacobsthal(const std::uint64_t &arg1);
 
-std::uint64_t Narayana(std::uint64_t arg1);
+std::uint64_t Narayana(const std::uint64_t &arg1);
 
-std::uint64_t Leonardo(std::uint64_t arg1);
+std::uint64_t Leonardo(const std::uint64_t &arg1);
 
-std::uint64_t Padua(std::uint64_t arg1);
+std::uint64_t Padua(const std::uint64_t &arg1);
 
-std::uint64_t Pell(std::uint64_t arg1);
+std::uint64_t Pell(const std::uint64_t &arg1);
 
-std::uint64_t Lucas(std::uint64_t arg1);
+std::uint64_t Lucas(const std::uint64_t &arg1);
 
 template<typename T1>
 std::uint64_t slength(std::deque<T1> arg1) {
@@ -686,13 +623,9 @@ std::uint64_t slength(std::deque<T1> arg1) {
     }
 
     // slength (x # xs) = 1 + slength xs
-    if (arg1.size() >= 1) {
-        arg1.erase(arg1.begin(), arg1.begin() + 1);
-        auto xs = std::move(arg1);
-        return 1 + slength(std::move(xs));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto xs = std::move(arg1);
+    return 1 + slength(std::move(xs));
 }
 
 template<typename T1>
@@ -710,19 +643,13 @@ std::deque<T1> stake(std::uint64_t arg1, std::deque<T1> arg2) {
     }
 
     // stake (Suc n) (x # xs) = x # stake n xs
-    if (arg1 != 0) {
-        if (arg2.size() >= 1) {
-            auto n = arg1 - 1;
-            auto x = arg2.front();
-            arg2.erase(arg2.begin(), arg2.begin() + 1);
-            auto xs = std::move(arg2);
-            auto temp0 = stake(std::move(n), std::move(xs));
-            temp0.push_front(std::move(x));
-            return temp0;
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = arg1 - 1;
+    auto x = arg2.front();
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    auto temp0 = stake(std::move(n), std::move(xs));
+    temp0.push_front(std::move(x));
+    return temp0;
 }
 
 template<typename T1>
@@ -741,16 +668,10 @@ std::deque<T1> sdrop(std::uint64_t arg1, std::deque<T1> arg2) {
     }
 
     // sdrop (Suc n) (x # xs) = sdrop n xs
-    if (arg1 != 0) {
-        if (arg2.size() >= 1) {
-            auto n = arg1 - 1;
-            arg2.erase(arg2.begin(), arg2.begin() + 1);
-            auto xs = std::move(arg2);
-            return sdrop(std::move(n), std::move(xs));
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto n = arg1 - 1;
+    arg2.erase(arg2.begin(), arg2.begin() + 1);
+    auto xs = std::move(arg2);
+    return sdrop(std::move(n), std::move(xs));
 }
 
 std::deque<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2);
@@ -772,25 +693,19 @@ T1 snth(std::deque<T1> arg1, std::uint64_t arg2) {
     }
 
     // snth (x#xs) (Suc n) = snth xs n
-    if (arg1.size() >= 1) {
-        if (arg2 != 0) {
-            arg1.erase(arg1.begin(), arg1.begin() + 1);
-            auto xs = std::move(arg1);
-            auto n = arg2 - 1;
-            return snth(std::move(xs), std::move(n));
-        }
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    arg1.erase(arg1.begin(), arg1.begin() + 1);
+    auto xs = std::move(arg1);
+    auto n = arg2 - 1;
+    return snth(std::move(xs), std::move(n));
 }
 
 template<typename T1>
-tree<T1> copy_tree(tree<T1> arg1) {
+tree<T1> copy_tree(const tree<T1> &arg1) {
     // copy_tree (Node left x right) = Node (copy_tree left) x (copy_tree right)
     if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto x = std::move(arg1.as_Node().p2_);
-        auto right = std::move(*arg1.as_Node().p3_);
+        auto left = arg1.as_Node().p1();
+        auto x = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
         auto temp0 = tree<T1>::Node(
             copy_tree(std::move(left)),
             std::move(x),
@@ -800,68 +715,52 @@ tree<T1> copy_tree(tree<T1> arg1) {
     }
 
     // copy_tree Tip = Tip
-    if (arg1.is_Tip()) {
-        return tree<T1>::Tip();
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    return tree<T1>::Tip();
 }
 
 template<typename T1>
-bool searchtree1(T1 arg1, tree<T1> arg2) {
+bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
     // searchtree1 a Tip = False
     if (arg2.is_Tip()) {
         return false;
     }
 
     // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
-    if (arg2.is_Node()) {
-        auto a = std::move(arg1);
-        auto left = std::move(*arg2.as_Node().p1_);
-        auto x = std::move(arg2.as_Node().p2_);
-        auto right = std::move(*arg2.as_Node().p3_);
-        return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
 }
 
 template<typename T1>
-bool searchtree2(T1 arg1, tree<T1> arg2) {
+bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
     // searchtree2 a Tip = False
     if (arg2.is_Tip()) {
         return false;
     }
 
     // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
-    if (arg2.is_Node()) {
-        auto a = std::move(arg1);
-        auto left = std::move(*arg2.as_Node().p1_);
-        auto x = std::move(arg2.as_Node().p2_);
-        auto right = std::move(*arg2.as_Node().p3_);
-        return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
 }
 
 template<typename T1>
-bool searchtree3(T1 arg1, tree<T1> arg2) {
+bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
     // searchtree3 a Tip = False
     if (arg2.is_Tip()) {
         return false;
     }
 
     // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
-    if (arg2.is_Node()) {
-        auto a = std::move(arg1);
-        auto left = std::move(*arg2.as_Node().p1_);
-        auto x = std::move(arg2.as_Node().p2_);
-        auto right = std::move(*arg2.as_Node().p3_);
-        return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
 }
 
 template<typename T1>
@@ -878,72 +777,60 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
-    if (arg2.is_Node()) {
-        auto a = std::move(arg1);
-        auto left = std::move(*arg2.as_Node().p1_);
-        auto x = std::move(arg2.as_Node().p2_);
-        auto right = std::move(*arg2.as_Node().p3_);
-        tree<T1> temp0;
-        if (a <= x) {
-            auto temp1 = tree<T1>::Node(
-                inserttree(std::move(a), std::move(left)),
-                std::move(x),
-                std::move(right)
-            );
-            temp0 = std::move(temp1);
-        } else {
-            auto temp2 = tree<T1>::Node(
-                std::move(left),
-                std::move(x),
-                inserttree(std::move(a), std::move(right))
-            );
-            temp0 = std::move(temp2);
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto a = std::move(arg1);
+    auto left = std::move(*arg2.as_Node().p1_);
+    auto x = std::move(arg2.as_Node().p2_);
+    auto right = std::move(*arg2.as_Node().p3_);
+    tree<T1> temp0;
+    if (a <= x) {
+        auto temp1 = tree<T1>::Node(
+            inserttree(std::move(a), std::move(left)),
+            std::move(x),
+            std::move(right)
+        );
+        temp0 = std::move(temp1);
+    } else {
+        auto temp2 = tree<T1>::Node(
+            std::move(left),
+            std::move(x),
+            inserttree(std::move(a), std::move(right))
+        );
+        temp0 = std::move(temp2);
     }
+    return temp0;
 }
 
 template<typename T1>
-std::deque<T1> transtolist(tree<T1> arg1) {
+std::deque<T1> transtolist(const tree<T1> &arg1) {
     // transtolist Tip = []
     if (arg1.is_Tip()) {
         return std::deque<T1>();
     }
 
     // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
-    if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto a = std::move(arg1.as_Node().p2_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        auto temp0 = transtolist(std::move(left));
-        auto temp1 = transtolist(std::move(right));
-        temp0.insert(temp0.end(), temp1.begin(), temp1.end());
-        auto temp2 = std::move(temp0);
-        temp2.push_front(std::move(a));
-        return temp2;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto left = arg1.as_Node().p1();
+    auto a = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
+    auto temp0 = transtolist(std::move(left));
+    auto temp1 = transtolist(std::move(right));
+    temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+    auto temp2 = std::move(temp0);
+    temp2.push_front(std::move(a));
+    return temp2;
 }
 
 template<typename T1>
 T1 rightest(tree<T1> arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
-    if (arg1.is_Node()) {
-        auto x = std::move(arg1.as_Node().p2_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        T1 temp0;
-        if (right.is_Tip()) {
-            temp0 = std::move(x);
-        } else {
-            temp0 = rightest(std::move(right));
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto x = std::move(arg1.as_Node().p2_);
+    auto right = std::move(*arg1.as_Node().p3_);
+    T1 temp0;
+    if (right.is_Tip()) {
+        temp0 = std::move(x);
+    } else {
+        temp0 = rightest(std::move(right));
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -954,19 +841,15 @@ tree<T1> rightestleft(tree<T1> arg1) {
     }
 
     // rightestleft (Node left x right) =(if right=Tip then left  ...
-    if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        tree<T1> temp0;
-        if (right.is_Tip()) {
-            temp0 = std::move(left);
-        } else {
-            temp0 = rightestleft(std::move(right));
-        }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+    auto left = std::move(*arg1.as_Node().p1_);
+    auto right = std::move(*arg1.as_Node().p3_);
+    tree<T1> temp0;
+    if (right.is_Tip()) {
+        temp0 = std::move(left);
+    } else {
+        temp0 = rightestleft(std::move(right));
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -977,32 +860,28 @@ tree<T1> deltreeroot(tree<T1> arg1) {
     }
 
     // deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) )
-    if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        tree<T1> temp0;
-        if (right.is_Tip()) {
-            temp0 = std::move(left);
+    auto left = std::move(*arg1.as_Node().p1_);
+    auto right = std::move(*arg1.as_Node().p3_);
+    tree<T1> temp0;
+    if (right.is_Tip()) {
+        temp0 = std::move(left);
+    } else {
+        tree<T1> temp1;
+        if (left.is_Tip()) {
+            temp1 = std::move(right);
         } else {
-            tree<T1> temp1;
-            if (left.is_Tip()) {
-                temp1 = std::move(right);
-            } else {
-                auto temp2 = left;
-                auto temp3 = left;
-                auto temp4 = tree<T1>::Node(
-                    rightestleft(std::move(temp2)),
-                    rightest(std::move(temp3)),
-                    std::move(right)
-                );
-                temp1 = std::move(temp4);
-            }
-            temp0 = std::move(temp1);
+            auto temp2 = left;
+            auto temp3 = left;
+            auto temp4 = tree<T1>::Node(
+                rightestleft(std::move(temp2)),
+                rightest(std::move(temp3)),
+                std::move(right)
+            );
+            temp1 = std::move(temp4);
         }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+        temp0 = std::move(temp1);
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -1059,25 +938,21 @@ tree<T1> addtreeroot(T1 arg1, tree<T1> arg2) {
     }
 
     // addtreeroot x (Node left m right) = (Node (Node left m right) x Tip)
-    if (arg2.is_Node()) {
-        auto x = std::move(arg1);
-        auto left = std::move(*arg2.as_Node().p1_);
-        auto m = std::move(arg2.as_Node().p2_);
-        auto right = std::move(*arg2.as_Node().p3_);
-        auto temp0 = tree<T1>::Node(
-            std::move(left),
-            std::move(m),
-            std::move(right)
-        );
-        auto temp1 = tree<T1>::Node(
-            std::move(temp0),
-            std::move(x),
-            tree<T1>::Tip()
-        );
-        return temp1;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto x = std::move(arg1);
+    auto left = std::move(*arg2.as_Node().p1_);
+    auto m = std::move(arg2.as_Node().p2_);
+    auto right = std::move(*arg2.as_Node().p3_);
+    auto temp0 = tree<T1>::Node(
+        std::move(left),
+        std::move(m),
+        std::move(right)
+    );
+    auto temp1 = tree<T1>::Node(
+        std::move(temp0),
+        std::move(x),
+        tree<T1>::Tip()
+    );
+    return temp1;
 }
 
 template<typename T1>
@@ -1088,42 +963,38 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     }
 
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
-    if (arg2.is_Node()) {
-        auto a = std::move(arg1);
-        auto left = std::move(*arg2.as_Node().p1_);
-        auto x = std::move(arg2.as_Node().p2_);
-        auto right = std::move(*arg2.as_Node().p3_);
-        tree<T1> temp0;
-        if (a == x) {
-            auto temp1 = tree<T1>::Node(
-                std::move(left),
+    auto a = std::move(arg1);
+    auto left = std::move(*arg2.as_Node().p1_);
+    auto x = std::move(arg2.as_Node().p2_);
+    auto right = std::move(*arg2.as_Node().p3_);
+    tree<T1> temp0;
+    if (a == x) {
+        auto temp1 = tree<T1>::Node(
+            std::move(left),
+            std::move(x),
+            std::move(right)
+        );
+        temp0 = deltreeroot(std::move(temp1));
+    } else {
+        tree<T1> temp2;
+        if (a < x) {
+            auto temp3 = tree<T1>::Node(
+                deltree(std::move(a), std::move(left)),
                 std::move(x),
                 std::move(right)
             );
-            temp0 = deltreeroot(std::move(temp1));
+            temp2 = std::move(temp3);
         } else {
-            tree<T1> temp2;
-            if (a < x) {
-                auto temp3 = tree<T1>::Node(
-                    deltree(std::move(a), std::move(left)),
-                    std::move(x),
-                    std::move(right)
-                );
-                temp2 = std::move(temp3);
-            } else {
-                auto temp4 = tree<T1>::Node(
-                    std::move(left),
-                    std::move(x),
-                    deltree(std::move(a), std::move(right))
-                );
-                temp2 = std::move(temp4);
-            }
-            temp0 = std::move(temp2);
+            auto temp4 = tree<T1>::Node(
+                std::move(left),
+                std::move(x),
+                deltree(std::move(a), std::move(right))
+            );
+            temp2 = std::move(temp4);
         }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+        temp0 = std::move(temp2);
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -1134,43 +1005,39 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     }
 
     // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
-    if (arg3.is_Node()) {
-        auto a = std::move(arg1);
-        auto b = std::move(arg2);
-        auto left = std::move(*arg3.as_Node().p1_);
-        auto x = std::move(arg3.as_Node().p2_);
-        auto right = std::move(*arg3.as_Node().p3_);
-        tree<T1> temp0;
-        if (a == x) {
-            auto temp1 = tree<T1>::Node(
-                std::move(left),
-                std::move(b),
+    auto a = std::move(arg1);
+    auto b = std::move(arg2);
+    auto left = std::move(*arg3.as_Node().p1_);
+    auto x = std::move(arg3.as_Node().p2_);
+    auto right = std::move(*arg3.as_Node().p3_);
+    tree<T1> temp0;
+    if (a == x) {
+        auto temp1 = tree<T1>::Node(
+            std::move(left),
+            std::move(b),
+            std::move(right)
+        );
+        temp0 = std::move(temp1);
+    } else {
+        tree<T1> temp2;
+        if (a < x) {
+            auto temp3 = tree<T1>::Node(
+                changetree(std::move(a), std::move(b), std::move(left)),
+                std::move(x),
                 std::move(right)
             );
-            temp0 = std::move(temp1);
+            temp2 = std::move(temp3);
         } else {
-            tree<T1> temp2;
-            if (a < x) {
-                auto temp3 = tree<T1>::Node(
-                    changetree(std::move(a), std::move(b), std::move(left)),
-                    std::move(x),
-                    std::move(right)
-                );
-                temp2 = std::move(temp3);
-            } else {
-                auto temp4 = tree<T1>::Node(
-                    std::move(left),
-                    std::move(x),
-                    changetree(std::move(a), std::move(b), std::move(right))
-                );
-                temp2 = std::move(temp4);
-            }
-            temp0 = std::move(temp2);
+            auto temp4 = tree<T1>::Node(
+                std::move(left),
+                std::move(x),
+                changetree(std::move(a), std::move(b), std::move(right))
+            );
+            temp2 = std::move(temp4);
         }
-        return temp0;
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
+        temp0 = std::move(temp2);
     }
+    return temp0;
 }
 
 template<typename T1>
@@ -1191,20 +1058,16 @@ std::deque<T1> sorttree(tree<T1> arg1) {
     }
 
     // sorttree (Node left x right) =(MergeSort (transtolist (Node left x right)))
-    if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto x = std::move(arg1.as_Node().p2_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        auto temp1 = tree<T1>::Node(
-            std::move(left),
-            std::move(x),
-            std::move(right)
-        );
-        auto temp0 = transtolist(std::move(temp1));
-        return MergeSort(std::move(temp0));
-    } else { // auto-generated for -Wreturn-type
-        std::abort();
-    }
+    auto left = std::move(*arg1.as_Node().p1_);
+    auto x = std::move(arg1.as_Node().p2_);
+    auto right = std::move(*arg1.as_Node().p3_);
+    auto temp1 = tree<T1>::Node(
+        std::move(left),
+        std::move(x),
+        std::move(right)
+    );
+    auto temp0 = transtolist(std::move(temp1));
+    return MergeSort(std::move(temp0));
 }
 
 // generated by HOL2Cpp

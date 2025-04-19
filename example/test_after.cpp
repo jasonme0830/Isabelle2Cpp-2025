@@ -46,11 +46,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
                 }
 
                 // None \<Rightarrow> None
-                if (!temp8.has_value()) {
-                    return std::optional<std::uint64_t>();
-                } else { // auto-generated for -Wreturn-type
-                    std::abort();
-                }
+                return std::optional<std::uint64_t>();
             })();
             temp4 = temp5;
         } else {
@@ -64,7 +60,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
     return temp3;
 }
 
-std::uint64_t two_fib(std::uint64_t arg1) {
+std::uint64_t two_fib(const std::uint64_t &arg1) {
     // two_fib 0 = 1
     if (arg1 == 0) {
         return 1;
@@ -78,11 +74,11 @@ std::uint64_t two_fib(std::uint64_t arg1) {
     }
 
     // two_fib n = (two_fib (n-1)) + (two_fib (n-2))
-    auto n = std::move(arg1);
+    auto n = arg1;
     return two_fib(n - 1) + two_fib(n - 2);
 }
 
-std::uint64_t three_fib(std::uint64_t arg1) {
+std::uint64_t three_fib(const std::uint64_t &arg1) {
     // three_fib 0 = 1
     if (arg1 == 0) {
         return 1;
@@ -105,11 +101,11 @@ std::uint64_t three_fib(std::uint64_t arg1) {
     }
 
     // three_fib n = (three_fib (n-1) + three_fib (n-2) + three_fib(n-3))
-    auto n = std::move(arg1);
+    auto n = arg1;
     return (three_fib(n - 1) + three_fib(n - 2)) + three_fib(n - 3);
 }
 
-std::uint64_t four_fib(std::uint64_t arg1) {
+std::uint64_t four_fib(const std::uint64_t &arg1) {
     // four_fib 0 = 1
     if (arg1 == 0) {
         return 1;
@@ -143,11 +139,11 @@ std::uint64_t four_fib(std::uint64_t arg1) {
     }
 
     // four_fib n = (four_fib(n-1) + four_fib(n-2) + four_fib(n-3) + four_fib(n-4))
-    auto n = std::move(arg1);
+    auto n = arg1;
     return ((four_fib(n - 1) + four_fib(n - 2)) + four_fib(n - 3)) + four_fib(n - 4);
 }
 
-std::uint64_t Jacobsthal(std::uint64_t arg1) {
+std::uint64_t Jacobsthal(const std::uint64_t &arg1) {
     // Jacobsthal 0 = 2
     if (arg1 == 0) {
         return 2;
@@ -161,11 +157,11 @@ std::uint64_t Jacobsthal(std::uint64_t arg1) {
     }
 
     // Jacobsthal n = (Jacobsthal (n-1)) + 2*(Jacobsthal (n-2))
-    auto n = std::move(arg1);
+    auto n = arg1;
     return Jacobsthal(n - 1) + (2 * Jacobsthal(n - 2));
 }
 
-std::uint64_t Narayana(std::uint64_t arg1) {
+std::uint64_t Narayana(const std::uint64_t &arg1) {
     // Narayana 0 = 1
     if (arg1 == 0) {
         return 1;
@@ -188,11 +184,11 @@ std::uint64_t Narayana(std::uint64_t arg1) {
     }
 
     // Narayana n = Narayana(n-1) + Narayana(n-3)
-    auto n = std::move(arg1);
+    auto n = arg1;
     return Narayana(n - 1) + Narayana(n - 3);
 }
 
-std::uint64_t Leonardo(std::uint64_t arg1) {
+std::uint64_t Leonardo(const std::uint64_t &arg1) {
     // Leonardo 0 = 1
     if (arg1 == 0) {
         return 1;
@@ -206,11 +202,11 @@ std::uint64_t Leonardo(std::uint64_t arg1) {
     }
 
     // Leonardo n = Leonardo(n-1) + Leonardo(n-2) + 1
-    auto n = std::move(arg1);
+    auto n = arg1;
     return (Leonardo(n - 1) + Leonardo(n - 2)) + 1;
 }
 
-std::uint64_t Padua(std::uint64_t arg1) {
+std::uint64_t Padua(const std::uint64_t &arg1) {
     // Padua 0 = 1
     if (arg1 == 0) {
         return 1;
@@ -233,11 +229,11 @@ std::uint64_t Padua(std::uint64_t arg1) {
     }
 
     // Padua n = Padua(n-2) + Padua(n-3)
-    auto n = std::move(arg1);
+    auto n = arg1;
     return Padua(n - 2) + Padua(n - 3);
 }
 
-std::uint64_t Pell(std::uint64_t arg1) {
+std::uint64_t Pell(const std::uint64_t &arg1) {
     // Pell 0 = 0
     if (arg1 == 0) {
         return 0;
@@ -251,11 +247,11 @@ std::uint64_t Pell(std::uint64_t arg1) {
     }
 
     // Pell n = (Pell(n-1)*2)+Pell(n-2)
-    auto n = std::move(arg1);
+    auto n = arg1;
     return (Pell(n - 1) * 2) + Pell(n - 2);
 }
 
-std::uint64_t Lucas(std::uint64_t arg1) {
+std::uint64_t Lucas(const std::uint64_t &arg1) {
     // Lucas 0 = 2
     if (arg1 == 0) {
         return 2;
@@ -269,7 +265,7 @@ std::uint64_t Lucas(std::uint64_t arg1) {
     }
 
     // Lucas n = Lucas(n-1) + Lucas(n-2)
-    auto n = std::move(arg1);
+    auto n = arg1;
     return Lucas(n - 1) + Lucas(n - 2);
 }
 

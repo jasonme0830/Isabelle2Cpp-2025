@@ -656,24 +656,29 @@ struct FunctionDef : Definition
   bool nonexhaustive = false;
   bool memoize = false;
   //标识函数的递归类型：0非递归、1单次递归、2多次递归
+  int func_gen_mode = 1;
   int func_recursive_type = 0;
   int func_recu_mode = 0;
-  int func_memo_mode = 0;
-  int func_gen_mode = 0;
+  int func_mem_mode = 0;
 
   std::string def_name() const override;
 
   bool is_predefined() const override;
   bool is_function_decl() const override;
   bool is_isomorphism() const override;
-  //标识函数的递归类型：0非递归、1单次递归、2多次递归
-  int analyse_func_recu_class();
 
 public:
   void gen_code(Code&) const override;
   //probably use isomorphism datatype, replace
   bool handle_isomorphism_datatype();
   bool judge_isomorphism() const override;
+
+  //确定函数主体的生成模式：0值传递、1move优化、2未定义的优化
+  int judge_func_gen_mode();
+  //确定函数的递归次数，也为记忆化判断进行准备：0非递归、1单词递归、2多次递归
+  int analyse_func_recu_class();
+  //结合close-memo参数、thy中fun前的memoize参数和函数本身的性质判断是否启用记忆化
+  int judge_func_mem_mode();
 };
 
 // as a special DatatypeDef

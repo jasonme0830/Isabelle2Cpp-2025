@@ -21,13 +21,16 @@ void Isomorphism::analyse_func_recu_class()
       else{
         //只检查新加入进来的函数定义
         FunctionDef &function = dynamic_cast<FunctionDef &>(*(*ptr_def));
-        cout << "* one function: " << function.func_memo_mode << endl;
-        cout << "typeinfo: " << typeid(function.func_memo_mode).name() << endl;
+        
+        function.judge_func_gen_mode();
         function.analyse_func_recu_class();
-        cout << "memo: " << theConfig.close_memo() << endl;
-        cout << "## recu_mode: " << function.func_recu_mode << endl;
+        function.judge_func_mem_mode();
+
+        // cout << "typeinfo: " << typeid(function.func_memo_mode).name() << endl;
+        cout << "## recu_class: " << function.func_recursive_type << endl;
+        // cout << "## recu_mode: " << function.func_recu_mode << endl;
         cout << "## gen_mode: " << function.func_gen_mode << endl;
-        cout << "## memo_mode: " << function.func_memo_mode << endl;
+        // cout << "## mem_mode: " << function.func_mem_mode << endl;
       }
     }
     else{
@@ -38,25 +41,21 @@ void Isomorphism::analyse_func_recu_class()
 
 
 int
+FunctionDef::judge_func_gen_mode()
+{
+  //0:值传递  1:move优化  2:未定义的优化
+  if(theConfig.close_move()){
+    func_gen_mode = 0;
+  }else{
+    //默认为1，开启move优化
+    func_gen_mode = 1;
+  }
+
+  return func_gen_mode;
+}
+int
 FunctionDef::analyse_func_recu_class()
 {
-  func_gen_mode = 1;
-  func_recu_mode = 1;
-  func_memo_mode = 1;
-
-  //0:&  1:move  2:memory
-  if(theConfig.close_move()){
-    func_recursive_type = 0;
-    return func_recursive_type;
-  }
-  if(theConfig.close_recu()){
-    func_recursive_type = 1;
-    func_gen_mode = 2;
-    func_recu_mode = 2;
-    func_memo_mode = 2;
-    return func_recursive_type;
-  }
-
 
   std::vector<Equation>::iterator ptr_equa;
   //初始化设置为非递归函数
@@ -88,6 +87,35 @@ FunctionDef::analyse_func_recu_class()
 
   return func_recursive_type; 
 }
+int
+FunctionDef::judge_func_mem_mode()
+{
+  if(theConfig.close_memo()){
+    //调用程序时的--close-memo具有最高优先级
+    func_mem_mode = 0;
+  }else if(memoize == true){
+    //thy文件中fun定义前的memoize参数具有第2优先级
+    func_mem_mode = 1;
+  }else if(func_recursive_type == 2){
+    //函数本身是否发生重复计算优先级最低
+    int input_arg_num = type->types.size() - 1;
+    cout << "---functype num: " << input_arg_num << endl;
+
+    // std::vector<Equation>::iterator ptr_equa;
+    // for (ptr_equa = equations.begin(); ptr_equa != equations.end(); ++ptr_equa){
+
+    // }
+    func_mem_mode = 1;
+  }else{   
+    // 必须先判断函数的递归类型，因为统计递归调用的参数时，没有办法
+    // 处理if-expr中的变量数量问题，需要判断递归调用次数的时候顺便
+    // 提前将if、case这种表达式的equation剔除出去
+    func_mem_mode = 0;
+  }
+  
+  return func_mem_mode;
+}
+
 
 int
 IntegralExpr::trav_judge_recursive(std::string func_name)
