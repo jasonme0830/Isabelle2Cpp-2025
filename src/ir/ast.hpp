@@ -237,6 +237,9 @@ struct Expr
 
   virtual void traversal_replace_cons(std::map<std::string,std::string>&)=0;
   virtual int trav_judge_recursive(std::string)=0;
+  virtual void trav_count_pattern_var(std::map<std::string, int>&)=0;
+  //标记是索引值：-1不操作、0-n增加计数
+  virtual void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int)=0;
   virtual std::string get_expr_class()=0;
 
 };
@@ -256,6 +259,8 @@ public:
 
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -285,6 +290,8 @@ public:
 
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -327,10 +334,14 @@ public:
 
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
+
   int trav_judge_recursive(std::string) override;
   int trav_judge_recursive_common(std::string);
   int trav_judge_recursive_recuCons(std::string);
   int trav_judge_recursive_ifexpr(std::string);
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
+
   std::string get_expr_class() override;
   std::string get_constructor() const;
 };
@@ -353,6 +364,8 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -380,6 +393,8 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -400,6 +415,8 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -412,6 +429,7 @@ struct Equation final
 
 public:
   void gen_funcentity(FuncEntity& func) const;
+  bool judge_mem_mode(const std::vector<std::map<std::string, int>>&);
 };
 
 struct LetinExpr final : Expr
@@ -430,6 +448,8 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -449,6 +469,8 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 
 };
@@ -469,6 +491,8 @@ public:
   void print_expr() const override;
   void traversal_replace_cons(std::map<std::string,std::string>&) override;
   int trav_judge_recursive(std::string) override;
+  void trav_count_pattern_var(std::map<std::string, int>&) override;
+  void trav_count_expr_var(std::string, std::vector<std::map<std::string, int>>&, int) override;
   std::string get_expr_class() override;
 };
 
@@ -655,10 +679,13 @@ struct FunctionDef : Definition
 
   bool nonexhaustive = false;
   bool memoize = false;
-  //标识函数的递归类型：0非递归、1单次递归、2多次递归
-  int func_gen_mode = 1;
+
   int func_recursive_type = 0;
-  int func_recu_mode = 0;
+  //标识函数的生成模式：0值传递、1move优化、2未定义的优化
+  int func_gen_mode = 1;
+  //标识函数的递归类型：0非递归、1单次递归、2多次递归
+  int func_recu_class = 0;
+  //标志函数是否启用记忆化：0禁用、1启用
   int func_mem_mode = 0;
 
   std::string def_name() const override;

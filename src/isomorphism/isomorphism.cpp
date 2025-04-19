@@ -19,7 +19,7 @@ Isomorphism::Isomorphism(Theory& thy)
 
 
   // 第三次遍历，分析函数的递归类型，方便后续优化
-  analyse_func_recu_class();
+  analyse_functionDef();
 }
 
 Isomorphism::~Isomorphism() = default;

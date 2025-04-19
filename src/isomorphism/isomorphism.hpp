@@ -16,7 +16,7 @@ public:
   void find_isomorphism_datatype();
   void replace_iso_type_in_func();
   
-  void analyse_func_recu_class();
+  void analyse_functionDef();
 
 private:
   Theory &thy;
