@@ -144,6 +144,10 @@ FunctionDef::gen_code(Code& code) const
 
   type->gen_funcentity(func);
 
+  if(func.func_gen_mode() == 1){
+    assert_true(func.typeinfos().size() > 1);
+    code.add_header("utility");
+  }
   if(func.func_mem_mode() == 1){
     assert_true(func.typeinfos().size() > 1);
     code.add_header("map");

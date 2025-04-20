@@ -99,7 +99,7 @@ Synthesizer::syn_func_params(const FuncEntity& func)
       params += ", ";
     }
     //根据函数的递归类型决定以什么样的方式进行代码生成优化
-    params += "$arg$"_fs.format(types[i].to_str_as_arg(func.func_recu_class()), i + 1);
+    params += "$arg$"_fs.format(types[i].to_str_as_arg(func.func_gen_mode()), i + 1);
   }
   return params;
 }
@@ -113,7 +113,7 @@ Synthesizer::syn_func_param_types(const FuncEntity& func)
     if (i) {
       param_types += ", ";
     }
-    param_types += "$"_fs.format(types[i].to_str(func.func_recu_class()));
+    param_types += "$"_fs.format(types[i].to_str(func.func_gen_mode()));
   }
   return param_types;
 }

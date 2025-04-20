@@ -1,0 +1,32 @@
+<<<<<<< HEAD
+## In current dir, for test.
+bin/hol2cpp example/test_before.thy -s --predef bin/defs.pre
+
+
+## list
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-move --predef bin/defs.pre
+
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/list/list --close-deque --predef bin/defs.pre
+
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/deque/list --predef bin/defs.pre
+
+## num
+bin/hol2cpp example/optimize/num/num.thy example/optimize/num/raw/num --close-memo --predef bin/defs.pre
+
+bin/hol2cpp example/optimize/num/num.thy example/optimize/num/after/num --predef bin/defs.pre
+
+## tree
+bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/raw/tree --close-move --predef bin/defs.pre
+
+bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/after/tree --predef bin/defs.pre
+
+
+
+--close-move  
+--close-recu
+--close-deque
+--close-isomor  
+--close-class
+--close-reduceCond
+
+This message for second reclone program from gitee
