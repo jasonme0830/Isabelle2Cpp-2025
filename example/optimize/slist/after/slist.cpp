@@ -1,42 +1,45 @@
-#include "defi.hpp"
+#include "slist.hpp"
 
-std::uint64_t natofsnat(std::uint64_t arg1) {
+std::uint64_t natofsnat(snat arg1) {
     // natofsnat sZero = 0
-    if (arg1 == 0) {
+    if (arg1.is_sZero()) {
         return 0;
     }
 
     // natofsnat (sSuc n) = (natofsnat n) + 1
-    auto n = arg1 - 1;
+    auto n = std::move(*arg1.as_sSuc().p1_);
     return natofsnat(std::move(n)) + 1;
 }
 
-std::uint64_t snatofnat(std::uint64_t arg1) {
+snat snatofnat(std::uint64_t arg1) {
     // snatofnat 0 = sZero
     if (arg1 == 0) {
-        return 0;
+        return snat::sZero();
     }
 
     // snatofnat (Suc n) = sSuc (snatofnat n)
     auto n = arg1 - 1;
-    return snatofnat(std::move(n)) + 1;
+    auto temp0 = snat::sSuc(
+        snatofnat(std::move(n))
+    );
+    return temp0;
 }
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2) {
+std::optional<snat> bs(snat arg1, slist<snat> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
-        return std::optional<std::uint64_t>();
+        return std::optional<snat>();
     }
 
     // bs x [y] = If (x = y) (Some sZero) None
     if (arg2.size() == 1) {
         auto x = std::move(arg1);
         auto y = arg2[0];
-        std::optional<std::uint64_t> temp0;
+        std::optional<snat> temp0;
         if (x == y) {
-            temp0 = std::make_optional<std::uint64_t>(0);
+            temp0 = std::make_optional<snat>(snat::sZero());
         } else {
-            temp0 = std::optional<std::uint64_t>();
+            temp0 = std::optional<snat>();
         }
         return temp0;
     }
@@ -49,11 +52,11 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
     auto temp2 = ys;
     auto temp1 = temp2[m];
     auto y = temp1;
-    std::optional<std::uint64_t> temp3;
+    std::optional<snat> temp3;
     if (y == x) {
-        temp3 = std::make_optional<std::uint64_t>(std::move(m));
+        temp3 = std::make_optional<snat>(std::move(m));
     } else {
-        std::optional<std::uint64_t> temp4;
+        std::optional<snat> temp4;
         if (y < x) {
             auto temp5 = ([&] {
                 auto temp6 = m + 1;
@@ -64,11 +67,11 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp8.has_value()) {
                     auto n = temp8.value();
-                    return std::make_optional<std::uint64_t>((m + n) + 1);
+                    return std::make_optional<snat>((m + n) + 1);
                 }
 
                 // None \<Rightarrow> None
-                return std::optional<std::uint64_t>();
+                return std::optional<snat>();
             })();
             temp4 = temp5;
         } else {
@@ -82,38 +85,38 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
     return temp3;
 }
 
-std::uint64_t fib(const std::uint64_t &arg1) {
-    auto impl = [&]() -> std::uint64_t {
+snat fib(snat arg1) {
+    auto impl = [&]() -> snat {
         // fib sZero = (Suc sZero)
-        if (arg1 == 0) {
-            return 0 + 1;
+        if (arg1.is_sZero()) {
+            return snat::sZero() + 1;
         }
 
         // fib (Suc sZero) = (Suc sZero)
         if (arg1 != 0) {
-            if (arg1 - 1 == 0) {
-                return 0 + 1;
+            if (arg1 - 1.is_sZero()) {
+                return std::uint64_t::sZero() + 1;
             }
         }
 
         // fib n = (fib (n - (Suc sZero))) + (fib (n - (Suc(Suc sZero))))
-        auto n = arg1;
-        return fib(n - (0 + 1)) + fib(n - ((0 + 1) + 1));
+        auto n = std::move(arg1);
+        return fib(n - (snat::sZero() + 1)) + fib(n - ((snat::sZero() + 1) + 1));
     };
 
-    static std::map<std::tuple<std::uint64_t>, std::uint64_t> cache;
+    static std::map<std::tuple<snat>, snat> cache;
     auto args = std::make_tuple(arg1);
     auto it = cache.find(args);
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::deque<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
+slist<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
     // supto i j = (if i \<ge> j then sNil else i # supto (i + 1) j)
     auto i = std::move(arg1);
     auto j = std::move(arg2);
-    std::deque<std::uint64_t> temp0;
+    slist<std::uint64_t> temp0;
     if (i >= j) {
-        temp0 = std::deque<std::uint64_t>();
+        temp0 = slist<std::uint64_t>::sNil();
     } else {
         auto temp1 = supto(i + 1, std::move(j));
         temp1.push_front(i);

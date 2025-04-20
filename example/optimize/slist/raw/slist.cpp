@@ -1,6 +1,6 @@
-#include "defi.hpp"
+#include "slist.hpp"
 
-std::uint64_t natofsnat(const snat &arg1) {
+std::uint64_t natofsnat(snat arg1) {
     // natofsnat sZero = 0
     if (arg1.is_sZero()) {
         return 0;
@@ -8,10 +8,10 @@ std::uint64_t natofsnat(const snat &arg1) {
 
     // natofsnat (sSuc n) = (natofsnat n) + 1
     auto n = arg1.as_sSuc().p1();
-    return natofsnat(std::move(n)) + 1;
+    return natofsnat(n) + 1;
 }
 
-snat snatofnat(const std::uint64_t &arg1) {
+snat snatofnat(std::uint64_t arg1) {
     // snatofnat 0 = sZero
     if (arg1 == 0) {
         return snat::sZero();
@@ -20,12 +20,12 @@ snat snatofnat(const std::uint64_t &arg1) {
     // snatofnat (Suc n) = sSuc (snatofnat n)
     auto n = arg1 - 1;
     auto temp0 = snat::sSuc(
-        snatofnat(std::move(n))
+        snatofnat(n)
     );
     return temp0;
 }
 
-std::optional<snat> bs(const snat &arg1, const slist<snat> &arg2) {
+std::optional<snat> bs(snat arg1, slist<snat> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<snat>();
@@ -54,19 +54,16 @@ std::optional<snat> bs(const snat &arg1, const slist<snat> &arg2) {
     auto y = temp1;
     std::optional<snat> temp3;
     if (y == x) {
-        temp3 = std::make_optional<snat>(std::move(m));
+        temp3 = std::make_optional<snat>(m);
     } else {
         std::optional<snat> temp4;
         if (y < x) {
             auto temp5 = ([&] {
-                auto temp6 = m + 1;
-                auto temp7 = std::move(ys);
-                temp7.erase(temp7.begin(), std::next(temp7.begin(), temp6));
-                auto temp8 = bs(std::move(x), std::move(temp7));
+                auto temp6 = bs(x, std::deque<snat>(ys.begin() + m + 1, ys.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
-                if (temp8.has_value()) {
-                    auto n = temp8.value();
+                if (temp6.has_value()) {
+                    auto n = temp6.value();
                     return std::make_optional<snat>((m + n) + 1);
                 }
 
@@ -75,35 +72,39 @@ std::optional<snat> bs(const snat &arg1, const slist<snat> &arg2) {
             })();
             temp4 = temp5;
         } else {
-            auto temp9 = std::move(m);
-            auto temp10 = std::move(ys);
-            temp10.erase(std::next(temp10.begin(), temp9), temp10.end());
-            temp4 = bs(std::move(x), std::move(temp10));
+            temp4 = bs(x, slist<snat>(ys.begin(), ys.begin() + m));
         }
-        temp3 = std::move(temp4);
+        temp3 = temp4;
     }
     return temp3;
 }
 
-snat fib(const snat &arg1) {
-    // fib sZero = (Suc sZero)
-    if (arg1.is_sZero()) {
-        return snat::sZero() + 1;
-    }
-
-    // fib (Suc sZero) = (Suc sZero)
-    if (arg1 != 0) {
-        if (arg1 - 1.is_sZero()) {
-            return std::uint64_t::sZero() + 1;
+snat fib(snat arg1) {
+    auto impl = [&]() -> snat {
+        // fib sZero = (Suc sZero)
+        if (arg1.is_sZero()) {
+            return snat::sZero() + 1;
         }
-    }
 
-    // fib n = (fib (n - (Suc sZero))) + (fib (n - (Suc(Suc sZero))))
-    auto n = arg1;
-    return fib(n - (snat::sZero() + 1)) + fib(n - ((snat::sZero() + 1) + 1));
+        // fib (Suc sZero) = (Suc sZero)
+        if (arg1 != 0) {
+            if (arg1 - 1.is_sZero()) {
+                return std::uint64_t::sZero() + 1;
+            }
+        }
+
+        // fib n = (fib (n - (Suc sZero))) + (fib (n - (Suc(Suc sZero))))
+        auto n = arg1;
+        return fib(n - (snat::sZero() + 1)) + fib(n - ((snat::sZero() + 1) + 1));
+    };
+
+    static std::map<std::tuple<snat>, snat> cache;
+    auto args = std::make_tuple(arg1);
+    auto it = cache.find(args);
+    return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-slist<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2) {
+slist<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
     // supto i j = (if i \<ge> j then sNil else i # supto (i + 1) j)
     auto i = arg1;
     auto j = arg2;
@@ -111,9 +112,9 @@ slist<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2)
     if (i >= j) {
         temp0 = slist<std::uint64_t>::sNil();
     } else {
-        auto temp1 = supto(i + 1, std::move(j));
+        auto temp1 = supto(i + 1, j);
         temp1.push_front(i);
-        temp0 = std::move(temp1);
+        temp0 = temp1;
     }
     return temp0;
 }
