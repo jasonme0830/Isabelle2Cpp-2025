@@ -207,6 +207,11 @@ fun rightest::"'a tree => 'a" where
                                  else (rightest right)) "
 (*"rightest Tip=  "*)
 
+fun delRightest::"'a tree => 'a tree" where
+"delRightest (Node left x Tip) = left" |
+"delRightest (Node left x right) = Node left x (delRightest right)" |
+"delRightest Tip = Tip"
+
 fun rightestleft::"'a tree => 'a tree "where
 "rightestleft Tip = Tip"|
 "rightestleft (Node left x right) =(if right=Tip then left 
@@ -214,7 +219,11 @@ fun rightestleft::"'a tree => 'a tree "where
 
 fun deltreeroot::"'a tree => 'a tree"where
 "deltreeroot Tip = Tip "|
-"deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) ) "
+"deltreeroot (Node left x right) =(if right=Tip 
+                                      then left 
+                                      else if left=Tip 
+                                              then right 
+                                              else(Node (delRightest left)(rightest left)right ) ) "
 
 fun addtreeroot::"'a => 'a tree => 'a tree" where
 "addtreeroot x Tip = Node Tip x Tip" |

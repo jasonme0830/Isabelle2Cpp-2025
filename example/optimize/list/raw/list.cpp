@@ -1,6 +1,6 @@
 #include "list.hpp"
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2) {
+std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
@@ -9,7 +9,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
     // bs x [y] = If (x = y) (Some 0) None
     if (arg2.size() == 1) {
         auto x = arg1;
-        auto y = arg2[0];
+        auto y = *std::next(arg2.begin(), 0);
         std::optional<std::uint64_t> temp0;
         if (x == y) {
             temp0 = std::make_optional<std::uint64_t>(0);
@@ -25,7 +25,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
     auto temp0 = ys.size() / 2;
     auto m = temp0;
     auto temp2 = ys;
-    auto temp1 = temp2[m];
+    auto temp1 = *std::next(temp2.begin(), m);
     auto y = temp1;
     std::optional<std::uint64_t> temp3;
     if (y == x) {
@@ -34,7 +34,7 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
         std::optional<std::uint64_t> temp4;
         if (y < x) {
             auto temp5 = ([&] {
-                auto temp6 = bs(x, std::deque<std::uint64_t>(ys.begin() + m + 1, ys.end()));
+                auto temp6 = bs(x, std::list<std::uint64_t>(std::next(ys.begin(), m + 1), ys.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp6.has_value()) {
@@ -47,20 +47,20 @@ std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> ar
             })();
             temp4 = temp5;
         } else {
-            temp4 = bs(x, std::deque<std::uint64_t>(ys.begin(), ys.begin() + m));
+            temp4 = bs(x, std::list<std::uint64_t>(ys.begin(), std::next(ys.begin(), m)));
         }
         temp3 = temp4;
     }
     return temp3;
 }
 
-std::deque<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
+std::list<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
     // supto i j = (if i \<ge> j then [] else i # supto (i + 1) j)
     auto i = arg1;
     auto j = arg2;
-    std::deque<std::uint64_t> temp0;
+    std::list<std::uint64_t> temp0;
     if (i >= j) {
-        temp0 = std::deque<std::uint64_t>();
+        temp0 = std::list<std::uint64_t>();
     } else {
         auto temp1 = supto(i + 1, j);
         temp1.push_front(i);

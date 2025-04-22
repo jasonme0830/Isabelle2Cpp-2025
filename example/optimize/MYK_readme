@@ -4,7 +4,7 @@ bin/hol2cpp example/test_before.thy -s --predef bin/defs.pre
 
 
 ## list
-bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-move --predef bin/defs.pre
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-move --close-deque --predef bin/defs.pre
 
 bin/hol2cpp example/optimize/list/list.thy example/optimize/list/list/list --close-deque --predef bin/defs.pre
 

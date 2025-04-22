@@ -307,6 +307,33 @@ T1 rightest(tree<T1> arg1) {
 }
 
 template<typename T1>
+tree<T1> delRightest(tree<T1> arg1) {
+    // delRightest (Node left x Tip) = left
+    if (arg1.is_Node()) {
+        if (arg1.as_Node().p3().is_Tip()) {
+            auto left = arg1.as_Node().p1();
+            return left;
+        }
+    }
+
+    // delRightest (Node left x right) = Node left x (delRightest right)
+    if (arg1.is_Node()) {
+        auto left = arg1.as_Node().p1();
+        auto x = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
+        auto temp0 = tree<T1>::Node(
+            left,
+            x,
+            delRightest(right)
+        );
+        return temp0;
+    }
+
+    // delRightest Tip = Tip
+    return tree<T1>::Tip();
+}
+
+template<typename T1>
 tree<T1> rightestleft(tree<T1> arg1) {
     // rightestleft Tip = Tip
     if (arg1.is_Tip()) {
@@ -332,7 +359,7 @@ tree<T1> deltreeroot(tree<T1> arg1) {
         return tree<T1>::Tip();
     }
 
-    // deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) )
+    // deltreeroot (Node left x right) =(if right=Tip  ...
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
     tree<T1> temp0;
@@ -344,7 +371,7 @@ tree<T1> deltreeroot(tree<T1> arg1) {
             temp1 = right;
         } else {
             auto temp2 = tree<T1>::Node(
-                rightestleft(left),
+                delRightest(left),
                 rightest(left),
                 right
             );

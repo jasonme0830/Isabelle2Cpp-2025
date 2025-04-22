@@ -76,19 +76,6 @@ fun MergeSort::"('a::ord)list=>'a slist " where
 "MergeSort  (sCons a sNil) = [a] "|
 "MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs)) "
 
-fun bs :: "snat \<Rightarrow> snat slist \<Rightarrow> snat option" where
-  "bs x [] = None" |
-  "bs x [y] = If (x = y) (Some sZero) None" |
-  "bs x ys = (let m = (length ys) div 2 in
-      let y = ys ! m in
-        If (y = x)
-          (Some m)
-          (If (y < x)
-            (case bs x (drop (m + 1) ys) of Some n \<Rightarrow> Some (m + n + 1) | None \<Rightarrow> None)
-            (bs x (take m ys)
-          )
-      )
-  )"
 
 fun fib :: "snat \<Rightarrow> snat" where
   "fib sZero = (Suc sZero)" |

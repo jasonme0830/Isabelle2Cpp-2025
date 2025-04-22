@@ -307,6 +307,33 @@ T1 rightest(tree<T1> arg1) {
 }
 
 template<typename T1>
+tree<T1> delRightest(tree<T1> arg1) {
+    // delRightest (Node left x Tip) = left
+    if (arg1.is_Node()) {
+        if (std::move(*arg1.as_Node().p3_).is_Tip()) {
+            auto left = std::move(*arg1.as_Node().p1_);
+            return left;
+        }
+    }
+
+    // delRightest (Node left x right) = Node left x (delRightest right)
+    if (arg1.is_Node()) {
+        auto left = std::move(*arg1.as_Node().p1_);
+        auto x = std::move(arg1.as_Node().p2_);
+        auto right = std::move(*arg1.as_Node().p3_);
+        auto temp0 = tree<T1>::Node(
+            std::move(left),
+            std::move(x),
+            delRightest(std::move(right))
+        );
+        return temp0;
+    }
+
+    // delRightest Tip = Tip
+    return tree<T1>::Tip();
+}
+
+template<typename T1>
 tree<T1> rightestleft(tree<T1> arg1) {
     // rightestleft Tip = Tip
     if (arg1.is_Tip()) {
@@ -332,7 +359,7 @@ tree<T1> deltreeroot(tree<T1> arg1) {
         return tree<T1>::Tip();
     }
 
-    // deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) )
+    // deltreeroot (Node left x right) =(if right=Tip  ...
     auto left = std::move(*arg1.as_Node().p1_);
     auto right = std::move(*arg1.as_Node().p3_);
     tree<T1> temp0;
@@ -346,7 +373,7 @@ tree<T1> deltreeroot(tree<T1> arg1) {
             auto temp2 = left;
             auto temp3 = left;
             auto temp4 = tree<T1>::Node(
-                rightestleft(std::move(temp2)),
+                delRightest(std::move(temp2)),
                 rightest(std::move(temp3)),
                 std::move(right)
             );
