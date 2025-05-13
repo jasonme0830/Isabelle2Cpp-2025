@@ -49,18 +49,18 @@ fun ModifyIndex::"snat=>'a=>'a slist=>'a slist "where
 fun SearchList::"'a=>'a slist=>bool "where
 "SearchList a sNil = False"|
 "SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))"
+
 fun app::  "'a slist =>'a slist => 'a slist " where 
 "app sNil as =as"|
 "app(sCons a as ) bs= sCons a (app as bs)"
-fun Insert::"'a::ord => 'a slist => 'a slist " where
-"Insert a sNil =sCons a sNil "|
-"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
 fun Reverse::  "'a slist =>'a slist " where
 "Reverse sNil = sNil"|
 "Reverse (sCons a as) = app(Reverse as)(sCons a sNil)"
 
 
-
+fun Insert::"'a::ord => 'a slist => 'a slist " where
+"Insert a sNil =sCons a sNil "|
+"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
 fun InsertSortPart::"('a::ord)slist => 'a slist => 'a slist "where
 "InsertSortPart sNil ys=ys "|
 "InsertSortPart (sCons x xs) ys=InsertSortPart xs (Insert x ys) "

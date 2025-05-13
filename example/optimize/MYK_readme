@@ -16,9 +16,9 @@ bin/hol2cpp example/optimize/num/num.thy example/optimize/num/raw/num --close-me
 bin/hol2cpp example/optimize/num/num.thy example/optimize/num/after/num --predef bin/defs.pre
 
 ## tree
-bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/raw/tree --close-move --predef bin/defs.pre
+bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/raw/tree --close-move --close-deque --predef bin/defs.pre
 
-bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/after/tree --predef bin/defs.pre
+bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/after/tree --close-deque --predef bin/defs.pre
 
 ## slist
 bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/raw/slist --close-isomor --close-move --predef bin/defs.pre

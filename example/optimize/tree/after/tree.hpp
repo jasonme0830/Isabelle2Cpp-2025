@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include <deque>
+#include <list>
 #include <memory>
 #include <utility>
 #include <variant>
@@ -274,10 +274,10 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
 }
 
 template<typename T1>
-std::deque<T1> transtolist(tree<T1> arg1) {
+std::list<T1> transtolist(tree<T1> arg1) {
     // transtolist Tip = []
     if (arg1.is_Tip()) {
-        return std::deque<T1>();
+        return std::list<T1>();
     }
 
     // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
@@ -286,7 +286,7 @@ std::deque<T1> transtolist(tree<T1> arg1) {
     auto right = std::move(*arg1.as_Node().p3_);
     auto temp0 = transtolist(std::move(left));
     auto temp1 = transtolist(std::move(right));
-    temp0.insert(temp0.end(), temp1.begin(), temp1.end());
+    temp0.splice(temp0.end(), temp1);
     auto temp2 = std::move(temp0);
     temp2.push_front(std::move(a));
     return temp2;
@@ -294,16 +294,17 @@ std::deque<T1> transtolist(tree<T1> arg1) {
 
 template<typename T1>
 T1 rightest(tree<T1> arg1) {
-    // rightest (Node left x right) = (if right=Tip then x  ...
-    auto x = std::move(arg1.as_Node().p2_);
-    auto right = std::move(*arg1.as_Node().p3_);
-    T1 temp0;
-    if (right.is_Tip()) {
-        temp0 = std::move(x);
-    } else {
-        temp0 = rightest(std::move(right));
+    // rightest (Node left x Tip) = x
+    if (arg1.is_Node()) {
+        if (std::move(*arg1.as_Node().p3_).is_Tip()) {
+            auto x = std::move(arg1.as_Node().p2_);
+            return x;
+        }
     }
-    return temp0;
+
+    // rightest (Node left x right) = rightest right
+    auto right = std::move(*arg1.as_Node().p3_);
+    return rightest(std::move(right));
 }
 
 template<typename T1>
@@ -359,29 +360,42 @@ tree<T1> deltreeroot(tree<T1> arg1) {
         return tree<T1>::Tip();
     }
 
-    // deltreeroot (Node left x right) =(if right=Tip  ...
+    // deltreeroot (Node Tip x Tip) = Tip
+    if (arg1.is_Node()) {
+        if (std::move(*arg1.as_Node().p1_).is_Tip()) {
+            if (std::move(*arg1.as_Node().p3_).is_Tip()) {
+                return tree<T1>::Tip();
+            }
+        }
+    }
+
+    // deltreeroot (Node Tip x right) = right
+    if (arg1.is_Node()) {
+        if (std::move(*arg1.as_Node().p1_).is_Tip()) {
+            auto right = std::move(*arg1.as_Node().p3_);
+            return right;
+        }
+    }
+
+    // deltreeroot (Node left x Tip) = left
+    if (arg1.is_Node()) {
+        if (std::move(*arg1.as_Node().p3_).is_Tip()) {
+            auto left = std::move(*arg1.as_Node().p1_);
+            return left;
+        }
+    }
+
+    // deltreeroot (Node left x right) = Node (delRightest left)(rightest left) right
     auto left = std::move(*arg1.as_Node().p1_);
     auto right = std::move(*arg1.as_Node().p3_);
-    tree<T1> temp0;
-    if (right.is_Tip()) {
-        temp0 = std::move(left);
-    } else {
-        tree<T1> temp1;
-        if (left.is_Tip()) {
-            temp1 = std::move(right);
-        } else {
-            auto temp2 = left;
-            auto temp3 = left;
-            auto temp4 = tree<T1>::Node(
-                delRightest(std::move(temp2)),
-                rightest(std::move(temp3)),
-                std::move(right)
-            );
-            temp1 = std::move(temp4);
-        }
-        temp0 = std::move(temp1);
-    }
-    return temp0;
+    auto temp0 = left;
+    auto temp1 = left;
+    auto temp2 = tree<T1>::Node(
+        delRightest(std::move(temp0)),
+        rightest(std::move(temp1)),
+        std::move(right)
+    );
+    return temp2;
 }
 
 template<typename T1>
@@ -541,10 +555,10 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
 }
 
 template<typename T1>
-std::deque<T1> sorttree(tree<T1> arg1) {
+std::list<T1> sorttree(tree<T1> arg1) {
     // sorttree Tip = []
     if (arg1.is_Tip()) {
-        return std::deque<T1>();
+        return std::list<T1>();
     }
 
     // sorttree (Node Tip a Tip) =[a]
@@ -552,7 +566,7 @@ std::deque<T1> sorttree(tree<T1> arg1) {
         if (std::move(*arg1.as_Node().p1_).is_Tip()) {
             if (std::move(*arg1.as_Node().p3_).is_Tip()) {
                 auto a = std::move(arg1.as_Node().p2_);
-                return std::deque<T1>{std::move(a)};
+                return std::list<T1>{std::move(a)};
             }
         }
     }

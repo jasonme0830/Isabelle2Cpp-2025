@@ -31,10 +31,9 @@ fun transtolist:: "'a tree =>'a list " where
 (*"transtolist (Node Tip a Tip) = [a]  "|*)
 "transtolist (Node left a right) =( a # (transtolist left)@(transtolist right)) "
 
-fun rightest::"'a tree => 'a" where
-"rightest (Node left x right) = (if right=Tip then x 
-                                 else (rightest right)) "
-(*"rightest Tip=  "*)
+fun rightest::"'a tree => 'a " where
+"rightest (Node left x Tip) = x" |
+"rightest (Node left x right) = rightest right" 
 
 fun delRightest::"'a tree => 'a tree" where
 "delRightest (Node left x Tip) = left" |
@@ -48,11 +47,10 @@ fun rightestleft::"'a tree => 'a tree "where
 
 fun deltreeroot::"'a tree => 'a tree"where
 "deltreeroot Tip = Tip "|
-"deltreeroot (Node left x right) =(if right=Tip 
-                                      then left 
-                                      else if left=Tip 
-                                              then right 
-                                              else(Node (delRightest left)(rightest left)right ) ) "
+"deltreeroot (Node Tip x Tip) = Tip" |
+"deltreeroot (Node Tip x right) = right" |
+"deltreeroot (Node left x Tip) = left" |
+"deltreeroot (Node left x right) = Node (delRightest left)(rightest left) right" 
 
 fun addtreeroot::"'a => 'a tree => 'a tree" where
 "addtreeroot x Tip = Node Tip x Tip" |
