@@ -7,7 +7,7 @@ namespace hol2cpp{
 Isomorphism::Isomorphism(Theory& thy)
 :thy(thy)
 {
-  if(!theConfig.close_isomor())
+  if(!theConfig.close_isomorType())
   {
     // 第一次遍历，比较是否有同构的数据类型
     find_isomorphism_datatype();

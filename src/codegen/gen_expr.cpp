@@ -41,9 +41,8 @@ VarExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
   // for variables
   else {
     auto var = func.get_variable(name);
-    // cout<<var<<" "<<movable<<" ";
-    // if (movable && typeinfo.movable()) 
-    if(movable && func.func_gen_mode() == 1)    {
+    // movable表示最后一次使用，typeinfo代表当前变量的类型
+    if (movable && typeinfo.movable()) {
       // cout<<"var: std::move($)"_fs.format(var)<<endl;
       return "std::move($)"_fs.format(var); // for move-list
     } else {
@@ -88,7 +87,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto xs = args[1]->gen_expr(func);
 
     // if (is_moved(xs) && theConfig.move_list()) 
-    if(is_moved(xs) && func.func_gen_mode() == 1){
+    if(is_moved(xs) && theConfig.close_moveStd() == false){
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
       func.add_expr("auto $ = $;", temp_n, n);
@@ -116,7 +115,7 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     auto xs = args[1]->gen_expr(func);
 
     // if (is_moved(xs) && theConfig.move_list()) 
-    if(is_moved(xs) && func.func_gen_mode() == 1)
+    if(is_moved(xs) && theConfig.close_moveStd() == false)
     {
       auto temp_n = func.gen_temp();
       auto temp_xs = func.gen_temp();
@@ -155,7 +154,9 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       func.add_expr("$.splice($.end(), $);", temp0, temp0, temp1);
     }
 
-    if(func.func_gen_mode() == 1){
+    //暂时不清楚是否应该改成theConfig.close_moveStd()
+    // if(func.func_gen_mode() == 2){
+    if(theConfig.close_moveStd() == false){
       return move_expr(temp0);
     } else {
       return temp0;
@@ -210,7 +211,9 @@ ConsExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
       .add_expr("}");
 
     return res;
-  } else if (constructor == "set") {
+  } 
+  
+  else if (constructor == "set") {
     assert_true(args.size() == 1);
     func.code().add_header("set");
 
@@ -309,7 +312,7 @@ ConsExpr::gen_expr_impl_listCons(FuncEntity& func, const TypeInfo& typeinfo) con
     .add_expr("$.push_front($);", temp, x);
 
   // if (theConfig.move_list()) 
-  if(func.func_gen_mode() == 1)
+  if(theConfig.close_moveStd() == false)
   {
     return move_expr(temp);
   } else {
@@ -376,6 +379,8 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
   case 0:
     return temp;
   case 1:
+    return temp;
+  case 2:
     return move_expr(temp);
   default:
     return move_expr(temp);
@@ -527,9 +532,9 @@ ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo
   switch (func.func_gen_mode())
   {
   case 2:
+    temp = move_expr(temp);
     break;
   case 1:
-    temp = move_expr(temp);
     break;
   case 0:
     break;
@@ -570,7 +575,6 @@ ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo,
     temp = move_expr(temp);
     break;
   case 1:
-    temp = move_expr(temp);
     break;
   case 0:
     break;

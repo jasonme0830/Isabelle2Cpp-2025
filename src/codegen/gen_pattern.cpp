@@ -87,7 +87,8 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
   else if (constructor == "Cons") {
     // if (!theConfig.move_list()) 
     // if(func.func_recu_class() != 1)
-    if(func.func_gen_mode() == 0)
+    // if(func.func_gen_mode() == 0)
+    if(!theConfig.close_moveStd())
     {
       func.add_pattern_cond("!$.empty()", prev);
       args[0]->gen_pattern(func, prev + ".front()");
@@ -160,7 +161,8 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
             n);
         }
 
-        var_expr->gen_pattern(func, "std::move($)"_fs.format(prev));
+        // var_expr->gen_pattern(func, "std::move($)"_fs.format(prev));
+        var_expr->gen_pattern(func, "$"_fs.format(prev));
       }
     }
   }
@@ -178,14 +180,14 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
         args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));
         break;
       case 1:
+        args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));
+        break;
+      case 2:
         if(components[pos][i] == self){
           args[i]->gen_pattern(func,"std::move(*$.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         }else{
           args[i]->gen_pattern(func,"std::move($.as_$().p$_)"_fs.format(prev, constructor, i + 1));
         }
-        break;
-      case 2:
-        args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));
         break;
       default:
         args[i]->gen_pattern(func,"$.as_$().p$()"_fs.format(prev, constructor, i + 1));

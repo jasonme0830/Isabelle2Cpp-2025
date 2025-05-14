@@ -28,6 +28,7 @@ private:
   void syn_class_def_valueConstructor(const Datatype &, const TypeInfo &);
   void syn_class_def_copyConstructor(const Datatype &);
   void syn_class_def_moveConstructor(const Datatype &);
+  void syn_class_def_returnSelfNode(const Datatype &);
   void syn_class_def_staticConstructor(const Datatype &);
   void syn_class_def_isfunction(const Datatype &);
   void syn_class_def_asfunction(const Datatype &);

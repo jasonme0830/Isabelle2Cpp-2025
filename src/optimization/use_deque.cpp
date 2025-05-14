@@ -7,13 +7,13 @@ namespace hol2cpp {
 void
 Config::use_deque(bool enable)
 {
-  use_deque_ = !enable;
+  use_deque_ = enable;
 
   if (enable) {
-    return;
+    theTemplateTypeMapping["list"] = "std::deque";
+    theHeaderMapping["list"] = "deque";
   }
 
-  theTemplateTypeMapping["list"] = "std::deque";
-  theHeaderMapping["list"] = "deque";
+
 }
 } // namespace hol2cpp

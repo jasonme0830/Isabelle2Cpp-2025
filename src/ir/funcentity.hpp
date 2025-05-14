@@ -174,9 +174,9 @@ public:
   void is_last_equation(bool is_last); // for reduce-cond
   bool is_last_equation() const;       // for reduce-cond
 
-  // 标志生成模式：0值传递、1move优化、2未定义的优化
+  // 标志生成模式：0值传递、1模拟构造优化、2二次开发move优化
   void func_gen_mode(int num);
-  // 标志生成模式：0值传递、1move优化、2未定义的优化
+  // 标志生成模式：0值传递、1模拟构造优化、2二次开发move优化
   int func_gen_mode() const;
   // 标志函数的递归类别：0非递归、1单词递归、2多次递归
   void func_recu_class(int num);

@@ -104,15 +104,16 @@ parse_config(int argc, char* argv[])
   theConfig.print_type(arg_parser.get<bool>("print-type"));
 
   // set optimizer options
-  theConfig.close_move(arg_parser.get<bool>("close-move"));
-  theConfig.close_recu(arg_parser.get<bool>("close-recu"));
+  theConfig.close_typeCons(arg_parser.get<bool>("close-typeCons"));
+  theConfig.close_moveStd(arg_parser.get<bool>("close-moveStd"));
   theConfig.close_memo(arg_parser.get<bool>("close-memo"));
-  theConfig.reduce_cond(arg_parser.get<bool>("close-reduceCond"));
-  theConfig.use_deque(arg_parser.get<bool>("close-deque"));
-  theConfig.close_isomor(arg_parser.get<bool>("close-isomor"));
+  theConfig.close_reduceCond(arg_parser.get<bool>("close-reduceCond"));
+  theConfig.close_isomorType(arg_parser.get<bool>("close-isomorType"));
 
   // set experimental options
-  theConfig.use_class(arg_parser.get<bool>("close-class"));
+  theConfig.use_deque(arg_parser.get<bool>("use-deque"));
+  theConfig.use_class(arg_parser.get<bool>("use-class"));
+  theConfig.use_struct(arg_parser.get<bool>("use-struct"));
   theConfig.uncurry(arg_parser.get<bool>("uncurry"));
 }
 
@@ -142,12 +143,12 @@ build_parser()
     .default_value(false)
     .implict_value(true);
 
-  arg_parser.add_argument("--close-move")
-    .help("enable close-move")
+  arg_parser.add_argument("--close-typeCons")
+    .help("enable close-typeCons")
     .default_value(false)
     .implict_value(true);
-  arg_parser.add_argument("--close-recu")
-    .help("enable close-recu")
+  arg_parser.add_argument("--close-moveStd")
+    .help("enable close-moveStd")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--close-memo")
@@ -158,17 +159,21 @@ build_parser()
     .help("enable close-reduceCond")
     .default_value(false)
     .implict_value(true);
-  arg_parser.add_argument("--close-deque")
-    .help("enable close-deque")
-    .default_value(false)
-    .implict_value(true);
-  arg_parser.add_argument("--close-isomor")
-    .help("enable isomor")
+  arg_parser.add_argument("--close-isomorType")
+    .help("enable close-isomorType")
     .default_value(false)
     .implict_value(true);
 
-  arg_parser.add_argument("--close-class")
-    .help("close generate class instead struct for a datatype")
+  arg_parser.add_argument("--use-deque")
+    .help("enable use-deque")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--use-class")
+    .help("enable generate class instead struct for a datatype")
+    .default_value(false)
+    .implict_value(true);
+  arg_parser.add_argument("--use-struct")
+    .help("enable generate struct instead class for a datatype")
     .default_value(false)
     .implict_value(true);
   arg_parser.add_argument("--uncurry")

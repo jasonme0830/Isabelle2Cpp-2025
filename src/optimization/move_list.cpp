@@ -7,9 +7,9 @@ using namespace std;
 
 namespace hol2cpp {
 void
-Config::close_move(bool enable)
+Config::close_moveStd(bool enable)
 {
-  close_move_ = enable;
+  close_moveStd_ = enable;
 
   // if (!enable) {
   //   return;

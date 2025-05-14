@@ -33,7 +33,8 @@ Synthesizer::syn_class_template(const Datatype& datatype)
 void
 Synthesizer::syn_class_definition(const Datatype& datatype)
 {
-  auto use_class = theConfig.use_class();
+  // auto use_class = theConfig.use_class();
+  auto use_struct = theConfig.use_struct();
 
   auto& name = datatype.name();
   auto& self = datatype.self();
@@ -41,10 +42,10 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
 
   TypeInfo variant("std::variant");
 
-  if (use_class) {
-    "class $ {\n"_fs.outf(newline(), name);
-  } else {
+  if (use_struct) {
     "struct $ {\n"_fs.outf(newline(), name);
+  } else {
+    "class $ {\n"_fs.outf(newline(), name);
   }
 
   add_indent();
@@ -99,7 +100,7 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   out_.get() << endl;
   
   // generate std::variant<_C0, ..., _Ck> value_;
-  if (use_class) {
+  if (!use_struct) {
     "public:\n"_fs.outf(newline(-2));
     out_.get()<<endl;
   } 
@@ -117,12 +118,17 @@ Synthesizer::syn_class_definition(const Datatype& datatype)
   syn_class_def_moveConstructor(datatype);
   out_.get() << endl;
 
+  // generate return self node member function
+  syn_class_def_returnSelfNode(datatype);
+  out_.get() << endl;
+
   // generate static constructions
   syn_class_def_staticConstructor(datatype);
   // generate is_Ci()
   syn_class_def_isfunction(datatype);
   // generate as_Ci()
   syn_class_def_asfunction(datatype);
+  out_.get() << endl;
 
   //generate copy operator=
   syn_class_def_copyOperator(datatype);
@@ -216,6 +222,51 @@ Synthesizer::syn_class_def_moveConstructor(const Datatype& datatype){
   "}\n"_fs.outf(newline());
 }
 void
+Synthesizer::syn_class_def_returnSelfNode(const Datatype& datatype){
+  //如果关闭了模拟构造优化，self函数就可以不用生成了
+  if(theConfig.close_typeCons()){
+    return;
+  }
+
+  auto& name = datatype.name();
+  auto& self = datatype.self();
+  auto& constructors = datatype.constructors();
+  auto& components = datatype.components();
+  "//返回自身根节点函数\n"_fs.outf(newline());
+  "$ self() const {\n"_fs.outf(newline(), self);
+  add_indent();
+  size_t final_return = 0;
+  for(size_t i = 0; i < components.size(); ++i){
+    if(i>0){ "\n"_fs.outf(out_.get()); }
+    "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructors[i]);
+      add_indent();
+      if(components[i].size() == 0){
+        "return $(_$());\n"_fs.outf(newline(), self, constructors[i]);
+        final_return = i;
+      }else{
+        "const $& value = std::get<_$>(value_);\n"_fs.outf(newline(), self, constructors[i]);
+        "return $( _$("_fs.outf(newline(), self, constructors[i]);
+        for(size_t j=0; j<components[i].size(); ++j){
+          if(j == 0){
+            "value.p$_"_fs.outf(out_.get(), j+1);
+          }else{
+            ", value.p$_"_fs.outf(out_.get(), j+1);
+          }
+        }
+        "));\n"_fs.outf(out_.get());
+      }
+      sub_indent();
+    "}"_fs.outf(newline());
+  }
+    "else{\n"_fs.outf(out_.get());
+      add_indent();
+      "return $(_$());\n"_fs.outf(newline(), self, constructors[final_return]);
+      sub_indent();
+    "}\n"_fs.outf(newline());
+    sub_indent();
+  "} \n"_fs.outf(newline());
+}
+void
 Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
   auto& name = datatype.name();
   auto& self = datatype.self();
@@ -224,36 +275,52 @@ Synthesizer::syn_class_def_staticConstructor(const Datatype& datatype){
 
   for (size_t i = 0; i < components.size(); ++i) {
     "static $ $("_fs.outf(newline(), self, constructors[i]);
-    for (size_t j = 0; j < components[i].size(); ++j) {
-      if (j == 0) {
-        "$ p1"_fs.outf(out_.get(), components[i][j]);
-        ;
-      } else {
-        ", $ p$"_fs.outf(out_.get(), components[i][j], j + 1);
+    if(theConfig.close_typeCons()){
+      for (size_t j = 0; j < components[i].size(); ++j) {
+        if (j == 0) {
+          "$ p1"_fs.outf(out_.get(), components[i][j]);
+        } else {
+          ", $ p$"_fs.outf(out_.get(), components[i][j], j + 1);
+        }
+      }
+    }else{
+      for (size_t j = 0; j < components[i].size(); ++j) {
+        if (j == 0) {
+          "const $& p1"_fs.outf(out_.get(), components[i][j]);
+        } else {
+          ", const $& p$"_fs.outf(out_.get(), components[i][j], j + 1);
+        }
       }
     }
+    
     ") {\n"_fs.outf(out_.get());
     add_indent();
+      "return $ ( _$ ( "_fs.outf(newline(), self, constructors[i]);
+        add_indent();
+        for (size_t j = 0; j < components[i].size(); ++j) {
+          out_.get() << endl;
+          if (j != 0) {
+            ", "_fs.outf(newline());
+          }else{
+            ""_fs.outf(newline());
+          }
 
-    "return $ ( _$ ( "_fs.outf(newline(), self, constructors[i]);
-      add_indent();
-      for (size_t j = 0; j < components[i].size(); ++j) {
-        out_.get() << endl;
-        if (j != 0) {
-          ", "_fs.outf(newline());
-        }else{
-          ""_fs.outf(newline());
+          if(components[i][j] == self){
+            if(theConfig.close_typeCons()){
+              "std::make_shared<$>(std::move(p$))"_fs.outf(out_.get(), self, j+1);
+            }else{
+              "std::make_shared<$>(p$.self())"_fs.outf(out_.get(), self, j+1);
+            }
+          }else{
+            if(theConfig.close_typeCons()){
+              "std::move(p$)"_fs.outf(out_.get(), j+1);
+            }else{
+              "p$"_fs.outf(out_.get(), j+1);
+            }
+          }
         }
-
-        if(components[i][j] == self){
-          "std::make_shared<$>(std::move(p$))"_fs.outf(out_.get(), self, j+1);
-        }else{
-          "std::move(p$)"_fs.outf(out_.get(), j+1);
-        }
-      }
-      sub_indent();
-    "));\n"_fs.outf(out_.get());
-
+        sub_indent();
+      "));\n"_fs.outf(out_.get());
     sub_indent();
     "}\n"_fs.outf(newline());
   }
@@ -471,19 +538,21 @@ const Datatype &datatype, size_t i, string &lhs, string &rhs){
   out_.get() << endl;
 }
 void
-Synthesizer::syn_class_def_struct_getMethod(
-const Datatype& datatype, size_t i){
+Synthesizer::syn_class_def_struct_getMethod(const Datatype& datatype, size_t i){
   auto& self = datatype.self();
   auto& components = datatype.components();
 
   // generate methods
   for (size_t j = 0; j < components[i].size(); ++j) {
     if (components[i][j] == self) {
-      "$ p$() const { return *p$_; }\n"_fs.outf(
-        newline(), components[i][j], j + 1, j + 1);
+      if(theConfig.close_typeCons()){
+        // "$ p$() const { return *p$_; }\n"_fs.outf(newline(), components[i][j], j+1, j+1);
+        "const $& p$() const { return *p$_; }\n"_fs.outf(newline(), components[i][j], j+1, j+1);
+      }else{
+        "$ p$() const { return p$_->self(); }\n"_fs.outf(newline(), components[i][j], j+1, j+1);
+      }
     } else {
-      "const $ &p$() const { return p$_; }\n"_fs.outf(
-        newline(), components[i][j], j + 1, j + 1);
+      "const $ &p$() const { return p$_; }\n"_fs.outf(newline(), components[i][j], j+1, j+1);
     }
   }
 

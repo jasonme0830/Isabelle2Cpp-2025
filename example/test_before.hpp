@@ -1,8 +1,9 @@
 #include <cstdint>
 #include <cstdlib>
-#include <deque>
+#include <list>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <variant>
 
 template<typename T1>
@@ -24,9 +25,9 @@ class tree {
         T1 p2_;
         std::shared_ptr<tree<T1>> p3_;
 
-        tree<T1> p1() const { return *p1_; }
+        tree<T1> p1() const { return p1_->self(); }
         const T1 &p2() const { return p2_; }
-        tree<T1> p3() const { return *p3_; }
+        tree<T1> p3() const { return p3_->self(); }
 
         _Node(std::shared_ptr<tree<T1>> p1, T1 p2, std::shared_ptr<tree<T1>> p3)
             :p1_(std::move(p1))
@@ -108,19 +109,33 @@ std::variant<_Tip, _Node> value_;
         } 
     }
 
+    //返回自身根节点函数
+    tree<T1> self() const {
+        if(std::holds_alternative<_Tip>(other.value_)){ 
+            return tree<T1>(_Tip());
+        }
+        if(std::holds_alternative<_Node>(other.value_)){ 
+            const tree<T1>& value = std::get<_Node>(value_);
+            return tree<T1>( _Node(value.p1_, value.p2_, value.p3_));
+        }else{
+            return tree<T1>(_Tip());
+        }
+    } 
+
     static tree<T1> Tip() {
         return tree<T1> ( _Tip ( ));
     }
-    static tree<T1> Node(tree<T1> p1, T1 p2, tree<T1> p3) {
+    static tree<T1> Node(const tree<T1>& p1, const T1& p2, const tree<T1>& p3) {
         return tree<T1> ( _Node ( 
-            std::make_shared<tree<T1>>(std::move(p1))
-            , std::move(p2)
-            , std::make_shared<tree<T1>>(std::move(p3))));
+            std::make_shared<tree<T1>>(p1.self())
+            , p2
+            , std::make_shared<tree<T1>>(p3.self())));
     }
 
     bool is_Tip() const { return std::holds_alternative<_Tip>(value_); }
     bool is_Node() const { return std::holds_alternative<_Node>(value_); }
     const _Node &as_Node() const { return std::get<_Node>(value_); }
+
     //拷贝赋值运算符
     tree<T1>& operator=(const tree<T1>& other){ 
         if(this != &other){ 
@@ -174,76 +189,76 @@ std::variant<_Tip, _Node> value_;
 
 
 template<typename T1>
-std::deque<T1> AddListHead(T1 arg1, std::deque<T1> arg2) {
+std::list<T1> AddListHead(const T1 &arg1, const std::list<T1> &arg2) {
     // AddListHead a xs =a # xs
     auto a = std::move(arg1);
     auto xs = std::move(arg2);
     auto temp0 = std::move(xs);
-    temp0.push_front(std::move(a));
+    temp0.push_front(a);
     return temp0;
 }
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::deque<std::uint64_t> arg2);
+std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2);
 
 template<typename T1>
-T1 rightest(tree<T1> arg1) {
+T1 rightest(const tree<T1> &arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
-    auto x = std::move(arg1.as_Node().p2_);
-    auto right = std::move(*arg1.as_Node().p3_);
+    auto x = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
     T1 temp0;
     if (right.is_Tip()) {
-        temp0 = std::move(x);
+        temp0 = x;
     } else {
-        temp0 = rightest(std::move(right));
+        temp0 = rightest(right);
     }
     return temp0;
 }
 
 template<typename T1>
-tree<T1> rightestleft(tree<T1> arg1) {
+tree<T1> rightestleft(const tree<T1> &arg1) {
     // rightestleft Tip = Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
     }
 
     // rightestleft (Node left x right) =(if right=Tip then left  ...
-    auto left = std::move(*arg1.as_Node().p1_);
-    auto right = std::move(*arg1.as_Node().p3_);
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
     tree<T1> temp0;
     if (right.is_Tip()) {
-        temp0 = std::move(left);
+        temp0 = left;
     } else {
-        temp0 = rightestleft(std::move(right));
+        temp0 = rightestleft(right);
     }
     return temp0;
 }
 
 template<typename T1>
-tree<T1> deltreeroot(tree<T1> arg1) {
+tree<T1> deltreeroot(const tree<T1> &arg1) {
     // deltreeroot Tip = Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
     }
 
     // deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) )
-    auto left = std::move(*arg1.as_Node().p1_);
-    auto right = std::move(*arg1.as_Node().p3_);
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
     tree<T1> temp0;
     if (right.is_Tip()) {
-        temp0 = std::move(left);
+        temp0 = left;
     } else {
         tree<T1> temp1;
         if (left.is_Tip()) {
-            temp1 = std::move(right);
+            temp1 = right;
         } else {
             auto temp2 = left;
             auto temp3 = left;
             auto temp4 = tree<T1>::Node(
-                rightestleft(std::move(temp2)),
-                rightest(std::move(temp3)),
-                std::move(right)
+                rightestleft(temp2),
+                rightest(temp3),
+                right
             );
-            temp1 = std::move(temp4);
+            temp1 = temp4;
         }
         temp0 = std::move(temp1);
     }

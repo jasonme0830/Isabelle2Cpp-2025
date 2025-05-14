@@ -44,13 +44,18 @@ void Isomorphism::analyse_functionDef()
 int
 FunctionDef::judge_func_gen_mode()
 {
-  //0:值传递  1:move优化  2:未定义的优化
-  if(theConfig.close_move()){
+  //0:值传递  1:模拟Isabelle的构造优化  2:std的move方法
+  //具体的func生成模式应该看type是否支持返回构造节点
+  if(theConfig.close_typeCons()){
     func_gen_mode = 0;
   }else{
-    //默认为1，开启move优化
+    //默认为1，开启模拟构造节点
     func_gen_mode = 1;
   }
+
+  //添加一个输入数据类型的判断函数，如果是std容器
+  //if(args == list)
+  //func_gen_mode = 2;
 
   return func_gen_mode;
 }

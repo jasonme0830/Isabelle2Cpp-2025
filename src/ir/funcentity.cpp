@@ -96,10 +96,10 @@ TypeInfo::to_str_as_arg(int arg_gen_mode) const
     TypeInfo::as_arg = asArg_namespace::default_as_arg;
     break;
   case 1:
-    TypeInfo::as_arg = asArg_namespace::default_as_arg;
+    TypeInfo::as_arg = asArg_namespace::const_as_arg;
     break;
   case 2:
-    TypeInfo::as_arg = asArg_namespace::const_as_arg;
+    TypeInfo::as_arg = asArg_namespace::default_as_arg;
     break;
   default:
     TypeInfo::as_arg = asArg_namespace::default_as_arg;
@@ -147,8 +147,8 @@ TypeInfo::args_size() const
 bool
 TypeInfo::movable() const
 {
-  // return theConfig.move_list() && name == theTemplateTypeMapping["list"];
-  return !theConfig.close_move();
+  //move应该只用于std提供的容器变量，目前只有Isabelle中的list有规则生成
+  return !theConfig.close_moveStd() && name == theTemplateTypeMapping["list"];
 }
 
 const TypeInfo&
@@ -353,7 +353,7 @@ void
 FuncEntity::add_pattern_cond(const string& cond)
 {
   // remove only if the option is used and the function is total
-  auto remove_last_cond = theConfig.reduce_cond() && !nonexhaustive_;
+  auto remove_last_cond = theConfig.close_reduceCond() && !nonexhaustive_;
 
   if (!is_last_equation_ || !remove_last_cond) {
     statements_.back().push_back(string(indent_, ' ') +

@@ -680,7 +680,7 @@ struct FunctionDef : Definition
   bool nonexhaustive = false;
   bool memoize = false;
 
-  //标识函数的生成模式：0值传递、1move优化、2未定义的优化
+  //标识函数的生成模式：0值传递、1模拟构造优化、2二次开发move优化
   int func_gen_mode = 1;
   //标识函数的递归类型：0非递归、1单次递归、2多次递归
   int func_recu_class = 0;
@@ -699,7 +699,7 @@ public:
   bool handle_isomorphism_datatype();
   bool judge_isomorphism() const override;
 
-  //确定函数主体的生成模式：0值传递、1move优化、2未定义的优化
+  //确定函数主体的生成模式：0值传递、1模拟构造优化、2二次开发move优化
   int judge_func_gen_mode();
   //确定函数的递归次数，也为记忆化判断进行准备：0非递归、1单词递归、2多次递归
   int analyse_func_recu_class();
