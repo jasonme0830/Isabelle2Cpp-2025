@@ -329,21 +329,37 @@ ConsExpr::gen_expr_impl_if(FuncEntity& func, const TypeInfo& typeinfo) const
 
   func.add_expr("$ $;", typeinfo.to_str(), res)
   .add_expr("if ($) {", cond)
-  .add_indent()
-  .add_expr("$ = $;", res, args[1]->gen_expr(func))
-  .sub_indent()
+  .add_indent();
+
+  string right_var_one = args[1]->gen_expr(func);
+  bool var_bool_one = func.find_declVar(right_var_one);
+  bool temp_bool_one = right_var_one.substr(0,4).compare("temp") == 0;
+  bool arg_bool_one = right_var_one.substr(0,3).compare("arg") == 0;
+  int type_class_one = args[1]->expr_type->get_exprType_class();
+  // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+  string decl_statement_one = "$ = $;";
+  if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_one = "$ = $.self();";
+    }
+  }
+  // .add_expr("$ = $;", res, args[1]->gen_expr(func))
+  func.add_expr(decl_statement_one, res, right_var_one);
+
+  func.sub_indent()
   .add_expr("} else {")
   .add_indent()
   .add_expr("$ = $;", res, args[2]->gen_expr(func))
   .sub_indent()
   .add_expr("}");
 
-  if(func.func_gen_mode() == 0){
-    return res;
-  }
-  else{
-    return move_expr(res);
-  }
+  // if(func.func_gen_mode() == 0){
+  //   return res;
+  // }
+  // else{
+  //   return move_expr(res);
+  // }
+  return res;
 }
 string
 ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) const

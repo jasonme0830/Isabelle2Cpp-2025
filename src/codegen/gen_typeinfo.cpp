@@ -71,6 +71,35 @@ FuncType::gen_typeinfo(FuncEntity& func) const
   return res;
 }
 
+int
+NormalType::get_exprType_class() const
+{
+  if (theNormalTypeMapping.count(name)){
+    return 2;
+  }else{
+    return 3;
+  }
+}
+int
+ArgumentType::get_exprType_class() const 
+{
+  return 3;
+}
+int
+TemplateType::get_exprType_class() const
+{
+  if(theHeaderMapping.count(name)){
+    return 1;
+  }else{
+    return 0;
+  }
+}
+int
+FuncType::get_exprType_class() const
+{
+  return 3;
+}
+
 /**
  * @brief apply the trans function on variable types,
  *  mainly used to generate the TypeInfo of arguments from abstract types

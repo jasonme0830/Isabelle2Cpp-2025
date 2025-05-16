@@ -249,6 +249,9 @@ FuncEntity::template_args() const
 void
 FuncEntity::decl_variable(const string& var, const string& expr)
 {
+  //一边声明变量一边将其统计起来
+  decl_variables_.insert(var);
+
   static regex arg_regex(R"(arg[1-9][0-9]*)");
   if (regex_match(expr, arg_regex)) {
     /* 这些可以省略不必要的解包复制，但是牺牲了代码的可读性，暂时放弃 */
@@ -278,6 +281,7 @@ FuncEntity::decl_variable(const string& var, const string& expr)
     unused_var_count_[var] = delay_statements_.size();
     add_delay_statement("auto $ = $;", var, expr);
   }
+
 }
 
 string
@@ -290,6 +294,21 @@ FuncEntity::get_variable(const string& var)
     unused_var_count_.erase(var);
     return var;
   }
+}
+
+bool
+FuncEntity::find_declVar(const string& var)
+{
+  if(decl_variables_.count(var)){
+    return true;
+  }else{
+    return false;
+  }
+}
+void
+FuncEntity::clear_declVar()
+{
+  decl_variables_.clear();
 }
 
 // experimental
@@ -331,6 +350,8 @@ FuncEntity::close_equation()
   for (auto& [_, ind] : unused_var_count_) {
     statements_.back()[decl_base_ + ind].clear();
   }
+  //每个equation结束之后清空统计声明变量的set
+  clear_declVar();
 }
 
 void

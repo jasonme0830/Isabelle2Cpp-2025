@@ -48,7 +48,7 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
 
   // for variables
   else {
-      func.decl_variable(name, prev);
+    func.decl_variable(name, prev);
   }
 }
 

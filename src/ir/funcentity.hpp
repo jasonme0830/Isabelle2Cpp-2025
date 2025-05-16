@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <set>
 
 namespace hol2cpp {
 class Code;
@@ -104,6 +105,10 @@ public:
   void decl_variable(const std::string& var, const std::string& expr);
   std::string get_variable(const std::string& var);
   TypeInfo get_var_typeinfo(const std::string& var);
+  //为了判断是否是CSMn内部声明的变量
+  bool find_declVar(const std::string& var);
+  //每个equation应该重新统计声明变量
+  void clear_declVar();
 
   /**
    * generate a temporary variable name
@@ -203,6 +208,8 @@ private:
   std::vector<std::string> template_args_;
   std::map<std::string, std::string> var_mapping_;
   std::map<std::string, std::size_t> unused_var_count_;
+  // 存储声明的变量，为了判断是否可以调用self函数
+  std::set<std::string> decl_variables_;
 
   std::size_t temp_count_;
   std::size_t condition_count_;

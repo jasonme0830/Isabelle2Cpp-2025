@@ -34,6 +34,8 @@ struct Type
    * @func: generate type infomation related with the given func
    */
   virtual TypeInfo gen_typeinfo(FuncEntity& func) const = 0;
+  //0:基于定义的递归类型 1:基于规则的递归 2:基于规则的数值类型 3:基于定义的其他类型
+  virtual int get_exprType_class() const = 0;
   // todo @xubo removes this method, not required after supporting type
   // inference
   virtual TypeInfo apply(
@@ -70,6 +72,7 @@ struct NormalType final : Type
 
 public:
   TypeInfo gen_typeinfo(FuncEntity& func) const override;
+  int get_exprType_class() const override;
   TypeInfo apply(
     std::function<TypeInfo(const std::string&)>& trans) const override;
 
@@ -104,6 +107,7 @@ struct ArgumentType final : Type
 
 public:
   TypeInfo gen_typeinfo(FuncEntity& func) const override;
+  int get_exprType_class() const override;
   TypeInfo apply(
     std::function<TypeInfo(const std::string&)>& trans) const override;
 
@@ -143,6 +147,7 @@ struct TemplateType final : Type
 
 public:
   TypeInfo gen_typeinfo(FuncEntity& func) const override;
+  int get_exprType_class() const override;
   TypeInfo apply(
     std::function<TypeInfo(const std::string&)>& trans) const override;
 
@@ -180,6 +185,7 @@ public:
   void gen_funcentity(FuncEntity& func) const;
 
   TypeInfo gen_typeinfo(FuncEntity& func) const override;
+  int get_exprType_class() const override;
   TypeInfo apply(
     std::function<TypeInfo(const std::string&)>& trans) const override;
 
