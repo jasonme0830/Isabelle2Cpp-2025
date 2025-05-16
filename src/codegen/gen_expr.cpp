@@ -276,8 +276,8 @@ ConsExpr::gen_expr_impl_recuCall(FuncEntity& func, const TypeInfo& typeinfo) con
   for(const Ptr<Expr> arg:args){
     //用if找出所有不用生成temp的情况
     if(arg->get_expr_class() == "Integral"){
-      content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
-      continue;
+      // content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
+      // continue;
     }
     if(arg->get_expr_class() == "Var"){
       // content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
@@ -286,13 +286,14 @@ ConsExpr::gen_expr_impl_recuCall(FuncEntity& func, const TypeInfo& typeinfo) con
     if(arg->get_expr_class() == "Cons"){ 
       //进行强制类型转换
       Ptr<const ConsExpr> copy_arg = std::dynamic_pointer_cast<const ConsExpr>(arg);
-      if(!copy_arg->get_genTempOrNot(func, typeinfo, arg)){
-        content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
+      if(copy_arg->get_genTempOrNot(func, typeinfo, arg)){
+        content += gen_expr_impl_recuCall_Temp(func, typeinfo, arg);
         continue;
       }
     }
-    //除上述的所有情况，全部生成temp处理
+    //除上述的特殊情况，其余全都不用生成临时变量
     content += gen_expr_impl_recuCall_noTemp(func, typeinfo, arg);
+    // content += gen_expr_impl_recuCall_Temp(func, typeinfo, arg);
   }
 
   content.pop_back();
@@ -343,22 +344,31 @@ ConsExpr::gen_expr_impl_if(FuncEntity& func, const TypeInfo& typeinfo) const
       decl_statement_one = "$ = $.self();";
     }
   }
-  // .add_expr("$ = $;", res, args[1]->gen_expr(func))
-  func.add_expr(decl_statement_one, res, right_var_one);
 
-  func.sub_indent()
+  // .add_expr("$ = $;", res, args[1]->gen_expr(func))
+  func.add_expr(decl_statement_one, res, right_var_one)
+  .sub_indent()
   .add_expr("} else {")
-  .add_indent()
-  .add_expr("$ = $;", res, args[2]->gen_expr(func))
+  .add_indent();
+
+  string right_var_two = args[2]->gen_expr(func);
+  bool var_bool_two = func.find_declVar(right_var_two);
+  bool temp_bool_two = right_var_two.substr(0,4).compare("temp") == 0;
+  bool arg_bool_two = right_var_two.substr(0,3).compare("arg") == 0;
+  int type_class_two = args[1]->expr_type->get_exprType_class();
+  // cout << right_var_two << " " << var_bool_two << temp_bool_two << arg_bool_two << " " << type_class_two << endl;
+  string decl_statement_two = "$ = $;";
+  if((var_bool_two || temp_bool_two || arg_bool_two)&&(type_class_two == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_two = "$ = $.self();";
+    }
+  }
+
+  // func.add_expr("$ = $;", res, args[2]->gen_expr(func))
+  func.add_expr(decl_statement_two, res, right_var_two)
   .sub_indent()
   .add_expr("}");
 
-  // if(func.func_gen_mode() == 0){
-  //   return res;
-  // }
-  // else{
-  //   return move_expr(res);
-  // }
   return res;
 }
 string
@@ -378,6 +388,7 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
   }
 
   auto temp = func.gen_temp();
+  //临时变量右侧是构造函数，不用调用self函数
   func.add_expr("auto $ = $::$(", temp, typeinfo.to_str(), constructor)
     .add_indent();
   for (size_t i = 0; i < arguments.size(); ++i) {
@@ -413,8 +424,8 @@ ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) cons
   for(const Ptr<Expr> arg:args){
     //用if找出所有不用生成temp的情况
     if(arg->get_expr_class() == "Integral"){
-      content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
-      continue;
+      // content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
+      // continue;
     }
     if(arg->get_expr_class() == "Var"){
       // content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
@@ -423,13 +434,14 @@ ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) cons
     if(arg->get_expr_class() == "Cons"){ 
       //进行强制类型转换
       Ptr<const ConsExpr> copy_arg = std::dynamic_pointer_cast<const ConsExpr>(arg);
-      if(!copy_arg->get_genTempOrNot(func, typeinfo, arg)){
-        content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
+      if(copy_arg->get_genTempOrNot(func, typeinfo, arg)){
+        content += gen_expr_impl_funCall_Temp(func, typeinfo, arg);
         continue;
       }
     }
-    //除上述的所有情况，全部生成temp处理
-    content += gen_expr_impl_funCall_Temp(func, typeinfo, arg);
+    //除上述的特殊情况，其余全都不用生成临时变量
+    content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
+    // content += gen_expr_impl_funCall_Temp(func, typeinfo, arg);
   }
 
   content.pop_back();
@@ -442,8 +454,23 @@ ConsExpr::gen_expr_impl_shortDef(FuncEntity& func, const TypeInfo& typeinfo) con
   auto short_def = func.code().get_short_def(constructor);
   assert_true(short_def->parameters.size() == args.size());
   for (size_t i = 0; i < args.size(); ++i) {
-    func.add_expr(
-      "auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func));
+
+    //等号右侧应该仿照判断是否使用self函数
+    string right_var_one = args[i]->gen_expr(func);
+    bool var_bool_one = func.find_declVar(right_var_one);
+    bool temp_bool_one = right_var_one.substr(0,4).compare("temp") == 0;
+    bool arg_bool_one = right_var_one.substr(0,3).compare("arg") == 0;
+    int type_class_one = args[i]->expr_type->get_exprType_class();
+    // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+    string decl_statement_one = "auto $ = $;";
+    if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+      if(theConfig.close_typeCons() == false){
+        decl_statement_one = "auto $ = $.self();";
+      }
+    }
+
+    // func.add_expr("auto $ = $;", short_def->parameters[i], args[i]->gen_expr(func));
+    func.add_expr(decl_statement_one, short_def->parameters[i], right_var_one);
   }
   return short_def->expr->gen_expr(func);
 }
@@ -544,19 +571,36 @@ ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo
   }
 
   auto temp = func.gen_temp();
-  func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-  switch (func.func_gen_mode())
-  {
-  case 2:
-    temp = move_expr(temp);
-    break;
-  case 1:
-    break;
-  case 0:
-    break;
-  default:
-    break;
+
+  //等号右侧是函数的参数，应该使用self函数
+  string right_var_one = arg->gen_expr(func);
+  bool var_bool_one = func.find_declVar(right_var_one);
+  bool temp_bool_one = right_var_one.substr(0,4).compare("temp") == 0;
+  bool arg_bool_one = right_var_one.substr(0,3).compare("arg") == 0;
+  int type_class_one = arg->expr_type->get_exprType_class();
+  // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+  string decl_statement_one = "auto $ = $;";
+  if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_one = "auto $ = $.self();";
+    }
   }
+
+  // func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+  func.add_expr(decl_statement_one, temp, right_var_one);
+
+  // switch (func.func_gen_mode())
+  // {
+  // case 2:
+  //   temp = move_expr(temp);
+  //   break;
+  // case 1:
+  //   break;
+  // case 0:
+  //   break;
+  // default:
+  //   break;
+  // }
   return temp+", ";
 }
 std::string
@@ -584,19 +628,35 @@ ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo,
   }
 
   auto temp = func.gen_temp();
-  func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
-  switch (func.func_gen_mode())
-  {
-  case 2:
-    temp = move_expr(temp);
-    break;
-  case 1:
-    break;
-  case 0:
-    break;
-  default:
-    break;
+  //等号右侧是函数的参数，应该使用self函数
+  string right_var_one = arg->gen_expr(func);
+  bool var_bool_one = func.find_declVar(right_var_one);
+  bool temp_bool_one = right_var_one.substr(0,4).compare("temp") == 0;
+  bool arg_bool_one = right_var_one.substr(0,3).compare("arg") == 0;
+  int type_class_one = arg->expr_type->get_exprType_class();
+  // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+  string decl_statement_one = "auto $ = $;";
+  if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_one = "auto $ = $.self();";
+    }
   }
+
+  // func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
+  func.add_expr(decl_statement_one, temp, right_var_one);
+
+  // switch (func.func_gen_mode())
+  // {
+  // case 2:
+  //   temp = move_expr(temp);
+  //   break;
+  // case 1:
+  //   break;
+  // case 0:
+  //   break;
+  // default:
+  //   break;
+  // }
   return temp+", ";
 }
 
@@ -636,28 +696,63 @@ BinaryOpExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
     { Token::Type::Mod, "%" },
   };
 
+  auto l = lhs->gen_expr(func);
+  auto r = rhs->gen_expr(func);
+
+  auto lv = func.gen_temp();
+  auto rv = func.gen_temp();
+
+  //判断l和r是否需要调用self函数
+  bool var_bool_l = func.find_declVar(l);
+  bool temp_bool_l = l.substr(0,4).compare("temp") == 0;
+  bool arg_bool_l = l.substr(0,3).compare("arg") == 0;
+  int type_class_l = lhs->expr_type->get_exprType_class();
+  string decl_statement_l = "auto $ = $;";
+  if((var_bool_l || temp_bool_l || arg_bool_l)&&(type_class_l == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_l = "auto $ = $.self();";
+    }
+  }
+  bool var_bool_r = func.find_declVar(r);
+  bool temp_bool_r = r.substr(0,4).compare("temp") == 0;
+  bool arg_bool_r = r.substr(0,3).compare("arg") == 0;
+  int type_class_r = rhs->expr_type->get_exprType_class();
+  string decl_statement_r = "auto $ = $;";
+  if((var_bool_r || temp_bool_r || arg_bool_r)&&(type_class_r == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_r = "auto $ = $.self();";
+    }
+  }
+
   switch (op.type) {
     case Token::Type::Inter: {
-      auto l = lhs->gen_expr(func);
-      auto r = rhs->gen_expr(func);
+      // auto l = lhs->gen_expr(func);
+      // auto r = rhs->gen_expr(func);
 
-      auto lv = func.gen_temp();
-      auto rv = func.gen_temp();
-      func.add_expr("auto $ = $;", lv, l)
-        .add_expr("auto $ = $;", rv, r)
-        .add_expr("$.merge($);", lv, rv);
+      // auto lv = func.gen_temp();
+      // auto rv = func.gen_temp();
+      // func.add_expr("auto $ = $;", lv, l)
+        // .add_expr("auto $ = $;", rv, r)
+        // .add_expr("$.merge($);", lv, rv)
+      func.add_expr(decl_statement_l, lv, l)
+        .add_expr(decl_statement_r, rv, r)
+        .add_expr("$.merge($);", lv, rv)
       ;
       return rv;
     }
     case Token::Type::Union: {
-      auto l = lhs->gen_expr(func);
-      auto r = rhs->gen_expr(func);
+      // auto l = lhs->gen_expr(func);
+      // auto r = rhs->gen_expr(func);
 
-      auto lv = func.gen_temp();
-      auto rv = func.gen_temp();
-      func.add_expr("auto $ = $;", lv, l)
-        .add_expr("auto $ = $;", rv, r)
-        .add_expr("$.merge($);", lv, rv);
+      // auto lv = func.gen_temp();
+      // auto rv = func.gen_temp();
+
+      // func.add_expr("auto $ = $;", lv, l)
+      //   .add_expr("auto $ = $;", rv, r)
+      //   .add_expr("$.merge($);", lv, rv)
+      func.add_expr(decl_statement_l, lv, l)
+        .add_expr(decl_statement_r, rv, r)
+        .add_expr("$.merge($);", lv, rv)
       ;
       return lv;
     }
@@ -723,7 +818,22 @@ CaseExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 
   auto e = expr->gen_expr(func);
   auto temp1 = func.gen_temp();
-  func.add_expr("auto $ = $;\n", temp1, e);
+
+  //判断等号右侧是否调用self函数
+  bool var_bool_one = func.find_declVar(e);
+  bool temp_bool_one = e.substr(0,4).compare("temp") == 0;
+  bool arg_bool_one = e.substr(0,3).compare("arg") == 0;
+  int type_class_one = expr->expr_type->get_exprType_class();
+  // cout << e << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+  string decl_statement_one = "auto $ = $;\n";
+  if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_one = "auto $ = $.self();\n";
+    }
+  } 
+
+  // func.add_expr("auto $ = $;\n", temp1, e);
+  func.add_expr(decl_statement_one, temp1, e);
 
   auto is_last_equation = func.is_last_equation(); // for reduce-cond
   for (size_t i = 0; i < equations.size(); ++i) {
@@ -757,7 +867,23 @@ string
 LetinExpr::gen_expr_impl(FuncEntity& func, const TypeInfo& typeinfo) const
 {
   auto temp = func.gen_temp();
-  func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func));
+
+  //判断等号右侧是否调用self函数
+  string right_var_one = equation.expr->gen_expr(func);
+  bool var_bool_one = func.find_declVar(right_var_one);
+  bool temp_bool_one = right_var_one.substr(0,4).compare("temp") == 0;
+  bool arg_bool_one = right_var_one.substr(0,3).compare("arg") == 0;
+  int type_class_one = equation.expr->expr_type->get_exprType_class();
+  // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+  string decl_statement_one = "auto $ = $;";
+  if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+    if(theConfig.close_typeCons() == false){
+      decl_statement_one = "auto $ = $.self();";
+    }
+  }
+  // func.add_expr("auto $ = $;", temp, equation.expr->gen_expr(func));
+  func.add_expr(decl_statement_one, temp, right_var_one);
+
   equation.pattern->gen_pattern(func, temp);
   func.close_pattern(); // for reduce-cond
   return expr->gen_expr(func);

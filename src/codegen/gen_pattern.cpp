@@ -48,6 +48,7 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
 
   // for variables
   else {
+    //TODO 对于整体的变量，应该判断是否调用self函数
     func.decl_variable(name, prev);
   }
 }

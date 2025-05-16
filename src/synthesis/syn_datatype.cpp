@@ -238,13 +238,13 @@ Synthesizer::syn_class_def_returnSelfNode(const Datatype& datatype){
   size_t final_return = 0;
   for(size_t i = 0; i < components.size(); ++i){
     if(i>0){ "\n"_fs.outf(out_.get()); }
-    "if(std::holds_alternative<_$>(other.value_)){ \n"_fs.outf(newline(), constructors[i]);
+    "if(std::holds_alternative<_$>(value_)){ \n"_fs.outf(newline(), constructors[i]);
       add_indent();
       if(components[i].size() == 0){
         "return $(_$());\n"_fs.outf(newline(), self, constructors[i]);
         final_return = i;
       }else{
-        "const $& value = std::get<_$>(value_);\n"_fs.outf(newline(), self, constructors[i]);
+        "const _$& value = std::get<_$>(value_);\n"_fs.outf(newline(), constructors[i], constructors[i]);
         "return $( _$("_fs.outf(newline(), self, constructors[i]);
         for(size_t j=0; j<components[i].size(); ++j){
           if(j == 0){

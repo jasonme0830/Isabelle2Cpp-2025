@@ -2,35 +2,38 @@ theory rule
   imports Main
 begin
 
+datatype snat = sZero | sSuc snat
+datatype 'a slist = sNil | sCons 'a "'a slist"
 datatype 'a tree = Tip | Node "'a tree " 'a "'a tree " 
 
+fun AddListHead::"'a=>'a slist=>'a slist"where
+"AddListHead a xs = sCons a  xs "
 
-fun AddListHead::"'a =>'a list=>'a list"where
-"AddListHead a xs =a # xs "
+fun DelListHead::"'a slist=>'a slist "where
+"DelListHead (sCons x xs) = xs"|
+"DelListHead sNil = sNil "
 
-fun AddListTail::"'a =>'a list =>'a list"where
-"AddListTail a [] =Cons a [] "|(*!*)
-"AddListTail a (x#xs) = x # (AddListTail a xs ) "
 
-fun AddListI::"nat =>'a =>'a list=>'a list"where
-"AddListI i a [] = Cons a [] "|
-"AddListI 0 a (x#xs) = AddListHead a (x#xs)"|
-"AddListI (Suc i) a (x#xs) = x # (AddListI i a xs) "
+fun AddListTail::"'a=>'a slist =>'a slist"where
+"AddListTail a sNil =sCons a sNil "|
+"AddListTail a (sCons x xs) = sCons x  (AddListTail a xs ) "
 
-fun DelListHead::"'a list=>'a list "where
-"DelListHead (x#xs) = xs"|
-"DelListHead [] = [] "
+fun AddListI::"snat=>'a=>'a slist=>'a slist"where
+"AddListI i a sNil = sCons a sNil "|
+"AddListI sZero a (sCons x xs) = AddListHead a (sCons x xs)"|
+"AddListI (sSuc i) a (sCons x xs) = sCons x  (AddListI i a xs) "
 
-fun DelListTail::"'a list =>'a list "where
-"DelListTail [] = []"|
-"DelListTail (Cons a []) = []"|
-"DelListTail (x#xs) =  Cons x (DelListTail xs) "
+fun DelListTail::"'a slist=>'a slist "where
+"DelListTail sNil = sNil"|
+"DelListTail (sCons a sNil) = sNil"|
+"DelListTail (sCons x xs) =  sCons x (DelListTail xs) "
 
-fun DelListI::"nat =>'a list =>'a list "where
-"DelListI i [] = []"|
-"DelListI i (Cons a []) = []"|
-"DelListI 0 (x#xs) = DelListHead (x#xs) "|
-"DelListI (Suc i) (x#xs) = x # (DelListI i xs) "
+fun DelListI::"snat=>'a slist=>'a slist "where
+"DelListI i sNil = sNil "|
+"DelListI i (sCons a sNil) = sNil "|
+"DelListI sZero (sCons x xs) = DelListHead (sCons x xs) "|
+"DelListI (sSuc i) (sCons x xs) = sCons x  (DelListI i xs) "
+
 
 fun SearchList::"'a =>'a list =>bool "where
 "SearchList a [] = False"|

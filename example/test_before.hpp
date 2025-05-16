@@ -8,6 +8,339 @@
 #include <utility>
 #include <variant>
 
+class snat {
+    struct _sZero {
+        _sZero() {}
+        _sZero(const _sZero& other){ }
+        _sZero(_sZero&& other) noexcept{ }
+        _sZero& operator=(const _sZero& other) { return *this; }
+        _sZero& operator=(_sZero&& other) noexcept { return *this; }
+        bool operator==(const _sZero &) const { return true; }
+        bool operator<(const _sZero &) const { return false; }
+        bool operator>(const _sZero &) const { return false; }
+        bool operator<=(const _sZero &) const { return true; }
+        bool operator>=(const _sZero &) const { return true; }
+    };
+    struct _sSuc {
+        std::shared_ptr<snat> p1_;
+
+        snat p1() const { return p1_->self(); }
+
+        _sSuc(std::shared_ptr<snat> p1)
+            :p1_(std::move(p1))
+        {}
+        _sSuc(const _sSuc& other)
+            :p1_(std::make_shared<snat>(*other.p1_))
+        {}
+        _sSuc(_sSuc&& other) noexcept 
+            :p1_(std::move(other.p1_))
+        { }
+
+        _sSuc& operator=(const _sSuc& other){ 
+            if(this != &other){ 
+                p1_.reset();
+                p1_ = std::make_shared<snat>(*other.p1_);
+            } 
+            return *this; 
+        } 
+        _sSuc& operator=(_sSuc&& other) noexcept {
+            if(this != &other) {
+                p1_ = std::move(other.p1_);
+            }
+            return *this;
+        }
+        bool operator==(const _sSuc &rhs) const {
+            return (std::tie(*p1_) == std::tie(*rhs.p1_));
+        }
+        bool operator<(const _sSuc &rhs) const {
+            return (std::tie(*p1_) < std::tie(*rhs.p1_));
+        }
+        bool operator>(const _sSuc &rhs) const {
+            return (std::tie(*p1_) > std::tie(*rhs.p1_));
+        }
+        bool operator<=(const _sSuc &rhs) const {
+            return (std::tie(*p1_) <= std::tie(*rhs.p1_));
+        }
+        bool operator>=(const _sSuc &rhs) const {
+            return (std::tie(*p1_) >= std::tie(*rhs.p1_));
+        }
+    };
+
+  public:
+
+std::variant<_sZero, _sSuc> value_;
+
+    //默认构造函数
+    snat(){
+        value_ = _sZero();
+    }
+    //value构造函数
+    snat(std::variant<_sZero, _sSuc> value) : value_(std::move(value)) {}
+    //深拷贝构造函数
+    snat(const snat& other) { 
+        if(std::holds_alternative<_sZero>(other.value_)){ 
+            value_ = std::get<_sZero>(other.value_); 
+        } 
+        if(std::holds_alternative<_sSuc>(other.value_)){ 
+            value_ = std::get<_sSuc>(other.value_); 
+        } 
+    } 
+    //移动构造函数
+    snat(snat&& other){
+        if(std::holds_alternative<_sZero>(other.value_)){ 
+            value_ = std::move(std::get<_sZero>(other.value_)); 
+        } 
+        if(std::holds_alternative<_sSuc>(other.value_)){ 
+            value_ = std::move(std::get<_sSuc>(other.value_)); 
+        } 
+    }
+
+    //返回自身根节点函数
+    snat self() const {
+        if(std::holds_alternative<_sZero>(value_)){ 
+            return snat(_sZero());
+        }
+        if(std::holds_alternative<_sSuc>(value_)){ 
+            const _sSuc& value = std::get<_sSuc>(value_);
+            return snat( _sSuc(value.p1_));
+        }else{
+            return snat(_sZero());
+        }
+    } 
+
+    static snat sZero() {
+        return snat ( _sZero ( ));
+    }
+    static snat sSuc(const snat& p1) {
+        return snat ( _sSuc ( 
+            std::make_shared<snat>(p1.self())));
+    }
+
+    bool is_sZero() const { return std::holds_alternative<_sZero>(value_); }
+    bool is_sSuc() const { return std::holds_alternative<_sSuc>(value_); }
+    const _sSuc &as_sSuc() const { return std::get<_sSuc>(value_); }
+
+    //拷贝赋值运算符
+    snat& operator=(const snat& other){ 
+        if(this != &other){ 
+            if(std::holds_alternative<_sZero>(other.value_)){ 
+                value_ = std::get<_sZero>(other.value_); 
+            } 
+            if(std::holds_alternative<_sSuc>(other.value_)){ 
+                value_ = std::get<_sSuc>(other.value_); 
+            } 
+        } 
+        return *this; 
+    }
+    snat& operator=(snat&& other) noexcept {
+        if(this != &other){
+            if(std::holds_alternative<_sZero>(other.value_)){
+                value_ = std::move(std::get<_sZero>(other.value_)); 
+            }
+            if(std::holds_alternative<_sSuc>(other.value_)){
+                value_ = std::move(std::get<_sSuc>(other.value_)); 
+            }
+        }
+        return *this;
+    }
+
+    bool operator==(const snat &rhs) const {
+        if(value_.index() == rhs.value_.index()){
+            return value_ == rhs.value_;
+        }else{
+            return false;
+        }
+    }
+    bool operator<(const snat &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ < rhs.value_; 
+    }
+    bool operator>(const snat &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ > rhs.value_; 
+    }
+    bool operator<=(const snat &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ < rhs.value_; 
+    }
+    bool operator>=(const snat &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ > rhs.value_; 
+    }
+
+};
+
+template<typename T1>
+class slist {
+    struct _sNil {
+        _sNil() {}
+        _sNil(const _sNil& other){ }
+        _sNil(_sNil&& other) noexcept{ }
+        _sNil& operator=(const _sNil& other) { return *this; }
+        _sNil& operator=(_sNil&& other) noexcept { return *this; }
+        bool operator==(const _sNil &) const { return true; }
+        bool operator<(const _sNil &) const { return false; }
+        bool operator>(const _sNil &) const { return false; }
+        bool operator<=(const _sNil &) const { return true; }
+        bool operator>=(const _sNil &) const { return true; }
+    };
+    struct _sCons {
+        T1 p1_;
+        std::shared_ptr<slist<T1>> p2_;
+
+        const T1 &p1() const { return p1_; }
+        slist<T1> p2() const { return p2_->self(); }
+
+        _sCons(T1 p1, std::shared_ptr<slist<T1>> p2)
+            :p1_(std::move(p1))
+            ,p2_(std::move(p2))
+        {}
+        _sCons(const _sCons& other)
+            :p1_(other.p1_)
+            ,p2_(std::make_shared<slist<T1>>(*other.p2_))
+        {}
+        _sCons(_sCons&& other) noexcept 
+            :p1_(std::move(other.p1_))
+            ,p2_(std::move(other.p2_))
+        { }
+
+        _sCons& operator=(const _sCons& other){ 
+            if(this != &other){ 
+                p1_ = other.p1_; 
+                p2_.reset();
+                p2_ = std::make_shared<slist<T1>>(*other.p2_);
+            } 
+            return *this; 
+        } 
+        _sCons& operator=(_sCons&& other) noexcept {
+            if(this != &other) {
+                p1_ = std::move(other.p1_);
+                p2_ = std::move(other.p2_);
+            }
+            return *this;
+        }
+        bool operator==(const _sCons &rhs) const {
+            return (std::tie(p1_, *p2_) == std::tie(rhs.p1_, *rhs.p2_));
+        }
+        bool operator<(const _sCons &rhs) const {
+            return (std::tie(p1_, *p2_) < std::tie(rhs.p1_, *rhs.p2_));
+        }
+        bool operator>(const _sCons &rhs) const {
+            return (std::tie(p1_, *p2_) > std::tie(rhs.p1_, *rhs.p2_));
+        }
+        bool operator<=(const _sCons &rhs) const {
+            return (std::tie(p1_, *p2_) <= std::tie(rhs.p1_, *rhs.p2_));
+        }
+        bool operator>=(const _sCons &rhs) const {
+            return (std::tie(p1_, *p2_) >= std::tie(rhs.p1_, *rhs.p2_));
+        }
+    };
+
+  public:
+
+std::variant<_sNil, _sCons> value_;
+
+    //默认构造函数
+    slist(){
+        value_ = _sNil();
+    }
+    //value构造函数
+    slist(std::variant<_sNil, _sCons> value) : value_(std::move(value)) {}
+    //深拷贝构造函数
+    slist(const slist<T1>& other) { 
+        if(std::holds_alternative<_sNil>(other.value_)){ 
+            value_ = std::get<_sNil>(other.value_); 
+        } 
+        if(std::holds_alternative<_sCons>(other.value_)){ 
+            value_ = std::get<_sCons>(other.value_); 
+        } 
+    } 
+    //移动构造函数
+    slist(slist<T1>&& other){
+        if(std::holds_alternative<_sNil>(other.value_)){ 
+            value_ = std::move(std::get<_sNil>(other.value_)); 
+        } 
+        if(std::holds_alternative<_sCons>(other.value_)){ 
+            value_ = std::move(std::get<_sCons>(other.value_)); 
+        } 
+    }
+
+    //返回自身根节点函数
+    slist<T1> self() const {
+        if(std::holds_alternative<_sNil>(value_)){ 
+            return slist<T1>(_sNil());
+        }
+        if(std::holds_alternative<_sCons>(value_)){ 
+            const _sCons& value = std::get<_sCons>(value_);
+            return slist<T1>( _sCons(value.p1_, value.p2_));
+        }else{
+            return slist<T1>(_sNil());
+        }
+    } 
+
+    static slist<T1> sNil() {
+        return slist<T1> ( _sNil ( ));
+    }
+    static slist<T1> sCons(const T1& p1, const slist<T1>& p2) {
+        return slist<T1> ( _sCons ( 
+            p1
+            , std::make_shared<slist<T1>>(p2.self())));
+    }
+
+    bool is_sNil() const { return std::holds_alternative<_sNil>(value_); }
+    bool is_sCons() const { return std::holds_alternative<_sCons>(value_); }
+    const _sCons &as_sCons() const { return std::get<_sCons>(value_); }
+
+    //拷贝赋值运算符
+    slist<T1>& operator=(const slist<T1>& other){ 
+        if(this != &other){ 
+            if(std::holds_alternative<_sNil>(other.value_)){ 
+                value_ = std::get<_sNil>(other.value_); 
+            } 
+            if(std::holds_alternative<_sCons>(other.value_)){ 
+                value_ = std::get<_sCons>(other.value_); 
+            } 
+        } 
+        return *this; 
+    }
+    slist<T1>& operator=(slist<T1>&& other) noexcept {
+        if(this != &other){
+            if(std::holds_alternative<_sNil>(other.value_)){
+                value_ = std::move(std::get<_sNil>(other.value_)); 
+            }
+            if(std::holds_alternative<_sCons>(other.value_)){
+                value_ = std::move(std::get<_sCons>(other.value_)); 
+            }
+        }
+        return *this;
+    }
+
+    bool operator==(const slist<T1> &rhs) const {
+        if(value_.index() == rhs.value_.index()){
+            return value_ == rhs.value_;
+        }else{
+            return false;
+        }
+    }
+    bool operator<(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ < rhs.value_; 
+    }
+    bool operator>(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return false;
+        return value_ > rhs.value_; 
+    }
+    bool operator<=(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ < rhs.value_; 
+    }
+    bool operator>=(const slist<T1> &rhs) const {
+        if(value_ == rhs.value_) return true;
+        return value_ > rhs.value_; 
+    }
+
+};
+
 template<typename T1>
 class tree {
     struct _Tip {
@@ -113,11 +446,11 @@ std::variant<_Tip, _Node> value_;
 
     //返回自身根节点函数
     tree<T1> self() const {
-        if(std::holds_alternative<_Tip>(other.value_)){ 
+        if(std::holds_alternative<_Tip>(value_)){ 
             return tree<T1>(_Tip());
         }
-        if(std::holds_alternative<_Node>(other.value_)){ 
-            const tree<T1>& value = std::get<_Node>(value_);
+        if(std::holds_alternative<_Node>(value_)){ 
+            const _Node& value = std::get<_Node>(value_);
             return tree<T1>( _Node(value.p1_, value.p2_, value.p3_));
         }else{
             return tree<T1>(_Tip());
@@ -191,134 +524,149 @@ std::variant<_Tip, _Node> value_;
 
 
 template<typename T1>
-std::list<T1> AddListHead(const T1 &arg1, const std::list<T1> &arg2) {
-    // AddListHead a xs =a # xs
-    auto a = std::move(arg1);
-    auto xs = std::move(arg2);
-    auto temp0 = std::move(xs);
-    temp0.push_front(a);
+slist<T1> AddListHead(const T1 &arg1, const slist<T1> &arg2) {
+    // AddListHead a xs = sCons a  xs
+    auto a = arg1;
+    auto xs = arg2;
+    auto temp0 = slist<T1>::sCons(
+        a,
+        xs
+    );
     return temp0;
 }
 
 template<typename T1>
-std::list<T1> AddListTail(const T1 &arg1, const std::list<T1> &arg2) {
-    // AddListTail a [] =Cons a []
-    if (arg2.empty()) {
-        auto a = std::move(arg1);
-        auto temp0 = std::list<T1>();
-        temp0.push_front(a);
-        return temp0;
-    }
-
-    // AddListTail a (x#xs) = x # (AddListTail a xs )
-    auto a = std::move(arg1);
-    auto x = arg2.front();
-    auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    auto temp0 = AddListTail(a, std::move(xs));
-    temp0.push_front(x);
-    return temp0;
-}
-
-template<typename T1>
-std::list<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const std::list<T1> &arg3) {
-    // AddListI i a [] = Cons a []
-    if (arg3.empty()) {
-        auto a = std::move(arg2);
-        auto temp0 = std::list<T1>();
-        temp0.push_front(a);
-        return temp0;
-    }
-
-    // AddListI 0 a (x#xs) = AddListHead a (x#xs)
-    if (arg1 == 0) {
-        if (!arg3.empty()) {
-            auto a = std::move(arg2);
-            auto x = arg3.front();
-            auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
-            auto temp0 = a;
-            auto temp2 = std::move(xs);
-            temp2.push_front(x);
-            auto temp1 = std::move(temp2);
-            return AddListHead(temp0, temp1);
-        }
-    }
-
-    // AddListI (Suc i) a (x#xs) = x # (AddListI i a xs)
-    auto i = arg1 - 1;
-    auto a = std::move(arg2);
-    auto x = arg3.front();
-    auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
-    auto temp0 = AddListI(i, a, std::move(xs));
-    temp0.push_front(x);
-    return temp0;
-}
-
-template<typename T1>
-std::list<T1> DelListHead(const std::list<T1> &arg1) {
-    // DelListHead (x#xs) = xs
-    if (!arg1.empty()) {
-        auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
+slist<T1> DelListHead(const slist<T1> &arg1) {
+    // DelListHead (sCons x xs) = xs
+    if (arg1.is_sCons()) {
+        auto xs = arg1.as_sCons().p2();
         return xs;
     }
 
-    // DelListHead [] = []
-    return std::list<T1>();
+    // DelListHead sNil = sNil
+    return slist<T1>::sNil();
 }
 
 template<typename T1>
-std::list<T1> DelListTail(const std::list<T1> &arg1) {
-    // DelListTail [] = []
-    if (arg1.empty()) {
-        return std::list<T1>();
+slist<T1> AddListTail(const T1 &arg1, const slist<T1> &arg2) {
+    // AddListTail a sNil =sCons a sNil
+    if (arg2.is_sNil()) {
+        auto a = arg1;
+        auto temp0 = slist<T1>::sCons(
+            a,
+            slist<T1>::sNil()
+        );
+        return temp0;
     }
 
-    // DelListTail (Cons a []) = []
-    if (!arg1.empty()) {
-        if (std::list<T1>(std::next(arg1.begin()), arg1.end()).empty()) {
-            return std::list<T1>();
-        }
-    }
-
-    // DelListTail (x#xs) =  Cons x (DelListTail xs)
-    auto x = arg1.front();
-    auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
-    auto temp0 = DelListTail(std::move(xs));
-    temp0.push_front(x);
+    // AddListTail a (sCons x xs) = sCons x  (AddListTail a xs )
+    auto a = arg1;
+    auto x = arg2.as_sCons().p1();
+    auto xs = arg2.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x,
+        AddListTail(a, xs)
+    );
     return temp0;
 }
 
 template<typename T1>
-std::list<T1> DelListI(const std::uint64_t &arg1, const std::list<T1> &arg2) {
-    // DelListI i [] = []
-    if (arg2.empty()) {
-        return std::list<T1>();
+slist<T1> AddListI(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
+    // AddListI i a sNil = sCons a sNil
+    if (arg3.is_sNil()) {
+        auto a = arg2;
+        auto temp0 = slist<T1>::sCons(
+            a,
+            slist<T1>::sNil()
+        );
+        return temp0;
     }
 
-    // DelListI i (Cons a []) = []
-    if (!arg2.empty()) {
-        if (std::list<T1>(std::next(arg2.begin()), arg2.end()).empty()) {
-            return std::list<T1>();
+    // AddListI sZero a (sCons x xs) = AddListHead a (sCons x xs)
+    if (arg1.is_sZero()) {
+        if (arg3.is_sCons()) {
+            auto a = arg2;
+            auto x = arg3.as_sCons().p1();
+            auto xs = arg3.as_sCons().p2();
+            auto temp0 = slist<T1>::sCons(
+                x,
+                xs
+            );
+            return AddListHead(a, temp0);
         }
     }
 
-    // DelListI 0 (x#xs) = DelListHead (x#xs)
-    if (arg1 == 0) {
-        if (!arg2.empty()) {
-            auto x = arg2.front();
-            auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-            auto temp1 = std::move(xs);
-            temp1.push_front(x);
-            auto temp0 = std::move(temp1);
+    // AddListI (sSuc i) a (sCons x xs) = sCons x  (AddListI i a xs)
+    auto i = arg1.as_sSuc().p1();
+    auto a = arg2;
+    auto x = arg3.as_sCons().p1();
+    auto xs = arg3.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x,
+        AddListI(i, a, xs)
+    );
+    return temp0;
+}
+
+template<typename T1>
+slist<T1> DelListTail(const slist<T1> &arg1) {
+    // DelListTail sNil = sNil
+    if (arg1.is_sNil()) {
+        return slist<T1>::sNil();
+    }
+
+    // DelListTail (sCons a sNil) = sNil
+    if (arg1.is_sCons()) {
+        if (arg1.as_sCons().p2().is_sNil()) {
+            return slist<T1>::sNil();
+        }
+    }
+
+    // DelListTail (sCons x xs) =  sCons x (DelListTail xs)
+    auto x = arg1.as_sCons().p1();
+    auto xs = arg1.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x,
+        DelListTail(xs)
+    );
+    return temp0;
+}
+
+template<typename T1>
+slist<T1> DelListI(const snat &arg1, const slist<T1> &arg2) {
+    // DelListI i sNil = sNil
+    if (arg2.is_sNil()) {
+        return slist<T1>::sNil();
+    }
+
+    // DelListI i (sCons a sNil) = sNil
+    if (arg2.is_sCons()) {
+        if (arg2.as_sCons().p2().is_sNil()) {
+            return slist<T1>::sNil();
+        }
+    }
+
+    // DelListI sZero (sCons x xs) = DelListHead (sCons x xs)
+    if (arg1.is_sZero()) {
+        if (arg2.is_sCons()) {
+            auto x = arg2.as_sCons().p1();
+            auto xs = arg2.as_sCons().p2();
+            auto temp0 = slist<T1>::sCons(
+                x,
+                xs
+            );
             return DelListHead(temp0);
         }
     }
 
-    // DelListI (Suc i) (x#xs) = x # (DelListI i xs)
-    auto i = arg1 - 1;
-    auto x = arg2.front();
-    auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    auto temp0 = DelListI(i, std::move(xs));
-    temp0.push_front(x);
+    // DelListI (sSuc i) (sCons x xs) = sCons x  (DelListI i xs)
+    auto i = arg1.as_sSuc().p1();
+    auto x = arg2.as_sCons().p1();
+    auto xs = arg2.as_sCons().p2();
+    auto temp0 = slist<T1>::sCons(
+        x,
+        DelListI(i, xs)
+    );
     return temp0;
 }
 
@@ -330,16 +678,16 @@ bool SearchList(const T1 &arg1, const std::list<T1> &arg2) {
     }
 
     // SearchList a (x#xs) = (if a=x then True else (SearchList a xs))
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto x = arg2.front();
     auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    bool temp0;
+    bool temp2;
     if (a == x) {
-        temp0 = true;
+        temp2 = true;
     } else {
-        temp0 = SearchList(a, std::move(xs));
+        temp2 = SearchList(a, std::move(xs));
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -350,21 +698,21 @@ std::list<T1> ModifyValue(const T1 &arg1, const T1 &arg2, const std::list<T1> &a
     }
 
     // ModifyValue a b (x#xs) = (if x=a then b#(ModifyValue a b xs) else x#(ModifyValue a b xs))
-    auto a = std::move(arg1);
-    auto b = std::move(arg2);
+    auto a = arg1;
+    auto b = arg2;
     auto x = arg3.front();
     auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
-    std::list<T1> temp0;
+    std::list<T1> temp2;
     if (x == a) {
-        auto temp1 = ModifyValue(a, b, std::move(xs));
-        temp1.push_front(b);
-        temp0 = std::move(temp1);
+        auto temp3 = ModifyValue(a, b, std::move(xs));
+        temp3.push_front(b);
+        temp2 = std::move(temp3);
     } else {
-        auto temp2 = ModifyValue(a, b, std::move(xs));
-        temp2.push_front(x);
-        temp0 = std::move(temp2);
+        auto temp4 = ModifyValue(a, b, std::move(xs));
+        temp4.push_front(x);
+        temp2 = std::move(temp4);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -377,7 +725,7 @@ std::list<T1> ModifyIndex(const std::uint64_t &arg1, const T1 &arg2, const std::
     // ModifyIndex 0 b (x#xs) =(b#xs)
     if (arg1 == 0) {
         if (!arg3.empty()) {
-            auto b = std::move(arg2);
+            auto b = arg2;
             auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
             auto temp0 = std::move(xs);
             temp0.push_front(b);
@@ -387,7 +735,7 @@ std::list<T1> ModifyIndex(const std::uint64_t &arg1, const T1 &arg2, const std::
 
     // ModifyIndex (Suc n) b (x#xs) = (x#(ModifyIndex n b xs))
     auto n = arg1 - 1;
-    auto b = std::move(arg2);
+    auto b = arg2;
     auto x = arg3.front();
     auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
     auto temp0 = ModifyIndex(n, b, std::move(xs));
@@ -403,7 +751,7 @@ std::list<T1> ffilter(const std::function<bool(const T1 &)> &arg1, const std::li
     }
 
     // ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))
-    auto f = std::move(arg1);
+    auto f = arg1;
     auto x = arg2.front();
     auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
     std::list<T1> temp0;
@@ -421,14 +769,14 @@ template<typename T1>
 std::list<T1> app(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     // app Nil as =as
     if (arg1.empty()) {
-        auto as = std::move(arg2);
+        auto as = arg2;
         return as;
     }
 
     // app(Cons a as )bs= Cons a (app as bs)
     auto a = arg1.front();
     auto as = std::list<T1>(std::next(arg1.begin()), arg1.end());
-    auto bs = std::move(arg2);
+    auto bs = arg2;
     auto temp0 = app(std::move(as), std::move(bs));
     temp0.push_front(a);
     return temp0;
@@ -483,68 +831,65 @@ template<typename T1>
 std::list<T1> Insert(const T1 &arg1, const std::list<T1> &arg2) {
     // Insert a [] =Cons a []
     if (arg2.empty()) {
-        auto a = std::move(arg1);
+        auto a = arg1;
         auto temp0 = std::list<T1>();
         temp0.push_front(a);
         return temp0;
     }
 
     // Insert a (x#xs) =(if a \<le> x then a#x#xs else x#(Insert a xs))
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto x = arg2.front();
     auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    std::list<T1> temp0;
+    std::list<T1> temp2;
     if (a <= x) {
-        auto temp1 = std::move(xs);
-        temp1.push_front(x);
-        auto temp2 = std::move(temp1);
-        temp2.push_front(a);
-        temp0 = std::move(temp2);
-    } else {
-        auto temp3 = Insert(a, std::move(xs));
+        auto temp3 = std::move(xs);
         temp3.push_front(x);
-        temp0 = std::move(temp3);
+        auto temp4 = std::move(temp3);
+        temp4.push_front(a);
+        temp2 = std::move(temp4);
+    } else {
+        auto temp5 = Insert(a, std::move(xs));
+        temp5.push_front(x);
+        temp2 = std::move(temp5);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
 std::list<T1> InsertSortPart(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     // InsertSortPart [] ys=ys
     if (arg1.empty()) {
-        auto ys = std::move(arg2);
+        auto ys = arg2;
         return ys;
     }
 
     // InsertSortPart (x#xs) ys=InsertSortPart xs (Insert x ys)
     auto x = arg1.front();
     auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
-    auto ys = std::move(arg2);
-    auto temp0 = x;
-    auto temp1 = std::move(ys);
-    return InsertSortPart(std::move(xs), Insert(temp0, temp1));
+    auto ys = arg2;
+    auto temp0 = Insert(x, std::move(ys));
+    return InsertSortPart(std::move(xs), temp0);
 }
 
 template<typename T1>
 std::list<T1> InsertSort(const std::list<T1> &arg1) {
     // InsertSort xs = InsertSortPart xs Nil
-    auto xs = std::move(arg1);
-    auto temp0 = std::move(xs);
-    auto temp1 = std::list<T1>();
-    return InsertSortPart(temp0, temp1);
+    auto xs = arg1;
+    return InsertSortPart(std::move(xs), std::list<T1>());
 }
 
 template<typename T1>
 std::list<T1> Merge(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
-        auto xs = std::move(arg2);
+        auto xs = arg2;
         return xs;
     }
 
     // Merge xs [] = xs
     if (arg2.empty()) {
-        auto xs = std::move(arg1);
+        auto xs = arg1;
         return xs;
     }
 
@@ -553,21 +898,23 @@ std::list<T1> Merge(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
     auto y = arg2.front();
     auto ys = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    std::list<T1> temp0;
+    std::list<T1> temp2;
     if (x <= y) {
-        auto temp1 = std::move(ys);
-        temp1.push_front(y);
-        auto temp2 = Merge(std::move(xs), std::move(temp1));
-        temp2.push_front(x);
-        temp0 = std::move(temp2);
-    } else {
-        auto temp3 = std::move(xs);
-        temp3.push_front(x);
-        auto temp4 = Merge(std::move(temp3), std::move(ys));
+        auto temp4 = std::move(ys);
         temp4.push_front(y);
-        temp0 = std::move(temp4);
+        auto temp3 = std::move(temp4);
+        auto temp5 = Merge(std::move(xs), temp3);
+        temp5.push_front(x);
+        temp2 = std::move(temp5);
+    } else {
+        auto temp7 = std::move(xs);
+        temp7.push_front(x);
+        auto temp6 = std::move(temp7);
+        auto temp8 = Merge(temp6, std::move(ys));
+        temp8.push_front(y);
+        temp2 = std::move(temp8);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -586,15 +933,15 @@ std::list<T1> MergeSort(const std::list<T1> &arg1) {
     }
 
     // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
-    auto xs = std::move(arg1);
-    auto temp1 = xs;
-    auto temp0 = MergeSort(std::list<T1>(xs.begin(), std::next(xs.begin(), size(temp1) / 2)));
-    auto temp3 = xs;
-    auto temp4 = size(temp3) / 2;
-    auto temp5 = std::move(xs);
-    temp5.erase(temp5.begin(), std::next(temp5.begin(), temp4));
-    auto temp2 = MergeSort(std::move(temp5));
-    return Merge(temp0, temp2);
+    auto xs = arg1;
+    auto temp1 = std::list<T1>(xs.begin(), std::next(xs.begin(), size(xs) / 2));
+    auto temp0 = MergeSort(temp1);
+    auto temp8 = size(xs) / 2;
+    auto temp9 = std::move(xs);
+    temp9.erase(temp9.begin(), std::next(temp9.begin(), temp8));
+    auto temp5 = std::move(temp9);
+    auto temp4 = MergeSort(temp5);
+    return Merge(temp0, temp4);
 }
 
 std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2);
@@ -656,7 +1003,7 @@ template<typename T1>
 std::list<T1> sdrop(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     // sdrop 0 xs = xs
     if (arg1 == 0) {
-        auto xs = std::move(arg2);
+        auto xs = arg2;
         return xs;
     }
 
@@ -723,7 +1070,7 @@ bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
     }
 
     // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
@@ -738,7 +1085,7 @@ bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
     }
 
     // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
@@ -753,7 +1100,7 @@ bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
     }
 
     // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
@@ -764,7 +1111,7 @@ template<typename T1>
 tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
     // inserttree a Tip = Node Tip a Tip
     if (arg2.is_Tip()) {
-        auto a = std::move(arg1);
+        auto a = arg1;
         auto temp0 = tree<T1>::Node(
             tree<T1>::Tip(),
             a,
@@ -774,27 +1121,27 @@ tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (a <= x) {
-        auto temp1 = tree<T1>::Node(
+        auto temp3 = tree<T1>::Node(
             inserttree(a, left),
             x,
             right
         );
-        temp0 = temp1.self();
+        temp2 = temp3.self();
     } else {
-        auto temp2 = tree<T1>::Node(
+        auto temp4 = tree<T1>::Node(
             left,
             x,
             inserttree(a, right)
         );
-        temp0 = temp2;
+        temp2 = temp4.self();
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -821,13 +1168,13 @@ T1 rightest(const tree<T1> &arg1) {
     // rightest (Node left x right) = (if right=Tip then x  ...
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
-    T1 temp0;
+    T1 temp2;
     if (right.is_Tip()) {
-        temp0 = x;
+        temp2 = x;
     } else {
-        temp0 = rightest(right);
+        temp2 = rightest(right);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -867,13 +1214,13 @@ tree<T1> rightestleft(const tree<T1> &arg1) {
     // rightestleft (Node left x right) =(if right=Tip then left  ...
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (right.is_Tip()) {
-        temp0 = left.self();
+        temp2 = left.self();
     } else {
-        temp0 = rightestleft(right);
+        temp2 = rightestleft(right);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -886,33 +1233,31 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
     // deltreeroot (Node left x right) =(if right=Tip  ...
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (right.is_Tip()) {
-        temp0 = left.self();
+        temp2 = left.self();
     } else {
-        tree<T1> temp1;
+        tree<T1> temp5;
         if (left.is_Tip()) {
-            temp1 = right.self();
+            temp5 = right.self();
         } else {
-            auto temp2 = left;
-            auto temp3 = left;
-            auto temp4 = tree<T1>::Node(
-                delRightest(temp2),
-                rightest(temp3),
+            auto temp6 = tree<T1>::Node(
+                delRightest(left),
+                rightest(left),
                 right
             );
-            temp1 = temp4;
+            temp5 = temp6.self();
         }
-        temp0 = temp1;
+        temp2 = temp5.self();
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
 tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     // addtreeroot x Tip = Node Tip x Tip
     if (arg2.is_Tip()) {
-        auto x = std::move(arg1);
+        auto x = arg1;
         auto temp0 = tree<T1>::Node(
             tree<T1>::Tip(),
             x,
@@ -924,7 +1269,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     // addtreeroot x (Node left m Tip) = Node left x (Node Tip m Tip)
     if (arg2.is_Node()) {
         if (arg2.as_Node().p3().is_Tip()) {
-            auto x = std::move(arg1);
+            auto x = arg1;
             auto left = arg2.as_Node().p1();
             auto m = arg2.as_Node().p2();
             auto temp0 = tree<T1>::Node(
@@ -944,7 +1289,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     // addtreeroot x (Node Tip m right) = Node (Node Tip m Tip) x right
     if (arg2.is_Node()) {
         if (arg2.as_Node().p1().is_Tip()) {
-            auto x = std::move(arg1);
+            auto x = arg1;
             auto m = arg2.as_Node().p2();
             auto right = arg2.as_Node().p3();
             auto temp0 = tree<T1>::Node(
@@ -962,7 +1307,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     }
 
     // addtreeroot x (Node left m right) = (Node (Node left m right) x Tip)
-    auto x = std::move(arg1);
+    auto x = arg1;
     auto left = arg2.as_Node().p1();
     auto m = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
@@ -987,38 +1332,38 @@ tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
     }
 
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
-    auto a = std::move(arg1);
+    auto a = arg1;
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (a == x) {
-        auto temp1 = tree<T1>::Node(
+        auto temp3 = tree<T1>::Node(
             left,
             x,
             right
         );
-        temp0 = deltreeroot(temp1);
+        temp2 = deltreeroot(temp3);
     } else {
-        tree<T1> temp2;
+        tree<T1> temp6;
         if (a < x) {
-            auto temp3 = tree<T1>::Node(
+            auto temp7 = tree<T1>::Node(
                 deltree(a, left),
                 x,
                 right
             );
-            temp2 = temp3.self();
+            temp6 = temp7.self();
         } else {
-            auto temp4 = tree<T1>::Node(
+            auto temp8 = tree<T1>::Node(
                 left,
                 x,
                 deltree(a, right)
             );
-            temp2 = temp4;
+            temp6 = temp8.self();
         }
-        temp0 = temp2;
+        temp2 = temp6.self();
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -1029,39 +1374,39 @@ tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
     }
 
     // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
-    auto a = std::move(arg1);
-    auto b = std::move(arg2);
+    auto a = arg1;
+    auto b = arg2;
     auto left = arg3.as_Node().p1();
     auto x = arg3.as_Node().p2();
     auto right = arg3.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (a == x) {
-        auto temp1 = tree<T1>::Node(
+        auto temp3 = tree<T1>::Node(
             left,
             b,
             right
         );
-        temp0 = temp1.self();
+        temp2 = temp3.self();
     } else {
-        tree<T1> temp2;
+        tree<T1> temp6;
         if (a < x) {
-            auto temp3 = tree<T1>::Node(
+            auto temp7 = tree<T1>::Node(
                 changetree(a, b, left),
                 x,
                 right
             );
-            temp2 = temp3.self();
+            temp6 = temp7.self();
         } else {
-            auto temp4 = tree<T1>::Node(
+            auto temp8 = tree<T1>::Node(
                 left,
                 x,
                 changetree(a, b, right)
             );
-            temp2 = temp4;
+            temp6 = temp8.self();
         }
-        temp0 = temp2;
+        temp2 = temp6.self();
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>

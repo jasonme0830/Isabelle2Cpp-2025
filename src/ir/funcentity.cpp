@@ -261,27 +261,30 @@ FuncEntity::decl_variable(const string& var, const string& expr)
     // var_typeinfos_[expr] = typeinfos_[n - 1];
 
     // code by myk
-    unused_var_count_[var] = delay_statements_.size();
-    switch (func_gen_mode())
-    {
-    case 2:
-      add_delay_statement("auto $ = $;", var, expr);
-      break;
-    case 1:
-      add_delay_statement("auto $ = $;", var, move_expr(expr));
-      break;
-    case 0:
-      add_delay_statement("auto $ = $;", var, expr);
-      break;
-    default:
-      add_delay_statement("auto $ = $;", var, expr);
-      break;
-    }
+    // unused_var_count_[var] = delay_statements_.size();
+    // switch (func_gen_mode())
+    // {
+    // case 2:
+    //   add_delay_statement("auto $ = $;", var, expr);
+    //   break;
+    // case 1:
+    //   // add_delay_statement("auto $ = $;", var, move_expr(expr));
+    //   add_delay_statement("auto $ = $;", var, expr);
+    //   break;
+    // case 0:
+    //   add_delay_statement("auto $ = $;", var, expr);
+    //   break;
+    // default:
+    //   add_delay_statement("auto $ = $;", var, expr);
+    //   break;
+    // }
   } else {
-    unused_var_count_[var] = delay_statements_.size();
-    add_delay_statement("auto $ = $;", var, expr);
+    // unused_var_count_[var] = delay_statements_.size();
+    // add_delay_statement("auto $ = $;", var, expr);
   }
-
+  
+  unused_var_count_[var] = delay_statements_.size();
+  add_delay_statement("auto $ = $;", var, expr);
 }
 
 string
