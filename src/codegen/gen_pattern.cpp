@@ -48,8 +48,19 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
 
   // for variables
   else {
-    //TODO 对于整体的变量，应该判断是否调用self函数
-    func.decl_variable(name, prev);
+    // 对于整体的变量，应该判断是否调用self函数
+    bool var_bool_one = func.find_declVar(prev);
+    bool temp_bool_one = prev.substr(0,4).compare("temp") == 0;
+    bool arg_bool_one = prev.substr(0,3).compare("arg") == 0;
+    int type_class_one = expr_type->get_exprType_class();
+    // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
+    string new_right_var = prev;
+    if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+      if(theConfig.close_typeCons() == false){
+        new_right_var += ".self()";
+      }
+    }
+    func.decl_variable(name, new_right_var);
   }
 }
 
