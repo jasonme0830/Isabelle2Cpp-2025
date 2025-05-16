@@ -49,13 +49,13 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
   // for variables
   else {
     // 对于整体的变量，应该判断是否调用self函数
-    bool var_bool_one = func.find_declVar(prev);
-    bool temp_bool_one = prev.substr(0,4).compare("temp") == 0;
-    bool arg_bool_one = prev.substr(0,3).compare("arg") == 0;
+    // 区别在于，解包变量中没有tempn，甚至变量名还没有统计,只为整体参数调用self函数
+    static regex arg_regex(R"(arg[1-9][0-9]*)");
+    bool arg_bool_one = regex_match(prev, arg_regex);
+    
     int type_class_one = expr_type->get_exprType_class();
-    // cout << right_var_one << " " << var_bool_one << temp_bool_one << arg_bool_one << " " << type_class_one << endl;
     string new_right_var = prev;
-    if((var_bool_one || temp_bool_one || arg_bool_one)&&(type_class_one == 0)){
+    if((arg_bool_one)&&(type_class_one == 0)){
       if(theConfig.close_typeCons() == false){
         new_right_var += ".self()";
       }

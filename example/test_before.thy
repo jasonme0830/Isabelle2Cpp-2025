@@ -6,75 +6,80 @@ datatype snat = sZero | sSuc snat
 datatype 'a slist = sNil | sCons 'a "'a slist"
 datatype 'a tree = Tip | Node "'a tree " 'a "'a tree " 
 
+
 fun AddListHead::"'a=>'a slist=>'a slist"where
 "AddListHead a xs = sCons a  xs "
-
 fun DelListHead::"'a slist=>'a slist "where
 "DelListHead (sCons x xs) = xs"|
 "DelListHead sNil = sNil "
 
-
 fun AddListTail::"'a=>'a slist =>'a slist"where
 "AddListTail a sNil =sCons a sNil "|
 "AddListTail a (sCons x xs) = sCons x  (AddListTail a xs ) "
-
-fun AddListI::"snat=>'a=>'a slist=>'a slist"where
-"AddListI i a sNil = sCons a sNil "|
-"AddListI sZero a (sCons x xs) = AddListHead a (sCons x xs)"|
-"AddListI (sSuc i) a (sCons x xs) = sCons x  (AddListI i a xs) "
-
 fun DelListTail::"'a slist=>'a slist "where
 "DelListTail sNil = sNil"|
 "DelListTail (sCons a sNil) = sNil"|
 "DelListTail (sCons x xs) =  sCons x (DelListTail xs) "
 
-fun DelListI::"snat=>'a slist=>'a slist "where
+fun AddListIs::"snat=>'a=>'a slist=>'a slist"where
+"AddListIs i a sNil = sCons a sNil "|
+"AddListIs sZero a (sCons x xs) = AddListHead a (sCons x xs)"|
+"AddListIs (sSuc i) a (sCons x xs) = sCons x  (AddListIs i a xs) "
+fun DelListIs::"snat=>'a slist=>'a slist "where
+"DelListIs i sNil = sNil "|
+"DelListIs i (sCons a sNil) = sNil "|
+"DelListIs sZero (sCons x xs) = DelListHead (sCons x xs) "|
+"DelListIs (sSuc i) (sCons x xs) = sCons x  (DelListIs i xs) "
+
+fun AddListI::"nat=>'a=>'a slist=>'a slist"where
+"AddListI i a sNil = sCons a sNil "|
+"AddListI Zero a (sCons x xs) = AddListHead a (sCons x xs)"|
+"AddListI (Suc i) a (sCons x xs) = sCons x  (AddListI i a xs) "
+fun DelListI::"nat=>'a slist=>'a slist "where
 "DelListI i sNil = sNil "|
 "DelListI i (sCons a sNil) = sNil "|
-"DelListI sZero (sCons x xs) = DelListHead (sCons x xs) "|
-"DelListI (sSuc i) (sCons x xs) = sCons x  (DelListI i xs) "
+"DelListI Zero (sCons x xs) = DelListHead (sCons x xs) "|
+"DelListI (Suc i) (sCons x xs) = sCons x  (DelListI i xs) "
 
 
-fun SearchList::"'a =>'a list =>bool "where
-"SearchList a [] = False"|
-"SearchList a (x#xs) = (if a=x then True else (SearchList a xs))"
+fun ModifyValue::"'a=>'a=> 'a slist =>'a slist"where
+"ModifyValue a b sNil = sNil "|
+"ModifyValue a b (sCons x xs) = (if x=a then (sCons b (ModifyValue a b xs)) else (sCons x (ModifyValue a b xs))) "
+fun ModifyIndex::"snat=>'a=>'a slist=>'a slist "where
+"ModifyIndex n b sNil = sNil"|
+"ModifyIndex sZero b (sCons x xs) =(sCons b xs)"|
+"ModifyIndex (sSuc n) b (sCons x xs) = (sCons x (ModifyIndex n b xs))"
+fun SearchList::"'a=>'a slist=>bool "where
+"SearchList a sNil = False"|
+"SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))"
+fun app::  "'a slist =>'a slist => 'a slist " where 
+"app sNil as =as"|
+"app(sCons a as ) bs= sCons a (app as bs)"
+fun Insert::"'a::ord => 'a slist => 'a slist " where
+"Insert a sNil =sCons a sNil "|
+"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
+fun Reverse::  "'a slist =>'a slist " where
+"Reverse sNil = sNil"|
+"Reverse (sCons a as) = app(Reverse as)(sCons a sNil)"
 
-fun ModifyValue::"'a =>'a => 'a list =>'a list"where
-"ModifyValue a b [] = [] "|
-"ModifyValue a b (x#xs) = (if x=a then b#(ModifyValue a b xs) else x#(ModifyValue a b xs)) "
+fun InsertSortPart::"('a::ord)slist => 'a slist => 'a slist "where
+"InsertSortPart sNil ys=ys "|
+"InsertSortPart (sCons x xs) ys=InsertSortPart xs (Insert x ys) "
+fun InsertSort::"('a::ord)slist=>'a slist " where
+"InsertSort xs = InsertSortPart xs sNil"
 
-fun ModifyIndex::"nat =>'a =>'a list =>'a list "where
-"ModifyIndex n b [] = []"|
-"ModifyIndex 0 b (x#xs) =(b#xs)"|
-"ModifyIndex (Suc n) b (x#xs) = (x#(ModifyIndex n b xs))"
+
 
 fun ffilter::"('a=>bool) =>'a list=>'a list "where
 "ffilter f [] = [] "|
 "ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))"
 
-fun app::  "'a list =>'a list => 'a list " where 
-"app Nil as =as"|
-"app(Cons a as )bs= Cons a (app as bs)"
-
-fun Reverse::  "'a list =>'a list " where
-"Reverse Nil =Nil"|
-"Reverse (Cons a as) = app(Reverse as)(Cons a Nil)"
 
 fun Reverse2::"'a list=>'a list "where
 "Reverse2 [] = []"|
 "Reverse2 (Cons a []) =Cons a [] "|
 "Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil) "
 
-fun Insert::"'a::ord => 'a list => 'a list " where
-"Insert a [] =Cons a [] "|
-"Insert a (x#xs) =(if a \<le> x then a#x#xs else x#(Insert a xs)) "
-
-fun InsertSortPart::"('a::ord)list => 'a list => 'a list "where
-"InsertSortPart [] ys=ys "|
-"InsertSortPart (x#xs) ys=InsertSortPart xs (Insert x ys) "
-
-fun InsertSort::"('a::ord)list=>'a list " where
-"InsertSort xs = InsertSortPart xs Nil"
 
 fun Merge::"('a::ord)list => 'a list => 'a list "where
 "Merge [] xs=xs"|

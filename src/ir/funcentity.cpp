@@ -5,7 +5,6 @@
 #include "../utility/format.hpp"
 #include "code.hpp"
 
-#include <regex>
 
 #define assert_true(expr) assert_impl(expr, CodegenError)
 

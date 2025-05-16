@@ -9,6 +9,8 @@
 #include <vector>
 #include <set>
 
+#include <regex>
+
 namespace hol2cpp {
 class Code;
 class FuncEntity;
