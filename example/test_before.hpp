@@ -925,7 +925,7 @@ slist<T1> InsertSort(const slist<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> ffilter(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
+std::list<T1> ffilter(const std::function<bool(const T1 &)> &arg1, std::list<T1> arg2) {
     // ffilter f [] = []
     if (arg2.empty()) {
         return std::list<T1>();
@@ -947,7 +947,7 @@ std::list<T1> ffilter(const std::function<bool(const T1 &)> &arg1, const std::li
 }
 
 template<typename T1>
-std::list<T1> Reverse2(const std::list<T1> &arg1) {
+std::list<T1> Reverse2(std::list<T1> arg1) {
     // Reverse2 [] = []
     if (arg1.empty()) {
         return std::list<T1>();
@@ -975,7 +975,7 @@ std::list<T1> Reverse2(const std::list<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> Merge(const std::list<T1> &arg1, const std::list<T1> &arg2) {
+std::list<T1> Merge(std::list<T1> arg1, std::list<T1> arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
         auto xs = arg2;
@@ -1013,7 +1013,7 @@ std::list<T1> Merge(const std::list<T1> &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1>
-std::list<T1> MergeSort(const std::list<T1> &arg1) {
+std::list<T1> MergeSort(std::list<T1> arg1) {
     // MergeSort [] = []
     if (arg1.empty()) {
         return std::list<T1>();
@@ -1039,7 +1039,7 @@ std::list<T1> MergeSort(const std::list<T1> &arg1) {
     return Merge(temp0, temp4);
 }
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2);
+std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64_t> arg2);
 
 std::uint64_t two_fib(const std::uint64_t &arg1);
 
@@ -1060,7 +1060,7 @@ std::uint64_t Pell(const std::uint64_t &arg1);
 std::uint64_t Lucas(const std::uint64_t &arg1);
 
 template<typename T1>
-std::uint64_t slength(const std::list<T1> &arg1) {
+std::uint64_t slength(std::list<T1> arg1) {
     // slength [] = 0
     if (arg1.empty()) {
         return 0;
@@ -1072,7 +1072,7 @@ std::uint64_t slength(const std::list<T1> &arg1) {
 }
 
 template<typename T1>
-std::list<T1> stake(const std::uint64_t &arg1, const std::list<T1> &arg2) {
+std::list<T1> stake(const std::uint64_t &arg1, std::list<T1> arg2) {
     // stake 0 xs = []
     if (arg1 == 0) {
         return std::list<T1>();
@@ -1095,7 +1095,7 @@ std::list<T1> stake(const std::uint64_t &arg1, const std::list<T1> &arg2) {
 }
 
 template<typename T1>
-std::list<T1> sdrop(const std::uint64_t &arg1, const std::list<T1> &arg2) {
+std::list<T1> sdrop(const std::uint64_t &arg1, std::list<T1> arg2) {
     // sdrop 0 xs = xs
     if (arg1 == 0) {
         auto xs = arg2;
@@ -1118,7 +1118,7 @@ std::list<T1> sdrop(const std::uint64_t &arg1, const std::list<T1> &arg2) {
 std::list<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2);
 
 template<typename T1>
-T1 snth(const std::list<T1> &arg1, const std::uint64_t &arg2) {
+T1 snth(std::list<T1> arg1, const std::uint64_t &arg2) {
     // snth [] n = 0
     if (arg1.empty()) {
         return 0;

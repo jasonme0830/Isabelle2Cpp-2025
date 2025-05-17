@@ -1,5 +1,7 @@
 #include "synthesizer.hpp"
 #include "../utility/config.hpp"
+//for typeInfo
+#include "../codegen/codegen.hpp"
 
 using namespace std;
 
@@ -98,12 +100,18 @@ Synthesizer::syn_func_params(const FuncEntity& func)
     if (i) {
       params += ", ";
     }
-    //根据函数的递归类型决定以什么样的方式进行代码生成优化
-    params += "$arg$"_fs.format(types[i].to_str_as_arg(func.func_gen_mode()), i + 1);
+    //判断当前参数的类型是否是容器，此处只处理list
+    if (types[i].name == theTemplateTypeMapping["list"]){
+      params += "$arg$"_fs.format(types[i].to_str_as_arg(0), i + 1);
+    }else{
+      //根据函数的递归类型决定以什么样的方式进行代码生成优化
+      params += "$arg$"_fs.format(types[i].to_str_as_arg(func.func_gen_mode()), i + 1);
+    }
   }
   return params;
 }
 
+// for memorization
 string
 Synthesizer::syn_func_param_types(const FuncEntity& func)
 {
@@ -117,7 +125,7 @@ Synthesizer::syn_func_param_types(const FuncEntity& func)
   }
   return param_types;
 }
-
+// for memorization
 string
 Synthesizer::syn_func_args(const FuncEntity& func)
 {

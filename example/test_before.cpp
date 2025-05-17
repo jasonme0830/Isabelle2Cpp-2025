@@ -1,6 +1,6 @@
 #include "test_before.hpp"
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2) {
+std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
