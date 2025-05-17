@@ -21,7 +21,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
 
     // bs x ys = (let m = (length ys) div 2 in ...
     auto x = arg1;
-    auto ys = arg2;
+    auto ys = std::move(arg2);
     auto temp0 = ys.size() / 2;
     auto m = temp0;
     auto temp4 = ys;

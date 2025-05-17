@@ -23,17 +23,17 @@ fun DelListTail::"'a slist=>'a slist "where
 
 fun AddListIs::"snat=>'a=>'a slist=>'a slist"where
 "AddListIs i a sNil = sCons a sNil "|
-"AddListIs sZero a (sCons x xs) = AddListHead a (sCons x xs)"|
+"AddListIs sZero a xs = AddListHead a xs"|
 "AddListIs (sSuc i) a (sCons x xs) = sCons x  (AddListIs i a xs) "
 fun DelListIs::"snat=>'a slist=>'a slist "where
 "DelListIs i sNil = sNil "|
 "DelListIs i (sCons a sNil) = sNil "|
-"DelListIs sZero (sCons x xs) = DelListHead (sCons x xs) "|
+"DelListIs sZero (Cons x xs) = DelListHead (Cons x xs) "|
 "DelListIs (sSuc i) (sCons x xs) = sCons x  (DelListIs i xs) "
 
 fun AddListI::"nat=>'a=>'a slist=>'a slist"where
 "AddListI i a sNil = sCons a sNil "|
-"AddListI Zero a (sCons x xs) = AddListHead a (sCons x xs)"|
+"AddListI Zero a xs = AddListHead a xs"|
 "AddListI (Suc i) a (sCons x xs) = sCons x  (AddListI i a xs) "
 fun DelListI::"nat=>'a slist=>'a slist "where
 "DelListI i sNil = sNil "|

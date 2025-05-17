@@ -88,7 +88,7 @@ ArgumentType::get_exprType_class() const
 int
 TemplateType::get_exprType_class() const
 {
-  if(theHeaderMapping.count(name)){
+  if(theTemplateTypeMapping.count(name)){
     return 1;
   }else{
     return 0;

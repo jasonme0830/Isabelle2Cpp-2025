@@ -55,9 +55,16 @@ VarExpr::gen_pattern(FuncEntity& func, const string& prev) const
     
     int type_class_one = expr_type->get_exprType_class();
     string new_right_var = prev;
+    //是整体参数，并且是基于定义的递归类型
     if((arg_bool_one)&&(type_class_one == 0)){
       if(theConfig.close_typeCons() == false){
         new_right_var += ".self()";
+      }
+    }
+    //是整体参数，并且是基于规则的递归类型，例如list
+    if((arg_bool_one)&&(type_class_one == 1)){
+      if(theConfig.close_moveStd() == false){
+        new_right_var = move_expr(new_right_var);
       }
     }
     func.decl_variable(name, new_right_var);
@@ -100,7 +107,7 @@ ConsExpr::gen_pattern(FuncEntity& func, const string& prev) const
     // if (!theConfig.move_list()) 
     // if(func.func_recu_class() != 1)
     // if(func.func_gen_mode() == 0)
-    if(!theConfig.close_moveStd())
+    if(theConfig.close_moveStd())
     {
       func.add_pattern_cond("!$.empty()", prev);
       args[0]->gen_pattern(func, prev + ".front()");
