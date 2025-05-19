@@ -528,7 +528,7 @@ slist<T1> AddListHead(const T1 &arg1, const slist<T1> &arg2) {
     // AddListHead a xs = sCons a  xs
     auto a = arg1;
     auto xs = arg2.self();
-    return slist<T1>::sCons(a, xs);;
+    return slist<T1>::sCons(a, xs);
 }
 
 template<typename T1>
@@ -548,14 +548,14 @@ slist<T1> AddListTail(const T1 &arg1, const slist<T1> &arg2) {
     // AddListTail a sNil =sCons a sNil
     if (arg2.is_sNil()) {
         auto a = arg1;
-        return slist<T1>::sCons(a, slist<T1>::sNil());;
+        return slist<T1>::sCons(a, slist<T1>::sNil());
     }
 
     // AddListTail a (sCons x xs) = sCons x  (AddListTail a xs )
     auto a = arg1;
     auto x = arg2.as_sCons().p1();
     auto xs = arg2.as_sCons().p2();
-    return slist<T1>::sCons(x, AddListTail(a, xs));;
+    return slist<T1>::sCons(x, AddListTail(a, xs));
 }
 
 template<typename T1>
@@ -575,7 +575,7 @@ slist<T1> DelListTail(const slist<T1> &arg1) {
     // DelListTail (sCons x xs) =  sCons x (DelListTail xs)
     auto x = arg1.as_sCons().p1();
     auto xs = arg1.as_sCons().p2();
-    return slist<T1>::sCons(x, DelListTail(xs));;
+    return slist<T1>::sCons(x, DelListTail(xs));
 }
 
 template<typename T1>
@@ -583,7 +583,7 @@ slist<T1> AddListIs(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
     // AddListIs i a sNil = sCons a sNil
     if (arg3.is_sNil()) {
         auto a = arg2;
-        return slist<T1>::sCons(a, slist<T1>::sNil());;
+        return slist<T1>::sCons(a, slist<T1>::sNil());
     }
 
     // AddListIs sZero a xs = AddListHead a xs
@@ -598,7 +598,7 @@ slist<T1> AddListIs(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
     auto a = arg2;
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
-    return slist<T1>::sCons(x, AddListIs(i, a, xs));;
+    return slist<T1>::sCons(x, AddListIs(i, a, xs));
 }
 
 template<typename T1>
@@ -620,7 +620,7 @@ slist<T1> DelListIs(const snat &arg1, const slist<T1> &arg2) {
         if (arg2.is_sCons()) {
             auto x = arg2.as_sCons().p1();
             auto xs = arg2.as_sCons().p2();
-            return DelListHead(slist<T1>::sCons(x, xs););
+            return DelListHead(slist<T1>::sCons(x, xs));
         }
     }
 
@@ -628,7 +628,7 @@ slist<T1> DelListIs(const snat &arg1, const slist<T1> &arg2) {
     auto i = arg1.as_sSuc().p1();
     auto x = arg2.as_sCons().p1();
     auto xs = arg2.as_sCons().p2();
-    return slist<T1>::sCons(x, DelListIs(i, xs));;
+    return slist<T1>::sCons(x, DelListIs(i, xs));
 }
 
 template<typename T1>
@@ -636,7 +636,7 @@ slist<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &a
     // AddListI i a sNil = sCons a sNil
     if (arg3.is_sNil()) {
         auto a = arg2;
-        return slist<T1>::sCons(a, slist<T1>::sNil());;
+        return slist<T1>::sCons(a, slist<T1>::sNil());
     }
 
     // AddListI Zero a xs = AddListHead a xs
@@ -651,7 +651,7 @@ slist<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const slist<T1> &a
     auto a = arg2;
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
-    return slist<T1>::sCons(x, AddListI(i, a, xs));;
+    return slist<T1>::sCons(x, AddListI(i, a, xs));
 }
 
 template<typename T1>
@@ -673,7 +673,7 @@ slist<T1> DelListI(const std::uint64_t &arg1, const slist<T1> &arg2) {
         if (arg2.is_sCons()) {
             auto x = arg2.as_sCons().p1();
             auto xs = arg2.as_sCons().p2();
-            return DelListHead(slist<T1>::sCons(x, xs););
+            return DelListHead(slist<T1>::sCons(x, xs));
         }
     }
 
@@ -681,7 +681,7 @@ slist<T1> DelListI(const std::uint64_t &arg1, const slist<T1> &arg2) {
     auto i = arg1 - 1;
     auto x = arg2.as_sCons().p1();
     auto xs = arg2.as_sCons().p2();
-    return slist<T1>::sCons(x, DelListI(i, xs));;
+    return slist<T1>::sCons(x, DelListI(i, xs));
 }
 
 template<typename T1>
@@ -698,9 +698,9 @@ slist<T1> ModifyValue(const T1 &arg1, const T1 &arg2, const slist<T1> &arg3) {
     auto xs = arg3.as_sCons().p2();
     slist<T1> temp2;
     if (x == a) {
-        temp2 = slist<T1>::sCons(b, ModifyValue(a, b, xs));;
+        temp2 = slist<T1>::sCons(b, ModifyValue(a, b, xs));
     } else {
-        temp2 = slist<T1>::sCons(x, ModifyValue(a, b, xs));;
+        temp2 = slist<T1>::sCons(x, ModifyValue(a, b, xs));
     }
     return temp2;
 }
@@ -717,7 +717,7 @@ slist<T1> ModifyIndex(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
         if (arg3.is_sCons()) {
             auto b = arg2;
             auto xs = arg3.as_sCons().p2();
-            return slist<T1>::sCons(b, xs);;
+            return slist<T1>::sCons(b, xs);
         }
     }
 
@@ -726,7 +726,7 @@ slist<T1> ModifyIndex(const snat &arg1, const T1 &arg2, const slist<T1> &arg3) {
     auto b = arg2;
     auto x = arg3.as_sCons().p1();
     auto xs = arg3.as_sCons().p2();
-    return slist<T1>::sCons(x, ModifyIndex(n, b, xs));;
+    return slist<T1>::sCons(x, ModifyIndex(n, b, xs));
 }
 
 template<typename T1>
@@ -761,7 +761,7 @@ slist<T1> app(const slist<T1> &arg1, const slist<T1> &arg2) {
     auto a = arg1.as_sCons().p1();
     auto as = arg1.as_sCons().p2();
     auto bs = arg2.self();
-    return slist<T1>::sCons(a, app(as, bs));;
+    return slist<T1>::sCons(a, app(as, bs));
 }
 
 template<typename T1>
@@ -769,7 +769,7 @@ slist<T1> Insert(const T1 &arg1, const slist<T1> &arg2) {
     // Insert a sNil =sCons a sNil
     if (arg2.is_sNil()) {
         auto a = arg1;
-        return slist<T1>::sCons(a, slist<T1>::sNil());;
+        return slist<T1>::sCons(a, slist<T1>::sNil());
     }
 
     // Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs)))
@@ -778,9 +778,9 @@ slist<T1> Insert(const T1 &arg1, const slist<T1> &arg2) {
     auto xs = arg2.as_sCons().p2();
     slist<T1> temp2;
     if (a <= x) {
-        temp2 = slist<T1>::sCons(a, slist<T1>::sCons(x, xs););;
+        temp2 = slist<T1>::sCons(a, slist<T1>::sCons(x, xs));
     } else {
-        temp2 = slist<T1>::sCons(x, Insert(a, xs));;
+        temp2 = slist<T1>::sCons(x, Insert(a, xs));
     }
     return temp2;
 }
@@ -796,7 +796,7 @@ slist<T1> Reverse(const slist<T1> &arg1) {
     auto a = arg1.as_sCons().p1();
     auto as = arg1.as_sCons().p2();
     auto temp0 = Reverse(as);
-    return app(temp0, slist<T1>::sCons(a, slist<T1>::sNil()););
+    return app(temp0, slist<T1>::sCons(a, slist<T1>::sNil()));
 }
 
 template<typename T1>
@@ -1048,7 +1048,7 @@ tree<T1> copy_tree(const tree<T1> &arg1) {
         auto left = arg1.as_Node().p1();
         auto x = arg1.as_Node().p2();
         auto right = arg1.as_Node().p3();
-        return tree<T1>::Node(copy_tree(left), x, copy_tree(right));;
+        return tree<T1>::Node(copy_tree(left), x, copy_tree(right));
     }
 
     // copy_tree Tip = Tip
@@ -1105,7 +1105,7 @@ tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
     // inserttree a Tip = Node Tip a Tip
     if (arg2.is_Tip()) {
         auto a = arg1;
-        return tree<T1>::Node(tree<T1>::Tip(), a, tree<T1>::Tip());;
+        return tree<T1>::Node(tree<T1>::Tip(), a, tree<T1>::Tip());
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
@@ -1115,9 +1115,9 @@ tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
     auto right = arg2.as_Node().p3();
     tree<T1> temp2;
     if (a <= x) {
-        temp2 = tree<T1>::Node(inserttree(a, left), x, right);;
+        temp2 = tree<T1>::Node(inserttree(a, left), x, right);
     } else {
-        temp2 = tree<T1>::Node(left, x, inserttree(a, right));;
+        temp2 = tree<T1>::Node(left, x, inserttree(a, right));
     }
     return temp2;
 }
@@ -1170,7 +1170,7 @@ tree<T1> delRightest(const tree<T1> &arg1) {
         auto left = arg1.as_Node().p1();
         auto x = arg1.as_Node().p2();
         auto right = arg1.as_Node().p3();
-        return tree<T1>::Node(left, x, delRightest(right));;
+        return tree<T1>::Node(left, x, delRightest(right));
     }
 
     // delRightest Tip = Tip
@@ -1214,7 +1214,7 @@ tree<T1> deltreeroot(const tree<T1> &arg1) {
         if (left.is_Tip()) {
             temp5 = right.self();
         } else {
-            temp5 = tree<T1>::Node(delRightest(left), rightest(left), right);;
+            temp5 = tree<T1>::Node(delRightest(left), rightest(left), right);
         }
         temp2 = temp5.self();
     }
@@ -1226,7 +1226,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     // addtreeroot x Tip = Node Tip x Tip
     if (arg2.is_Tip()) {
         auto x = arg1;
-        return tree<T1>::Node(tree<T1>::Tip(), x, tree<T1>::Tip());;
+        return tree<T1>::Node(tree<T1>::Tip(), x, tree<T1>::Tip());
     }
 
     // addtreeroot x (Node left m Tip) = Node left x (Node Tip m Tip)
@@ -1235,7 +1235,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
             auto x = arg1;
             auto left = arg2.as_Node().p1();
             auto m = arg2.as_Node().p2();
-            return tree<T1>::Node(left, x, tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()););;
+            return tree<T1>::Node(left, x, tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()));
         }
     }
 
@@ -1245,7 +1245,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
             auto x = arg1;
             auto m = arg2.as_Node().p2();
             auto right = arg2.as_Node().p3();
-            return tree<T1>::Node(tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip());, x, right);;
+            return tree<T1>::Node(tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()), x, right);
         }
     }
 
@@ -1254,7 +1254,7 @@ tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     auto left = arg2.as_Node().p1();
     auto m = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    return tree<T1>::Node(tree<T1>::Node(left, m, right);, x, tree<T1>::Tip());;
+    return tree<T1>::Node(tree<T1>::Node(left, m, right), x, tree<T1>::Tip());
 }
 
 template<typename T1>
@@ -1271,13 +1271,13 @@ tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
     auto right = arg2.as_Node().p3();
     tree<T1> temp2;
     if (a == x) {
-        temp2 = deltreeroot(tree<T1>::Node(left, x, right););
+        temp2 = deltreeroot(tree<T1>::Node(left, x, right));
     } else {
         tree<T1> temp5;
         if (a < x) {
-            temp5 = tree<T1>::Node(deltree(a, left), x, right);;
+            temp5 = tree<T1>::Node(deltree(a, left), x, right);
         } else {
-            temp5 = tree<T1>::Node(left, x, deltree(a, right));;
+            temp5 = tree<T1>::Node(left, x, deltree(a, right));
         }
         temp2 = temp5.self();
     }
@@ -1299,13 +1299,13 @@ tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
     auto right = arg3.as_Node().p3();
     tree<T1> temp2;
     if (a == x) {
-        temp2 = tree<T1>::Node(left, b, right);;
+        temp2 = tree<T1>::Node(left, b, right);
     } else {
         tree<T1> temp5;
         if (a < x) {
-            temp5 = tree<T1>::Node(changetree(a, b, left), x, right);;
+            temp5 = tree<T1>::Node(changetree(a, b, left), x, right);
         } else {
-            temp5 = tree<T1>::Node(left, x, changetree(a, b, right));;
+            temp5 = tree<T1>::Node(left, x, changetree(a, b, right));
         }
         temp2 = temp5.self();
     }
@@ -1333,7 +1333,7 @@ std::list<T1> sorttree(const tree<T1> &arg1) {
     auto left = arg1.as_Node().p1();
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
-    auto temp0 = transtolist(tree<T1>::Node(left, x, right););
+    auto temp0 = transtolist(tree<T1>::Node(left, x, right));
     return MergeSort(temp0);
 }
 

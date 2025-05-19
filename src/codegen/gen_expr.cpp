@@ -412,7 +412,7 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
       statements += ", " + arguments[i];
     }
   }
-  statements += ");";
+  statements += ")";
   return statements;
 }
 string
