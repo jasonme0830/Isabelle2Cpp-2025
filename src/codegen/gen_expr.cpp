@@ -422,7 +422,7 @@ ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) cons
 
   string content;
   for(const Ptr<Expr> arg:args){
-    //用if找出所有不用生成temp的情况
+    //用if找出所有生成temp的情况
     if(arg->get_expr_class() == "Integral"){
       // content += gen_expr_impl_funCall_noTemp(func, typeinfo, arg);
       // continue;
@@ -480,6 +480,7 @@ ConsExpr::get_genTempOrNot(FuncEntity& func, const TypeInfo& typeinfo, const Ptr
 {
   Ptr<const ConsExpr> copy_arg = std::dynamic_pointer_cast<const ConsExpr>(arg);
   std::string arg_cons = copy_arg->get_constructor();
+  // 原则是尽量不生成临时变量
   // for recursive calls
   if (arg_cons == func.name()) {
     return true;
@@ -491,6 +492,7 @@ ConsExpr::get_genTempOrNot(FuncEntity& func, const TypeInfo& typeinfo, const Ptr
   }
   else if (arg_cons == "Cons") {
     return true;
+    // return false;
   } else if (arg_cons == "length") {
     assert_true(args.size() == 1);
     return true;
@@ -645,18 +647,12 @@ ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo,
   // func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
   func.add_expr(decl_statement_one, temp, right_var_one);
 
-  // switch (func.func_gen_mode())
-  // {
-  // case 2:
-  //   temp = move_expr(temp);
-  //   break;
-  // case 1:
-  //   break;
-  // case 0:
-  //   break;
-  // default:
-  //   break;
-  // }
+  //如果等号右侧是可以移动，那么当前返回的临时变量也可以移动
+  if(theConfig.close_moveStd() == false){
+    if(is_moved(right_var_one)){
+      temp = move_expr(temp);
+    }
+  }
   return temp+", ";
 }
 

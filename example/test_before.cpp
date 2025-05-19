@@ -21,7 +21,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
 
     // bs x ys = (let m = (length ys) div 2 in ...
     auto x = arg1;
-    auto ys = std::move(arg2);
+    auto ys = arg2;
     auto temp0 = ys.size() / 2;
     auto m = temp0;
     auto temp4 = ys;
@@ -34,15 +34,12 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
         std::optional<std::uint64_t> temp10;
         if (y < x) {
             auto temp11 = ([&] {
-                auto temp15 = m + 1;
-                auto temp16 = std::move(ys);
-                temp16.erase(temp16.begin(), std::next(temp16.begin(), temp15));
-                auto temp12 = std::move(temp16);
-                auto temp17 = bs(x, temp12);
+                auto temp12 = std::list<std::uint64_t>(std::next(ys.begin(), m + 1), ys.end());
+                auto temp15 = bs(x, temp12);
 
                 // Some n \<Rightarrow> Some (m + n + 1)
-                if (temp17.has_value()) {
-                    auto n = temp17.value();
+                if (temp15.has_value()) {
+                    auto n = temp15.value();
                     return std::make_optional<std::uint64_t>((m + n) + 1);
                 }
 
@@ -51,11 +48,8 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
             })();
             temp10 = temp11;
         } else {
-            auto temp25 = m;
-            auto temp26 = std::move(ys);
-            temp26.erase(std::next(temp26.begin(), temp25), temp26.end());
-            auto temp24 = std::move(temp26);
-            temp10 = bs(x, temp24);
+            auto temp22 = std::list<std::uint64_t>(ys.begin(), std::next(ys.begin(), m));
+            temp10 = bs(x, temp22);
         }
         temp7 = temp10;
     }
@@ -344,7 +338,7 @@ std::list<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &a
     } else {
         auto temp5 = supto(i + 1, j);
         temp5.push_front(i);
-        temp2 = std::move(temp5);
+        temp2 = temp5;
     }
     return temp2;
 }
