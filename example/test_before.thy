@@ -28,7 +28,7 @@ fun AddListIs::"snat=>'a=>'a slist=>'a slist"where
 fun DelListIs::"snat=>'a slist=>'a slist "where
 "DelListIs i sNil = sNil "|
 "DelListIs i (sCons a sNil) = sNil "|
-"DelListIs sZero (Cons x xs) = DelListHead (Cons x xs) "|
+"DelListIs sZero (sCons x xs) = DelListHead (sCons x xs) "|
 "DelListIs (sSuc i) (sCons x xs) = sCons x  (DelListIs i xs) "
 
 fun AddListI::"nat=>'a=>'a slist=>'a slist"where

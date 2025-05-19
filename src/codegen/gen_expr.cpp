@@ -387,31 +387,33 @@ ConsExpr::gen_expr_impl_datatype(FuncEntity& func, const TypeInfo& typeinfo) con
     arguments.push_back(arg->gen_expr(func));
   }
 
-  auto temp = func.gen_temp();
-  //临时变量右侧是构造函数，不用调用self函数
-  func.add_expr("auto $ = $::$(", temp, typeinfo.to_str(), constructor)
-    .add_indent();
+  // //给构造函数生成临时变量
+  // auto temp = func.gen_temp();
+  // //临时变量右侧是构造函数，不用调用self函数
+  // func.add_expr("auto $ = $::$(", temp, typeinfo.to_str(), constructor)
+  //   .add_indent();
+  // for (size_t i = 0; i < arguments.size(); ++i) {
+  //   if (i == 0) {
+  //     func.add_expr(arguments[i]);
+  //   } else {
+  //     func.app_last_stmt(",");
+  //     func.add_expr(arguments[i]);
+  //   }
+  // }
+  // func.sub_indent().add_expr(");");
+
+  //构造函数不生成临时变量
+  string statements;
+  statements = typeinfo.to_str() +"::"+constructor + "(";
   for (size_t i = 0; i < arguments.size(); ++i) {
     if (i == 0) {
-      func.add_expr(arguments[i]);
+      statements += arguments[i];
     } else {
-      func.app_last_stmt(",");
-      func.add_expr(arguments[i]);
+      statements += ", " + arguments[i];
     }
   }
-  func.sub_indent().add_expr(");");
-
-  switch (func.func_gen_mode())
-  {
-  case 0:
-    return temp;
-  case 1:
-    return temp;
-  case 2:
-    return move_expr(temp);
-  default:
-    return move_expr(temp);
-  }
+  statements += ");";
+  return statements;
 }
 string
 ConsExpr::gen_expr_impl_funCall(FuncEntity& func, const TypeInfo& typeinfo) const
