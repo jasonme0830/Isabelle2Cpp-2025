@@ -38,7 +38,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
                 auto temp16 = std::move(ys);
                 temp16.erase(temp16.begin(), std::next(temp16.begin(), temp15));
                 auto temp12 = std::move(temp16);
-                auto temp17 = bs(x, temp12);
+                auto temp17 = bs(x, std::move(temp12));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
                 if (temp17.has_value()) {
@@ -55,7 +55,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
             auto temp26 = std::move(ys);
             temp26.erase(std::next(temp26.begin(), temp25), temp26.end());
             auto temp24 = std::move(temp26);
-            temp10 = bs(x, temp24);
+            temp10 = bs(x, std::move(temp24));
         }
         temp7 = temp10;
     }

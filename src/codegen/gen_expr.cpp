@@ -500,10 +500,12 @@ ConsExpr::get_genTempOrNot(FuncEntity& func, const TypeInfo& typeinfo, const Ptr
     return true;
   } else if (arg_cons == "take") {
     assert_true(args.size() == 2);
-    return true;
+    // return true;
+    return false;
   } else if (arg_cons == "drop") {
     assert_true(args.size() == 2);
-    return true;
+    // return true;
+    return false;
   } else if (arg_cons == "append") {
     assert_true(args.size() == 2);
     return true;
@@ -593,18 +595,12 @@ ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo
   // func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
   func.add_expr(decl_statement_one, temp, right_var_one);
 
-  // switch (func.func_gen_mode())
-  // {
-  // case 2:
-  //   temp = move_expr(temp);
-  //   break;
-  // case 1:
-  //   break;
-  // case 0:
-  //   break;
-  // default:
-  //   break;
-  // }
+  //如果等号右侧是可以移动，那么当前返回的临时变量也可以移动
+  if(theConfig.close_moveStd() == false){
+    if(is_moved(right_var_one)){
+      temp = move_expr(temp);
+    }
+  }
   return temp+", ";
 }
 std::string
