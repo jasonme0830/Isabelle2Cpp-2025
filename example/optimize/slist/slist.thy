@@ -88,12 +88,6 @@ fun MergeSort::"('a::ord)list=>'a slist " where
 "MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs)) "
 
 
-fun fib :: "snat \<Rightarrow> snat" where
-  "fib sZero = (Suc sZero)" |
-  "fib (Suc sZero) = (Suc sZero)" |
-  "fib n = (fib (n - (Suc sZero))) + (fib (n - (Suc(Suc sZero))))"
-
-
 fun ssize :: "'a slist => nat" where  
   "ssize sNil = 0" |  
   "ssize  (sCons x sNil) = (Suc 0)" |
@@ -111,7 +105,7 @@ fun sdrop :: "nat => 'a slist => 'a slist" where
   "sdrop (Suc n) sNil = sNil" |  
   "sdrop (Suc n)  (sCons x xs) = (sdrop n xs)"
 fun supto :: "nat => nat => nat slist" where  
-  "supto i j = (if i \<ge> j then sNil else i # supto (i + 1) j)"
+  "supto i j = (if i \<ge> j then sNil else (sCons i  (supto (i + 1) j)))"
 fun snth :: "'a slist => nat => 'a" where  
   "snth sNil n = 0" |  
   "snth (x#xs) 0 = x" |  

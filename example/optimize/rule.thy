@@ -7,11 +7,9 @@ datatype 'a tree = Tip | Node "'a tree " 'a "'a tree "
 
 fun AddListHead::"'a =>'a list=>'a list"where
 "AddListHead a xs =a # xs "
-
 fun AddListTail::"'a =>'a list =>'a list"where
 "AddListTail a [] =Cons a [] "|(*!*)
 "AddListTail a (x#xs) = x # (AddListTail a xs ) "
-
 fun AddListI::"nat =>'a =>'a list=>'a list"where
 "AddListI i a [] = Cons a [] "|
 "AddListI 0 a (x#xs) = AddListHead a (x#xs)"|
@@ -20,12 +18,10 @@ fun AddListI::"nat =>'a =>'a list=>'a list"where
 fun DelListHead::"'a list=>'a list "where
 "DelListHead (x#xs) = xs"|
 "DelListHead [] = [] "
-
 fun DelListTail::"'a list =>'a list "where
 "DelListTail [] = []"|
 "DelListTail (Cons a []) = []"|
 "DelListTail (x#xs) =  Cons x (DelListTail xs) "
-
 fun DelListI::"nat =>'a list =>'a list "where
 "DelListI i [] = []"|
 "DelListI i (Cons a []) = []"|
@@ -39,7 +35,6 @@ fun SearchList::"'a =>'a list =>bool "where
 fun ModifyValue::"'a =>'a => 'a list =>'a list"where
 "ModifyValue a b [] = [] "|
 "ModifyValue a b (x#xs) = (if x=a then b#(ModifyValue a b xs) else x#(ModifyValue a b xs)) "
-
 fun ModifyIndex::"nat =>'a =>'a list =>'a list "where
 "ModifyIndex n b [] = []"|
 "ModifyIndex 0 b (x#xs) =(b#xs)"|
@@ -65,11 +60,9 @@ fun Reverse2::"'a list=>'a list "where
 fun Insert::"'a::ord => 'a list => 'a list " where
 "Insert a [] =Cons a [] "|
 "Insert a (x#xs) =(if a \<le> x then a#x#xs else x#(Insert a xs)) "
-
 fun InsertSortPart::"('a::ord)list => 'a list => 'a list "where
 "InsertSortPart [] ys=ys "|
 "InsertSortPart (x#xs) ys=InsertSortPart xs (Insert x ys) "
-
 fun InsertSort::"('a::ord)list=>'a list " where
 "InsertSort xs = InsertSortPart xs Nil"
 
@@ -77,7 +70,6 @@ fun Merge::"('a::ord)list => 'a list => 'a list "where
 "Merge [] xs=xs"|
 "Merge xs [] = xs"|
 "Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys)) "
-
 fun MergeSort::"('a::ord)list=>'a list " where
 "MergeSort [] = []"|
 "MergeSort (Cons a []) = [a] "|

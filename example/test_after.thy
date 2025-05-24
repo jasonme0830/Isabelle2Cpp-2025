@@ -2,86 +2,96 @@ theory rule
   imports Main
 begin
 
+datatype snat = sZero | sSuc snat
+datatype 'a slist = sNil | sCons 'a "'a slist"
 datatype 'a tree = Tip | Node "'a tree " 'a "'a tree " 
 
+fun copyList::"'a slist => 'a slist"where
+"copyList sNil = sNil"|
+"copyList (sCons x xs) = sCons x (copyList xs)"
 
-fun AddListHead::"'a =>'a list=>'a list"where
-"AddListHead a xs =a # xs "
+fun AddListHead::"'a=>'a slist=>'a slist"where
+"AddListHead a xs = sCons a  xs "
+fun DelListHead::"'a slist=>'a slist "where
+"DelListHead (sCons x xs) = xs"|
+"DelListHead sNil = sNil "
 
-fun AddListTail::"'a =>'a list =>'a list"where
-"AddListTail a [] =Cons a [] "|(*!*)
-"AddListTail a (x#xs) = x # (AddListTail a xs ) "
+fun AddListTail::"'a=>'a slist =>'a slist"where
+"AddListTail a sNil =sCons a sNil "|
+"AddListTail a (sCons x xs) = sCons x  (AddListTail a xs ) "
+fun DelListTail::"'a slist=>'a slist "where
+"DelListTail sNil = sNil"|
+"DelListTail (sCons a sNil) = sNil"|
+"DelListTail (sCons x xs) =  sCons x (DelListTail xs) "
 
-fun AddListI::"nat =>'a =>'a list=>'a list"where
-"AddListI i a [] = Cons a [] "|
-"AddListI 0 a (x#xs) = AddListHead a (x#xs)"|
-"AddListI (Suc i) a (x#xs) = x # (AddListI i a xs) "
+fun AddListIs::"snat=>'a=>'a slist=>'a slist"where
+"AddListIs i a sNil = sCons a sNil "|
+"AddListIs sZero a xs = AddListHead a xs"|
+"AddListIs (sSuc i) a (sCons x xs) = sCons x  (AddListIs i a xs) "
+fun DelListIs::"snat=>'a slist=>'a slist "where
+"DelListIs i sNil = sNil "|
+"DelListIs i (sCons a sNil) = sNil "|
+"DelListIs sZero (sCons x xs) = DelListHead (sCons x xs) "|
+"DelListIs (sSuc i) (sCons x xs) = sCons x  (DelListIs i xs) "
 
-fun DelListHead::"'a list=>'a list "where
-"DelListHead (x#xs) = xs"|
-"DelListHead [] = [] "
+fun AddListI::"nat=>'a=>'a slist=>'a slist"where
+"AddListI i a sNil = sCons a sNil "|
+"AddListI Zero a xs = AddListHead a xs"|
+"AddListI (Suc i) a (sCons x xs) = sCons x  (AddListI i a xs) "
+fun DelListI::"nat=>'a slist=>'a slist "where
+"DelListI i sNil = sNil "|
+"DelListI i (sCons a sNil) = sNil "|
+"DelListI Zero (sCons x xs) = DelListHead (sCons x xs) "|
+"DelListI (Suc i) (sCons x xs) = sCons x  (DelListI i xs) "
 
-fun DelListTail::"'a list =>'a list "where
-"DelListTail [] = []"|
-"DelListTail (Cons a []) = []"|
-"DelListTail (x#xs) =  Cons x (DelListTail xs) "
 
-fun DelListI::"nat =>'a list =>'a list "where
-"DelListI i [] = []"|
-"DelListI i (Cons a []) = []"|
-"DelListI 0 (x#xs) = DelListHead (x#xs) "|
-"DelListI (Suc i) (x#xs) = x # (DelListI i xs) "
+fun ModifyValue::"'a=>'a=> 'a slist =>'a slist"where
+"ModifyValue a b sNil = sNil "|
+"ModifyValue a b (sCons x xs) = (if x=a then (sCons b (ModifyValue a b xs)) else (sCons x (ModifyValue a b xs))) "
+fun ModifyIndex::"snat=>'a=>'a slist=>'a slist "where
+"ModifyIndex n b sNil = sNil"|
+"ModifyIndex sZero b (sCons x xs) =(sCons b xs)"|
+"ModifyIndex (sSuc n) b (sCons x xs) = (sCons x (ModifyIndex n b xs))"
 
-fun SearchList::"'a =>'a list =>bool "where
-"SearchList a [] = False"|
-"SearchList a (x#xs) = (if a=x then True else (SearchList a xs))"
+fun SearchList::"'a=>'a slist=>bool "where
+"SearchList a sNil = False"|
+"SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))"
 
-fun ModifyValue::"'a =>'a => 'a list =>'a list"where
-"ModifyValue a b [] = [] "|
-"ModifyValue a b (x#xs) = (if x=a then b#(ModifyValue a b xs) else x#(ModifyValue a b xs)) "
-
-fun ModifyIndex::"nat =>'a =>'a list =>'a list "where
-"ModifyIndex n b [] = []"|
-"ModifyIndex 0 b (x#xs) =(b#xs)"|
-"ModifyIndex (Suc n) b (x#xs) = (x#(ModifyIndex n b xs))"
-
-fun ffilter::"('a=>bool) =>'a list=>'a list "where
-"ffilter f [] = [] "|
-"ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))"
-
-fun app::  "'a list =>'a list => 'a list " where 
-"app Nil as =as"|
-"app(Cons a as )bs= Cons a (app as bs)"
-
-fun Reverse::  "'a list =>'a list " where
-"Reverse Nil =Nil"|
-"Reverse (Cons a as) = app(Reverse as)(Cons a Nil)"
-
+fun app::  "'a slist =>'a slist => 'a slist " where 
+"app sNil as =as"|
+"app(sCons a as ) bs= sCons a (app as bs)"
+fun Reverse::  "'a slist =>'a slist " where
+"Reverse sNil = sNil"|
+"Reverse (sCons a as) = app(Reverse as)(sCons a sNil)"
 fun Reverse2::"'a list=>'a list "where
 "Reverse2 [] = []"|
 "Reverse2 (Cons a []) =Cons a [] "|
 "Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil) "
 
-fun Insert::"'a::ord => 'a list => 'a list " where
-"Insert a [] =Cons a [] "|
-"Insert a (x#xs) =(if a \<le> x then a#x#xs else x#(Insert a xs)) "
+fun Insert::"'a::ord => 'a slist => 'a slist " where
+"Insert a sNil =sCons a sNil "|
+"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
+fun InsertSortPart::"('a::ord)slist => 'a slist => 'a slist "where
+"InsertSortPart sNil ys=ys "|
+"InsertSortPart (sCons x xs) ys=InsertSortPart xs (Insert x ys) "
+fun InsertSort::"('a::ord)slist=>'a slist " where
+"InsertSort xs = InsertSortPart xs sNil"
 
-fun InsertSortPart::"('a::ord)list => 'a list => 'a list "where
-"InsertSortPart [] ys=ys "|
-"InsertSortPart (x#xs) ys=InsertSortPart xs (Insert x ys) "
 
-fun InsertSort::"('a::ord)list=>'a list " where
-"InsertSort xs = InsertSortPart xs Nil"
+fun ffilter::"('a=>bool) =>'a list=>'a list "where
+"ffilter f [] = [] "|
+"ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))"
+
 
 fun Merge::"('a::ord)list => 'a list => 'a list "where
 "Merge [] xs=xs"|
 "Merge xs [] = xs"|
 "Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys)) "
-
 fun MergeSort::"('a::ord)list=>'a list " where
 "MergeSort [] = []"|
 "MergeSort (Cons a []) = [a] "|
 "MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs)) "
+
 
 fun bs :: "nat \<Rightarrow> nat list \<Rightarrow> nat option" where
   "bs x [] = None" |
@@ -176,9 +186,9 @@ fun snth :: "'a list => nat => 'a" where
 
 
 
-fun copy_tree::"'a tree \<Rightarrow> 'a tree" where
-"copy_tree (Node left x right) = Node (copy_tree left) x (copy_tree right)" |
-"copy_tree Tip = Tip" 
+fun copytree::"'a tree \<Rightarrow> 'a tree" where
+"copytree (Node left x right) = Node (copytree left) x (copytree right)" |
+"copytree Tip = Tip" 
 
 fun searchtree1::"'a =>'a tree =>bool " where
 "searchtree1 a Tip = False "|
@@ -207,6 +217,11 @@ fun rightest::"'a tree => 'a" where
                                  else (rightest right)) "
 (*"rightest Tip=  "*)
 
+fun delRightest::"'a tree => 'a tree" where
+"delRightest (Node left x Tip) = left" |
+"delRightest (Node left x right) = Node left x (delRightest right)" |
+"delRightest Tip = Tip"
+
 fun rightestleft::"'a tree => 'a tree "where
 "rightestleft Tip = Tip"|
 "rightestleft (Node left x right) =(if right=Tip then left 
@@ -214,7 +229,11 @@ fun rightestleft::"'a tree => 'a tree "where
 
 fun deltreeroot::"'a tree => 'a tree"where
 "deltreeroot Tip = Tip "|
-"deltreeroot (Node left x right) =(if right=Tip then left else if left=Tip then right else(Node (rightestleft left)(rightest left)right ) ) "
+"deltreeroot (Node left x right) =(if right=Tip 
+                                      then left 
+                                      else if left=Tip 
+                                              then right 
+                                              else(Node (delRightest left)(rightest left)right ) ) "
 
 fun addtreeroot::"'a => 'a tree => 'a tree" where
 "addtreeroot x Tip = Node Tip x Tip" |

@@ -6,6 +6,9 @@ datatype snat = sZero | sSuc snat
 datatype 'a slist = sNil | sCons 'a "'a slist"
 datatype 'a tree = Tip | Node "'a tree " 'a "'a tree " 
 
+fun copyList::"'a slist => 'a slist"where
+"copyList sNil = sNil"|
+"copyList (sCons x xs) = sCons x (copyList xs)"
 
 fun AddListHead::"'a=>'a slist=>'a slist"where
 "AddListHead a xs = sCons a  xs "
@@ -49,19 +52,25 @@ fun ModifyIndex::"snat=>'a=>'a slist=>'a slist "where
 "ModifyIndex n b sNil = sNil"|
 "ModifyIndex sZero b (sCons x xs) =(sCons b xs)"|
 "ModifyIndex (sSuc n) b (sCons x xs) = (sCons x (ModifyIndex n b xs))"
+
 fun SearchList::"'a=>'a slist=>bool "where
 "SearchList a sNil = False"|
 "SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))"
+
 fun app::  "'a slist =>'a slist => 'a slist " where 
 "app sNil as =as"|
 "app(sCons a as ) bs= sCons a (app as bs)"
-fun Insert::"'a::ord => 'a slist => 'a slist " where
-"Insert a sNil =sCons a sNil "|
-"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
 fun Reverse::  "'a slist =>'a slist " where
 "Reverse sNil = sNil"|
 "Reverse (sCons a as) = app(Reverse as)(sCons a sNil)"
+fun Reverse2::"'a list=>'a list "where
+"Reverse2 [] = []"|
+"Reverse2 (Cons a []) =Cons a [] "|
+"Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil) "
 
+fun Insert::"'a::ord => 'a slist => 'a slist " where
+"Insert a sNil =sCons a sNil "|
+"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
 fun InsertSortPart::"('a::ord)slist => 'a slist => 'a slist "where
 "InsertSortPart sNil ys=ys "|
 "InsertSortPart (sCons x xs) ys=InsertSortPart xs (Insert x ys) "
@@ -69,27 +78,20 @@ fun InsertSort::"('a::ord)slist=>'a slist " where
 "InsertSort xs = InsertSortPart xs sNil"
 
 
-
 fun ffilter::"('a=>bool) =>'a list=>'a list "where
 "ffilter f [] = [] "|
 "ffilter f(x#xs) = (if (f x) then (x#(ffilter f xs))else(ffilter f xs ))"
-
-
-fun Reverse2::"'a list=>'a list "where
-"Reverse2 [] = []"|
-"Reverse2 (Cons a []) =Cons a [] "|
-"Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil) "
 
 
 fun Merge::"('a::ord)list => 'a list => 'a list "where
 "Merge [] xs=xs"|
 "Merge xs [] = xs"|
 "Merge (x#xs)(y#ys) = (if x\<le>y then (x#(Merge xs (y#ys)) )else y # (Merge (x#xs)ys)) "
-
 fun MergeSort::"('a::ord)list=>'a list " where
 "MergeSort [] = []"|
 "MergeSort (Cons a []) = [a] "|
 "MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs)) "
+
 
 fun bs :: "nat \<Rightarrow> nat list \<Rightarrow> nat option" where
   "bs x [] = None" |
@@ -184,9 +186,9 @@ fun snth :: "'a list => nat => 'a" where
 
 
 
-fun copy_tree::"'a tree \<Rightarrow> 'a tree" where
-"copy_tree (Node left x right) = Node (copy_tree left) x (copy_tree right)" |
-"copy_tree Tip = Tip" 
+fun copytree::"'a tree \<Rightarrow> 'a tree" where
+"copytree (Node left x right) = Node (copytree left) x (copytree right)" |
+"copytree Tip = Tip" 
 
 fun searchtree1::"'a =>'a tree =>bool " where
 "searchtree1 a Tip = False "|

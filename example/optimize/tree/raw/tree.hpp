@@ -23,9 +23,9 @@ class tree {
         T1 p2_;
         std::shared_ptr<tree<T1>> p3_;
 
-        tree<T1> p1() const { return *p1_; }
+        const tree<T1>& p1() const { return *p1_; }
         const T1 &p2() const { return p2_; }
-        tree<T1> p3() const { return *p3_; }
+        const tree<T1>& p3() const { return *p3_; }
 
         _Node(std::shared_ptr<tree<T1>> p1, T1 p2, std::shared_ptr<tree<T1>> p3)
             :p1_(std::move(p1))
@@ -107,6 +107,7 @@ std::variant<_Tip, _Node> value_;
         } 
     }
 
+
     static tree<T1> Tip() {
         return tree<T1> ( _Tip ( ));
     }
@@ -120,6 +121,7 @@ std::variant<_Tip, _Node> value_;
     bool is_Tip() const { return std::holds_alternative<_Tip>(value_); }
     bool is_Node() const { return std::holds_alternative<_Node>(value_); }
     const _Node &as_Node() const { return std::get<_Node>(value_); }
+
     //拷贝赋值运算符
     tree<T1>& operator=(const tree<T1>& other){ 
         if(this != &other){ 
@@ -179,12 +181,7 @@ tree<T1> copy_tree(tree<T1> arg1) {
         auto left = arg1.as_Node().p1();
         auto x = arg1.as_Node().p2();
         auto right = arg1.as_Node().p3();
-        auto temp0 = tree<T1>::Node(
-            copy_tree(left),
-            x,
-            copy_tree(right)
-        );
-        return temp0;
+        return tree<T1>::Node(copy_tree(left), x, copy_tree(right));
     }
 
     // copy_tree Tip = Tip
@@ -241,12 +238,7 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     // inserttree a Tip = Node Tip a Tip
     if (arg2.is_Tip()) {
         auto a = arg1;
-        auto temp0 = tree<T1>::Node(
-            tree<T1>::Tip(),
-            a,
-            tree<T1>::Tip()
-        );
-        return temp0;
+        return tree<T1>::Node(tree<T1>::Tip(), a, tree<T1>::Tip());
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
@@ -254,23 +246,13 @@ tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (a <= x) {
-        auto temp1 = tree<T1>::Node(
-            inserttree(a, left),
-            x,
-            right
-        );
-        temp0 = temp1;
+        temp2 = tree<T1>::Node(inserttree(a, left), x, right);
     } else {
-        auto temp2 = tree<T1>::Node(
-            left,
-            x,
-            inserttree(a, right)
-        );
-        temp0 = temp2;
+        temp2 = tree<T1>::Node(left, x, inserttree(a, right));
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -287,9 +269,9 @@ std::list<T1> transtolist(tree<T1> arg1) {
     auto temp0 = transtolist(left);
     auto temp1 = transtolist(right);
     temp0.splice(temp0.end(), temp1);
-    auto temp2 = temp0;
+    auto temp2 = std::move(temp0);
     temp2.push_front(a);
-    return temp2;
+    return std::move(temp2);
 }
 
 template<typename T1>
@@ -322,12 +304,7 @@ tree<T1> delRightest(tree<T1> arg1) {
         auto left = arg1.as_Node().p1();
         auto x = arg1.as_Node().p2();
         auto right = arg1.as_Node().p3();
-        auto temp0 = tree<T1>::Node(
-            left,
-            x,
-            delRightest(right)
-        );
-        return temp0;
+        return tree<T1>::Node(left, x, delRightest(right));
     }
 
     // delRightest Tip = Tip
@@ -344,13 +321,13 @@ tree<T1> rightestleft(tree<T1> arg1) {
     // rightestleft (Node left x right) =(if right=Tip then left  ...
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (right.is_Tip()) {
-        temp0 = left;
+        temp2 = left;
     } else {
-        temp0 = rightestleft(right);
+        temp2 = rightestleft(right);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -388,12 +365,7 @@ tree<T1> deltreeroot(tree<T1> arg1) {
     // deltreeroot (Node left x right) = Node (delRightest left)(rightest left) right
     auto left = arg1.as_Node().p1();
     auto right = arg1.as_Node().p3();
-    auto temp0 = tree<T1>::Node(
-        delRightest(left),
-        rightest(left),
-        right
-    );
-    return temp0;
+    return tree<T1>::Node(delRightest(left), rightest(left), right);
 }
 
 template<typename T1>
@@ -401,12 +373,7 @@ tree<T1> addtreeroot(T1 arg1, tree<T1> arg2) {
     // addtreeroot x Tip = Node Tip x Tip
     if (arg2.is_Tip()) {
         auto x = arg1;
-        auto temp0 = tree<T1>::Node(
-            tree<T1>::Tip(),
-            x,
-            tree<T1>::Tip()
-        );
-        return temp0;
+        return tree<T1>::Node(tree<T1>::Tip(), x, tree<T1>::Tip());
     }
 
     // addtreeroot x (Node left m Tip) = Node left x (Node Tip m Tip)
@@ -415,17 +382,7 @@ tree<T1> addtreeroot(T1 arg1, tree<T1> arg2) {
             auto x = arg1;
             auto left = arg2.as_Node().p1();
             auto m = arg2.as_Node().p2();
-            auto temp0 = tree<T1>::Node(
-                tree<T1>::Tip(),
-                m,
-                tree<T1>::Tip()
-            );
-            auto temp1 = tree<T1>::Node(
-                left,
-                x,
-                temp0
-            );
-            return temp1;
+            return tree<T1>::Node(left, x, tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()));
         }
     }
 
@@ -435,17 +392,7 @@ tree<T1> addtreeroot(T1 arg1, tree<T1> arg2) {
             auto x = arg1;
             auto m = arg2.as_Node().p2();
             auto right = arg2.as_Node().p3();
-            auto temp0 = tree<T1>::Node(
-                tree<T1>::Tip(),
-                m,
-                tree<T1>::Tip()
-            );
-            auto temp1 = tree<T1>::Node(
-                temp0,
-                x,
-                right
-            );
-            return temp1;
+            return tree<T1>::Node(tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()), x, right);
         }
     }
 
@@ -454,17 +401,7 @@ tree<T1> addtreeroot(T1 arg1, tree<T1> arg2) {
     auto left = arg2.as_Node().p1();
     auto m = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    auto temp0 = tree<T1>::Node(
-        left,
-        m,
-        right
-    );
-    auto temp1 = tree<T1>::Node(
-        temp0,
-        x,
-        tree<T1>::Tip()
-    );
-    return temp1;
+    return tree<T1>::Node(tree<T1>::Node(left, m, right), x, tree<T1>::Tip());
 }
 
 template<typename T1>
@@ -479,34 +416,19 @@ tree<T1> deltree(T1 arg1, tree<T1> arg2) {
     auto left = arg2.as_Node().p1();
     auto x = arg2.as_Node().p2();
     auto right = arg2.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (a == x) {
-        auto temp1 = tree<T1>::Node(
-            left,
-            x,
-            right
-        );
-        temp0 = deltreeroot(temp1);
+        temp2 = deltreeroot(tree<T1>::Node(left, x, right));
     } else {
-        tree<T1> temp2;
+        tree<T1> temp5;
         if (a < x) {
-            auto temp3 = tree<T1>::Node(
-                deltree(a, left),
-                x,
-                right
-            );
-            temp2 = temp3;
+            temp5 = tree<T1>::Node(deltree(a, left), x, right);
         } else {
-            auto temp4 = tree<T1>::Node(
-                left,
-                x,
-                deltree(a, right)
-            );
-            temp2 = temp4;
+            temp5 = tree<T1>::Node(left, x, deltree(a, right));
         }
-        temp0 = temp2;
+        temp2 = temp5;
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -522,34 +444,19 @@ tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
     auto left = arg3.as_Node().p1();
     auto x = arg3.as_Node().p2();
     auto right = arg3.as_Node().p3();
-    tree<T1> temp0;
+    tree<T1> temp2;
     if (a == x) {
-        auto temp1 = tree<T1>::Node(
-            left,
-            b,
-            right
-        );
-        temp0 = temp1;
+        temp2 = tree<T1>::Node(left, b, right);
     } else {
-        tree<T1> temp2;
+        tree<T1> temp5;
         if (a < x) {
-            auto temp3 = tree<T1>::Node(
-                changetree(a, b, left),
-                x,
-                right
-            );
-            temp2 = temp3;
+            temp5 = tree<T1>::Node(changetree(a, b, left), x, right);
         } else {
-            auto temp4 = tree<T1>::Node(
-                left,
-                x,
-                changetree(a, b, right)
-            );
-            temp2 = temp4;
+            temp5 = tree<T1>::Node(left, x, changetree(a, b, right));
         }
-        temp0 = temp2;
+        temp2 = temp5;
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
@@ -573,12 +480,7 @@ std::list<T1> sorttree(tree<T1> arg1) {
     auto left = arg1.as_Node().p1();
     auto x = arg1.as_Node().p2();
     auto right = arg1.as_Node().p3();
-    auto temp0 = tree<T1>::Node(
-        left,
-        x,
-        right
-    );
-    return MergeSort(transtolist(temp0));
+    return MergeSort(transtolist(tree<T1>::Node(left, x, right)));
 }
 
 // generated by HOL2Cpp

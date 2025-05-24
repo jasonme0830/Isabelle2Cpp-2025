@@ -23,9 +23,9 @@ class tree {
         T1 p2_;
         std::shared_ptr<tree<T1>> p3_;
 
-        tree<T1> p1() const { return *p1_; }
+        tree<T1> p1() const { return p1_->self(); }
         const T1 &p2() const { return p2_; }
-        tree<T1> p3() const { return *p3_; }
+        tree<T1> p3() const { return p3_->self(); }
 
         _Node(std::shared_ptr<tree<T1>> p1, T1 p2, std::shared_ptr<tree<T1>> p3)
             :p1_(std::move(p1))
@@ -107,19 +107,33 @@ std::variant<_Tip, _Node> value_;
         } 
     }
 
+    //返回自身根节点函数
+    tree<T1> self() const {
+        if(std::holds_alternative<_Tip>(value_)){ 
+            return tree<T1>(_Tip());
+        }
+        if(std::holds_alternative<_Node>(value_)){ 
+            const _Node& value = std::get<_Node>(value_);
+            return tree<T1>( _Node(value.p1_, value.p2_, value.p3_));
+        }else{
+            return tree<T1>(_Tip());
+        }
+    } 
+
     static tree<T1> Tip() {
         return tree<T1> ( _Tip ( ));
     }
-    static tree<T1> Node(tree<T1> p1, T1 p2, tree<T1> p3) {
+    static tree<T1> Node(const tree<T1>& p1, const T1& p2, const tree<T1>& p3) {
         return tree<T1> ( _Node ( 
-            std::make_shared<tree<T1>>(std::move(p1))
-            , std::move(p2)
-            , std::make_shared<tree<T1>>(std::move(p3))));
+            std::make_shared<tree<T1>>(p1.self())
+            , p2
+            , std::make_shared<tree<T1>>(p3.self())));
     }
 
     bool is_Tip() const { return std::holds_alternative<_Tip>(value_); }
     bool is_Node() const { return std::holds_alternative<_Node>(value_); }
     const _Node &as_Node() const { return std::get<_Node>(value_); }
+
     //拷贝赋值运算符
     tree<T1>& operator=(const tree<T1>& other){ 
         if(this != &other){ 
@@ -173,18 +187,13 @@ std::variant<_Tip, _Node> value_;
 
 
 template<typename T1>
-tree<T1> copy_tree(tree<T1> arg1) {
+tree<T1> copy_tree(const tree<T1> &arg1) {
     // copy_tree (Node left x right) = Node (copy_tree left) x (copy_tree right)
     if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto x = std::move(arg1.as_Node().p2_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        auto temp0 = tree<T1>::Node(
-            copy_tree(std::move(left)),
-            std::move(x),
-            copy_tree(std::move(right))
-        );
-        return temp0;
+        auto left = arg1.as_Node().p1();
+        auto x = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
+        return tree<T1>::Node(copy_tree(left), x, copy_tree(right));
     }
 
     // copy_tree Tip = Tip
@@ -192,142 +201,122 @@ tree<T1> copy_tree(tree<T1> arg1) {
 }
 
 template<typename T1>
-bool searchtree1(T1 arg1, tree<T1> arg2) {
+bool searchtree1(const T1 &arg1, const tree<T1> &arg2) {
     // searchtree1 a Tip = False
     if (arg2.is_Tip()) {
         return false;
     }
 
     // searchtree1 a (Node left x right) = (a= x \<or> (searchtree1 a left)\<or> (searchtree1 a right))
-    auto a = std::move(arg1);
-    auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2_);
-    auto right = std::move(*arg2.as_Node().p3_);
-    return (a == x) || (searchtree1(a, std::move(left)) || searchtree1(std::move(a), std::move(right)));
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return (a == x) || (searchtree1(a, left) || searchtree1(a, right));
 }
 
 template<typename T1>
-bool searchtree2(T1 arg1, tree<T1> arg2) {
+bool searchtree2(const T1 &arg1, const tree<T1> &arg2) {
     // searchtree2 a Tip = False
     if (arg2.is_Tip()) {
         return false;
     }
 
     // searchtree2 a (Node left x right) = ( (searchtree2 a left) \<or> (a=x) \<or>  (searchtree2 a right))
-    auto a = std::move(arg1);
-    auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2_);
-    auto right = std::move(*arg2.as_Node().p3_);
-    return searchtree2(a, std::move(left)) || ((a == x) || searchtree2(std::move(a), std::move(right)));
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return searchtree2(a, left) || ((a == x) || searchtree2(a, right));
 }
 
 template<typename T1>
-bool searchtree3(T1 arg1, tree<T1> arg2) {
+bool searchtree3(const T1 &arg1, const tree<T1> &arg2) {
     // searchtree3 a Tip = False
     if (arg2.is_Tip()) {
         return false;
     }
 
     // searchtree3 a (Node left x right) = ( (searchtree3 a left)\<or> (searchtree3 a right) \<or> (a=x) )
-    auto a = std::move(arg1);
-    auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2_);
-    auto right = std::move(*arg2.as_Node().p3_);
-    return searchtree3(a, std::move(left)) || (searchtree3(a, std::move(right)) || (a == x));
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return searchtree3(a, left) || (searchtree3(a, right) || (a == x));
 }
 
 template<typename T1>
-tree<T1> inserttree(T1 arg1, tree<T1> arg2) {
+tree<T1> inserttree(const T1 &arg1, const tree<T1> &arg2) {
     // inserttree a Tip = Node Tip a Tip
     if (arg2.is_Tip()) {
-        auto a = std::move(arg1);
-        auto temp0 = tree<T1>::Node(
-            tree<T1>::Tip(),
-            std::move(a),
-            tree<T1>::Tip()
-        );
-        return temp0;
+        auto a = arg1;
+        return tree<T1>::Node(tree<T1>::Tip(), a, tree<T1>::Tip());
     }
 
     // inserttree a (Node left x right) = (if a\<le>x then (Node (inserttree a left) x right)  ...
-    auto a = std::move(arg1);
-    auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2_);
-    auto right = std::move(*arg2.as_Node().p3_);
-    tree<T1> temp0;
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    tree<T1> temp2;
     if (a <= x) {
-        auto temp1 = tree<T1>::Node(
-            inserttree(std::move(a), std::move(left)),
-            std::move(x),
-            std::move(right)
-        );
-        temp0 = std::move(temp1);
+        temp2 = tree<T1>::Node(inserttree(a, left), x, right);
     } else {
-        auto temp2 = tree<T1>::Node(
-            std::move(left),
-            std::move(x),
-            inserttree(std::move(a), std::move(right))
-        );
-        temp0 = std::move(temp2);
+        temp2 = tree<T1>::Node(left, x, inserttree(a, right));
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-std::list<T1> transtolist(tree<T1> arg1) {
+std::list<T1> transtolist(const tree<T1> &arg1) {
     // transtolist Tip = []
     if (arg1.is_Tip()) {
         return std::list<T1>();
     }
 
     // transtolist (Node left a right) =( a # (transtolist left)@(transtolist right))
-    auto left = std::move(*arg1.as_Node().p1_);
-    auto a = std::move(arg1.as_Node().p2_);
-    auto right = std::move(*arg1.as_Node().p3_);
-    auto temp0 = transtolist(std::move(left));
-    auto temp1 = transtolist(std::move(right));
+    auto left = arg1.as_Node().p1();
+    auto a = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
+    auto temp0 = transtolist(left);
+    auto temp1 = transtolist(right);
     temp0.splice(temp0.end(), temp1);
     auto temp2 = std::move(temp0);
-    temp2.push_front(std::move(a));
+    temp2.push_front(a);
     return temp2;
 }
 
 template<typename T1>
-T1 rightest(tree<T1> arg1) {
+T1 rightest(const tree<T1> &arg1) {
     // rightest (Node left x Tip) = x
     if (arg1.is_Node()) {
-        if (std::move(*arg1.as_Node().p3_).is_Tip()) {
-            auto x = std::move(arg1.as_Node().p2_);
+        if (arg1.as_Node().p3().is_Tip()) {
+            auto x = arg1.as_Node().p2();
             return x;
         }
     }
 
     // rightest (Node left x right) = rightest right
-    auto right = std::move(*arg1.as_Node().p3_);
-    return rightest(std::move(right));
+    auto right = arg1.as_Node().p3();
+    return rightest(right);
 }
 
 template<typename T1>
-tree<T1> delRightest(tree<T1> arg1) {
+tree<T1> delRightest(const tree<T1> &arg1) {
     // delRightest (Node left x Tip) = left
     if (arg1.is_Node()) {
-        if (std::move(*arg1.as_Node().p3_).is_Tip()) {
-            auto left = std::move(*arg1.as_Node().p1_);
+        if (arg1.as_Node().p3().is_Tip()) {
+            auto left = arg1.as_Node().p1();
             return left;
         }
     }
 
     // delRightest (Node left x right) = Node left x (delRightest right)
     if (arg1.is_Node()) {
-        auto left = std::move(*arg1.as_Node().p1_);
-        auto x = std::move(arg1.as_Node().p2_);
-        auto right = std::move(*arg1.as_Node().p3_);
-        auto temp0 = tree<T1>::Node(
-            std::move(left),
-            std::move(x),
-            delRightest(std::move(right))
-        );
-        return temp0;
+        auto left = arg1.as_Node().p1();
+        auto x = arg1.as_Node().p2();
+        auto right = arg1.as_Node().p3();
+        return tree<T1>::Node(left, x, delRightest(right));
     }
 
     // delRightest Tip = Tip
@@ -335,26 +324,26 @@ tree<T1> delRightest(tree<T1> arg1) {
 }
 
 template<typename T1>
-tree<T1> rightestleft(tree<T1> arg1) {
+tree<T1> rightestleft(const tree<T1> &arg1) {
     // rightestleft Tip = Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
     }
 
     // rightestleft (Node left x right) =(if right=Tip then left  ...
-    auto left = std::move(*arg1.as_Node().p1_);
-    auto right = std::move(*arg1.as_Node().p3_);
-    tree<T1> temp0;
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
+    tree<T1> temp2;
     if (right.is_Tip()) {
-        temp0 = std::move(left);
+        temp2 = left.self();
     } else {
-        temp0 = rightestleft(std::move(right));
+        temp2 = rightestleft(right);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-tree<T1> deltreeroot(tree<T1> arg1) {
+tree<T1> deltreeroot(const tree<T1> &arg1) {
     // deltreeroot Tip = Tip
     if (arg1.is_Tip()) {
         return tree<T1>::Tip();
@@ -362,8 +351,8 @@ tree<T1> deltreeroot(tree<T1> arg1) {
 
     // deltreeroot (Node Tip x Tip) = Tip
     if (arg1.is_Node()) {
-        if (std::move(*arg1.as_Node().p1_).is_Tip()) {
-            if (std::move(*arg1.as_Node().p3_).is_Tip()) {
+        if (arg1.as_Node().p1().is_Tip()) {
+            if (arg1.as_Node().p3().is_Tip()) {
                 return tree<T1>::Tip();
             }
         }
@@ -371,191 +360,119 @@ tree<T1> deltreeroot(tree<T1> arg1) {
 
     // deltreeroot (Node Tip x right) = right
     if (arg1.is_Node()) {
-        if (std::move(*arg1.as_Node().p1_).is_Tip()) {
-            auto right = std::move(*arg1.as_Node().p3_);
+        if (arg1.as_Node().p1().is_Tip()) {
+            auto right = arg1.as_Node().p3();
             return right;
         }
     }
 
     // deltreeroot (Node left x Tip) = left
     if (arg1.is_Node()) {
-        if (std::move(*arg1.as_Node().p3_).is_Tip()) {
-            auto left = std::move(*arg1.as_Node().p1_);
+        if (arg1.as_Node().p3().is_Tip()) {
+            auto left = arg1.as_Node().p1();
             return left;
         }
     }
 
     // deltreeroot (Node left x right) = Node (delRightest left)(rightest left) right
-    auto left = std::move(*arg1.as_Node().p1_);
-    auto right = std::move(*arg1.as_Node().p3_);
-    auto temp0 = left;
-    auto temp1 = left;
-    auto temp2 = tree<T1>::Node(
-        delRightest(std::move(temp0)),
-        rightest(std::move(temp1)),
-        std::move(right)
-    );
-    return temp2;
+    auto left = arg1.as_Node().p1();
+    auto right = arg1.as_Node().p3();
+    return tree<T1>::Node(delRightest(left), rightest(left), right);
 }
 
 template<typename T1>
-tree<T1> addtreeroot(T1 arg1, tree<T1> arg2) {
+tree<T1> addtreeroot(const T1 &arg1, const tree<T1> &arg2) {
     // addtreeroot x Tip = Node Tip x Tip
     if (arg2.is_Tip()) {
-        auto x = std::move(arg1);
-        auto temp0 = tree<T1>::Node(
-            tree<T1>::Tip(),
-            std::move(x),
-            tree<T1>::Tip()
-        );
-        return temp0;
+        auto x = arg1;
+        return tree<T1>::Node(tree<T1>::Tip(), x, tree<T1>::Tip());
     }
 
     // addtreeroot x (Node left m Tip) = Node left x (Node Tip m Tip)
     if (arg2.is_Node()) {
-        if (std::move(*arg2.as_Node().p3_).is_Tip()) {
-            auto x = std::move(arg1);
-            auto left = std::move(*arg2.as_Node().p1_);
-            auto m = std::move(arg2.as_Node().p2_);
-            auto temp0 = tree<T1>::Node(
-                tree<T1>::Tip(),
-                std::move(m),
-                tree<T1>::Tip()
-            );
-            auto temp1 = tree<T1>::Node(
-                std::move(left),
-                std::move(x),
-                std::move(temp0)
-            );
-            return temp1;
+        if (arg2.as_Node().p3().is_Tip()) {
+            auto x = arg1;
+            auto left = arg2.as_Node().p1();
+            auto m = arg2.as_Node().p2();
+            return tree<T1>::Node(left, x, tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()));
         }
     }
 
     // addtreeroot x (Node Tip m right) = Node (Node Tip m Tip) x right
     if (arg2.is_Node()) {
-        if (std::move(*arg2.as_Node().p1_).is_Tip()) {
-            auto x = std::move(arg1);
-            auto m = std::move(arg2.as_Node().p2_);
-            auto right = std::move(*arg2.as_Node().p3_);
-            auto temp0 = tree<T1>::Node(
-                tree<T1>::Tip(),
-                std::move(m),
-                tree<T1>::Tip()
-            );
-            auto temp1 = tree<T1>::Node(
-                std::move(temp0),
-                std::move(x),
-                std::move(right)
-            );
-            return temp1;
+        if (arg2.as_Node().p1().is_Tip()) {
+            auto x = arg1;
+            auto m = arg2.as_Node().p2();
+            auto right = arg2.as_Node().p3();
+            return tree<T1>::Node(tree<T1>::Node(tree<T1>::Tip(), m, tree<T1>::Tip()), x, right);
         }
     }
 
     // addtreeroot x (Node left m right) = (Node (Node left m right) x Tip)
-    auto x = std::move(arg1);
-    auto left = std::move(*arg2.as_Node().p1_);
-    auto m = std::move(arg2.as_Node().p2_);
-    auto right = std::move(*arg2.as_Node().p3_);
-    auto temp0 = tree<T1>::Node(
-        std::move(left),
-        std::move(m),
-        std::move(right)
-    );
-    auto temp1 = tree<T1>::Node(
-        std::move(temp0),
-        std::move(x),
-        tree<T1>::Tip()
-    );
-    return temp1;
+    auto x = arg1;
+    auto left = arg2.as_Node().p1();
+    auto m = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    return tree<T1>::Node(tree<T1>::Node(left, m, right), x, tree<T1>::Tip());
 }
 
 template<typename T1>
-tree<T1> deltree(T1 arg1, tree<T1> arg2) {
+tree<T1> deltree(const T1 &arg1, const tree<T1> &arg2) {
     // deltree a Tip = Tip
     if (arg2.is_Tip()) {
         return tree<T1>::Tip();
     }
 
     // deltree a (Node left x right) =( if a=x then(deltreeroot(Node left x right)) ...
-    auto a = std::move(arg1);
-    auto left = std::move(*arg2.as_Node().p1_);
-    auto x = std::move(arg2.as_Node().p2_);
-    auto right = std::move(*arg2.as_Node().p3_);
-    tree<T1> temp0;
+    auto a = arg1;
+    auto left = arg2.as_Node().p1();
+    auto x = arg2.as_Node().p2();
+    auto right = arg2.as_Node().p3();
+    tree<T1> temp2;
     if (a == x) {
-        auto temp1 = tree<T1>::Node(
-            std::move(left),
-            std::move(x),
-            std::move(right)
-        );
-        temp0 = deltreeroot(std::move(temp1));
+        temp2 = deltreeroot(tree<T1>::Node(left, x, right));
     } else {
-        tree<T1> temp2;
+        tree<T1> temp5;
         if (a < x) {
-            auto temp3 = tree<T1>::Node(
-                deltree(std::move(a), std::move(left)),
-                std::move(x),
-                std::move(right)
-            );
-            temp2 = std::move(temp3);
+            temp5 = tree<T1>::Node(deltree(a, left), x, right);
         } else {
-            auto temp4 = tree<T1>::Node(
-                std::move(left),
-                std::move(x),
-                deltree(std::move(a), std::move(right))
-            );
-            temp2 = std::move(temp4);
+            temp5 = tree<T1>::Node(left, x, deltree(a, right));
         }
-        temp0 = std::move(temp2);
+        temp2 = temp5.self();
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-tree<T1> changetree(T1 arg1, T1 arg2, tree<T1> arg3) {
+tree<T1> changetree(const T1 &arg1, const T1 &arg2, const tree<T1> &arg3) {
     // changetree a b Tip = Tip
     if (arg3.is_Tip()) {
         return tree<T1>::Tip();
     }
 
     // changetree a b (Node left x right) = ( if (a=x) then (Node left b right) ...
-    auto a = std::move(arg1);
-    auto b = std::move(arg2);
-    auto left = std::move(*arg3.as_Node().p1_);
-    auto x = std::move(arg3.as_Node().p2_);
-    auto right = std::move(*arg3.as_Node().p3_);
-    tree<T1> temp0;
+    auto a = arg1;
+    auto b = arg2;
+    auto left = arg3.as_Node().p1();
+    auto x = arg3.as_Node().p2();
+    auto right = arg3.as_Node().p3();
+    tree<T1> temp2;
     if (a == x) {
-        auto temp1 = tree<T1>::Node(
-            std::move(left),
-            std::move(b),
-            std::move(right)
-        );
-        temp0 = std::move(temp1);
+        temp2 = tree<T1>::Node(left, b, right);
     } else {
-        tree<T1> temp2;
+        tree<T1> temp5;
         if (a < x) {
-            auto temp3 = tree<T1>::Node(
-                changetree(std::move(a), std::move(b), std::move(left)),
-                std::move(x),
-                std::move(right)
-            );
-            temp2 = std::move(temp3);
+            temp5 = tree<T1>::Node(changetree(a, b, left), x, right);
         } else {
-            auto temp4 = tree<T1>::Node(
-                std::move(left),
-                std::move(x),
-                changetree(std::move(a), std::move(b), std::move(right))
-            );
-            temp2 = std::move(temp4);
+            temp5 = tree<T1>::Node(left, x, changetree(a, b, right));
         }
-        temp0 = std::move(temp2);
+        temp2 = temp5.self();
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-std::list<T1> sorttree(tree<T1> arg1) {
+std::list<T1> sorttree(const tree<T1> &arg1) {
     // sorttree Tip = []
     if (arg1.is_Tip()) {
         return std::list<T1>();
@@ -563,24 +480,19 @@ std::list<T1> sorttree(tree<T1> arg1) {
 
     // sorttree (Node Tip a Tip) =[a]
     if (arg1.is_Node()) {
-        if (std::move(*arg1.as_Node().p1_).is_Tip()) {
-            if (std::move(*arg1.as_Node().p3_).is_Tip()) {
-                auto a = std::move(arg1.as_Node().p2_);
-                return std::list<T1>{std::move(a)};
+        if (arg1.as_Node().p1().is_Tip()) {
+            if (arg1.as_Node().p3().is_Tip()) {
+                auto a = arg1.as_Node().p2();
+                return std::list<T1>{a};
             }
         }
     }
 
     // sorttree (Node left x right) =(MergeSort (transtolist (Node left x right)))
-    auto left = std::move(*arg1.as_Node().p1_);
-    auto x = std::move(arg1.as_Node().p2_);
-    auto right = std::move(*arg1.as_Node().p3_);
-    auto temp0 = tree<T1>::Node(
-        std::move(left),
-        std::move(x),
-        std::move(right)
-    );
-    return MergeSort(transtolist(std::move(temp0)));
+    auto left = arg1.as_Node().p1();
+    auto x = arg1.as_Node().p2();
+    auto right = arg1.as_Node().p3();
+    return MergeSort(transtolist(tree<T1>::Node(left, x, right)));
 }
 
 // generated by HOL2Cpp

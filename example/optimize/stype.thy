@@ -4,17 +4,18 @@ begin
 
 datatype snat = sZero | sSuc snat
 datatype 'a slist = sNil | sCons 'a "'a slist"
-datatype 'a tree = Tip | Node "'a tree " 'a "'a tree " 
+
 
 fun natofsnat :: "snat \<Rightarrow> nat" where
   "natofsnat sZero = 0" |
   "natofsnat (sSuc n) = (natofsnat n) + 1"
-
 fun snatofnat :: "nat \<Rightarrow> snat" where
   "snatofnat 0 = sZero" |
   "snatofnat (Suc n) = sSuc (snatofnat n)"
 
-
+fun copyList::"'a slist => 'a slist"where
+"copyList sNil = sNil"|
+"copyList (sCons x xs) = sCons x (copyList xs)"
 
 fun AddListHead::"'a=>'a slist=>'a slist"where
 "AddListHead a xs = sCons a  xs "
@@ -50,7 +51,6 @@ fun DelListI::"nat=>'a slist=>'a slist "where
 "DelListI Zero (sCons x xs) = DelListHead (sCons x xs) "|
 "DelListI (Suc i) (sCons x xs) = sCons x  (DelListI i xs) "
 
-
 fun ModifyValue::"'a=>'a=> 'a slist =>'a slist"where
 "ModifyValue a b sNil = sNil "|
 "ModifyValue a b (sCons x xs) = (if x=a then (sCons b (ModifyValue a b xs)) else (sCons x (ModifyValue a b xs))) "
@@ -58,21 +58,25 @@ fun ModifyIndex::"snat=>'a=>'a slist=>'a slist "where
 "ModifyIndex n b sNil = sNil"|
 "ModifyIndex sZero b (sCons x xs) =(sCons b xs)"|
 "ModifyIndex (sSuc n) b (sCons x xs) = (sCons x (ModifyIndex n b xs))"
+
 fun SearchList::"'a=>'a slist=>bool "where
 "SearchList a sNil = False"|
 "SearchList a (sCons x xs) = (if a=x then True else (SearchList a xs))"
+
 fun app::  "'a slist =>'a slist => 'a slist " where 
 "app sNil as =as"|
 "app(sCons a as ) bs= sCons a (app as bs)"
-fun Insert::"'a::ord => 'a slist => 'a slist " where
-"Insert a sNil =sCons a sNil "|
-"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
 fun Reverse::  "'a slist =>'a slist " where
 "Reverse sNil = sNil"|
 "Reverse (sCons a as) = app(Reverse as)(sCons a sNil)"
+fun Reverse2::"'a list=>'a list "where
+"Reverse2 [] = []"|
+"Reverse2 (Cons a []) =Cons a [] "|
+"Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil) "
 
-
-
+fun Insert::"'a::ord => 'a slist => 'a slist " where
+"Insert a sNil =sCons a sNil "|
+"Insert a (sCons x xs) =(if a \<le> x then (sCons a (sCons x xs)) else (sCons x (Insert a xs))) "
 fun InsertSortPart::"('a::ord)slist => 'a slist => 'a slist "where
 "InsertSortPart sNil ys=ys "|
 "InsertSortPart (sCons x xs) ys=InsertSortPart xs (Insert x ys) "

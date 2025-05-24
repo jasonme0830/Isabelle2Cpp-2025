@@ -8,7 +8,7 @@
 
 
 template<typename T1>
-std::list<T1> AddListHead(T1 arg1, std::list<T1> arg2) {
+std::list<T1> AddListHead(const T1 &arg1, const std::list<T1> &arg2) {
     // AddListHead a xs =a # xs
     auto a = arg1;
     auto xs = arg2;
@@ -18,7 +18,7 @@ std::list<T1> AddListHead(T1 arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> AddListTail(T1 arg1, std::list<T1> arg2) {
+std::list<T1> AddListTail(const T1 &arg1, const std::list<T1> &arg2) {
     // AddListTail a [] =Cons a []
     if (arg2.empty()) {
         auto a = arg1;
@@ -37,7 +37,7 @@ std::list<T1> AddListTail(T1 arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> AddListI(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
+std::list<T1> AddListI(const std::uint64_t &arg1, const T1 &arg2, const std::list<T1> &arg3) {
     // AddListI i a [] = Cons a []
     if (arg3.empty()) {
         auto a = arg2;
@@ -52,8 +52,9 @@ std::list<T1> AddListI(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
             auto a = arg2;
             auto x = arg3.front();
             auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
-            auto temp0 = xs;
-            temp0.push_front(x);
+            auto temp1 = xs;
+            temp1.push_front(x);
+            auto temp0 = temp1;
             return AddListHead(a, temp0);
         }
     }
@@ -69,7 +70,7 @@ std::list<T1> AddListI(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
 }
 
 template<typename T1>
-std::list<T1> DelListHead(std::list<T1> arg1) {
+std::list<T1> DelListHead(const std::list<T1> &arg1) {
     // DelListHead (x#xs) = xs
     if (!arg1.empty()) {
         auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
@@ -81,7 +82,7 @@ std::list<T1> DelListHead(std::list<T1> arg1) {
 }
 
 template<typename T1>
-std::list<T1> DelListTail(std::list<T1> arg1) {
+std::list<T1> DelListTail(const std::list<T1> &arg1) {
     // DelListTail [] = []
     if (arg1.empty()) {
         return std::list<T1>();
@@ -103,7 +104,7 @@ std::list<T1> DelListTail(std::list<T1> arg1) {
 }
 
 template<typename T1>
-std::list<T1> DelListI(std::uint64_t arg1, std::list<T1> arg2) {
+std::list<T1> DelListI(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     // DelListI i [] = []
     if (arg2.empty()) {
         return std::list<T1>();
@@ -121,8 +122,9 @@ std::list<T1> DelListI(std::uint64_t arg1, std::list<T1> arg2) {
         if (!arg2.empty()) {
             auto x = arg2.front();
             auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-            auto temp0 = xs;
-            temp0.push_front(x);
+            auto temp1 = xs;
+            temp1.push_front(x);
+            auto temp0 = temp1;
             return DelListHead(temp0);
         }
     }
@@ -137,7 +139,7 @@ std::list<T1> DelListI(std::uint64_t arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-bool SearchList(T1 arg1, std::list<T1> arg2) {
+bool SearchList(const T1 &arg1, const std::list<T1> &arg2) {
     // SearchList a [] = False
     if (arg2.empty()) {
         return false;
@@ -147,17 +149,17 @@ bool SearchList(T1 arg1, std::list<T1> arg2) {
     auto a = arg1;
     auto x = arg2.front();
     auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    bool temp0;
+    bool temp2;
     if (a == x) {
-        temp0 = true;
+        temp2 = true;
     } else {
-        temp0 = SearchList(a, xs);
+        temp2 = SearchList(a, xs);
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-std::list<T1> ModifyValue(T1 arg1, T1 arg2, std::list<T1> arg3) {
+std::list<T1> ModifyValue(const T1 &arg1, const T1 &arg2, const std::list<T1> &arg3) {
     // ModifyValue a b [] = []
     if (arg3.empty()) {
         return std::list<T1>();
@@ -168,21 +170,21 @@ std::list<T1> ModifyValue(T1 arg1, T1 arg2, std::list<T1> arg3) {
     auto b = arg2;
     auto x = arg3.front();
     auto xs = std::list<T1>(std::next(arg3.begin()), arg3.end());
-    std::list<T1> temp0;
+    std::list<T1> temp2;
     if (x == a) {
-        auto temp1 = ModifyValue(a, b, xs);
-        temp1.push_front(b);
-        temp0 = temp1;
+        auto temp3 = ModifyValue(a, b, xs);
+        temp3.push_front(b);
+        temp2 = temp3;
     } else {
-        auto temp2 = ModifyValue(a, b, xs);
-        temp2.push_front(x);
-        temp0 = temp2;
+        auto temp4 = ModifyValue(a, b, xs);
+        temp4.push_front(x);
+        temp2 = temp4;
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-std::list<T1> ModifyIndex(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
+std::list<T1> ModifyIndex(const std::uint64_t &arg1, const T1 &arg2, const std::list<T1> &arg3) {
     // ModifyIndex n b [] = []
     if (arg3.empty()) {
         return std::list<T1>();
@@ -210,7 +212,7 @@ std::list<T1> ModifyIndex(std::uint64_t arg1, T1 arg2, std::list<T1> arg3) {
 }
 
 template<typename T1>
-std::list<T1> ffilter(std::function<bool(T1 )> arg1, std::list<T1> arg2) {
+std::list<T1> ffilter(const std::function<bool(const T1 &)> &arg1, const std::list<T1> &arg2) {
     // ffilter f [] = []
     if (arg2.empty()) {
         return std::list<T1>();
@@ -232,7 +234,7 @@ std::list<T1> ffilter(std::function<bool(T1 )> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> app(std::list<T1> arg1, std::list<T1> arg2) {
+std::list<T1> app(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     // app Nil as =as
     if (arg1.empty()) {
         auto as = arg2;
@@ -249,7 +251,7 @@ std::list<T1> app(std::list<T1> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> Reverse(std::list<T1> arg1) {
+std::list<T1> Reverse(const std::list<T1> &arg1) {
     // Reverse Nil =Nil
     if (arg1.empty()) {
         return std::list<T1>();
@@ -258,13 +260,15 @@ std::list<T1> Reverse(std::list<T1> arg1) {
     // Reverse (Cons a as) = app(Reverse as)(Cons a Nil)
     auto a = arg1.front();
     auto as = std::list<T1>(std::next(arg1.begin()), arg1.end());
-    auto temp0 = std::list<T1>();
-    temp0.push_front(a);
-    return app(Reverse(as), temp0);
+    auto temp0 = Reverse(as);
+    auto temp2 = std::list<T1>();
+    temp2.push_front(a);
+    auto temp1 = temp2;
+    return app(temp0, temp1);
 }
 
 template<typename T1>
-std::list<T1> Reverse2(std::list<T1> arg1) {
+std::list<T1> Reverse2(const std::list<T1> &arg1) {
     // Reverse2 [] = []
     if (arg1.empty()) {
         return std::list<T1>();
@@ -292,7 +296,7 @@ std::list<T1> Reverse2(std::list<T1> arg1) {
 }
 
 template<typename T1>
-std::list<T1> Insert(T1 arg1, std::list<T1> arg2) {
+std::list<T1> Insert(const T1 &arg1, const std::list<T1> &arg2) {
     // Insert a [] =Cons a []
     if (arg2.empty()) {
         auto a = arg1;
@@ -305,23 +309,23 @@ std::list<T1> Insert(T1 arg1, std::list<T1> arg2) {
     auto a = arg1;
     auto x = arg2.front();
     auto xs = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    std::list<T1> temp0;
+    std::list<T1> temp2;
     if (a <= x) {
-        auto temp1 = xs;
-        temp1.push_front(x);
-        auto temp2 = temp1;
-        temp2.push_front(a);
-        temp0 = temp2;
-    } else {
-        auto temp3 = Insert(a, xs);
+        auto temp3 = xs;
         temp3.push_front(x);
-        temp0 = temp3;
+        auto temp4 = temp3;
+        temp4.push_front(a);
+        temp2 = temp4;
+    } else {
+        auto temp5 = Insert(a, xs);
+        temp5.push_front(x);
+        temp2 = temp5;
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-std::list<T1> InsertSortPart(std::list<T1> arg1, std::list<T1> arg2) {
+std::list<T1> InsertSortPart(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     // InsertSortPart [] ys=ys
     if (arg1.empty()) {
         auto ys = arg2;
@@ -332,18 +336,19 @@ std::list<T1> InsertSortPart(std::list<T1> arg1, std::list<T1> arg2) {
     auto x = arg1.front();
     auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
     auto ys = arg2;
-    return InsertSortPart(xs, Insert(x, ys));
+    auto temp0 = Insert(x, ys);
+    return InsertSortPart(xs, temp0);
 }
 
 template<typename T1>
-std::list<T1> InsertSort(std::list<T1> arg1) {
+std::list<T1> InsertSort(const std::list<T1> &arg1) {
     // InsertSort xs = InsertSortPart xs Nil
     auto xs = arg1;
     return InsertSortPart(xs, std::list<T1>());
 }
 
 template<typename T1>
-std::list<T1> Merge(std::list<T1> arg1, std::list<T1> arg2) {
+std::list<T1> Merge(const std::list<T1> &arg1, const std::list<T1> &arg2) {
     // Merge [] xs=xs
     if (arg1.empty()) {
         auto xs = arg2;
@@ -361,25 +366,27 @@ std::list<T1> Merge(std::list<T1> arg1, std::list<T1> arg2) {
     auto xs = std::list<T1>(std::next(arg1.begin()), arg1.end());
     auto y = arg2.front();
     auto ys = std::list<T1>(std::next(arg2.begin()), arg2.end());
-    std::list<T1> temp0;
+    std::list<T1> temp2;
     if (x <= y) {
-        auto temp1 = ys;
-        temp1.push_front(y);
-        auto temp2 = Merge(xs, temp1);
-        temp2.push_front(x);
-        temp0 = temp2;
-    } else {
-        auto temp3 = xs;
-        temp3.push_front(x);
-        auto temp4 = Merge(temp3, ys);
+        auto temp4 = ys;
         temp4.push_front(y);
-        temp0 = temp4;
+        auto temp3 = temp4;
+        auto temp5 = Merge(xs, temp3);
+        temp5.push_front(x);
+        temp2 = temp5;
+    } else {
+        auto temp7 = xs;
+        temp7.push_front(x);
+        auto temp6 = temp7;
+        auto temp8 = Merge(temp6, ys);
+        temp8.push_front(y);
+        temp2 = temp8;
     }
-    return temp0;
+    return temp2;
 }
 
 template<typename T1>
-std::list<T1> MergeSort(std::list<T1> arg1) {
+std::list<T1> MergeSort(const std::list<T1> &arg1) {
     // MergeSort [] = []
     if (arg1.empty()) {
         return std::list<T1>();
@@ -395,13 +402,15 @@ std::list<T1> MergeSort(std::list<T1> arg1) {
 
     // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
     auto xs = arg1;
-    return Merge(MergeSort(std::list<T1>(xs.begin(), std::next(xs.begin(), size(xs) / 2))), MergeSort(std::list<T1>(std::next(xs.begin(), size(xs) / 2), xs.end())));
+    auto temp0 = MergeSort(std::list<T1>(xs.begin(), std::next(xs.begin(), size(xs) / 2)));
+    auto temp3 = MergeSort(std::list<T1>(std::next(xs.begin(), size(xs) / 2), xs.end()));
+    return Merge(temp0, temp3);
 }
 
-std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2);
+std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2);
 
 template<typename T1>
-std::uint64_t slength(std::list<T1> arg1) {
+std::uint64_t slength(const std::list<T1> &arg1) {
     // slength [] = 0
     if (arg1.empty()) {
         return 0;
@@ -413,7 +422,7 @@ std::uint64_t slength(std::list<T1> arg1) {
 }
 
 template<typename T1>
-std::list<T1> stake(std::uint64_t arg1, std::list<T1> arg2) {
+std::list<T1> stake(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     // stake 0 xs = []
     if (arg1 == 0) {
         return std::list<T1>();
@@ -436,7 +445,7 @@ std::list<T1> stake(std::uint64_t arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
-std::list<T1> sdrop(std::uint64_t arg1, std::list<T1> arg2) {
+std::list<T1> sdrop(const std::uint64_t &arg1, const std::list<T1> &arg2) {
     // sdrop 0 xs = xs
     if (arg1 == 0) {
         auto xs = arg2;
@@ -456,10 +465,10 @@ std::list<T1> sdrop(std::uint64_t arg1, std::list<T1> arg2) {
     return sdrop(n, xs);
 }
 
-std::list<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2);
+std::list<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2);
 
 template<typename T1>
-T1 snth(std::list<T1> arg1, std::uint64_t arg2) {
+T1 snth(const std::list<T1> &arg1, const std::uint64_t &arg2) {
     // snth [] n = 0
     if (arg1.empty()) {
         return 0;

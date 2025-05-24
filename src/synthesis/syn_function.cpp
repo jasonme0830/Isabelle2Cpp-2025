@@ -104,8 +104,10 @@ Synthesizer::syn_func_params(const FuncEntity& func)
     if (types[i].name == theTemplateTypeMapping["list"]){
       if(theConfig.close_moveStd() == false){
         params += "$arg$"_fs.format(types[i].to_str_as_arg(0), i + 1);
+      }else if(theConfig.close_typeCons() == true){
+        //不使用移动，就与其他基于定义的保持一致
+        params += "$arg$"_fs.format(types[i].to_str_as_arg(0), i + 1);
       }else{
-        //不使用移动，函数参数使用常量引用
         params += "$arg$"_fs.format(types[i].to_str_as_arg(1), i + 1);
       }
     }else{

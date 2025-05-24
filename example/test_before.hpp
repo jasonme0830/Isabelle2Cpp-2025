@@ -191,6 +191,22 @@ std::variant<_Tip, _Node> value_;
 
 
 template<typename T1>
+std::list<T1> copyList(std::list<T1> arg1) {
+    // copyList sNil = sNil
+    if (arg1.empty()) {
+        return std::list<T1>();
+    }
+
+    // copyList (sCons x xs) = sCons x (copyList xs)
+    auto x = arg1.front();
+    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+    auto xs = std::move(arg1);
+    auto temp0 = copyList(std::move(xs));
+    temp0.push_front(x);
+    return temp0;
+}
+
+template<typename T1>
 std::list<T1> AddListHead(const T1 &arg1, std::list<T1> arg2) {
     // AddListHead a xs = sCons a  xs
     auto a = arg1;
@@ -476,6 +492,51 @@ std::list<T1> app(std::list<T1> arg1, std::list<T1> arg2) {
 }
 
 template<typename T1>
+std::list<T1> Reverse(std::list<T1> arg1) {
+    // Reverse sNil = sNil
+    if (arg1.empty()) {
+        return std::list<T1>();
+    }
+
+    // Reverse (sCons a as) = app(Reverse as)(sCons a sNil)
+    auto a = arg1.front();
+    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+    auto as = std::move(arg1);
+    auto temp0 = Reverse(std::move(as));
+    auto temp2 = std::list<T1>();
+    temp2.push_front(a);
+    auto temp1 = std::move(temp2);
+    return app(temp0, std::move(temp1));
+}
+
+template<typename T1>
+std::list<T1> Reverse2(std::list<T1> arg1) {
+    // Reverse2 [] = []
+    if (arg1.empty()) {
+        return std::list<T1>();
+    }
+
+    // Reverse2 (Cons a []) =Cons a []
+    if (arg1.size() == 1) {
+        auto a = arg1.front();
+        auto temp0 = std::list<T1>();
+        temp0.push_front(a);
+        return temp0;
+    }
+
+    // Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil)
+    auto x = arg1.front();
+    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
+    auto xs = std::move(arg1);
+    auto temp0 = std::list<T1>();
+    temp0.push_front(x);
+    auto temp1 = Reverse2(std::move(xs));
+    auto temp2 = std::move(temp0);
+    temp1.splice(temp1.end(), temp2);
+    return temp1;
+}
+
+template<typename T1>
 std::list<T1> Insert(const T1 &arg1, std::list<T1> arg2) {
     // Insert a sNil =sCons a sNil
     if (arg2.empty()) {
@@ -503,24 +564,6 @@ std::list<T1> Insert(const T1 &arg1, std::list<T1> arg2) {
         temp2 = std::move(temp5);
     }
     return temp2;
-}
-
-template<typename T1>
-std::list<T1> Reverse(std::list<T1> arg1) {
-    // Reverse sNil = sNil
-    if (arg1.empty()) {
-        return std::list<T1>();
-    }
-
-    // Reverse (sCons a as) = app(Reverse as)(sCons a sNil)
-    auto a = arg1.front();
-    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
-    auto as = std::move(arg1);
-    auto temp0 = Reverse(std::move(as));
-    auto temp2 = std::list<T1>();
-    temp2.push_front(a);
-    auto temp1 = std::move(temp2);
-    return app(temp0, std::move(temp1));
 }
 
 template<typename T1>
@@ -568,33 +611,6 @@ std::list<T1> ffilter(const std::function<bool(const T1 &)> &arg1, std::list<T1>
         temp0 = ffilter(f, std::move(xs));
     }
     return temp0;
-}
-
-template<typename T1>
-std::list<T1> Reverse2(std::list<T1> arg1) {
-    // Reverse2 [] = []
-    if (arg1.empty()) {
-        return std::list<T1>();
-    }
-
-    // Reverse2 (Cons a []) =Cons a []
-    if (arg1.size() == 1) {
-        auto a = arg1.front();
-        auto temp0 = std::list<T1>();
-        temp0.push_front(a);
-        return temp0;
-    }
-
-    // Reverse2 (x#xs) = ( Reverse2 xs)@ (Cons x Nil)
-    auto x = arg1.front();
-    arg1.erase(arg1.begin(), std::next(arg1.begin(), 1));
-    auto xs = std::move(arg1);
-    auto temp0 = std::list<T1>();
-    temp0.push_front(x);
-    auto temp1 = Reverse2(std::move(xs));
-    auto temp2 = std::move(temp0);
-    temp1.splice(temp1.end(), temp2);
-    return temp1;
 }
 
 template<typename T1>
@@ -652,14 +668,12 @@ std::list<T1> MergeSort(std::list<T1> arg1) {
 
     // MergeSort xs = Merge (MergeSort(take ((size xs) div 2) xs))  (MergeSort(drop ((size xs) div 2) xs))
     auto xs = std::move(arg1);
-    auto temp1 = std::list<T1>(xs.begin(), std::next(xs.begin(), size(xs) / 2));
-    auto temp0 = MergeSort(temp1);
-    auto temp8 = size(xs) / 2;
-    auto temp9 = std::move(xs);
-    temp9.erase(temp9.begin(), std::next(temp9.begin(), temp8));
-    auto temp5 = std::move(temp9);
-    auto temp4 = MergeSort(std::move(temp5));
-    return Merge(temp0, temp4);
+    auto temp0 = MergeSort(std::list<T1>(xs.begin(), std::next(xs.begin(), size(xs) / 2)));
+    auto temp6 = size(xs) / 2;
+    auto temp7 = std::move(xs);
+    temp7.erase(temp7.begin(), std::next(temp7.begin(), temp6));
+    auto temp3 = MergeSort(std::move(temp7));
+    return Merge(temp0, temp3);
 }
 
 std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64_t> arg2);
@@ -767,16 +781,16 @@ T1 snth(std::list<T1> arg1, const std::uint64_t &arg2) {
 }
 
 template<typename T1>
-tree<T1> copy_tree(const tree<T1> &arg1) {
-    // copy_tree (Node left x right) = Node (copy_tree left) x (copy_tree right)
+tree<T1> copytree(const tree<T1> &arg1) {
+    // copytree (Node left x right) = Node (copytree left) x (copytree right)
     if (arg1.is_Node()) {
         auto left = arg1.as_Node().p1();
         auto x = arg1.as_Node().p2();
         auto right = arg1.as_Node().p3();
-        return tree<T1>::Node(copy_tree(left), x, copy_tree(right));
+        return tree<T1>::Node(copytree(left), x, copytree(right));
     }
 
-    // copy_tree Tip = Tip
+    // copytree Tip = Tip
     return tree<T1>::Tip();
 }
 

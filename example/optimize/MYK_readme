@@ -4,11 +4,11 @@ bin/hol2cpp example/test_before.thy -s --predef bin/defs.pre
 
 
 ## list
-bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-move --close-deque --predef bin/defs.pre
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-moveStd --predef bin/defs.pre
 
-bin/hol2cpp example/optimize/list/list.thy example/optimize/list/list/list --close-deque --predef bin/defs.pre
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/list/list --predef bin/defs.pre
 
-bin/hol2cpp example/optimize/list/list.thy example/optimize/list/deque/list --predef bin/defs.pre
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/deque/list --use-deque --predef bin/defs.pre
 
 ## num
 bin/hol2cpp example/optimize/num/num.thy example/optimize/num/raw/num --close-memo --predef bin/defs.pre
@@ -16,14 +16,14 @@ bin/hol2cpp example/optimize/num/num.thy example/optimize/num/raw/num --close-me
 bin/hol2cpp example/optimize/num/num.thy example/optimize/num/after/num --predef bin/defs.pre
 
 ## tree
-bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/raw/tree --close-move --close-deque --predef bin/defs.pre
+bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/raw/tree --close-typeCons --predef bin/defs.pre
 
-bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/after/tree --close-deque --predef bin/defs.pre
+bin/hol2cpp example/optimize/tree/tree.thy example/optimize/tree/after/tree --predef bin/defs.pre
 
 ## slist
-bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/raw/slist --close-isomor --close-move --predef bin/defs.pre
+bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/raw/slist --close-isomorType --close-moveStd --close-typeCons --predef bin/defs.pre
 
-bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/after/slist --close-isomor --predef bin/defs.pre
+bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/after/slist --close-isomorType --predef bin/defs.pre
 
 
 
