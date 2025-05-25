@@ -601,7 +601,9 @@ ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo
     //   temp = move_expr(temp);
     // }
     //函数调用作为参数，就应该移动
-    temp = move_expr(temp);
+    if(type_class_one == 1){
+      temp = move_expr(temp);
+    }
   }
   return temp+", ";
 }
@@ -653,7 +655,9 @@ ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo,
       // temp = move_expr(temp);
     // }
     //函数调用作为参数，就应该移动
-    temp = move_expr(temp);
+    if(type_class_one == 1){
+      temp = move_expr(temp);
+    }
   }
   return temp+", ";
 }
