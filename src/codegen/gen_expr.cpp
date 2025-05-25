@@ -595,11 +595,13 @@ ConsExpr::gen_expr_impl_recuCall_Temp(FuncEntity& func, const TypeInfo& typeinfo
   // func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
   func.add_expr(decl_statement_one, temp, right_var_one);
 
-  //如果等号右侧是可以移动，那么当前返回的临时变量也可以移动
   if(theConfig.close_moveStd() == false){
-    if(is_moved(right_var_one)){
-      temp = move_expr(temp);
-    }
+    //如果等号右侧是可以移动，那么当前返回的临时变量也可以移动
+    // if(is_moved(right_var_one)){
+    //   temp = move_expr(temp);
+    // }
+    //函数调用作为参数，就应该移动
+    temp = move_expr(temp);
   }
   return temp+", ";
 }
@@ -645,11 +647,13 @@ ConsExpr::gen_expr_impl_funCall_Temp(FuncEntity& func, const TypeInfo& typeinfo,
   // func.add_expr("auto $ = $;", temp, arg->gen_expr(func));
   func.add_expr(decl_statement_one, temp, right_var_one);
 
-  //如果等号右侧是可以移动，那么当前返回的临时变量也可以移动
   if(theConfig.close_moveStd() == false){
-    if(is_moved(right_var_one)){
-      temp = move_expr(temp);
-    }
+    //如果等号右侧是可以移动，那么当前返回的临时变量也可以移动
+    // if(is_moved(right_var_one)){
+      // temp = move_expr(temp);
+    // }
+    //函数调用作为参数，就应该移动
+    temp = move_expr(temp);
   }
   return temp+", ";
 }
