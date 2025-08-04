@@ -35,13 +35,18 @@ after: for the codes generated from the Isabelle2Cpp-2025
 ## for test function 
 
 --close-moveStd   ## to close the move optimization for std containers
+
 --close-memo   ## to close the memoization in functions
+
 --close-isomorType    
+
 --close-reduceCond
 
 # target type selection
 --use-deque
+
 ##--close-class
+
 --use-struct
 
 ## Commands for conversion
@@ -59,9 +64,11 @@ find src/ -iname *.hpp -o -iname *.cpp | xargs clang-format -i --style=Mozilla
 
 ## Benchmark
 To compare the generated codes of different version Isabelle2Cpp:
+
 https://github.com/jasonme0830/Isabelle2Cpp-2025-test.git
 
 To compare the codes generated from other generator: 
+
 https://github.com/jasonme0830/Isabelle2Cpp-2025-Benchmark.git 
 
 
