@@ -1,6 +1,6 @@
 #include "test_after.hpp"
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64_t> arg2) {
+std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
@@ -21,7 +21,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
 
     // bs x ys = (let m = (length ys) div 2 in ...
     auto x = arg1;
-    auto ys = std::move(arg2);
+    auto ys = arg2;
     auto temp0 = ys.size() / 2;
     auto m = temp0;
     auto temp4 = ys;
@@ -34,14 +34,11 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
         std::optional<std::uint64_t> temp10;
         if (y < x) {
             auto temp11 = ([&] {
-                auto temp14 = m + 1;
-                auto temp15 = std::move(ys);
-                temp15.erase(temp15.begin(), std::next(temp15.begin(), temp14));
-                auto temp16 = bs(x, std::move(temp15));
+                auto temp14 = bs(x, std::list<std::uint64_t>(std::next(ys.begin(), m + 1), ys.end()));
 
                 // Some n \<Rightarrow> Some (m + n + 1)
-                if (temp16.has_value()) {
-                    auto n = temp16.value();
+                if (temp14.has_value()) {
+                    auto n = temp14.value();
                     return std::make_optional<std::uint64_t>((m + n) + 1);
                 }
 
@@ -50,17 +47,14 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64
             })();
             temp10 = temp11;
         } else {
-            auto temp23 = m;
-            auto temp24 = std::move(ys);
-            temp24.erase(std::next(temp24.begin(), temp23), temp24.end());
-            temp10 = bs(x, std::move(temp24));
+            temp10 = bs(x, std::list<std::uint64_t>(ys.begin(), std::next(ys.begin(), m)));
         }
         temp7 = temp10;
     }
     return temp7;
 }
 
-std::uint64_t two_fib(const std::uint64_t &arg1) {
+std::uint64_t two_fib(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // two_fib 0 = 1
         if (arg1 == 0) {
@@ -85,7 +79,7 @@ std::uint64_t two_fib(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t three_fib(const std::uint64_t &arg1) {
+std::uint64_t three_fib(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // three_fib 0 = 1
         if (arg1 == 0) {
@@ -119,7 +113,7 @@ std::uint64_t three_fib(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t four_fib(const std::uint64_t &arg1) {
+std::uint64_t four_fib(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // four_fib 0 = 1
         if (arg1 == 0) {
@@ -164,7 +158,7 @@ std::uint64_t four_fib(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t Jacobsthal(const std::uint64_t &arg1) {
+std::uint64_t Jacobsthal(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // Jacobsthal 0 = 2
         if (arg1 == 0) {
@@ -189,7 +183,7 @@ std::uint64_t Jacobsthal(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t Narayana(const std::uint64_t &arg1) {
+std::uint64_t Narayana(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // Narayana 0 = 1
         if (arg1 == 0) {
@@ -223,7 +217,7 @@ std::uint64_t Narayana(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t Leonardo(const std::uint64_t &arg1) {
+std::uint64_t Leonardo(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // Leonardo 0 = 1
         if (arg1 == 0) {
@@ -248,7 +242,7 @@ std::uint64_t Leonardo(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t Padua(const std::uint64_t &arg1) {
+std::uint64_t Padua(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // Padua 0 = 1
         if (arg1 == 0) {
@@ -282,7 +276,7 @@ std::uint64_t Padua(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t Pell(const std::uint64_t &arg1) {
+std::uint64_t Pell(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // Pell 0 = 0
         if (arg1 == 0) {
@@ -307,7 +301,7 @@ std::uint64_t Pell(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::uint64_t Lucas(const std::uint64_t &arg1) {
+std::uint64_t Lucas(std::uint64_t arg1) {
     auto impl = [&]() -> std::uint64_t {
         // Lucas 0 = 2
         if (arg1 == 0) {
@@ -332,7 +326,7 @@ std::uint64_t Lucas(const std::uint64_t &arg1) {
     return it != cache.end() ? it->second : (cache.emplace(std::move(args), impl()).first->second);
 }
 
-std::list<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2) {
+std::list<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
     // supto i j = (if i \<ge> j then [] else i # supto (i + 1) j)
     auto i = arg1;
     auto j = arg2;
@@ -342,7 +336,7 @@ std::list<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &a
     } else {
         auto temp5 = supto(i + 1, j);
         temp5.push_front(i);
-        temp2 = std::move(temp5);
+        temp2 = temp5;
     }
     return temp2;
 }

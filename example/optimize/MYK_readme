@@ -4,7 +4,7 @@ bin/hol2cpp example/test_before.thy -s --predef bin/defs.pre
 
 
 ## list
-bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-moveStd --predef bin/defs.pre
+bin/hol2cpp example/optimize/list/list.thy example/optimize/list/raw/list --close-typeCons --close-moveStd --predef bin/defs.pre
 
 bin/hol2cpp example/optimize/list/list.thy example/optimize/list/list/list --predef bin/defs.pre
 
@@ -25,20 +25,5 @@ bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/raw/slist --
 
 bin/hol2cpp example/optimize/slist/slist.thy example/optimize/slist/after/slist --close-isomorType --predef bin/defs.pre
 
-
-
-#使用后有提升
-## for test type
---close-typeCons   ## 关闭数据类型中的辅助函数，不再只返回节点而是返回整个数据
-## for test function 
---close-moveStd   ## to close the move optimization for std containers
---close-memo   ## to close the memoization in functions
---close-isomorType    
---close-reduceCond
-
-#使用后不一定有提升
---use-deque
-##--close-class
---use-struct
 
 This message for second reclone program from gitee

@@ -274,7 +274,7 @@ std::list<T1> Reverse(std::list<T1> arg1) {
     auto temp2 = std::list<T1>();
     temp2.push_front(a);
     auto temp1 = std::move(temp2);
-    return app(temp0, std::move(temp1));
+    return app(std::move(temp0), std::move(temp1));
 }
 
 template<typename T1>
@@ -348,7 +348,7 @@ std::list<T1> InsertSortPart(std::list<T1> arg1, std::list<T1> arg2) {
     auto xs = std::move(arg1);
     auto ys = std::move(arg2);
     auto temp0 = Insert(x, std::move(ys));
-    return InsertSortPart(std::move(xs), temp0);
+    return InsertSortPart(std::move(xs), std::move(temp0));
 }
 
 template<typename T1>
@@ -418,7 +418,7 @@ std::list<T1> MergeSort(std::list<T1> arg1) {
     auto temp7 = std::move(xs);
     temp7.erase(temp7.begin(), std::next(temp7.begin(), temp6));
     auto temp3 = MergeSort(std::move(temp7));
-    return Merge(temp0, temp3);
+    return Merge(std::move(temp0), std::move(temp3));
 }
 
 std::optional<std::uint64_t> bs(const std::uint64_t &arg1, std::list<std::uint64_t> arg2);

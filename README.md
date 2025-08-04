@@ -1,6 +1,12 @@
-# HOL2Cpp
+# Isabelle2Cpp-2025
 
-Conversion from Isabelle/HOL to C++, supports HOL at the version on June 9, 2019.
+The first version hol2cpp of Isabelle2Cpp, converts Isabelle/HOL specifications to C++ codes, supports HOL on June 9, 2019.
+
+The second version of Isabelle2Cpp, adds type system and supports type inference.
+
+The third version of Isabelle2Cpp, adds the isomorphic type module.
+
+Now the 2025 version of Isabelle2Cpp, supports deep copy for secondary development, maintains shallow copy in the definition-based conversion, adds move in the rule-based conversion, and implements memoization for int repetitive computation functions.
 
 ## Build
 
@@ -12,19 +18,38 @@ make clean # clean target bin/hol2cpp
 make cleanall # clean target and generated example codes
 ```
 
-## Benchmark
+## Input examples
 
-### Requirement
+/example/optimize
 
-Install the [Google Benchmark](https://github.com/google/benchmark#installation) in the parent directory of hol2cpp
+raw: for the codes generated from the previous version Isabelle2Cpp
 
-### Bench
+after: for the codes generated from the Isabelle2Cpp-2025
+
+## Optimization options
+
+## for test type
+
+--close-typeCons   ## close shollow copy in the definition-based conversion
+
+## for test function 
+
+--close-moveStd   ## to close the move optimization for std containers
+--close-memo   ## to close the memoization in functions
+--close-isomorType    
+--close-reduceCond
+
+# target type selection
+--use-deque
+##--close-class
+--use-struct
+
+## Commands for conversion
+/example/optimize/MYK_readme
 
 ```bash
-make bench # make benchmarks
+bin/hol2cpp example/test_before.thy -s --predef bin/defs.pre
 ```
-
-## Code Style
 
 ### Format
 
@@ -32,18 +57,39 @@ make bench # make benchmarks
 find src/ -iname *.hpp -o -iname *.cpp | xargs clang-format -i --style=Mozilla
 ```
 
+## Benchmark
+To compare the generated codes of different version Isabelle2Cpp:
+https://github.com/jasonme0830/Isabelle2Cpp-2025-test.git
+
+To compare the codes generated from other generator: 
+https://github.com/jasonme0830/Isabelle2Cpp-2025-Benchmark.git 
+
+
 ## TODO
 
 - [ ] Support currying.
 - [ ] Resolve identifier conflicts.
 - [ ] Support recursive function to loop/iteration.
 - [ ] Support configurable conversion rules.
-- [ ] Add type system and support type inference.
+- [ ] Support lambda expression.
 
-## Example
+## JSON
 
-You can see some examples in [example/](example/).
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "version": 4
+}
 
-## ChangeLog
-
-See [ChangeLog.md](ChangeLog.md)

@@ -1,6 +1,6 @@
 #include "list.hpp"
 
-std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::uint64_t> &arg2) {
+std::optional<std::uint64_t> bs(std::uint64_t arg1, std::list<std::uint64_t> arg2) {
     // bs x [] = None
     if (arg2.empty()) {
         return std::optional<std::uint64_t>();
@@ -54,7 +54,7 @@ std::optional<std::uint64_t> bs(const std::uint64_t &arg1, const std::list<std::
     return temp7;
 }
 
-std::list<std::uint64_t> supto(const std::uint64_t &arg1, const std::uint64_t &arg2) {
+std::list<std::uint64_t> supto(std::uint64_t arg1, std::uint64_t arg2) {
     // supto i j = (if i \<ge> j then [] else i # supto (i + 1) j)
     auto i = arg1;
     auto j = arg2;
